@@ -17,7 +17,7 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
-    "Promo.Web.API": {
+    "Promo.Membership.API": {
       "commandName": "Project",
       "dotnetRunMessages": "true",
       "launchBrowser": true,

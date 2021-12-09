@@ -22,7 +22,7 @@ namespace Promo.Core.Repositories
         {
             using var conn = new MySqlConnection(_database.GetConnectionString());
             var command = conn.CreateCommand();
-            command.CommandText = "accounts_create";
+            command.CommandText = "account_create";
             command.CommandType = CommandType.StoredProcedure;
             command
                 .AddParameter("email", account.EmailAddress)
