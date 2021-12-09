@@ -1,0 +1,15 @@
+﻿namespace Promo.Core.ApiRequests
+{
+    public class NewAccountRequest
+    {
+        public string EmailAddress { get; set; }
+        public string Password { get; set; }
+        public bool EmailVerified { get; set; }
+        public string PhoneNumber { get; set; }
+        public bool PhoneNumberVerified { get; set; }
+        public string DisplayName { get; set; }
+        public string Pin { get; set; }
+        public bool UseEmail { get; set; }
+        public bool TermsAccepted { get; set; }
+    }
+}
