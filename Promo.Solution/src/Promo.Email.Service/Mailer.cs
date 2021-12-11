@@ -15,8 +15,9 @@ namespace Promo.Email.Service
         private readonly IHostApplicationLifetime _appLifeTime;
         private readonly CancellationTokenSource _cancellationTokenSource;
 
-        public Mailer(ILogger<Mailer> logger, IHostApplicationLifetime appLifeTime)
+        public Mailer(IMailService mailService, ILogger<Mailer> logger, IHostApplicationLifetime appLifeTime)
         {
+            _mailService = mailService;
             _logger = logger;
             _appLifeTime = appLifeTime;
             _cancellationTokenSource = new CancellationTokenSource();
