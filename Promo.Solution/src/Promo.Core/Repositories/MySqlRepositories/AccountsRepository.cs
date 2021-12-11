@@ -8,8 +8,20 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Promo.Core.Repositories
+namespace Promo.Core.Repositories.MySqlRepositories
 {
+    public interface IAccountsRepository
+    {
+        Task CreateAsync(Account account);
+        Task UpdateAsync(Guid accountUid, Account account);
+        Task<Account> GetAsync(Guid accountUid);
+        Task<Account> GetByEmailAddressAsync(string emailAddress);
+        Task<Account> GetByPhoneNumberAsync(string phoneNumber);
+        Task<Account> GetByDisplayNameAsync(string displayName);
+        Task RemoveAsync(Account account);
+        Task<List<Account>> GetAllAccounts();
+    }
+
     public class AccountsRepository : IAccountsRepository
     {
         private readonly IDatabase _database;
@@ -179,7 +191,7 @@ namespace Promo.Core.Repositories
             using (var conn = new MySqlConnection(_database.GetConnectionString()))
             {
                 var command = conn.CreateCommand();
-                command.CommandText = "account_get_by_displayName";
+                command.CommandText = "account_get_by_display_name";
                 command.CommandType = CommandType.StoredProcedure;
                 command.AddParameter("displayName", displayName);
 

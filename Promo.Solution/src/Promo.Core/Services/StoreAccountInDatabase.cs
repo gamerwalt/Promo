@@ -1,6 +1,6 @@
 ﻿using MediatR;
 using Promo.Core.CoreRequestNotifications;
-using Promo.Core.Repositories;
+using Promo.Core.Repositories.MySqlRepositories;
 using Promo.Models;
 using System;
 using System.Threading;

@@ -13,7 +13,7 @@ using Microsoft.OpenApi.Models;
 using Newtonsoft.Json;
 using Promo.Core;
 using Promo.Core.ConfigurationOptions;
-using Promo.Core.Repositories;
+using Promo.Core.Repositories.MySqlRepositories;
 using System.Reflection;
 
 namespace Promo.Web.API
@@ -40,7 +40,8 @@ namespace Promo.Web.API
             {
                 return new MySqlDatabase("Identity", Configuration);
             });
-            services.AddTransient<IAccountsRepository, AccountsRepository>();
+            
+            AddRepositories(services);
 
             var domainAssembly = typeof(CoreRequest).GetTypeInfo().Assembly;
             services.AddMediatR(domainAssembly);
@@ -48,6 +49,12 @@ namespace Promo.Web.API
 
             AddGoogleServicesAuthentication(services);
             AddFirebaseServices(services, Configuration);
+        }
+
+        private static void AddRepositories(IServiceCollection services)
+        {
+            services.AddTransient<IAccountsRepository, AccountsRepository>();
+            services.AddTransient<IMailRepository, MailRepository>();
         }
 
         private void AddGoogleServicesAuthentication(IServiceCollection services)
