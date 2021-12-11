@@ -11,9 +11,14 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Promo.Core;
 using Promo.Core.ConfigurationOptions;
 using Promo.Core.Repositories.MySqlRepositories;
+using Promo.External.Clients;
+using Promo.Membership.API;
+using System.Linq;
+using System.Net.Http;
 using System.Reflection;
 
 namespace Promo.Web.API
@@ -42,6 +47,7 @@ namespace Promo.Web.API
             });
             
             AddRepositories(services);
+            AddClients(services);
 
             var domainAssembly = typeof(CoreRequest).GetTypeInfo().Assembly;
             services.AddMediatR(domainAssembly);
@@ -49,6 +55,11 @@ namespace Promo.Web.API
 
             AddGoogleServicesAuthentication(services);
             AddFirebaseServices(services, Configuration);
+        }
+
+        private void AddClients(IServiceCollection services)
+        {
+            services.AddHttpClient<IIdentityClient, IdentityClient>();
         }
 
         private static void AddRepositories(IServiceCollection services)
@@ -59,6 +70,15 @@ namespace Promo.Web.API
 
         private void AddGoogleServicesAuthentication(IServiceCollection services)
         {
+            var client = new HttpClient();
+            var jsonResult = client.GetStringAsync(Configuration["GoogleSecureTokenCertificateUrl"]).Result;
+            var metaData = JObject.Parse(jsonResult)
+                .Children()
+                .Cast<JProperty>()
+                .Select(i => new x509Metadata(i.Path, i.Value.ToString()));
+
+            var issuerSigningKeys = metaData.Select(s => s.X509SecurityKey);
+            
             var googleServicesOptions = Configuration.GetSection(GoogleServicesOptions.GoogleServices).Get<GoogleServicesOptions>();
 
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -71,7 +91,8 @@ namespace Promo.Web.API
                         ValidIssuer = googleServicesOptions.FirebaseAppId,
                         ValidateAudience = true,
                         ValidAudience = googleServicesOptions.ProjectId,
-                        ValidateLifetime = true
+                        ValidateLifetime = true,
+                        IssuerSigningKeys = issuerSigningKeys,
                     };
                 });
         }
@@ -112,14 +133,15 @@ namespace Promo.Web.API
 
             app.UseRouting();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
             });
-
-            app.UseAuthentication();
+            
+            
         }
     }
 }

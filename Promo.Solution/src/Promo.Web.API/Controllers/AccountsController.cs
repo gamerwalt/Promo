@@ -1,12 +1,22 @@
-﻿using MediatR;
+﻿using FirebaseAdmin;
+using FirebaseAdmin.Auth;
+using Google.Apis.Auth.OAuth2;
+using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using Promo.Core.ApiRequests;
+using Promo.Core.ConfigurationOptions;
 using Promo.Core.CoreRequestHandlers;
+using Promo.External.Clients;
 using Promo.Models;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace Promo.Web.API.Controllers
@@ -15,15 +25,21 @@ namespace Promo.Web.API.Controllers
     [Route("v1")]
     public class AccountsController : ControllerBase
     {
+        private readonly IIdentityClient _identityClient;
         private readonly ILogger<AccountsController> _logger;
         private readonly IMediator _mediator;
-
+        private readonly IConfiguration _config;
+        
         public AccountsController(
+            IIdentityClient identityClient,
             ILogger<AccountsController> logger,
-            IMediator mediator)
+            IMediator mediator,
+            IConfiguration config)
         {
+            _identityClient = identityClient;
             _logger = logger;
             _mediator = mediator;
+            _config = config;
         }
 
         [HttpPost("accounts")]
@@ -35,6 +51,36 @@ namespace Promo.Web.API.Controllers
             await _mediator.Send(new CreateAccountRequest(newAccount, userUid));
 
             return new OkObjectResult(new Account());
+        }
+
+        [HttpPost("accounts/signin")]
+        [Produces("application/json")]
+        public async Task<ActionResult> SignIn([FromBody] AuthenticateRequest request)
+        {
+            request.ReturnSecureToken = true;
+            var response = await _identityClient.SignIn(request);
+
+            if (response != null)
+                return new OkObjectResult(response);
+
+            else return new UnauthorizedResult();
+        }
+
+        [HttpGet("accounts")]
+        [Produces("application/json")]
+        [ProducesResponseType((int)HttpStatusCode.OK, Type = typeof(Account))]
+        [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        [Authorize]
+        public async Task<ActionResult<Account>> GetAccount()
+        {
+            var userIdClaim = User.Claims.FirstOrDefault(c => c.Type.Equals("user_id"));
+
+            if (userIdClaim == null) return new BadRequestResult();
+
+            var account = await _mediator.Send<Account>(new GetAccountRequest(Guid.Parse(userIdClaim.Value)));
+
+            return new OkObjectResult(account);
         }
     }
 }

@@ -50,7 +50,7 @@ namespace Promo.Core.Repositories.MySqlRepositories
             await command.ExecuteNonQueryAsync();
         }
 
-        public async Task<Account> GetAsync(Guid userUid)
+        public async Task<Account> GetAsync(Guid accountUid)
         {
             var account = default(Account);
 
@@ -59,7 +59,7 @@ namespace Promo.Core.Repositories.MySqlRepositories
                 var command = conn.CreateCommand();
                 command.CommandText = "account_get_by_uid";
                 command.CommandType = CommandType.StoredProcedure;
-                command.AddParameter("userUid", userUid);
+                command.AddParameter("accountUid", accountUid);
 
                 await conn.OpenAsync();
                 using (var reader = await command.ExecuteReaderAsync())
