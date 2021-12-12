@@ -1,22 +1,22 @@
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+using Promo.Email.Service.Services;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Promo.Email.Service
+namespace Promo.Email.Service.HostedServices
 {
-    public class Mailer : IHostedService
+    public class PromoHostedService : IHostedService
     {
+        private readonly IVerifyAccountService _verifyUserService;
         private readonly IMailService _mailService;
-        private readonly ILogger<Mailer> _logger;
+        private readonly ILogger<PromoHostedService> _logger;
         private readonly IHostApplicationLifetime _appLifeTime;
         private readonly CancellationTokenSource _cancellationTokenSource;
 
-        public Mailer(IMailService mailService, ILogger<Mailer> logger, IHostApplicationLifetime appLifeTime)
+        public PromoHostedService(IVerifyAccountService verifyUserService, IMailService mailService, ILogger<PromoHostedService> logger, IHostApplicationLifetime appLifeTime)
         {
+            _verifyUserService = verifyUserService;
             _mailService = mailService;
             _logger = logger;
             _appLifeTime = appLifeTime;
@@ -43,7 +43,10 @@ namespace Promo.Email.Service
         private void OnStarted()
         {
             _logger.LogInformation("OnStarted has been called");
+
+            Task.Run(async () => await _verifyUserService.VerifyAnyUnverifiedAccounts(_cancellationTokenSource.Token)).Wait();
             Task.Run(async () => await _mailService.ProcessAnyUnsentEmails(_cancellationTokenSource.Token)).Wait();
+
             _appLifeTime.StopApplication();
         }
 

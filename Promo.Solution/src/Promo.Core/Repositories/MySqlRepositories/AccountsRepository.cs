@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Promo.Core.Repositories.MySqlRepositories
@@ -20,6 +21,8 @@ namespace Promo.Core.Repositories.MySqlRepositories
         Task<Account> GetByDisplayNameAsync(string displayName);
         Task RemoveAsync(Account account);
         Task<List<Account>> GetAllAccounts();
+        Task<IEnumerable<Account>> GetUnverifiedAccountsAsync(CancellationToken token);
+        Task VerifyAccountEmailAsync(Guid accountUid);
     }
 
     public class AccountsRepository : IAccountsRepository
@@ -76,7 +79,7 @@ namespace Promo.Core.Repositories.MySqlRepositories
 
         public async Task<List<Account>> GetAllAccounts()
         {
-            var users = new List<Account>();
+            var accounts = new List<Account>();
 
             using (var conn = new MySqlConnection(_database.GetConnectionString()))
             {
@@ -89,12 +92,12 @@ namespace Promo.Core.Repositories.MySqlRepositories
                 {
                     while (await reader.ReadAsync())
                     {
-                        users.Add(CreateAccountFrom(reader));
+                        accounts.Add(CreateAccountFrom(reader));
                     }
                 }
             }
 
-            return users;
+            return accounts;
         }
 
         private Account CreateAccountFrom(MySqlDataReader reader)
@@ -206,6 +209,41 @@ namespace Promo.Core.Repositories.MySqlRepositories
             }
 
             return account;
+        }
+
+        public async Task<IEnumerable<Account>> GetUnverifiedAccountsAsync(CancellationToken token)
+        {
+            var accounts = new List<Account>();
+
+            using (var conn = new MySqlConnection(_database.GetConnectionString()))
+            {
+                var command = conn.CreateCommand();
+                command.CommandText = "accounts_unverified_get";
+                command.CommandType = CommandType.StoredProcedure;
+
+                await conn.OpenAsync();
+                using (var reader = await command.ExecuteReaderAsync())
+                {
+                    while (await reader.ReadAsync())
+                    {
+                        accounts.Add(CreateAccountFrom(reader));
+                    }
+                }
+            }
+
+            return accounts;
+        }
+
+        public async Task VerifyAccountEmailAsync(Guid accountUid)
+        {
+            using var conn = new MySqlConnection(_database.GetConnectionString());
+            var command = conn.CreateCommand();
+            command.CommandText = "account_email_verify";
+            command.CommandType = CommandType.StoredProcedure;
+            command.AddParameter("accountUid", accountUid);
+
+            await conn.OpenAsync();
+            await command.ExecuteNonQueryAsync();
         }
     }
 }

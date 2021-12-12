@@ -63,14 +63,13 @@ namespace Promo.Web.API.Controllers
             if (response != null)
                 return new OkObjectResult(response);
 
-            else return new UnauthorizedResult();
+            return new UnauthorizedResult();
         }
 
         [HttpGet("accounts")]
         [Produces("application/json")]
         [ProducesResponseType((int)HttpStatusCode.OK, Type = typeof(Account))]
         [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
-        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         [Authorize]
         public async Task<ActionResult<Account>> GetAccount()
         {

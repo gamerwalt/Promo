@@ -1,18 +1,17 @@
 ﻿using MailKit.Net.Smtp;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MimeKit;
 using Promo.Core.Repositories.MySqlRepositories;
 using Promo.Email.Service.TemplateMailRequest;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Promo.Email.Service
+namespace Promo.Email.Service.Services
 {
     public interface IMailService
     {
@@ -21,20 +20,29 @@ namespace Promo.Email.Service
 
     public class MailService : IMailService
     {
+        private ILogger<MailService> _logger;
         private readonly IMailRepository _mailRepository;
         private readonly MailSettings _mailSettings;
 
-        public MailService(IMailRepository mailRepository, IOptions<MailSettings> mailSettingsOptions)
+        public MailService(
+            ILogger<MailService> logger,
+            IMailRepository mailRepository, 
+            IOptions<MailSettings> mailSettingsOptions
+            )
         {
+            _logger = logger;
             _mailRepository = mailRepository;
             _mailSettings = mailSettingsOptions.Value;
         }
 
         public async Task ProcessAnyUnsentEmails(CancellationToken token)
         {
+            _logger.LogInformation($"{nameof(ProcessAnyUnsentEmails)} processing started.");
+
             var emailsToGoOut = await _mailRepository.GetUnsentAsync();
             if(emailsToGoOut != null && emailsToGoOut.Count() != 0)
             {
+                _logger.LogInformation($"There are {emailsToGoOut.Count()} emails that needs to be sent.");
                 foreach(var email in emailsToGoOut)
                 {
                     switch(email.Template)
@@ -51,9 +59,21 @@ namespace Promo.Email.Service
                             await _mailRepository.UpdateAsSentAsync(email);
 
                             break;
+
+                        case Models.EmailTemplate.WelcomeEmail:
+                            await SendWelcomeEmailAsync(new WelcomeEmailRequest
+                            {
+                                EmailAddress = email.EmailAddress,
+                                EmailTemplate = Models.EmailTemplate.WelcomeEmail,
+                                DisplayName = email.Parameters["DisplayName"],
+                                DashboardLink = email.Parameters["DashboardLink"]
+                            });
+                            break;
                     }
                 }
             }
+
+            _logger.LogInformation($"{nameof(ProcessAnyUnsentEmails)} processing completed.");
         }
 
         private async Task SendEmailAsync(MailRequest mailRequest)
@@ -76,7 +96,7 @@ namespace Promo.Email.Service
 
         private async Task SendVerificationEmailAsync(VerificationEmailRequest request)
         {
-            var filePath = Directory.GetCurrentDirectory() + $"{Path.DirectorySeparatorChar}Templates{Path.DirectorySeparatorChar}{request.EmailTemplate.ToString()}.html";
+            var filePath = Directory.GetCurrentDirectory() + $"{Path.DirectorySeparatorChar}Templates{Path.DirectorySeparatorChar}{request.EmailTemplate}.html";
             var streamReader = new StreamReader(filePath);
             var mailText = streamReader.ReadToEnd();
             streamReader.Close();
@@ -94,6 +114,30 @@ namespace Promo.Email.Service
                     ToEmailAddress = request.EmailAddress,
                     Body = mailText,
                     Subject = "Please verify your email address."
+                }
+            );
+        }
+
+        private async Task SendWelcomeEmailAsync(WelcomeEmailRequest request)
+        {
+            var filePath = Directory.GetCurrentDirectory() + $"{Path.DirectorySeparatorChar}Templates{Path.DirectorySeparatorChar}{request.EmailTemplate}.html";
+            var streamReader = new StreamReader(filePath);
+            var mailText = streamReader.ReadToEnd();
+            streamReader.Close();
+
+            Type type = request.GetType();
+
+            foreach (var f in type.GetProperties(BindingFlags.Instance | BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public))
+            {
+                mailText = mailText.Replace($"[{f.Name}]", f.GetValue(request).ToString());
+            }
+
+            await SendEmailAsync(
+                new MailRequest
+                {
+                    ToEmailAddress = request.EmailAddress,
+                    Body = mailText,
+                    Subject = "Let's get you started!"
                 }
             );
         }
