@@ -1,22 +1,15 @@
-﻿using FirebaseAdmin;
-using FirebaseAdmin.Auth;
-using Google.Apis.Auth.OAuth2;
-using MediatR;
+﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
 using Promo.Core.ApiRequests;
-using Promo.Core.ConfigurationOptions;
 using Promo.Core.CoreRequestHandlers;
-using Promo.External.Clients;
+using Promo.Core.External;
 using Promo.Models;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace Promo.Web.API.Controllers
@@ -29,7 +22,7 @@ namespace Promo.Web.API.Controllers
         private readonly ILogger<AccountsController> _logger;
         private readonly IMediator _mediator;
         private readonly IConfiguration _config;
-        
+
         public AccountsController(
             IIdentityClient identityClient,
             ILogger<AccountsController> logger,
@@ -45,10 +38,10 @@ namespace Promo.Web.API.Controllers
         [HttpPost("accounts")]
         [Produces("application/json")]
         [ProducesResponseType((int)HttpStatusCode.OK, Type = typeof(Account))]
-        public async Task<ActionResult<Account>> AddAccount([FromBody] NewAccountRequest newAccount)
+        public async Task<ActionResult<Account>> AddAccount([FromBody] Core.ApiRequests.CreateAccountRequest newAccount)
         {
             var userUid = Guid.NewGuid();
-            await _mediator.Send(new CreateAccountRequest(newAccount, userUid));
+            await _mediator.Send(new Core.CoreRequestHandlers.CreateAccountRequest(newAccount, userUid));
 
             return new OkObjectResult(new Account());
         }

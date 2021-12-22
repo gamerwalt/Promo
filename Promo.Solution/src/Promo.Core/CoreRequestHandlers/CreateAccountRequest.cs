@@ -15,16 +15,16 @@ namespace Promo.Core.CoreRequestHandlers
 {
     public class CreateAccountRequest : IRequest
     {
-        private NewAccountRequest _newAccount;
+        private ApiRequests.CreateAccountRequest _newAccount;
         private Guid _userUid;
 
-        public CreateAccountRequest(NewAccountRequest newAccount, Guid userUid)
+        public CreateAccountRequest(ApiRequests.CreateAccountRequest newAccount, Guid userUid)
         {
             _newAccount = newAccount;
             _userUid = userUid;
         }
 
-        public NewAccountRequest NewAccount => _newAccount;
+        public ApiRequests.CreateAccountRequest NewAccount => _newAccount;
         public Guid UserUid => _userUid;
     }
 

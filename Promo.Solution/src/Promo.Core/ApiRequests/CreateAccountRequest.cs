@@ -1,6 +1,6 @@
 ﻿namespace Promo.Core.ApiRequests
 {
-    public class NewAccountRequest
+    public class CreateAccountRequest
     {
         public string EmailAddress { get; set; }
         public string Password { get; set; }

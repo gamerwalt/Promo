@@ -8,7 +8,7 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Promo.External.Clients
+namespace Promo.Core.External
 {
     public interface IIdentityClient
     {

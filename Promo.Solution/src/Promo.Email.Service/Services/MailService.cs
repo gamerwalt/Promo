@@ -68,6 +68,9 @@ namespace Promo.Email.Service.Services
                                 DisplayName = email.Parameters["DisplayName"],
                                 DashboardLink = email.Parameters["DashboardLink"]
                             });
+
+                            await _mailRepository.UpdateAsSentAsync(email);
+
                             break;
                     }
                 }

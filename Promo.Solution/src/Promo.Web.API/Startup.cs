@@ -14,9 +14,8 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Promo.Core;
 using Promo.Core.ConfigurationOptions;
-using Promo.Core.Repositories.MySqlRepositories;
-using Promo.External.Clients;
-using Promo.Membership.API;
+using Promo.Core.Configurations;
+using Promo.Core.External;
 using System.Linq;
 using System.Net.Http;
 using System.Reflection;
@@ -38,15 +37,15 @@ namespace Promo.Web.API
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "Promo.Web.API", Version = "v1" });
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "Promo.Membership.API", Version = "v1" });
             });
 
             services.AddSingleton<IDatabase>(c =>
             {
                 return new MySqlDatabase("Identity", Configuration);
             });
-            
-            AddRepositories(services);
+
+            services.AddRepositories();
             AddClients(services);
 
             var domainAssembly = typeof(CoreRequest).GetTypeInfo().Assembly;
@@ -62,12 +61,6 @@ namespace Promo.Web.API
             services.AddHttpClient<IIdentityClient, IdentityClient>();
         }
 
-        private static void AddRepositories(IServiceCollection services)
-        {
-            services.AddTransient<IAccountsRepository, AccountsRepository>();
-            services.AddTransient<IMailRepository, MailRepository>();
-        }
-
         private void AddGoogleServicesAuthentication(IServiceCollection services)
         {
             var client = new HttpClient();
@@ -78,7 +71,7 @@ namespace Promo.Web.API
                 .Select(i => new x509Metadata(i.Path, i.Value.ToString()));
 
             var issuerSigningKeys = metaData.Select(s => s.X509SecurityKey);
-            
+
             var googleServicesOptions = Configuration.GetSection(GoogleServicesOptions.GoogleServices).Get<GoogleServicesOptions>();
 
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -140,8 +133,8 @@ namespace Promo.Web.API
             {
                 endpoints.MapControllers();
             });
-            
-            
+
+
         }
     }
 }
