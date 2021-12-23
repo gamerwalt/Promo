@@ -45,11 +45,11 @@ namespace Promo.Core.CoreRequestHandlers
 
         public async Task<Guid> Handle(CreateCampaignRequest request, CancellationToken cancellationToken)
         {
-            var guid = Guid.NewGuid();
+            var campaignUid = Guid.NewGuid();
 
             await _repository.CreateCampaignAsync(new Campaign
             {
-                CampaignUid = guid,
+                CampaignUid = campaignUid,
                 CampaignName = request.NewCampaign.Name,
                 Description = request.NewCampaign.Description,
                 StartDate = request.NewCampaign.StartDate,
@@ -64,9 +64,9 @@ namespace Promo.Core.CoreRequestHandlers
                 }
             });
 
-            await _mediator.Publish(new CampaignCreated(request));
+            await _mediator.Publish(new CampaignCreated(request, campaignUid));
 
-            return guid;
+            return campaignUid;
         }
     }
 }

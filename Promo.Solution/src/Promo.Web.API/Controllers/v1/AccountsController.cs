@@ -12,7 +12,7 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 
-namespace Promo.Web.API.Controllers
+namespace Promo.Web.API.Controllers.v1
 {
     [ApiController]
     [Route("v1")]

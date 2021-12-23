@@ -10,7 +10,7 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 
-namespace Promo.Campaign.API.Controllers
+namespace Promo.Campaign.API.Controllers.v1
 {
     [ApiController]
     [Route("v1")]

@@ -17,6 +17,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Promo.Email.Service", "Prom
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Promo.Campaign.API", "Promo.Campaign.API\Promo.Campaign.API.csproj", "{5D34C8C2-0BA3-49F1-91FC-9A04CDB25EAC}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Promo.Sweeps.API", "Promo.Sweeps.API\Promo.Sweeps.API.csproj", "{D67AA555-BF71-41EC-B7BB-022DF19633E7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -43,6 +45,10 @@ Global
 		{5D34C8C2-0BA3-49F1-91FC-9A04CDB25EAC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5D34C8C2-0BA3-49F1-91FC-9A04CDB25EAC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5D34C8C2-0BA3-49F1-91FC-9A04CDB25EAC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D67AA555-BF71-41EC-B7BB-022DF19633E7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D67AA555-BF71-41EC-B7BB-022DF19633E7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D67AA555-BF71-41EC-B7BB-022DF19633E7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D67AA555-BF71-41EC-B7BB-022DF19633E7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -53,6 +59,7 @@ Global
 		{513B7724-31EC-4602-9C7E-33E20711E03D} = {B71190C8-5608-4FFE-8C71-DA20A334CFC6}
 		{6671B497-1EAA-4446-8A41-960BFFF31010} = {B71190C8-5608-4FFE-8C71-DA20A334CFC6}
 		{5D34C8C2-0BA3-49F1-91FC-9A04CDB25EAC} = {B71190C8-5608-4FFE-8C71-DA20A334CFC6}
+		{D67AA555-BF71-41EC-B7BB-022DF19633E7} = {B71190C8-5608-4FFE-8C71-DA20A334CFC6}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {94B46B7F-1545-465E-863A-AAD0C58A8C0F}

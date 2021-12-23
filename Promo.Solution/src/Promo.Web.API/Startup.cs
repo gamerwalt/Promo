@@ -46,7 +46,7 @@ namespace Promo.Web.API
             });
 
             services.AddRepositories();
-            AddClients(services);
+            services.AddHttpClients(Configuration);
 
             var domainAssembly = typeof(CoreRequest).GetTypeInfo().Assembly;
             services.AddMediatR(domainAssembly);
@@ -54,11 +54,6 @@ namespace Promo.Web.API
 
             AddGoogleServicesAuthentication(services);
             AddFirebaseServices(services, Configuration);
-        }
-
-        private void AddClients(IServiceCollection services)
-        {
-            services.AddHttpClient<IIdentityClient, IdentityClient>();
         }
 
         private void AddGoogleServicesAuthentication(IServiceCollection services)

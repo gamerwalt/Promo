@@ -11,7 +11,9 @@ using Newtonsoft.Json.Linq;
 using Promo.Core;
 using Promo.Core.ConfigurationOptions;
 using Promo.Core.Configurations;
+using Promo.Core.External;
 using Promo.Core.Repositories.MySqlRepositories;
+using System;
 using System.Linq;
 using System.Net.Http;
 using System.Reflection;
@@ -47,10 +49,11 @@ namespace Promo.Campaign.API
             services.AddMediatR(domainAssembly);
 
             services.AddRepositories();
+            services.AddHttpClients(Configuration);
 
             AddGoogleServicesAuthentication(services);
         }
-
+        
         private void AddGoogleServicesAuthentication(IServiceCollection services)
         {
             var client = new HttpClient();
