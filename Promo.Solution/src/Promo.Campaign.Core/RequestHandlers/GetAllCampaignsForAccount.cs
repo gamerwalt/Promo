@@ -1,16 +1,14 @@
 ﻿using MediatR;
-using Promo.Core.Repositories.MySqlRepositories;
-using Promo.Models.Campaigns;
+using Promo.Campaign.Infrastructure;
+using Promo.Clients.Internal;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Promo.Core.CoreRequestHandlers
+namespace Promo.Campaign.Core.RequestHandlers
 {
-    public class GetAllCampaignsForAccount : IRequest<List<Campaign>>
+    public class GetAllCampaignsForAccount : IRequest<List<Infrastructure.Models.Campaign>>
     {
         private Guid accountUid;
 
@@ -25,22 +23,18 @@ namespace Promo.Core.CoreRequestHandlers
         }
     }
 
-    public class GetAllCampaignsForAccountHandler : IRequestHandler<GetAllCampaignsForAccount, List<Campaign>>
+    public class GetAllCampaignsForAccountHandler : IRequestHandler<GetAllCampaignsForAccount, List<Infrastructure.Models.Campaign>>
     {
-        private readonly IAccountsRepository _accountsRepository;
         private readonly ICampaignRepository _repository;
 
-        public GetAllCampaignsForAccountHandler(IAccountsRepository accountsRepository, ICampaignRepository repository)
+        public GetAllCampaignsForAccountHandler(ICampaignRepository repository)
         {
             _repository = repository;
-            _accountsRepository = accountsRepository;
         }
 
-        public async Task<List<Campaign>> Handle(GetAllCampaignsForAccount request, CancellationToken cancellationToken)
+        public async Task<List<Infrastructure.Models.Campaign>> Handle(GetAllCampaignsForAccount request, CancellationToken cancellationToken)
         {
-            var account = await _accountsRepository.GetAsync(request.AccountUid);
-
-            return await _repository.GetAccountCampaignsAsync(account.AccountId);
+            return await _repository.GetAccountCampaignsAsync(request.AccountUid);
         }
     }
 }

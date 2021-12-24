@@ -1,8 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
-using Promo.Core.ApiRequests;
-using Promo.Core.ApiResponses;
+using Promo.Core.Authentication;
 using System;
 using System.Net.Http;
 using System.Text;
@@ -36,7 +35,7 @@ namespace Promo.Clients.External
             var url = $"{_config["IdentityUrl"]}{_config["GoogleServices:WebApiKey"]}";
 
             var result = await _client.PostAsync(url, stringContent);
-            if(result.IsSuccessStatusCode)
+            if (result.IsSuccessStatusCode)
             {
                 return JsonConvert.DeserializeObject<SignInResponse>(await result.Content.ReadAsStringAsync());
             }

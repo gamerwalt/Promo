@@ -4,9 +4,10 @@ using Google.Apis.Auth.OAuth2;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
-using Promo.Core.ConfigurationOptions;
-using Promo.Core.Repositories.MySqlRepositories;
-using Promo.Models;
+using Promo.Clients.Internal;
+using Promo.Core;
+using Promo.Core.Authentication.ConfigurationOptions;
+using Promo.Core.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,18 +24,18 @@ namespace Promo.Email.Service.Services
     public class VerifyAccountService : IVerifyAccountService
     {
         private ILogger<VerifyAccountService> _logger;
-        private readonly IAccountsRepository _accountsRepository;
+        private readonly IAccountsClient _accountsClient;
         private readonly IMailRepository _mailRepository;
         private readonly IConfiguration _config;
 
         public VerifyAccountService(
             ILogger<VerifyAccountService> logger,
-            IAccountsRepository accountsRepository,
+            IAccountsClient accountsClient,
             IMailRepository mailRepository,
             IConfiguration config)
         {
             _logger = logger;
-            _accountsRepository = accountsRepository;
+            _accountsClient = accountsClient;
             _config = config;
             _mailRepository = mailRepository;
         }
@@ -55,23 +56,23 @@ namespace Promo.Email.Service.Services
                 });
             }
 
-            var unverifiedAccounts = await _accountsRepository.GetUnverifiedAccountsAsync(token);
-            if(unverifiedAccounts != null || unverifiedAccounts.Count() != 0)
+            var unverifiedAccounts = await _accountsClient.GetUnverifiedAccountsAsync(token);
+            if (unverifiedAccounts != null || unverifiedAccounts.Count() != 0)
             {
                 _logger.LogInformation($"There are {unverifiedAccounts.Count()} accounts that needs to be checked for verification.");
-                foreach(var account in unverifiedAccounts)
+                foreach (var account in unverifiedAccounts)
                 {
                     _logger.LogInformation($"Verifying account with uid: {account.AccountUid}");
                     try
                     {
                         var userRecord = await FirebaseAuth.DefaultInstance.GetUserAsync(account.AccountUid.ToString());
-                        if(userRecord.EmailVerified)
+                        if (userRecord.EmailVerified)
                         {
-                            await _accountsRepository.VerifyAccountEmailAsync(account.AccountUid);
+                            await _accountsClient.VerifyAccountEmailAsync(account.AccountUid);
                             await SaveWelcomeEmailAsync(account);
                         }
                     }
-                    catch(FirebaseAuthException fbEx)
+                    catch (FirebaseAuthException fbEx)
                     {
                         _logger.LogError($"A FirebaseAuthException occurred for the user with uid: {account.AccountUid}");
                     }
@@ -85,7 +86,7 @@ namespace Promo.Email.Service.Services
             _logger.LogInformation($"{nameof(VerifyAnyUnverifiedAccounts)} processing completed.");
         }
 
-        private async Task SaveWelcomeEmailAsync(Models.Account account)
+        private async Task SaveWelcomeEmailAsync(Account account)
         {
             await _mailRepository.CreateAsync(new Models.Email
             {

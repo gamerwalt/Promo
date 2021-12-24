@@ -4,14 +4,12 @@ using Google.Apis.Auth.OAuth2;
 using MediatR;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
-using Promo.Core.ConfigurationOptions;
-using Promo.Core.CoreRequestNotifications;
-using Promo.Core.Repositories.MySqlRepositories;
-using Promo.Models;
+using Promo.Clients.Internal;
+using Promo.Core;
+using Promo.Core.Authentication.ConfigurationOptions;
+using Promo.Membership.Core.Notifications;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -19,12 +17,12 @@ namespace Promo.Membership.Core
 {
     public class SaveVerificationEmailInDatabase : INotificationHandler<AccountCreatedViaFirebase>
     {
-        private readonly IMailRepository _repository;
+        private readonly IMailClient _mailClient;
         private readonly IConfiguration _config;
 
-        public SaveVerificationEmailInDatabase(IMailRepository repository, IConfiguration config)
+        public SaveVerificationEmailInDatabase(IMailClient mailClient, IConfiguration config)
         {
-            _repository = repository;
+            _mailClient = mailClient;
             _config = config;
         }
 
@@ -44,7 +42,7 @@ namespace Promo.Membership.Core
 
             var emailLink = await FirebaseAuth.DefaultInstance.GenerateEmailVerificationLinkAsync(notification.CreatedUser.Email);
 
-            var email = new Email
+            var email = new Promo.Core.Models.Email
             {
                 EmailUid = Guid.NewGuid(),
                 EmailAddress = notification.CreatedUser.Email,
@@ -59,7 +57,7 @@ namespace Promo.Membership.Core
                 }
             };
 
-            await _repository.CreateAsync(email);
+            await _mailClient.CreateAsync(email);
 
             FirebaseApp.DefaultInstance.Delete();
         }

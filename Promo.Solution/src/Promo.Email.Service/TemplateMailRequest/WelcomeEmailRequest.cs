@@ -1,4 +1,4 @@
-﻿using Promo.Models;
+﻿using Promo.Core;
 
 namespace Promo.Email.Service.TemplateMailRequest
 {

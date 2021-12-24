@@ -4,9 +4,9 @@ using Google.Apis.Auth.OAuth2;
 using MediatR;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
-using Promo.Core.ApiRequests;
-using Promo.Core.ConfigurationOptions;
-using Promo.Core.CoreRequestNotifications;
+using Promo.Core.Authentication.ConfigurationOptions;
+using Promo.Membership.Core.Notifications;
+using Promo.Membership.Core.Requests;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -15,16 +15,16 @@ namespace Promo.Membership.Core.RequestHandlers
 {
     public class CreateAccountRequest : IRequest
     {
-        private ApiRequests.CreateAccountRequest _newAccount;
+        private NewAccountRequest _newAccountRequest;
         private Guid _userUid;
 
-        public CreateAccountRequest(ApiRequests.CreateAccountRequest newAccount, Guid userUid)
+        public CreateAccountRequest(NewAccountRequest newAccount, Guid userUid)
         {
-            _newAccount = newAccount;
+            _newAccountRequest = newAccount;
             _userUid = userUid;
         }
 
-        public ApiRequests.CreateAccountRequest NewAccount => _newAccount;
+        public NewAccountRequest NewAccountRequest => _newAccountRequest;
         public Guid UserUid => _userUid;
     }
 
@@ -44,20 +44,20 @@ namespace Promo.Membership.Core.RequestHandlers
             var args = new UserRecordArgs
             {
                 Uid = request.UserUid.ToString(),
-                Email = request.NewAccount.EmailAddress,
+                Email = request.NewAccountRequest.EmailAddress,
                 EmailVerified = false,
-                PhoneNumber = request.NewAccount.PhoneNumber,
-                Password = request.NewAccount.Password,
-                DisplayName = request.NewAccount.DisplayName,
+                PhoneNumber = request.NewAccountRequest.PhoneNumber,
+                Password = request.NewAccountRequest.Password,
+                DisplayName = request.NewAccountRequest.DisplayName,
                 Disabled = false
             };
 
             var createdUser = await ConfigureAndCreateUser(args);
 
             await _mediator.Publish(new AccountCreatedViaFirebase(
-                createdUser, 
-                request.NewAccount.Pin, 
-                request.NewAccount.TermsAccepted)
+                createdUser,
+                request.NewAccountRequest.Pin,
+                request.NewAccountRequest.TermsAccepted)
             );
         }
 

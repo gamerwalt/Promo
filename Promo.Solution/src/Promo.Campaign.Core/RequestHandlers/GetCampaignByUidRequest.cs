@@ -1,13 +1,12 @@
 ﻿using MediatR;
-using Promo.Core.Repositories.MySqlRepositories;
-using Promo.Models.Campaigns;
+using Promo.Campaign.Infrastructure;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Promo.Core.CoreRequestHandlers
+namespace Promo.Campaign.Core.RequestHandlers
 {
-    public class GetCampaignByUidRequest : IRequest<Campaign>
+    public class GetCampaignByUidRequest : IRequest<Infrastructure.Models.Campaign>
     {
         private Guid campaignUid;
 
@@ -22,7 +21,7 @@ namespace Promo.Core.CoreRequestHandlers
         }
     }
 
-    public class GetCampaignByUidRequestHandler : IRequestHandler<GetCampaignByUidRequest, Campaign>
+    public class GetCampaignByUidRequestHandler : IRequestHandler<GetCampaignByUidRequest, Infrastructure.Models.Campaign>
     {
         private readonly ICampaignRepository _repository;
 
@@ -31,7 +30,7 @@ namespace Promo.Core.CoreRequestHandlers
             _repository = repository;
         }
 
-        public async Task<Campaign> Handle(GetCampaignByUidRequest request, CancellationToken cancellationToken)
+        public async Task<Infrastructure.Models.Campaign> Handle(GetCampaignByUidRequest request, CancellationToken cancellationToken)
         {
             return await _repository.GetCampaignByUidAsync(request.CampaignUid);
         }

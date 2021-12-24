@@ -1,13 +1,12 @@
 ﻿using MediatR;
-using Promo.Core.ApiRequests;
-using Promo.Core.CoreRequestNotifications;
-using Promo.Core.Repositories.MySqlRepositories;
-using Promo.Models.Campaigns;
+using Promo.Campaign.Core.Notifications;
+using Promo.Campaign.Core.Requests;
+using Promo.Campaign.Infrastructure;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Promo.Core.CoreRequestHandlers
+namespace Promo.Campaign.Core.RequestHandlers
 {
     public class UpdateCampaignViaUidRequest : IRequest
     {
@@ -44,7 +43,7 @@ namespace Promo.Core.CoreRequestHandlers
 
         protected async override Task Handle(UpdateCampaignViaUidRequest request, CancellationToken cancellationToken)
         {
-            await _repository.UpdateCampaignAsync(request.CampaignUid, new Campaign
+            await _repository.UpdateCampaignAsync(request.CampaignUid, new Infrastructure.Models.Campaign
             {
                 CampaignName = request.Request.CampaignName,
                 Description = request.Request.Description,

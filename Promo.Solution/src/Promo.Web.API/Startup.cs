@@ -12,10 +12,11 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Promo.Clients.External;
 using Promo.Core;
-using Promo.Core.ConfigurationOptions;
-using Promo.Core.Configurations;
-using Promo.Core.External;
+using Promo.Core.Authentication.ConfigurationOptions;
+using Promo.Membership.Core.RequestHandlers;
+using Promo.Membership.Infrastructure;
 using System.Linq;
 using System.Net.Http;
 using System.Reflection;
@@ -45,10 +46,11 @@ namespace Promo.Web.API
                 return new MySqlDatabase("Identity", Configuration);
             });
 
-            services.AddRepositories();
-            services.AddHttpClients(Configuration);
+            services.AddTransient<IAccountsRepository, AccountsRepository>();
 
-            var domainAssembly = typeof(CoreRequest).GetTypeInfo().Assembly;
+            services.AddHttpClient<IIdentityClient, IdentityClient>();
+
+            var domainAssembly = typeof(GetAccountRequest).GetTypeInfo().Assembly;
             services.AddMediatR(domainAssembly);
             services.AddFluentValidation(new[] { domainAssembly });
 

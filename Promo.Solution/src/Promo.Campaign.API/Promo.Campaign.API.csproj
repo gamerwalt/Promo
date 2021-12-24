@@ -13,7 +13,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Promo.Campaign.Core\Promo.Campaign.Core.csproj" />
     <ProjectReference Include="..\Promo.Core\Promo.Core.csproj" />
+    <ProjectReference Include="..\Promo.Membership.Core\Promo.Membership.Core.csproj" />
   </ItemGroup>
 
 </Project>

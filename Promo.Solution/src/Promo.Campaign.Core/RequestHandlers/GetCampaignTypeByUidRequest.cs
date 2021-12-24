@@ -1,11 +1,11 @@
 ﻿using MediatR;
-using Promo.Core.Repositories.MySqlRepositories;
-using Promo.Models.Campaigns;
+using Promo.Campaign.Infrastructure;
+using Promo.Campaign.Infrastructure.Models;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Promo.Core.CoreRequestHandlers
+namespace Promo.Campaign.Core.RequestHandlers
 {
     public class GetCampaignTypeByUidRequest : IRequest<CampaignType>
     {

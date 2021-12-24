@@ -3,10 +3,11 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using Promo.Core.ApiRequests;
-using Promo.Core.CoreRequestHandlers;
-using Promo.Core.External;
-using Promo.Models;
+using Promo.Clients.External;
+using Promo.Core.Authentication;
+using Promo.Membership.Core.RequestHandlers;
+using Promo.Membership.Core.Requests;
+using Promo.Membership.Infrastructure.Models;
 using System;
 using System.Linq;
 using System.Net;
@@ -38,10 +39,10 @@ namespace Promo.Web.API.Controllers.v1
         [HttpPost("accounts")]
         [Produces("application/json")]
         [ProducesResponseType((int)HttpStatusCode.OK, Type = typeof(Account))]
-        public async Task<ActionResult<Account>> AddAccount([FromBody] Core.ApiRequests.CreateAccountRequest newAccount)
+        public async Task<ActionResult<Account>> AddAccount([FromBody] NewAccountRequest newAccount)
         {
             var userUid = Guid.NewGuid();
-            await _mediator.Send(new Core.CoreRequestHandlers.CreateAccountRequest(newAccount, userUid));
+            await _mediator.Send(new CreateAccountRequest(newAccount, userUid));
 
             return new OkObjectResult(new Account());
         }

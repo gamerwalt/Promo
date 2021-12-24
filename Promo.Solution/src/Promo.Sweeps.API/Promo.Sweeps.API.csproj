@@ -10,6 +10,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Promo.Core\Promo.Core.csproj" />
+    <ProjectReference Include="..\Promo.Sweeps.Core\Promo.Sweeps.Core.csproj" />
+    <ProjectReference Include="..\Promo.Sweeps.Infrastructure\Promo.Sweeps.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

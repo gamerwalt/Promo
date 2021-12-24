@@ -1,8 +1,9 @@
 ﻿using MediatR;
-using Promo.Core.CoreRequestNotifications;
-using Promo.Core.Exceptions;
-using Promo.Core.External;
-using Promo.Core.Repositories.MySqlRepositories;
+using Promo.Campaign.Core.Notifications;
+using Promo.Campaign.Infrastructure;
+using Promo.Campaign.Infrastructure.Exceptions;
+using Promo.Clients.Internal;
+using Promo.Core;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -36,29 +37,29 @@ namespace Promo.Campaign.Core
         /// <returns></returns>
         public async Task Handle(CampaignCreated notification, CancellationToken cancellationToken)
         {
-            if (notification.Request.NewCampaign.CampaignTypeUid == Guid.Empty)
-                throw new InvalidCampaignTypeException($"An error occurred while trying to handle the {nameof(CampaignCreated)} for the campaign name {notification.Request.NewCampaign.Name}.");
+            if (notification.Request.CampaignTypeUid == Guid.Empty)
+                throw new InvalidCampaignTypeException($"An error occurred while trying to handle the {nameof(CampaignCreated)} for the campaign name {notification.Request.Name}.");
 
-            var campaignType = await _campaignTypesRepository.GetCampaignTypeByUidAsync(notification.Request.NewCampaign.CampaignTypeUid);
+            var campaignType = await _campaignTypesRepository.GetCampaignTypeByUidAsync(notification.Request.CampaignTypeUid);
 
-            if(campaignType == null)
-                throw new InvalidCampaignTypeException($"An error occurred while trying to handle the {nameof(CampaignCreated)} for the campaign name {notification.Request.NewCampaign.Name}.");
+            if (campaignType == null)
+                throw new InvalidCampaignTypeException($"An error occurred while trying to handle the {nameof(CampaignCreated)} for the campaign name {notification.Request.Name}.");
 
-            switch(campaignType.CampaignTypeCode)
+            switch (campaignType.CampaignTypeCode)
             {
-                case Models.CampaignTypeCode.AutoAll:
+                case CampaignTypeCode.AutoAll:
                     break;
-                case Models.CampaignTypeCode.AutoEnterSweepsFromHashtag:
-                case Models.CampaignTypeCode.AutoEnterSweepsFromTweet:
+                case CampaignTypeCode.AutoEnterSweepsFromHashtag:
+                case CampaignTypeCode.AutoEnterSweepsFromTweet:
                     await CreateSweepsForCampaignAsync(notification.CampaignUid);
                     break;
-                case Models.CampaignTypeCode.AutoReplyDM:
+                case CampaignTypeCode.AutoReplyDM:
                     break;
-                case Models.CampaignTypeCode.AutoReplyHashtag:
+                case CampaignTypeCode.AutoReplyHashtag:
                     break;
-                case Models.CampaignTypeCode.AutoReplyLikedTweet:
+                case CampaignTypeCode.AutoReplyLikedTweet:
                     break;
-                case Models.CampaignTypeCode.AutoReplyTweet:
+                case CampaignTypeCode.AutoReplyTweet:
                     break;
             }
         }
@@ -69,7 +70,7 @@ namespace Promo.Campaign.Core
             if (campaign == null)
                 throw new InvalidCampaignException($"An error occurred while trying to run the method {nameof(CreateSweepsForCampaignAsync)} to create a sweeps for the campaignUid {campaignUid}");
 
-            await _sweepsClient.CreateSweepsForCampaignAsync(campaign);
+            await _sweepsClient.CreateSweepsForCampaignAsync(campaign.CampaignUid, campaign.StartDate, campaign.EndDate);
         }
     }
 }

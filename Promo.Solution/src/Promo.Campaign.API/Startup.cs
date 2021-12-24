@@ -8,11 +8,11 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Newtonsoft.Json.Linq;
+using Promo.Campaign.Core.RequestHandlers;
+using Promo.Campaign.Infrastructure;
+using Promo.Clients.Internal;
 using Promo.Core;
-using Promo.Core.ConfigurationOptions;
-using Promo.Core.Configurations;
-using Promo.Core.External;
-using Promo.Core.Repositories.MySqlRepositories;
+using Promo.Core.Authentication.ConfigurationOptions;
 using System;
 using System.Linq;
 using System.Net.Http;
@@ -42,18 +42,31 @@ namespace Promo.Campaign.API
 
             services.AddSingleton<IDatabase>(c =>
             {
-                return new MySqlDatabase("hrvster", Configuration);
+                return new MySqlDatabase("Campaign", Configuration);
             });
 
-            var domainAssembly = typeof(CoreRequest).GetTypeInfo().Assembly;
+            var domainAssembly = typeof(CreateCampaignRequest).GetTypeInfo().Assembly;
             services.AddMediatR(domainAssembly);
 
-            services.AddRepositories();
-            services.AddHttpClients(Configuration);
+            services.AddTransient<ICampaignTypesRepository, CampaignTypesRepository>();
+            services.AddTransient<ICampaignRepository, CampaignRepository>();
+
+            AddSweepsClient(services);
 
             AddGoogleServicesAuthentication(services);
         }
-        
+
+        private void AddSweepsClient(IServiceCollection services)
+        {
+            var sweepsBaseApi = Configuration["PromoSweepsUrl"];
+
+            services.AddHttpClient<ISweepsClient, SweepsClient>(client =>
+            {
+                client.BaseAddress = new Uri(sweepsBaseApi);
+                client.DefaultRequestHeaders.Add("Accept", "application/json");
+            });
+        }
+
         private void AddGoogleServicesAuthentication(IServiceCollection services)
         {
             var client = new HttpClient();

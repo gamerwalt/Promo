@@ -1,19 +1,10 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using Promo.Core;
-using Promo.Core.Configurations;
-using Promo.Core.External;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Promo.Sweeps.API
 {
@@ -38,10 +29,8 @@ namespace Promo.Sweeps.API
 
             services.AddSingleton<IDatabase>(c =>
             {
-                return new MySqlDatabase("Identity", Configuration);
+                return new MySqlDatabase("Sweeps", Configuration);
             });
-            services.AddRepositories();
-            services.AddHttpClients(Configuration);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

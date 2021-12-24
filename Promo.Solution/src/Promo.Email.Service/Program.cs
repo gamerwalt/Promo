@@ -2,7 +2,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Promo.Core;
-using Promo.Core.Repositories.MySqlRepositories;
 using Promo.Email.Service.HostedServices;
 using Promo.Email.Service.Services;
 
@@ -24,14 +23,13 @@ namespace Promo.Email.Service
                     services.AddHostedService<PromoHostedService>();
                     services.AddSingleton<IDatabase>(c =>
                     {
-                        return new MySqlDatabase("Identity", Configuration);
+                        return new MySqlDatabase("Email", Configuration);
                     });
 
                     services.AddSingleton<IMailService, MailService>();
                     services.AddSingleton<IVerifyAccountService, VerifyAccountService>();
 
                     services.AddSingleton<IMailRepository, MailRepository>();
-                    services.AddSingleton<IAccountsRepository, AccountsRepository>();
 
                     services.Configure<MailSettings>(Configuration.GetSection("MailSettings"));
                 });

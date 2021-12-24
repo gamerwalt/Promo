@@ -1,7 +1,7 @@
 ﻿using MySqlConnector;
+using Promo.Campaign.Infrastructure.Models;
+using Promo.Core;
 using Promo.Core.Extensions;
-using Promo.Models;
-using Promo.Models.Campaigns;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -11,10 +11,10 @@ namespace Promo.Campaign.Infrastructure
 {
     public interface ICampaignRepository
     {
-        Task CreateCampaignAsync(Campaign campaign);
-        Task<Campaign> GetCampaignByUidAsync(Guid campaignUid);
-        Task UpdateCampaignAsync(Guid campaignUid, Campaign campaign);
-        Task<List<Campaign>> GetAccountCampaignsAsync(int accountId);
+        Task CreateCampaignAsync(Models.Campaign campaign);
+        Task<Models.Campaign> GetCampaignByUidAsync(Guid campaignUid);
+        Task UpdateCampaignAsync(Guid campaignUid, Models.Campaign campaign);
+        Task<List<Models.Campaign>> GetAccountCampaignsAsync(Guid accountUid);
     }
 
     public class CampaignRepository : ICampaignRepository
@@ -25,7 +25,7 @@ namespace Promo.Campaign.Infrastructure
             _database = database;
         }
 
-        public async Task CreateCampaignAsync(Campaign campaign)
+        public async Task CreateCampaignAsync(Models.Campaign campaign)
         {
             using var conn = new MySqlConnection(_database.GetConnectionString());
             var command = conn.CreateCommand();
@@ -38,22 +38,22 @@ namespace Promo.Campaign.Infrastructure
                 .AddParameter("startDate", campaign.StartDate)
                 .AddParameter("endDate", campaign.EndDate)
                 .AddParameter("campaignTypeUid", campaign.CampaignType.CampaignTypeUid)
-                .AddParameter("accountUid", campaign.Account.AccountUid);
+                .AddParameter("accountUid", campaign.AccountUid);
 
             await conn.OpenAsync();
             await command.ExecuteNonQueryAsync();
         }
 
-        public async Task<List<Campaign>> GetAccountCampaignsAsync(int accountId)
+        public async Task<List<Models.Campaign>> GetAccountCampaignsAsync(Guid accountUid)
         {
-            var campaigns = new List<Campaign>();
+            var campaigns = new List<Models.Campaign>();
 
             using (var conn = new MySqlConnection(_database.GetConnectionString()))
             {
                 var command = conn.CreateCommand();
                 command.CommandText = "campaigns_get_by_account_uid";
                 command.CommandType = CommandType.StoredProcedure;
-                command.AddParameter("accountId", accountId);
+                command.AddParameter("accountUid", accountUid);
 
                 await conn.OpenAsync();
                 using var reader = await command.ExecuteReaderAsync();
@@ -66,11 +66,11 @@ namespace Promo.Campaign.Infrastructure
             return campaigns;
         }
 
-        public async Task<Campaign> GetCampaignByUidAsync(Guid campaignUid)
+        public async Task<Models.Campaign> GetCampaignByUidAsync(Guid campaignUid)
         {
-            var campaign = default(Campaign);
+            var campaign = default(Models.Campaign);
 
-            using(var conn = new MySqlConnection(_database.GetConnectionString()))
+            using (var conn = new MySqlConnection(_database.GetConnectionString()))
             {
                 var command = conn.CreateCommand();
                 command.CommandText = "campaign_get_by_uid";
@@ -88,7 +88,7 @@ namespace Promo.Campaign.Infrastructure
             return campaign;
         }
 
-        public async Task UpdateCampaignAsync(Guid campaignUid, Campaign campaign)
+        public async Task UpdateCampaignAsync(Guid campaignUid, Models.Campaign campaign)
         {
             using var conn = new MySqlConnection(_database.GetConnectionString());
             var command = conn.CreateCommand();
@@ -106,9 +106,9 @@ namespace Promo.Campaign.Infrastructure
             await command.ExecuteNonQueryAsync();
         }
 
-        private Campaign CreateCampaignFrom(MySqlDataReader reader)
+        private Models.Campaign CreateCampaignFrom(MySqlDataReader reader)
         {
-            return new Campaign
+            return new Models.Campaign
             {
                 CampaignId = reader.GetInt32("campaign_id"),
                 CampaignUid = reader.GetGuid("campaign_uid"),
@@ -118,13 +118,7 @@ namespace Promo.Campaign.Infrastructure
                 EndDate = reader.GetDateTime("end_date"),
                 CreatedDate = reader.GetDateTime("created_date"),
                 ActiveInd = reader.GetBoolean("active_ind"),
-                Account = new Account
-                {
-                    AccountId = reader.GetInt32("account_id"),
-                    AccountUid = reader.GetGuid("account_uid"),
-                    EmailAddress = reader.GetString("email_address"),
-                    DisplayName = reader.GetString("display_name")
-                },
+                AccountUid = reader.GetGuid("account_uid"),
                 CampaignType = new CampaignType
                 {
                     CampaignTypeId = reader.GetInt32("campaign_type_id"),

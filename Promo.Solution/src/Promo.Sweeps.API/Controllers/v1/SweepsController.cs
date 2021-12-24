@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using Promo.Core.ApiRequests;
-using Promo.Models.Sweeps;
+using Promo.Sweeps.Core.Requests;
+using Promo.Sweeps.Infrastructure.Models;
 using System.Net;
 using System.Threading.Tasks;
 

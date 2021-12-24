@@ -14,7 +14,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Promo.Clients\Promo.Clients.csproj" />
     <ProjectReference Include="..\Promo.Core\Promo.Core.csproj" />
+    <ProjectReference Include="..\Promo.Membership.Core\Promo.Membership.Core.csproj" />
+    <ProjectReference Include="..\Promo.Membership.Infrastructure\Promo.Membership.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

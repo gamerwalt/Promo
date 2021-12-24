@@ -1,11 +1,9 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using Promo.Core.CoreRequestHandlers;
-using Promo.Models.Campaigns;
-using System;
+using Promo.Campaign.Core.RequestHandlers;
+using Promo.Campaign.Infrastructure.Models;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 

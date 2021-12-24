@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MimeKit;
-using Promo.Core.Repositories.MySqlRepositories;
+using Promo.Core;
 using Promo.Email.Service.TemplateMailRequest;
 using System;
 using System.IO;
@@ -26,7 +26,7 @@ namespace Promo.Email.Service.Services
 
         public MailService(
             ILogger<MailService> logger,
-            IMailRepository mailRepository, 
+            IMailRepository mailRepository,
             IOptions<MailSettings> mailSettingsOptions
             )
         {
@@ -40,18 +40,18 @@ namespace Promo.Email.Service.Services
             _logger.LogInformation($"{nameof(ProcessAnyUnsentEmails)} processing started.");
 
             var emailsToGoOut = await _mailRepository.GetUnsentAsync();
-            if(emailsToGoOut != null && emailsToGoOut.Count() != 0)
+            if (emailsToGoOut != null && emailsToGoOut.Count() != 0)
             {
                 _logger.LogInformation($"There are {emailsToGoOut.Count()} emails that needs to be sent.");
-                foreach(var email in emailsToGoOut)
+                foreach (var email in emailsToGoOut)
                 {
-                    switch(email.Template)
+                    switch (email.Template)
                     {
-                        case Models.EmailTemplate.VerificationEmail:
+                        case EmailTemplate.VerificationEmail:
                             await SendVerificationEmailAsync(new VerificationEmailRequest
                             {
                                 EmailAddress = email.EmailAddress,
-                                EmailTemplate = Models.EmailTemplate.VerificationEmail,
+                                EmailTemplate = EmailTemplate.VerificationEmail,
                                 DisplayName = email.Parameters["DisplayName"],
                                 VerificationLink = email.Parameters["VerificationLink"]
                             });
@@ -60,11 +60,11 @@ namespace Promo.Email.Service.Services
 
                             break;
 
-                        case Models.EmailTemplate.WelcomeEmail:
+                        case EmailTemplate.WelcomeEmail:
                             await SendWelcomeEmailAsync(new WelcomeEmailRequest
                             {
                                 EmailAddress = email.EmailAddress,
-                                EmailTemplate = Models.EmailTemplate.WelcomeEmail,
+                                EmailTemplate = EmailTemplate.WelcomeEmail,
                                 DisplayName = email.Parameters["DisplayName"],
                                 DashboardLink = email.Parameters["DashboardLink"]
                             });

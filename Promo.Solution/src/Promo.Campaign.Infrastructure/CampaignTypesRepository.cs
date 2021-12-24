@@ -1,12 +1,10 @@
 ﻿using MySqlConnector;
+using Promo.Campaign.Infrastructure.Models;
+using Promo.Core;
 using Promo.Core.Extensions;
-using Promo.Models;
-using Promo.Models.Campaigns;
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Promo.Campaign.Infrastructure
@@ -59,7 +57,7 @@ namespace Promo.Campaign.Infrastructure
 
                 await conn.OpenAsync();
                 using var reader = await command.ExecuteReaderAsync();
-                while(await reader.ReadAsync())
+                while (await reader.ReadAsync())
                 {
                     campaignType = CreateCampaignTypeFrom(reader);
                 }

@@ -1,12 +1,11 @@
 ﻿using MediatR;
-using Microsoft.Extensions.Logging;
-using Promo.Core.Repositories.MySqlRepositories;
-using Promo.Models.Campaigns;
+using Promo.Campaign.Infrastructure;
+using Promo.Campaign.Infrastructure.Models;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Promo.Core.CoreRequestHandlers
+namespace Promo.Campaign.Core.RequestHandlers
 {
     public class GetAllCampaignTypesRequest : IRequest<IEnumerable<CampaignType>>
     {
@@ -14,14 +13,10 @@ namespace Promo.Core.CoreRequestHandlers
 
     public class GetAllCampaignTypesRequestHandler : IRequestHandler<GetAllCampaignTypesRequest, IEnumerable<CampaignType>>
     {
-        private readonly ILogger<GetAllCampaignTypesRequestHandler> _logger;
         private readonly ICampaignTypesRepository _repository;
 
-        public GetAllCampaignTypesRequestHandler(
-            ILogger<GetAllCampaignTypesRequestHandler> logger,
-            ICampaignTypesRepository repository)
+        public GetAllCampaignTypesRequestHandler(ICampaignTypesRepository repository)
         {
-            _logger = logger;
             _repository = repository;
         }
 

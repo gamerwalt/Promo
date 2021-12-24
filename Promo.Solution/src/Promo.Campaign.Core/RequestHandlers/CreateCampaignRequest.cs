@@ -1,28 +1,28 @@
 ﻿using MediatR;
-using Promo.Core.ApiRequests;
-using Promo.Core.CoreRequestNotifications;
-using Promo.Core.Repositories.MySqlRepositories;
-using Promo.Models.Campaigns;
+using Promo.Campaign.Core.Notifications;
+using Promo.Campaign.Core.Requests;
+using Promo.Campaign.Infrastructure;
+using Promo.Campaign.Infrastructure.Models;
 using System;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Promo.Core.CoreRequestHandlers
+namespace Promo.Campaign.Core.RequestHandlers
 {
     public class CreateCampaignRequest : IRequest<Guid>
     {
-        private ApiRequests.CreateCampaignRequest request;
+        private NewCampaignRequest request;
         private ClaimsPrincipal user;
 
-        public CreateCampaignRequest(ApiRequests.CreateCampaignRequest request, ClaimsPrincipal user)
+        public CreateCampaignRequest(NewCampaignRequest request, ClaimsPrincipal user)
         {
             this.request = request;
             this.user = user;
         }
 
-        public ApiRequests.CreateCampaignRequest NewCampaign
+        public NewCampaignRequest NewCampaign
         {
             get { return request; }
         }
@@ -47,7 +47,7 @@ namespace Promo.Core.CoreRequestHandlers
         {
             var campaignUid = Guid.NewGuid();
 
-            await _repository.CreateCampaignAsync(new Campaign
+            await _repository.CreateCampaignAsync(new Infrastructure.Models.Campaign
             {
                 CampaignUid = campaignUid,
                 CampaignName = request.NewCampaign.Name,
@@ -58,13 +58,10 @@ namespace Promo.Core.CoreRequestHandlers
                 {
                     CampaignTypeUid = request.NewCampaign.CampaignTypeUid
                 },
-                Account = new Models.Account
-                {
-                    AccountUid = request.AccountUid
-                }
+                AccountUid = request.AccountUid
             });
 
-            await _mediator.Publish(new CampaignCreated(request, campaignUid));
+            await _mediator.Publish(new CampaignCreated(request.NewCampaign, campaignUid));
 
             return campaignUid;
         }

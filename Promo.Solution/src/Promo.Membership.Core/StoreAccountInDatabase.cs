@@ -1,7 +1,7 @@
 ﻿using MediatR;
-using Promo.Core.CoreRequestNotifications;
-using Promo.Core.Repositories.MySqlRepositories;
-using Promo.Models;
+using Promo.Membership.Core.Notifications;
+using Promo.Membership.Infrastructure;
+using Promo.Membership.Infrastructure.Models;
 using System;
 using System.Threading;
 using System.Threading.Tasks;

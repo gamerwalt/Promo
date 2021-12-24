@@ -1,11 +1,10 @@
 ﻿using MySqlConnector;
+using Promo.Core;
 using Promo.Core.Extensions;
-using Promo.Models;
+using Promo.Membership.Infrastructure.Models;
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 

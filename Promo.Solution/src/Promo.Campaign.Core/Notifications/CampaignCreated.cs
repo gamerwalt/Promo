@@ -1,21 +1,21 @@
 ﻿using MediatR;
-using Promo.Core.CoreRequestHandlers;
+using Promo.Campaign.Core.Requests;
 using System;
 
 namespace Promo.Campaign.Core.Notifications
 {
     public class CampaignCreated : INotification
     {
-        private CreateCampaignRequest request;
+        private NewCampaignRequest request;
         private Guid campaignUid;
 
-        public CampaignCreated(CreateCampaignRequest request, System.Guid campaignUid)
+        public CampaignCreated(NewCampaignRequest request, System.Guid campaignUid)
         {
             this.request = request;
             this.campaignUid = campaignUid;
         }
 
-        public CreateCampaignRequest Request
+        public NewCampaignRequest Request
         {
             get { return this.request; }
         }

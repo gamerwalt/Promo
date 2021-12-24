@@ -1,7 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
-using Promo.Models.Campaigns;
 using System;
 using System.Net.Http;
 using System.Text;
@@ -11,7 +10,7 @@ namespace Promo.Clients.Internal
 {
     public interface ISweepsClient
     {
-        Task CreateSweepsForCampaignAsync(Campaign campaign);
+        Task CreateSweepsForCampaignAsync(Guid campaignUid, DateTime startDate, DateTime endDate);
     }
 
     public class SweepsClient : ISweepsClient
@@ -25,9 +24,14 @@ namespace Promo.Clients.Internal
             _config = config ?? throw new ArgumentNullException(nameof(config));
         }
 
-        public async Task CreateSweepsForCampaignAsync(Campaign campaign)
+        public async Task CreateSweepsForCampaignAsync(Guid campaignUid, DateTime startDate, DateTime endDate)
         {
-            var content = JsonConvert.SerializeObject(campaign, new JsonSerializerSettings
+            var content = JsonConvert.SerializeObject(new
+            {
+                CampaignUid = campaignUid,
+                StartDate = startDate,
+                EndDate = endDate,
+            }, new JsonSerializerSettings
             {
                 ContractResolver = new CamelCasePropertyNamesContractResolver()
             });
