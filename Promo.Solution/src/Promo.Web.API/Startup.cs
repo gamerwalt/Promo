@@ -55,12 +55,9 @@ namespace Promo.Membership.API
 
             services.AddHttpClient<IIdentityClient, IdentityClient>();
             AddMailClient(services);
+            
+            //Service Authentication
             AddHrvsterServiceAuthenticationclient(services);
-
-            services.Configure<HrvsterServiceAccount>(Configuration);
-            services.Configure<HrvsterServiceAccount>(Configuration
-                .GetSection(HrvsterServiceAccount.SectionName));
-            services.AddTransient(p => p.GetService<IOptions<HrvsterServiceAccount>>().Value);
 
             var domainAssembly = typeof(GetAccountRequest).GetTypeInfo().Assembly;
             services.AddMediatR(domainAssembly);
@@ -72,6 +69,11 @@ namespace Promo.Membership.API
 
         private void AddHrvsterServiceAuthenticationclient(IServiceCollection services)
         {
+            services.Configure<HrvsterServiceAccount>(Configuration);
+            services.Configure<HrvsterServiceAccount>(Configuration
+                .GetSection(HrvsterServiceAccount.SectionName));
+            services.AddTransient(p => p.GetService<IOptions<HrvsterServiceAccount>>().Value);
+
             services.AddHttpClient<IServiceAuthenticate, ServiceAuthenticate>(client =>
             {
                 client.BaseAddress = new Uri("https://identitytoolkit.googleapis.com");

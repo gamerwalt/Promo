@@ -4,6 +4,7 @@ using Promo.Campaign.Infrastructure;
 using Promo.Campaign.Infrastructure.Exceptions;
 using Promo.Clients.Internal;
 using Promo.Core;
+using Promo.Core.Authentication;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -15,15 +16,18 @@ namespace Promo.Campaign.Core
         private readonly ICampaignTypesRepository _campaignTypesRepository;
         private readonly ICampaignRepository _campaignRepository;
         private readonly ISweepsClient _sweepsClient;
+        private readonly IServiceAuthenticate _serviceAuthenticate;
 
         public HandleCampaignCreatedService(
             ICampaignTypesRepository campaignTypesRepository,
             ICampaignRepository campaignRepository,
-            ISweepsClient sweepsClient)
+            ISweepsClient sweepsClient,
+            IServiceAuthenticate serviceAuthenticate)
         {
             _campaignTypesRepository = campaignTypesRepository;
             _campaignRepository = campaignRepository;
             _sweepsClient = sweepsClient;
+            _serviceAuthenticate = serviceAuthenticate;
         }
 
         /// <summary>
@@ -70,7 +74,7 @@ namespace Promo.Campaign.Core
             if (campaign == null)
                 throw new InvalidCampaignException($"An error occurred while trying to run the method {nameof(CreateSweepsForCampaignAsync)} to create a sweeps for the campaignUid {campaignUid}");
 
-            await _sweepsClient.CreateSweepsForCampaignAsync(campaign.CampaignUid, campaign.StartDate, campaign.EndDate);
+            await _sweepsClient.CreateSweepsForCampaignAsync($"{campaign.CampaignName}_sweeps", campaign.CampaignUid, campaign.StartDate, campaign.EndDate);
         }
     }
 }

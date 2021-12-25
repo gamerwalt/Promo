@@ -39,7 +39,7 @@ namespace Promo.Campaign.API.Controllers.v1
             if (campaignType == null)
                 return new BadRequestObjectResult(new { message = $"The campaign type for Uid: {request.CampaignTypeUid} does not exist." });
 
-            var campaignUid = await _mediator.Send(new Core.RequestHandlers.CreateCampaignRequest(request, User));
+            var campaignUid = await _mediator.Send(new CreateCampaignRequest(request, User));
 
             var campaign = await _mediator.Send(new GetCampaignByUidRequest(campaignUid));
 

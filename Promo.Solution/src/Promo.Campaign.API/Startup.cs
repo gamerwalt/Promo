@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Newtonsoft.Json.Linq;
@@ -12,7 +13,9 @@ using Promo.Campaign.Core.RequestHandlers;
 using Promo.Campaign.Infrastructure;
 using Promo.Clients.Internal;
 using Promo.Core;
+using Promo.Core.Authentication;
 using Promo.Core.Authentication.ConfigurationOptions;
+using Promo.Core.Models;
 using System;
 using System.Linq;
 using System.Net.Http;
@@ -52,8 +55,23 @@ namespace Promo.Campaign.API
             services.AddTransient<ICampaignRepository, CampaignRepository>();
 
             AddSweepsClient(services);
+            AddHrvsterServiceAuthenticationclient(services);
 
             AddGoogleServicesAuthentication(services);
+        }
+
+        private void AddHrvsterServiceAuthenticationclient(IServiceCollection services)
+        {
+            services.Configure<HrvsterServiceAccount>(Configuration);
+            services.Configure<HrvsterServiceAccount>(Configuration
+                .GetSection(HrvsterServiceAccount.SectionName));
+            services.AddTransient(p => p.GetService<IOptions<HrvsterServiceAccount>>().Value);
+
+            services.AddHttpClient<IServiceAuthenticate, ServiceAuthenticate>(client =>
+            {
+                client.BaseAddress = new Uri(Configuration["GoogleAuthenticateUrl"]);
+                client.DefaultRequestHeaders.Add("Accept", "application/json");
+            });
         }
 
         private void AddSweepsClient(IServiceCollection services)

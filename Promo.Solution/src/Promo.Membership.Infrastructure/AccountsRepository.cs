@@ -125,7 +125,7 @@ namespace Promo.Membership.Infrastructure
                 return null;
             }
 
-            return reader.GetDateTime("updated_date");
+            return reader.GetDateTime(fieldName);
         }
 
         public Task RemoveAsync(Account account)
