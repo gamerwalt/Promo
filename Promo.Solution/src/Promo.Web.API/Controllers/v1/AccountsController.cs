@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.Identity.Web;
 using Promo.Clients.External;
 using Promo.Core.Authentication;
 using Promo.Membership.Core.RequestHandlers;
@@ -13,28 +14,23 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 
-namespace Promo.Web.API.Controllers.v1
+namespace Promo.Membership.API.Controllers.v1
 {
     [ApiController]
     [Route("v1")]
     public class AccountsController : ControllerBase
     {
         private readonly IIdentityClient _identityClient;
-        private readonly ILogger<AccountsController> _logger;
         private readonly IMediator _mediator;
-        private readonly IConfiguration _config;
+        private readonly ITokenAcquisition _tokenAcquisition;
 
         public AccountsController(
             IIdentityClient identityClient,
-            ILogger<AccountsController> logger,
-            IMediator mediator,
-            IConfiguration config)
+            IMediator mediator)
         {
             _identityClient = identityClient;
-            _logger = logger;
             _mediator = mediator;
-            _config = config;
-        }
+         }
 
         [HttpPost("accounts")]
         [Produces("application/json")]
@@ -44,7 +40,9 @@ namespace Promo.Web.API.Controllers.v1
             var userUid = Guid.NewGuid();
             await _mediator.Send(new CreateAccountRequest(newAccount, userUid));
 
-            return new OkObjectResult(new Account());
+            var account = await _mediator.Send(new GetAccountRequest(userUid));
+
+            return new OkObjectResult(account);
         }
 
         [HttpPost("accounts/signin")]

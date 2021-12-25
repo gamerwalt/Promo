@@ -8,20 +8,25 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Promo.Clients.External;
+using Promo.Clients.Internal;
 using Promo.Core;
+using Promo.Core.Authentication;
 using Promo.Core.Authentication.ConfigurationOptions;
+using Promo.Core.Models;
 using Promo.Membership.Core.RequestHandlers;
 using Promo.Membership.Infrastructure;
+using System;
 using System.Linq;
 using System.Net.Http;
 using System.Reflection;
 
-namespace Promo.Web.API
+namespace Promo.Membership.API
 {
     public class Startup
     {
@@ -49,6 +54,13 @@ namespace Promo.Web.API
             services.AddTransient<IAccountsRepository, AccountsRepository>();
 
             services.AddHttpClient<IIdentityClient, IdentityClient>();
+            AddMailClient(services);
+            AddHrvsterServiceAuthenticationclient(services);
+
+            services.Configure<HrvsterServiceAccount>(Configuration);
+            services.Configure<HrvsterServiceAccount>(Configuration
+                .GetSection(HrvsterServiceAccount.SectionName));
+            services.AddTransient(p => p.GetService<IOptions<HrvsterServiceAccount>>().Value);
 
             var domainAssembly = typeof(GetAccountRequest).GetTypeInfo().Assembly;
             services.AddMediatR(domainAssembly);
@@ -58,16 +70,36 @@ namespace Promo.Web.API
             AddFirebaseServices(services, Configuration);
         }
 
+        private void AddHrvsterServiceAuthenticationclient(IServiceCollection services)
+        {
+            services.AddHttpClient<IServiceAuthenticate, ServiceAuthenticate>(client =>
+            {
+                client.BaseAddress = new Uri("https://identitytoolkit.googleapis.com");
+                client.DefaultRequestHeaders.Add("Accept", "application/json");
+            });
+        }
+
+        private void AddMailClient(IServiceCollection services)
+        {
+            var mailBaseApi = Configuration["PromoMailUrl"];
+
+            services.AddHttpClient<IMailClient, MailClient>(client =>
+            {
+                client.BaseAddress = new Uri(mailBaseApi);
+                client.DefaultRequestHeaders.Add("Accept", "application/json");
+            });
+        }
+
         private void AddGoogleServicesAuthentication(IServiceCollection services)
         {
-            var client = new HttpClient();
-            var jsonResult = client.GetStringAsync(Configuration["GoogleSecureTokenCertificateUrl"]).Result;
-            var metaData = JObject.Parse(jsonResult)
-                .Children()
-                .Cast<JProperty>()
-                .Select(i => new x509Metadata(i.Path, i.Value.ToString()));
+            //var client = new HttpClient();
+            //var jsonResult = client.GetStringAsync(Configuration["GoogleSecureTokenCertificateUrl"]).Result;
+            //var metaData = JObject.Parse(jsonResult)
+            //    .Children()
+            //    .Cast<JProperty>()
+            //    .Select(i => new x509Metadata(i.Path, i.Value.ToString()));
 
-            var issuerSigningKeys = metaData.Select(s => s.X509SecurityKey);
+            //var issuerSigningKeys = metaData.Select(s => s.X509SecurityKey);
 
             var googleServicesOptions = Configuration.GetSection(GoogleServicesOptions.GoogleServices).Get<GoogleServicesOptions>();
 
@@ -81,8 +113,8 @@ namespace Promo.Web.API
                         ValidIssuer = googleServicesOptions.FirebaseAppId,
                         ValidateAudience = true,
                         ValidAudience = googleServicesOptions.ProjectId,
-                        ValidateLifetime = true,
-                        IssuerSigningKeys = issuerSigningKeys,
+                        ValidateLifetime = true
+                        //IssuerSigningKeys = issuerSigningKeys,
                     };
                 });
         }

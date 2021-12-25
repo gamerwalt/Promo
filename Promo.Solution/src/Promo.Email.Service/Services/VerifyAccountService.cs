@@ -8,6 +8,7 @@ using Promo.Clients.Internal;
 using Promo.Core;
 using Promo.Core.Authentication.ConfigurationOptions;
 using Promo.Core.Models;
+using Promo.Emails.Infrastructure;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -83,12 +84,14 @@ namespace Promo.Email.Service.Services
                 }
             }
 
+            FirebaseApp.DefaultInstance.Delete();
+
             _logger.LogInformation($"{nameof(VerifyAnyUnverifiedAccounts)} processing completed.");
         }
 
         private async Task SaveWelcomeEmailAsync(Account account)
         {
-            await _mailRepository.CreateAsync(new Models.Email
+            await _mailRepository.CreateAsync(new Core.Models.Email
             {
                 EmailAddress = account.EmailAddress,
                 EmailUid = Guid.NewGuid(),

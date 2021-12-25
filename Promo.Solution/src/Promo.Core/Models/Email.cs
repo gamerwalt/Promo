@@ -11,5 +11,7 @@ namespace Promo.Core.Models
         public EmailTemplate Template { get; set; }
         public bool Sent { get; set; }
         public Dictionary<string, string> Parameters { get; set; }
+        public int Id { get; set; }
+        public DateTime CreatedDate { get; set; }
     }
 }

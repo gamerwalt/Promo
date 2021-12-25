@@ -1,9 +1,12 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Promo.Clients.Internal;
 using Promo.Core;
 using Promo.Email.Service.HostedServices;
 using Promo.Email.Service.Services;
+using Promo.Emails.Infrastructure;
+using System;
 
 namespace Promo.Email.Service
 {
@@ -32,6 +35,11 @@ namespace Promo.Email.Service
                     services.AddSingleton<IMailRepository, MailRepository>();
 
                     services.Configure<MailSettings>(Configuration.GetSection("MailSettings"));
+                    services.AddHttpClient<IAccountsClient, AccountsClient>(client =>
+                    {
+                        client.BaseAddress = new Uri(Configuration["PromoAccountsUrl"]);
+                        client.DefaultRequestHeaders.Add("Accept", "application/json");
+                    });
                 });
 
         private static void ConfigureAppConfiguration(HostBuilderContext hostBuilder, IConfigurationBuilder configurationBuilder)

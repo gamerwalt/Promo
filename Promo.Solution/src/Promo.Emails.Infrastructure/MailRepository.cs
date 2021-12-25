@@ -2,18 +2,19 @@
 using Newtonsoft.Json;
 using Promo.Core;
 using Promo.Core.Extensions;
+using Promo.Core.Models;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Threading.Tasks;
 
-namespace Promo.Email.Service
+namespace Promo.Emails.Infrastructure
 {
     public interface IMailRepository
     {
-        Task CreateAsync(Models.Email email);
-        Task<IEnumerable<Models.Email>> GetUnsentAsync();
-        Task UpdateAsSentAsync(Models.Email email);
+        Task CreateAsync(Email email);
+        Task<IEnumerable<Email>> GetUnsentAsync();
+        Task UpdateAsSentAsync(Email email);
     }
 
     public class MailRepository : IMailRepository
@@ -23,7 +24,7 @@ namespace Promo.Email.Service
         {
             _database = database;
         }
-        public async Task CreateAsync(Models.Email email)
+        public async Task CreateAsync(Email email)
         {
             using var conn = new MySqlConnection(_database.GetConnectionString());
             var command = conn.CreateCommand();
@@ -41,7 +42,7 @@ namespace Promo.Email.Service
             await command.ExecuteNonQueryAsync();
         }
 
-        public async Task UpdateAsSentAsync(Models.Email email)
+        public async Task UpdateAsSentAsync(Email email)
         {
             using var conn = new MySqlConnection(_database.GetConnectionString());
             var command = conn.CreateCommand();
@@ -54,9 +55,9 @@ namespace Promo.Email.Service
             await command.ExecuteNonQueryAsync();
         }
 
-        public async Task<IEnumerable<Models.Email>> GetUnsentAsync()
+        public async Task<IEnumerable<Email>> GetUnsentAsync()
         {
-            var emails = new List<Models.Email>();
+            var emails = new List<Email>();
 
             using var conn = new MySqlConnection(_database.GetConnectionString());
             {
@@ -77,9 +78,9 @@ namespace Promo.Email.Service
             return emails;
         }
 
-        private Models.Email CreateEmailFrom(MySqlDataReader reader)
+        private Email CreateEmailFrom(MySqlDataReader reader)
         {
-            return new Models.Email
+            return new Email
             {
                 Id = reader.GetInt32("email_id"),
                 EmailUid = reader.GetGuid("email_uid"),

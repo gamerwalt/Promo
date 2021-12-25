@@ -4,6 +4,7 @@ using Microsoft.Extensions.Options;
 using MimeKit;
 using Promo.Core;
 using Promo.Email.Service.TemplateMailRequest;
+using Promo.Emails.Infrastructure;
 using System;
 using System.IO;
 using System.Linq;

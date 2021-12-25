@@ -16,6 +16,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Promo.Clients\Promo.Clients.csproj" />
     <ProjectReference Include="..\Promo.Core\Promo.Core.csproj" />
+    <ProjectReference Include="..\Promo.Emails.Infrastructure\Promo.Emails.Infrastructure.csproj" />
   </ItemGroup>
 
   <ItemGroup>

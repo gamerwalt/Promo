@@ -6,6 +6,7 @@ using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using Promo.Clients.Internal;
 using Promo.Core;
+using Promo.Core.Authentication;
 using Promo.Core.Authentication.ConfigurationOptions;
 using Promo.Membership.Core.Notifications;
 using System;
@@ -19,11 +20,16 @@ namespace Promo.Membership.Core
     {
         private readonly IMailClient _mailClient;
         private readonly IConfiguration _config;
+        private readonly IServiceAuthenticate _serviceAuthenticate;
 
-        public SaveVerificationEmailInDatabase(IMailClient mailClient, IConfiguration config)
+        public SaveVerificationEmailInDatabase(
+            IMailClient mailClient, 
+            IConfiguration config,
+            IServiceAuthenticate serviceAuthenticate)
         {
             _mailClient = mailClient;
             _config = config;
+            _serviceAuthenticate = serviceAuthenticate;
         }
 
         public async Task Handle(AccountCreatedViaFirebase notification, CancellationToken cancellationToken)
@@ -57,7 +63,9 @@ namespace Promo.Membership.Core
                 }
             };
 
-            await _mailClient.CreateAsync(email);
+            var authModel = await _serviceAuthenticate.Authenticate();
+
+            await _mailClient.CreateAsync(email, authModel.IdToken);
 
             FirebaseApp.DefaultInstance.Delete();
         }
