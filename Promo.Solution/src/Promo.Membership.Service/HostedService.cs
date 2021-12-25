@@ -1,23 +1,32 @@
-using Microsoft.Extensions.Hosting;
+﻿using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Promo.Email.Service.Services;
+using Promo.Clients.Internal;
+using Promo.Membership.Service.Services;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Promo.Email.Service.HostedServices
+namespace Promo.Membership.Service
 {
-    public class PromoHostedService : IHostedService
+    public class HostedService : IHostedService
     {
         private readonly IVerifyAccountService _verifyUserService;
-        private readonly IMailService _mailService;
-        private readonly ILogger<PromoHostedService> _logger;
+        private readonly IMailClient _mailClient;
+        private readonly ILogger<HostedService> _logger;
         private readonly IHostApplicationLifetime _appLifeTime;
         private readonly CancellationTokenSource _cancellationTokenSource;
 
-        public PromoHostedService(IVerifyAccountService verifyUserService, IMailService mailService, ILogger<PromoHostedService> logger, IHostApplicationLifetime appLifeTime)
+        public HostedService(
+            IVerifyAccountService verifyUserService, 
+            IMailClient mailClient, 
+            ILogger<HostedService> logger, 
+            IHostApplicationLifetime appLifeTime)
         {
             _verifyUserService = verifyUserService;
-            _mailService = mailService;
+            _mailClient = mailClient;
             _logger = logger;
             _appLifeTime = appLifeTime;
             _cancellationTokenSource = new CancellationTokenSource();
@@ -45,7 +54,6 @@ namespace Promo.Email.Service.HostedServices
             _logger.LogInformation("OnStarted has been called");
 
             Task.Run(async () => await _verifyUserService.VerifyAnyUnverifiedAccounts(_cancellationTokenSource.Token)).Wait();
-            Task.Run(async () => await _mailService.ProcessAnyUnsentEmails(_cancellationTokenSource.Token)).Wait();
 
             _appLifeTime.StopApplication();
         }

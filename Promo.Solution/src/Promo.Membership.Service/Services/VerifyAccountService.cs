@@ -6,16 +6,17 @@ using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Promo.Clients.Internal;
 using Promo.Core;
+using Promo.Core.Authentication;
 using Promo.Core.Authentication.ConfigurationOptions;
-using Promo.Core.Models;
-using Promo.Emails.Infrastructure;
+using Promo.Membership.Infrastructure;
+using Promo.Membership.Infrastructure.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Promo.Email.Service.Services
+namespace Promo.Membership.Service.Services
 {
     public interface IVerifyAccountService
     {
@@ -25,25 +26,33 @@ namespace Promo.Email.Service.Services
     public class VerifyAccountService : IVerifyAccountService
     {
         private ILogger<VerifyAccountService> _logger;
-        private readonly IAccountsClient _accountsClient;
-        private readonly IMailRepository _mailRepository;
+        private readonly IAccountsRepository _repository;
+        private readonly IMailClient _mailClient;
         private readonly IConfiguration _config;
+        private readonly IServiceAuthenticate _serviceAuthenticate;
 
         public VerifyAccountService(
             ILogger<VerifyAccountService> logger,
-            IAccountsClient accountsClient,
-            IMailRepository mailRepository,
-            IConfiguration config)
+            IAccountsRepository repository,
+            IMailClient mailclient,
+            IConfiguration config,
+            IServiceAuthenticate serviceAuthenticate)
         {
             _logger = logger;
-            _accountsClient = accountsClient;
+            _repository = repository;
             _config = config;
-            _mailRepository = mailRepository;
+            _mailClient = mailclient;
+            _serviceAuthenticate = serviceAuthenticate;
         }
 
         public async Task VerifyAnyUnverifiedAccounts(CancellationToken token)
         {
             _logger.LogInformation($"{nameof(VerifyAnyUnverifiedAccounts)} processing started.");
+
+            var authModel = await _serviceAuthenticate.Authenticate();
+
+            if (authModel == null)
+                throw new Exception($"Unable to authenticate service at {nameof(VerifyAccountService)}");
 
             if (FirebaseApp.DefaultInstance == null)
             {
@@ -57,7 +66,7 @@ namespace Promo.Email.Service.Services
                 });
             }
 
-            var unverifiedAccounts = await _accountsClient.GetUnverifiedAccountsAsync(token);
+            var unverifiedAccounts = await _repository.GetUnverifiedAccountsAsync(token);
             if (unverifiedAccounts != null || unverifiedAccounts.Count() != 0)
             {
                 _logger.LogInformation($"There are {unverifiedAccounts.Count()} accounts that needs to be checked for verification.");
@@ -66,16 +75,17 @@ namespace Promo.Email.Service.Services
                     _logger.LogInformation($"Verifying account with uid: {account.AccountUid}");
                     try
                     {
-                        var userRecord = await FirebaseAuth.DefaultInstance.GetUserAsync(account.AccountUid.ToString());
+                        var userRecord = await FirebaseAuth.DefaultInstance.GetUserAsync(account.AccountUid.ToString(), token);
                         if (userRecord.EmailVerified)
                         {
-                            await _accountsClient.VerifyAccountEmailAsync(account.AccountUid);
-                            await SaveWelcomeEmailAsync(account);
+                            await _repository.VerifyAccountEmailAsync(account.AccountUid);
+                            await SaveWelcomeEmailAsync(account, authModel.IdToken);
                         }
                     }
                     catch (FirebaseAuthException fbEx)
                     {
                         _logger.LogError($"A FirebaseAuthException occurred for the user with uid: {account.AccountUid}");
+                        _logger.LogError(fbEx.Message);
                     }
                     catch (Exception ex)
                     {
@@ -89,9 +99,9 @@ namespace Promo.Email.Service.Services
             _logger.LogInformation($"{nameof(VerifyAnyUnverifiedAccounts)} processing completed.");
         }
 
-        private async Task SaveWelcomeEmailAsync(Account account)
+        private async Task SaveWelcomeEmailAsync(Account account, string accessToken)
         {
-            await _mailRepository.CreateAsync(new Core.Models.Email
+            await _mailClient.CreateAsync(new Core.Models.Email
             {
                 EmailAddress = account.EmailAddress,
                 EmailUid = Guid.NewGuid(),
@@ -102,7 +112,7 @@ namespace Promo.Email.Service.Services
                 },
                 Status = EmailStatus.New,
                 Template = EmailTemplate.WelcomeEmail
-            });
+            }, accessToken);
         }
     }
 }
