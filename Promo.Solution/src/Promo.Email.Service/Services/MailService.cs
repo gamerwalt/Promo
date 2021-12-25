@@ -53,8 +53,8 @@ namespace Promo.Email.Service.Services
                             {
                                 EmailAddress = email.EmailAddress,
                                 EmailTemplate = EmailTemplate.VerificationEmail,
-                                DisplayName = email.Parameters["DisplayName"],
-                                VerificationLink = email.Parameters["VerificationLink"]
+                                DisplayName = email.Parameters[EmailParameters.DisplayName],
+                                VerificationLink = email.Parameters[EmailParameters.VerificationLink]
                             });
 
                             await _mailRepository.UpdateAsSentAsync(email);
@@ -66,8 +66,8 @@ namespace Promo.Email.Service.Services
                             {
                                 EmailAddress = email.EmailAddress,
                                 EmailTemplate = EmailTemplate.WelcomeEmail,
-                                DisplayName = email.Parameters["DisplayName"],
-                                DashboardLink = email.Parameters["DashboardLink"]
+                                DisplayName = email.Parameters[EmailParameters.DisplayName],
+                                DashboardLink = email.Parameters[EmailParameters.DashboardLink]
                             });
 
                             await _mailRepository.UpdateAsSentAsync(email);

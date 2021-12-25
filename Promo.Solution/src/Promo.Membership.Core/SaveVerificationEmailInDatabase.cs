@@ -57,9 +57,9 @@ namespace Promo.Membership.Core
                 Sent = false,
                 Parameters = new Dictionary<string, string>
                 {
-                    { "VerificationLink", emailLink },
-                    { "Email", notification.CreatedUser.Email },
-                    { "DisplayName", notification.CreatedUser.DisplayName }
+                    { EmailParameters.VerificationLink, emailLink },
+                    { EmailParameters.Email, notification.CreatedUser.Email },
+                    { EmailParameters.DisplayName, notification.CreatedUser.DisplayName }
                 }
             };
 
