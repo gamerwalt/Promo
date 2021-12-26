@@ -24,4 +24,12 @@
         AutoEnterSweepsFromTweet,
         AutoEnterSweepsFromHashtag
     }
+
+    public enum UserIdentifierType
+    {
+        TwitterHandle,
+        InstagramHandle,
+        Email,
+        Phone
+    }
 }

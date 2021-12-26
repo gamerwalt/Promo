@@ -39,11 +39,12 @@ namespace Promo.Sweeps.API
                 return new MySqlDatabase("Sweeps", Configuration);
             });
             services.AddTransient<ISweepsRepository, SweepsRepository>();
+            services.AddTransient<ISweepsEntryRepository, SweepsEntryRepository>();
 
             //Authentication
             AddGoogleServicesAuthentication(services);
 
-            var domainAssembly = typeof(CreateSweepRequest).GetTypeInfo().Assembly;
+            var domainAssembly = typeof(CreateSweep).GetTypeInfo().Assembly;
             services.AddMediatR(domainAssembly);
         }
 

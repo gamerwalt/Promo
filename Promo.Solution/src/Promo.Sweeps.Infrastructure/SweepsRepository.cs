@@ -3,6 +3,7 @@ using Promo.Core;
 using Promo.Core.Extensions;
 using Promo.Sweeps.Infrastructure.Models;
 using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Threading.Tasks;
 
@@ -12,6 +13,8 @@ namespace Promo.Sweeps.Infrastructure
     {
         Task CreateAsync(Sweep sweep);
         Task<Sweep> GetAsync(Guid sweepUid);
+        Task<IEnumerable<Sweep>> GetAllForCampaignAsync(Guid campaignUid);
+        Task UpdateAsync(Guid sweepUid, Sweep sweep);
     }
 
     public class SweepsRepository : ISweepsRepository
@@ -40,6 +43,30 @@ namespace Promo.Sweeps.Infrastructure
             await command.ExecuteNonQueryAsync();
         }
 
+        public async Task<IEnumerable<Sweep>> GetAllForCampaignAsync(Guid campaignUid)
+        {
+            var sweeps = new List<Sweep>();
+
+            using (var conn = new MySqlConnection(_database.GetConnectionString()))
+            {
+                var command = conn.CreateCommand();
+                command.CommandText = "sweeps_get_by_campaignUid";
+                command.CommandType = CommandType.StoredProcedure;
+                command.AddParameter(nameof(campaignUid), campaignUid);
+
+                await conn.OpenAsync();
+                using (var reader = await command.ExecuteReaderAsync())
+                {
+                    while (await reader.ReadAsync())
+                    {
+                        sweeps.Add(CreateSweepFrom(reader));
+                    }
+                }
+            }
+
+            return sweeps;
+        }
+
         public async Task<Sweep> GetAsync(Guid sweepUid)
         {
             var sweep = default(Sweep);
@@ -62,6 +89,23 @@ namespace Promo.Sweeps.Infrastructure
             }
 
             return sweep;
+        }
+
+        public async Task UpdateAsync(Guid sweepUid, Sweep sweep)
+        {
+            using var conn = new MySqlConnection(_database.GetConnectionString());
+            var command = conn.CreateCommand();
+            command.CommandText = "sweep_update";
+            command.CommandType = CommandType.StoredProcedure;
+            command
+                .AddParameter("sweepUid", sweep.SweepUid)
+                .AddParameter("sweepName", sweep.Name)
+                .AddParameter("startDate", sweep.StartDate)
+                .AddParameter("endDate", sweep.EndDate)
+                .AddParameter("drawDate", sweep.DrawDate.Value);
+
+            await conn.OpenAsync();
+            await command.ExecuteNonQueryAsync();
         }
 
         private Sweep CreateSweepFrom(MySqlDataReader reader)

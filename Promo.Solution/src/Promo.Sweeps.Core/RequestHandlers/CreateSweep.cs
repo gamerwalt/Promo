@@ -8,11 +8,11 @@ using System.Threading.Tasks;
 
 namespace Promo.Sweeps.Core.RequestHandlers
 {
-    public class CreateSweepRequest : IRequest<Sweep>
+    public class CreateSweep : IRequest<Sweep>
     {
         private NewSweepRequest request;
 
-        public CreateSweepRequest(NewSweepRequest request)
+        public CreateSweep(NewSweepRequest request)
         {
             this.request = request;
         }
@@ -23,7 +23,7 @@ namespace Promo.Sweeps.Core.RequestHandlers
         }
     }
 
-    public class CreateSweepRequestHandler : IRequestHandler<CreateSweepRequest, Sweep>
+    public class CreateSweepRequestHandler : IRequestHandler<CreateSweep, Sweep>
     {
         private readonly ISweepsRepository _repository;
 
@@ -32,7 +32,7 @@ namespace Promo.Sweeps.Core.RequestHandlers
             _repository = repository;
         }
 
-        public async Task<Sweep> Handle(CreateSweepRequest request, CancellationToken cancellationToken)
+        public async Task<Sweep> Handle(CreateSweep request, CancellationToken cancellationToken)
         {
             var sweepUid = Guid.NewGuid();
             await _repository.CreateAsync(new Sweep
