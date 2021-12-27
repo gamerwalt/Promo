@@ -88,9 +88,7 @@ namespace Promo.Campaign.API.Controllers.v1
             if (campaign == null)
                 return new NotFoundObjectResult(new { message = "Campaign not found." });
 
-            await _mediator.Send(new UpdateCampaignViaUidRequest(campaignUid, request));
-
-            campaign = await _mediator.Send(new GetCampaignByUidRequest(campaignUid));
+            campaign = await _mediator.Send(new UpdateCampaignViaUidRequest(campaignUid, request));
 
             return new OkObjectResult(campaign);
         }

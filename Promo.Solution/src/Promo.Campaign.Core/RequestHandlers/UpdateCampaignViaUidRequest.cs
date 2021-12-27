@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Promo.Campaign.Core.RequestHandlers
 {
-    public class UpdateCampaignViaUidRequest : IRequest
+    public class UpdateCampaignViaUidRequest : IRequest<Infrastructure.Models.Campaign>
     {
         private Guid _campaignUid;
         private UpdateCampaignRequest _request;
@@ -30,7 +30,7 @@ namespace Promo.Campaign.Core.RequestHandlers
         }
     }
 
-    public class UpdateCampaignViaUidRequestHandler : AsyncRequestHandler<UpdateCampaignViaUidRequest>
+    public class UpdateCampaignViaUidRequestHandler : IRequestHandler<UpdateCampaignViaUidRequest, Infrastructure.Models.Campaign>
     {
         private ICampaignRepository _repository;
         private IMediator _mediator;
@@ -41,7 +41,7 @@ namespace Promo.Campaign.Core.RequestHandlers
             _mediator = mediator;
         }
 
-        protected async override Task Handle(UpdateCampaignViaUidRequest request, CancellationToken cancellationToken)
+        public async Task<Infrastructure.Models.Campaign> Handle(UpdateCampaignViaUidRequest request, CancellationToken cancellationToken)
         {
             await _repository.UpdateCampaignAsync(request.CampaignUid, new Infrastructure.Models.Campaign
             {
@@ -49,10 +49,18 @@ namespace Promo.Campaign.Core.RequestHandlers
                 Description = request.Request.Description,
                 StartDate = request.Request.StartDate,
                 EndDate = request.Request.EndDate,
-                ActiveInd = request.Request.ActiveInd
+                ActiveInd = request.Request.ActiveInd,
+                CampaignType = new Infrastructure.Models.CampaignType
+                {
+                    CampaignTypeUid = request.Request.CampaignTypeUid
+                }
             });
 
+            var campaign = await _repository.GetCampaignByUidAsync(request.CampaignUid);
+
             await _mediator.Publish(new CampaignUpdated(request.CampaignUid));
+
+            return campaign;
         }
     }
 }

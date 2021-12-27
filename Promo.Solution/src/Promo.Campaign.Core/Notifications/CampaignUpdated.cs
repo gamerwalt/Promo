@@ -1,8 +1,9 @@
-﻿using System;
+﻿using MediatR;
+using System;
 
 namespace Promo.Campaign.Core.Notifications
 {
-    public class CampaignUpdated
+    public class CampaignUpdated : INotification
     {
         private Guid _campaignUid;
 

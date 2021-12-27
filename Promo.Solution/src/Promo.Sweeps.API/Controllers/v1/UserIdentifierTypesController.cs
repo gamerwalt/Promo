@@ -27,7 +27,7 @@ namespace Promo.Sweeps.API.Controllers.v1
         {
             var userIdentifierTypes = Enum.GetValues(typeof(UserIdentifierType))
                 .Cast<UserIdentifierType>().Select(c => c.ToString());
-            return Ok(userIdentifierTypes);
+            return new OkObjectResult(userIdentifierTypes);
         }
     }
 }

@@ -68,14 +68,6 @@ namespace Promo.Campaign.Infrastructure
 
         private CampaignType CreateCampaignTypeFrom(MySqlDataReader reader)
         {
-            var id = reader.GetInt32("campaign_type_id");
-            var uid = reader.GetGuid("campaign_type_uid");
-            var code = (CampaignTypeCode)Enum.Parse(typeof(CampaignTypeCode), reader.GetString("campaign_type_code"));
-            var name = reader.GetString("campaign_type_name");
-            var desc = reader.GetString("campaign_type_description");
-            var cDate = reader.GetDateTime("created_date");
-            var udate = GetNullableDateTimeValue(reader, "updated_date");
-
             return new CampaignType
             {
                 CampaignTypeId = reader.GetInt32("campaign_type_id"),

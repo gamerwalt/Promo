@@ -32,4 +32,11 @@
         Email,
         Phone
     }
+
+    public enum WatchTypeCode
+    {
+        Tweet,
+        Hashtag,
+        DM
+    }
 }

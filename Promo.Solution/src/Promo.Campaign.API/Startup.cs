@@ -1,10 +1,13 @@
+using FluentValidation.AspNetCore;
 using MediatR;
+using MediatR.Extensions.FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -15,8 +18,10 @@ using Promo.Clients.Internal;
 using Promo.Core;
 using Promo.Core.Authentication;
 using Promo.Core.Authentication.ConfigurationOptions;
+using Promo.Core.Exceptions;
 using Promo.Core.Models;
 using System;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Reflection;
@@ -50,14 +55,27 @@ namespace Promo.Campaign.API
 
             var domainAssembly = typeof(CreateCampaignRequest).GetTypeInfo().Assembly;
             services.AddMediatR(domainAssembly);
+            services.AddFluentValidation(new[] { domainAssembly });
 
             services.AddTransient<ICampaignTypesRepository, CampaignTypesRepository>();
             services.AddTransient<ICampaignRepository, CampaignRepository>();
 
             AddSweepsClient(services);
+            AddRulesClient(services);
             AddHrvsterServiceAuthenticationclient(services);
 
             AddGoogleServicesAuthentication(services);
+        }
+
+        private void AddRulesClient(IServiceCollection services)
+        {
+            var rulesBaseApi = Configuration["PromoRulesUrl"];
+
+            services.AddHttpClient<IRulesClient, RulesClient>(client =>
+            {
+                client.BaseAddress = new Uri(rulesBaseApi);
+                client.DefaultRequestHeaders.Add("Accept", "application/json");
+            });
         }
 
         private void AddHrvsterServiceAuthenticationclient(IServiceCollection services)
@@ -115,7 +133,7 @@ namespace Promo.Campaign.API
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory loggerFactory)
         {
             if (env.IsDevelopment())
             {
@@ -123,6 +141,10 @@ namespace Promo.Campaign.API
                 app.UseSwagger();
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Promo.Campaign.API v1"));
             }
+
+            app.ConfigureExceptionHandler(app.ApplicationServices.GetRequiredService<ILogger<Startup>>());
+
+            loggerFactory.AddFile(@"C:\Logs\log.txt");
 
             app.UseHttpsRedirection();
 

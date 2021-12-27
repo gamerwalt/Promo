@@ -100,7 +100,8 @@ namespace Promo.Campaign.Infrastructure
                 .AddParameter("campaignDescription", campaign.Description)
                 .AddParameter("startDate", campaign.StartDate)
                 .AddParameter("endDate", campaign.EndDate)
-                .AddParameter("activeInd", campaign.ActiveInd);
+                .AddParameter("activeInd", campaign.ActiveInd)
+                .AddParameter("campaignTypeUid", campaign.CampaignType?.CampaignTypeUid);
 
             await conn.OpenAsync();
             await command.ExecuteNonQueryAsync();

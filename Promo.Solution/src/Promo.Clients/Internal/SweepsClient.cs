@@ -19,13 +19,11 @@ namespace Promo.Clients.Internal
     public class SweepsClient : ISweepsClient
     {
         private readonly HttpClient _client;
-        private readonly IConfiguration _config;
         private readonly IServiceAuthenticate _serviceAuthenticate;
 
-        public SweepsClient(HttpClient client, IConfiguration config, IServiceAuthenticate serviceAuthenticate)
+        public SweepsClient(HttpClient client, IServiceAuthenticate serviceAuthenticate)
         {
             _client = client ?? throw new ArgumentNullException(nameof(client));
-            _config = config ?? throw new ArgumentNullException(nameof(config));
             _serviceAuthenticate = serviceAuthenticate ?? throw new ArgumentNullException(nameof(serviceAuthenticate));
         }
 

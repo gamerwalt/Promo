@@ -9,5 +9,6 @@ namespace Promo.Campaign.Core.Requests
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
         public bool ActiveInd { get; set; }
+        public Guid CampaignTypeUid { get; set; }
     }
 }
