@@ -66,32 +66,6 @@ namespace Promo.Campaign.API
             AddHrvsterServiceAuthenticationclient(services);
 
             AddGoogleServicesAuthentication(services);
-
-            AddTwitterClient(services);
-        }
-
-        private void AddTwitterClient(IServiceCollection services)
-        {
-            services.Configure<TwitterAccount>(Configuration);
-            services.Configure<TwitterAccount>(Configuration.GetSection(TwitterAccount.SectionName));
-            services.AddTransient(p => p.GetService<IOptions<TwitterAccount>>().Value);
-
-            services.AddTransient<ITwitterClient, TwitterClient>(c => GenerateTwitterClient(c));
-        }
-
-        private TwitterClient GenerateTwitterClient(IServiceProvider c)
-        {
-            var twitterAccount = c.GetService<TwitterAccount>();
-
-            var client = new TwitterClient(
-                twitterAccount.ConsumerKey, 
-                twitterAccount.ConsumerSecret, 
-                twitterAccount.AccessToken, 
-                twitterAccount.AccessTokenSecret
-            );
-            client.Config.RateLimitTrackerMode = RateLimitTrackerMode.TrackAndAwait;
-
-            return client;
         }
 
         private void AddRulesClient(IServiceCollection services)

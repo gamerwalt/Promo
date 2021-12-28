@@ -3,6 +3,7 @@ using Promo.Core;
 using Promo.Core.Extensions;
 using Promo.Rules.Infrastructure.Models;
 using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Threading.Tasks;
 
@@ -12,6 +13,8 @@ namespace Promo.Rules.Infrastructure
     {
         Task CreateRuleAsync(Models.Rule rule);
         Task<Models.Rule> GetAsync(Guid ruleUid);
+        Task<IEnumerable<Models.Rule>> GetUnAddedRulesAsync();
+        Task UpdateRuleAsAddedAsync(Guid ruleUid);
     }
 
     public class RulesRepository : IRulesRepository
@@ -60,6 +63,39 @@ namespace Promo.Rules.Infrastructure
             }
 
             return rule;
+        }
+
+        public async Task<IEnumerable<Models.Rule>> GetUnAddedRulesAsync()
+        {
+            var rules = new List<Models.Rule>();
+
+            using (var conn = new MySqlConnection(_database.GetConnectionString()))
+            {
+                var command = conn.CreateCommand();
+                command.CommandText = "rules_unadded_get";
+                command.CommandType = CommandType.StoredProcedure;
+
+                await conn.OpenAsync();
+                using var reader = await command.ExecuteReaderAsync();
+                while (await reader.ReadAsync())
+                {
+                    rules.Add(CreateRecordFrom(reader));
+                }
+            }
+
+            return rules;
+        }
+
+        public async Task UpdateRuleAsAddedAsync(Guid ruleUid)
+        {
+            using var conn = new MySqlConnection(_database.GetConnectionString());
+            var command = conn.CreateCommand();
+            command.CommandText = "rule_update_as_added";
+            command.CommandType = CommandType.StoredProcedure;
+            command.AddParameter("ruleUid", ruleUid);
+
+            await conn.OpenAsync();
+            await command.ExecuteNonQueryAsync();
         }
 
         private Models.Rule CreateRecordFrom(MySqlDataReader reader)

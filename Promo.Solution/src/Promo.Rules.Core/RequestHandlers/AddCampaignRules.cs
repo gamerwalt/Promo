@@ -1,12 +1,8 @@
 ﻿using MediatR;
-using Promo.Core;
 using Promo.Rules.Core.Notifications;
 using Promo.Rules.Infrastructure;
 using Promo.Rules.Infrastructure.Models;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -14,14 +10,14 @@ namespace Promo.Rules.Core.RequestHandlers
 {
     public class AddCampaignRules : IRequest<IEnumerable<Rule>>
     {
-        private IEnumerable<Promo.Core.Models.Rule> rules;
+        private IEnumerable<Rule> rules;
 
-        public AddCampaignRules(IEnumerable<Promo.Core.Models.Rule> rules)
+        public AddCampaignRules(IEnumerable<Rule> rules)
         {
             this.rules = rules;
         }
 
-        public IEnumerable<Promo.Core.Models.Rule> Rules
+        public IEnumerable<Rule> Rules
         {
             get { return rules; }
         }
@@ -42,14 +38,14 @@ namespace Promo.Rules.Core.RequestHandlers
         {
             var rules = new List<Rule>();
 
-            foreach(var rule in request.Rules)
+            foreach (var rule in request.Rules)
             {
                 await _repository.CreateRuleAsync(new Rule
                 {
                     CampaignUid = rule.CampaignUid,
                     RuleUid = rule.RuleUid,
                     ActiveInd = rule.ActiveInd,
-                    WatchTypeCode = (WatchTypeCode)Enum.Parse(typeof(WatchTypeCode), rule.WatchTypeCode),
+                    WatchTypeCode = rule.WatchTypeCode,
                     WatchValue = rule.WatchValue
                 });
 

@@ -1,0 +1,41 @@
+﻿using MediatR;
+using Promo.Rules.Infrastructure;
+using Promo.Rules.Infrastructure.Models;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
+
+namespace Promo.Rules.Core.RequestHandlers
+{
+    public class UpdateRuleAsAdded : IRequest<Rule>
+    {
+        private Guid ruleUid;
+
+        public UpdateRuleAsAdded(Guid ruleUid)
+        {
+            this.ruleUid = ruleUid;
+        }
+
+        public Guid RuleUid
+        {
+            get { return ruleUid; }
+        }
+    }
+
+    public class UpdateRuleAsAddedRequestHandler : IRequestHandler<UpdateRuleAsAdded, Rule>
+    {
+        private readonly IRulesRepository _repository;
+
+        public UpdateRuleAsAddedRequestHandler(IRulesRepository repository)
+        {
+            _repository = repository;
+        }
+
+        public async Task<Rule> Handle(UpdateRuleAsAdded request, CancellationToken cancellationToken)
+        {
+            await _repository.UpdateRuleAsAddedAsync(request.RuleUid);
+
+            return await _repository.GetAsync(request.RuleUid);
+        }
+    }
+}
