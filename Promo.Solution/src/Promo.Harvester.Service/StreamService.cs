@@ -5,7 +5,9 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Tweetinvi;
+using Tweetinvi.Events.V2;
 using Tweetinvi.Streaming;
+using Tweetinvi.Streaming.V2;
 
 namespace Promo.Harvester.Service
 {
@@ -21,6 +23,7 @@ namespace Promo.Harvester.Service
         private readonly IHarvesterService _harvesterService;
 
         private IFilteredStream currentStream;
+        private IFilteredStreamV2 newStream;
 
         public StreamService(
             ITwitterClient twitterClient,
@@ -46,7 +49,6 @@ namespace Promo.Harvester.Service
                     if (track.ActiveInd)
                     {
                         currentStream.AddTrack(track.WatchValue);
-                        await _rulesClient.UpdateRuleAsAddedAsync(track.RuleUid);
                     }
                 }
             }
@@ -59,7 +61,7 @@ namespace Promo.Harvester.Service
         private void CurrentStream_MatchingTweetReceived(object sender, Tweetinvi.Events.MatchedTweetReceivedEventArgs e)
         {
             System.Console.WriteLine(e.Json);
-            Task.Run(async () => await _harvesterService.AddAsync(e.Json)).Wait();
+            Task.Run(async () => await _harvesterService.SaveAsync(e.Json)).Wait();
         }
 
         private async Task FilterRunningCampaignsAsync(IEnumerable<Core.Models.Rule> tracksNeededToBeAdded)

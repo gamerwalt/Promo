@@ -126,7 +126,7 @@ namespace Promo.Clients.Internal
 
             var url = ServiceUrls.UpdateRuleAsAdded.Replace("{ruleUid}", ruleUid.ToString());
 
-            using (var requestMessage = new HttpRequestMessage(HttpMethod.Patch, $"{url}"))
+            using (var requestMessage = new HttpRequestMessage(HttpMethod.Post, $"{url}"))
             {
                 requestMessage.Content = new StringContent(content, Encoding.UTF8, "application/json");
                 requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", authModel.IdToken);

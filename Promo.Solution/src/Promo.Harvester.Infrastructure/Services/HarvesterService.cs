@@ -9,7 +9,7 @@ namespace Promo.Harvester.Infrastruture.Services
     //but the campaign service needs to know about this
     public interface IHarvesterService
     {
-        Task AddAsync(string json);
+        Task SaveAsync(string json);
     }
 
     public class HarvesterService : IHarvesterService
@@ -21,7 +21,7 @@ namespace Promo.Harvester.Infrastruture.Services
             _repository = repository;
         }
 
-        public async Task AddAsync(string json)
+        public async Task SaveAsync(string json)
         {
             await _repository.CreateHarvestedRecordAsync(json);
         }
