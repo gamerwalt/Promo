@@ -51,6 +51,7 @@ namespace Promo.Rules.API
             });
 
             services.AddTransient<IWatchTypeCampaignTypesRepository, WatchTypeCampaignTypesRepository>();
+            services.AddTransient<IRulesRepository, RulesRepository>();
         }
 
         private void AddGoogleServicesAuthentication(IServiceCollection services)

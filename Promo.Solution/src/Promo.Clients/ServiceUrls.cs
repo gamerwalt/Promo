@@ -6,7 +6,7 @@
 
 
         //Rules
-        public static string WatchTypeCodes = "v1/ruletypes";
+        public static string Rules = "v1/rules";
         public static string WatchTypeCampaignTypes = "v1/watchtypes";
     }
 }

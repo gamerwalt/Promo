@@ -1,9 +1,11 @@
 ﻿using FluentValidation;
 using MediatR;
+using Promo.Campaign.Core.Notifications;
 using Promo.Campaign.Infrastructure;
 using Promo.Campaign.Infrastructure.Models;
 using Promo.Clients.Internal;
 using Promo.Core;
+using Promo.Core.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -44,7 +46,7 @@ namespace Promo.Campaign.Core.RequestHandlers
         }
     }
 
-    public class AddCampaignRule : IRequest
+    public class AddCampaignRule : IRequest<IEnumerable<Rule>>
     {
         private Guid campaignUid;
         private CampaignRule rule;
@@ -66,11 +68,38 @@ namespace Promo.Campaign.Core.RequestHandlers
         }
     }
 
-    public class AddCampaignRuleHandler : IRequestHandler<AddCampaignRule>
+    public class AddCampaignRuleHandler : IRequestHandler<AddCampaignRule, IEnumerable<Rule>>
     {
-        public async Task<Unit> Handle(AddCampaignRule request, CancellationToken cancellationToken)
+        private readonly IRulesClient _rulesClient;
+        private readonly IMediator _mediator;
+
+        public AddCampaignRuleHandler(IRulesClient rulesClient, IMediator mediator)
         {
-            throw new NotImplementedException();
+            _rulesClient = rulesClient;
+            _mediator = mediator;
+        }
+
+        public async Task<IEnumerable<Rule>> Handle(AddCampaignRule request, CancellationToken cancellationToken)
+        {
+            var rules = new List<Rule>();
+
+            foreach(var property in request.CampaignRule.WatchProperties)
+            {
+                rules.Add(new Rule
+                {
+                    CampaignUid = request.CampaignUid,
+                    RuleUid = Guid.NewGuid(),
+                    WatchValue = property,
+                    ActiveInd = true,
+                    WatchTypeCode = request.CampaignRule.WatchTypeCode
+                });               
+            }
+
+            await _rulesClient.CreateCampaignRulesAsync(rules);
+
+            await _mediator.Publish(new RulesAdded(rules));
+
+            return rules;
         }
     }
 }

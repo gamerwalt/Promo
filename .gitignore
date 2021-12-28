@@ -363,3 +363,7 @@ MigrationBackup/
 FodyWeavers.xsd
 Promo.Solution/src/Promo.Email.Service/appsettings.json
 Promo.Solution/src/Promo.Web.API/appsettings.json
+Promo.Solution/src/Promo.Campaign.API/appsettings.json
+Promo.Solution/src/Promo.Harvester.Service/appsettings.json
+Promo.Solution/src/Promo.Harvester.Service/appsettings.json
+

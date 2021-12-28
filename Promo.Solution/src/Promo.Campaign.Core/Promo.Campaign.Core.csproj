@@ -13,6 +13,7 @@
     <ProjectReference Include="..\Promo.Campaign.Infrastructure\Promo.Campaign.Infrastructure.csproj" />
     <ProjectReference Include="..\Promo.Clients\Promo.Clients.csproj" />
     <ProjectReference Include="..\Promo.Core\Promo.Core.csproj" />
+    <ProjectReference Include="..\Promo.Rules.Infrastructure\Promo.Rules.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>
