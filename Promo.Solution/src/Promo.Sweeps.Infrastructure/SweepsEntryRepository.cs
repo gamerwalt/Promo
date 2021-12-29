@@ -12,6 +12,7 @@ namespace Promo.Sweeps.Infrastructure
     {
         Task CreateAsync(SweepEntry sweepEntry);
         Task<SweepEntry> GetAsync(Guid sweepEntryGuid);
+        Task CreateCampaignSweepsEntryAsync(CampaignSweepsEntry campaignSweepsEntry);
     }
 
     public class SweepsEntryRepository : ISweepsEntryRepository
@@ -32,6 +33,23 @@ namespace Promo.Sweeps.Infrastructure
             command
                 .AddParameter("sweepEntryUid", sweepEntry.SweepEntryUid)
                 .AddParameter("sweepUid", sweepEntry.Sweep.SweepUid)
+                .AddParameter("userIdentifier", sweepEntry.UserIdentifier)
+                .AddParameter("userIdentifierType", sweepEntry.UserIdentifierType.ToString())
+                .AddParameter("acceptedTerms", sweepEntry.AcceptedTerms);
+
+            await conn.OpenAsync();
+            await command.ExecuteNonQueryAsync();
+        }
+
+        public async Task CreateCampaignSweepsEntryAsync(CampaignSweepsEntry sweepEntry)
+        {
+            using var conn = new MySqlConnection(_database.GetConnectionString());
+            var command = conn.CreateCommand();
+            command.CommandText = "sweep_add_entry_via_campaign_uid";
+            command.CommandType = CommandType.StoredProcedure;
+            command
+                .AddParameter("sweepEntryUid", sweepEntry.SweepEntryUid)
+                .AddParameter("campaignUid", sweepEntry.CampaignUid)
                 .AddParameter("userIdentifier", sweepEntry.UserIdentifier)
                 .AddParameter("userIdentifierType", sweepEntry.UserIdentifierType.ToString())
                 .AddParameter("acceptedTerms", sweepEntry.AcceptedTerms);

@@ -50,7 +50,6 @@ namespace Promo.Campaign.API.Controllers.v1
         [Produces("application/json")]
         [ProducesResponseType((int)HttpStatusCode.OK, Type = typeof(List<Infrastructure.Models.Campaign>))]
         [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
-        [Authorize]
         public async Task<ActionResult<List<Infrastructure.Models.Campaign>>> GetAllAsync()
         {
             var accountUid = Guid.Parse(User.Claims.FirstOrDefault(c => c.Type.Equals("user_id", StringComparison.OrdinalIgnoreCase)).Value);
@@ -65,7 +64,6 @@ namespace Promo.Campaign.API.Controllers.v1
         [ProducesResponseType((int)HttpStatusCode.OK, Type = typeof(Infrastructure.Models.Campaign))]
         [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
-        [Authorize]
         public async Task<ActionResult<Infrastructure.Models.Campaign>> GetAsync([FromRoute] Guid campaignUid)
         {
             var campaign = await _mediator.Send(new GetCampaignByUidRequest(campaignUid));
@@ -81,6 +79,7 @@ namespace Promo.Campaign.API.Controllers.v1
         [ProducesResponseType((int)HttpStatusCode.OK, Type = typeof(Infrastructure.Models.Campaign))]
         [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
+        [Authorize]
         public async Task<ActionResult<Infrastructure.Models.Campaign>> UpdateAsync([FromRoute] Guid campaignUid, UpdateCampaignRequest request)
         {
             var campaign = await _mediator.Send(new GetCampaignByUidRequest(campaignUid));

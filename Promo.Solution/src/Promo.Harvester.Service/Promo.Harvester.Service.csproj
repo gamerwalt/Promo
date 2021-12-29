@@ -6,6 +6,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="MediatR" Version="9.0.0" />
+    <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="9.0.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="5.0.0" />
     <PackageReference Include="TweetinviAPI" Version="5.0.4" />
   </ItemGroup>
@@ -13,6 +15,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Promo.Clients\Promo.Clients.csproj" />
     <ProjectReference Include="..\Promo.Core\Promo.Core.csproj" />
+    <ProjectReference Include="..\Promo.Harvester.Core\Promo.Harvester.Core.csproj" />
     <ProjectReference Include="..\Promo.Harvester.Infrastructure\Promo.Harvester.Infrastructure.csproj" />
     <ProjectReference Include="..\Promo.Rules.Core\Promo.Rules.Core.csproj" />
   </ItemGroup>

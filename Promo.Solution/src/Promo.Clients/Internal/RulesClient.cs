@@ -5,10 +5,12 @@ using Promo.Core.Exceptions;
 using Promo.Core.Models;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
+using Tweetinvi.Models.Entities;
 
 namespace Promo.Clients.Internal
 {
@@ -16,8 +18,10 @@ namespace Promo.Clients.Internal
     {
         Task<IEnumerable<WatchTypeCampaignType>> GetWatchTypeCampaignTypesAsync();
         Task CreateCampaignRulesAsync(IEnumerable<Rule> rules);
-        Task<IEnumerable<Rule>> GetRulesNeededToBeWatchedAsync();
+        Task<IEnumerable<Rule>> GetHashTagRulesAsync();
         Task UpdateRuleAsAddedAsync(Guid ruleUid);
+        Task<List<Rule>> GetRulesForReceivedTweetAsync(List<IHashtagEntity> hashtags);
+        Task<Rule> GetRuleAsync(Guid ruleUid);
     }
 
     public class RulesClient : IRulesClient
@@ -80,13 +84,13 @@ namespace Promo.Clients.Internal
             return null;
         }
 
-        public async Task<IEnumerable<Rule>> GetRulesNeededToBeWatchedAsync()
+        public async Task<IEnumerable<Rule>> GetHashTagRulesAsync()
         {
             var authModel = await AuthenticateService();
 
             var result = new HttpResponseMessage();
 
-            using (var requestMessage = new HttpRequestMessage(HttpMethod.Get, $"{ServiceUrls.UnaddedRules}"))
+            using (var requestMessage = new HttpRequestMessage(HttpMethod.Get, $"{ServiceUrls.GetHashtagRules}"))
             {
                 requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", authModel.IdToken);
 
@@ -135,6 +139,68 @@ namespace Promo.Clients.Internal
                 if (result.StatusCode == System.Net.HttpStatusCode.Unauthorized)
                     throw new Exception(ExceptionMessages.UnauthroizedAccessToAPI);
             }
+        }
+
+        public async Task<List<Rule>> GetRulesForReceivedTweetAsync(List<IHashtagEntity> hashtags)
+        {
+            var authModel = await AuthenticateService();
+
+            var result = new HttpResponseMessage();
+            string content = JsonConvert.SerializeObject(hashtags.Select(c => c.Text),
+                new JsonSerializerSettings
+                {
+                    ContractResolver = new CamelCasePropertyNamesContractResolver()
+                }
+            );
+
+            using (var requestMessage = new HttpRequestMessage(HttpMethod.Get, ServiceUrls.GetRulesForHashtags))
+            {
+                requestMessage.Content = new StringContent(content, Encoding.UTF8, "application/json");
+                requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", authModel.IdToken);
+
+                result = await _client.SendAsync(requestMessage);
+                if (result.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+                    throw new Exception(ExceptionMessages.UnauthroizedAccessToAPI);
+
+                if (result.IsSuccessStatusCode)
+                {
+                    return JsonConvert.DeserializeObject<List<Rule>>(await result.Content.ReadAsStringAsync());
+                }
+            }
+
+            return null;
+        }
+
+        public async Task<Rule> GetRuleAsync(Guid ruleUid)
+        {
+            var authModel = await AuthenticateService();
+
+            var result = new HttpResponseMessage();
+            string content = JsonConvert.SerializeObject(ruleUid,
+                new JsonSerializerSettings
+                {
+                    ContractResolver = new CamelCasePropertyNamesContractResolver()
+                }
+            );
+
+            var url = ServiceUrls.GetRule.Replace("{ruleUid}", ruleUid.ToString());
+
+            using (var requestMessage = new HttpRequestMessage(HttpMethod.Get, url))
+            {
+                requestMessage.Content = new StringContent(content, Encoding.UTF8, "application/json");
+                requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", authModel.IdToken);
+
+                result = await _client.SendAsync(requestMessage);
+                if (result.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+                    throw new Exception(ExceptionMessages.UnauthroizedAccessToAPI);
+
+                if (result.IsSuccessStatusCode)
+                {
+                    return JsonConvert.DeserializeObject<Rule>(await result.Content.ReadAsStringAsync());
+                }
+            }
+
+            return null;
         }
     }
 }

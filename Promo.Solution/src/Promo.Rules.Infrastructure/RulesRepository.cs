@@ -13,8 +13,9 @@ namespace Promo.Rules.Infrastructure
     {
         Task CreateRuleAsync(Models.Rule rule);
         Task<Models.Rule> GetAsync(Guid ruleUid);
-        Task<IEnumerable<Models.Rule>> GetUnAddedRulesAsync();
+        Task<IEnumerable<Models.Rule>> GetRules(string watchTypeCode);
         Task UpdateRuleAsAddedAsync(Guid ruleUid);
+        Task<IEnumerable<Models.Rule>> GetRuleByHashTagAsync(string text);
     }
 
     public class RulesRepository : IRulesRepository
@@ -65,15 +66,38 @@ namespace Promo.Rules.Infrastructure
             return rule;
         }
 
-        public async Task<IEnumerable<Models.Rule>> GetUnAddedRulesAsync()
+        public async Task<IEnumerable<Models.Rule>> GetRuleByHashTagAsync(string text)
         {
             var rules = new List<Models.Rule>();
 
             using (var conn = new MySqlConnection(_database.GetConnectionString()))
             {
                 var command = conn.CreateCommand();
-                command.CommandText = "rules_unadded_get";
+                command.CommandText = "rules_get_by_watchvalue";
                 command.CommandType = CommandType.StoredProcedure;
+                command.AddParameter("watchValue", text);
+
+                await conn.OpenAsync();
+                using var reader = await command.ExecuteReaderAsync();
+                while (await reader.ReadAsync())
+                {
+                    rules.Add(CreateRecordFrom(reader));
+                }
+            }
+
+            return rules;
+        }
+
+        public async Task<IEnumerable<Models.Rule>> GetRules(string watchTypeCode)
+        {
+            var rules = new List<Models.Rule>();
+
+            using (var conn = new MySqlConnection(_database.GetConnectionString()))
+            {
+                var command = conn.CreateCommand();
+                command.CommandText = "rules_get_by_watch_type_code";
+                command.CommandType = CommandType.StoredProcedure;
+                command.AddParameter("watchTypeCode", watchTypeCode);
 
                 await conn.OpenAsync();
                 using var reader = await command.ExecuteReaderAsync();

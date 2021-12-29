@@ -1,3 +1,4 @@
+using MediatR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -6,12 +7,11 @@ using Promo.Clients.Internal;
 using Promo.Core;
 using Promo.Core.Authentication;
 using Promo.Core.Models;
+using Promo.Harvester.Core;
+using Promo.Harvester.Core.Services;
 using Promo.Harvester.Infrastructure;
-using Promo.Harvester.Infrastruture.Services;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using System.Reflection;
 using Tweetinvi;
 
 namespace Promo.Harvester.Service
@@ -33,13 +33,22 @@ namespace Promo.Harvester.Service
                     services.AddHostedService<HarvesterHostedService>();
                     services.AddTransient<IStreamService, StreamService>();
                     services.AddTransient<IHarvesterService, HarvesterService>();
-                    
+
+                    AddMediator(services);
 
                     AddRulesClient(services);
+                    AddCampaignsClient(services);
+                    AddSweepsClient(services);
                     AddTwitterClient(services);
                     AddHrvsterServiceAuthenticationclient(services);
                     AddDatabaseAndRepositories(services);
                 });
+
+        private static void AddMediator(IServiceCollection services)
+        {
+            var domainAssembly = typeof(ProcessReceivedTweetFromHashtagStream).GetTypeInfo().Assembly;
+            services.AddMediatR(domainAssembly);
+        }
 
         private static void AddDatabaseAndRepositories(IServiceCollection services)
         {
@@ -72,6 +81,28 @@ namespace Promo.Harvester.Service
             services.AddHttpClient<IRulesClient, RulesClient>(client =>
             {
                 client.BaseAddress = new Uri(rulesBaseApi);
+                client.DefaultRequestHeaders.Add("Accept", "application/json");
+            });
+        }
+
+        private static void AddSweepsClient(IServiceCollection services)
+        {
+            var sweepsBaseApi = Configuration["PromoSweepsUrl"];
+
+            services.AddHttpClient<ISweepsClient, SweepsClient>(client =>
+            {
+                client.BaseAddress = new Uri(sweepsBaseApi);
+                client.DefaultRequestHeaders.Add("Accept", "application/json");
+            });
+        }
+
+        private static void AddCampaignsClient(IServiceCollection services)
+        {
+            var campaignBaseApi = Configuration["PromoCampaignsUrl"];
+
+            services.AddHttpClient<ICampaignsClient, CampaignsClient>(client =>
+            {
+                client.BaseAddress = new Uri(campaignBaseApi);
                 client.DefaultRequestHeaders.Add("Accept", "application/json");
             });
         }

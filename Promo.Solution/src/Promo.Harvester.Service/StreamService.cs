@@ -1,11 +1,10 @@
 ﻿using Promo.Clients.Internal;
-using Promo.Harvester.Infrastruture.Services;
+using Promo.Harvester.Core.Services;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Tweetinvi;
-using Tweetinvi.Events.V2;
 using Tweetinvi.Streaming;
 using Tweetinvi.Streaming.V2;
 
@@ -39,12 +38,12 @@ namespace Promo.Harvester.Service
 
         public async Task StartStreamingAsync(CancellationToken token)
         {
-            var tracksNeededToBeAdded = await _rulesClient.GetRulesNeededToBeWatchedAsync();
-            await FilterRunningCampaignsAsync(tracksNeededToBeAdded);
+            var hashTagRules = await _rulesClient.GetHashTagRulesAsync();
+            await FilterRunningCampaignsAsync(hashTagRules);
 
-            if (tracksNeededToBeAdded.Count() > 0)
+            if (hashTagRules.Count() > 0)
             {
-                foreach (var track in tracksNeededToBeAdded)
+                foreach (var track in hashTagRules)
                 {
                     if (track.ActiveInd)
                     {
@@ -61,10 +60,10 @@ namespace Promo.Harvester.Service
         private void CurrentStream_MatchingTweetReceived(object sender, Tweetinvi.Events.MatchedTweetReceivedEventArgs e)
         {
             System.Console.WriteLine(e.Json);
-            Task.Run(async () => await _harvesterService.SaveAsync(e.Json)).Wait();
+            Task.Run(async () => await _harvesterService.SaveTweetReceivedAsync(e.Json, e.Tweet)).Wait();
         }
 
-        private async Task FilterRunningCampaignsAsync(IEnumerable<Core.Models.Rule> tracksNeededToBeAdded)
+        private async Task FilterRunningCampaignsAsync(IEnumerable<Promo.Core.Models.Rule> tracksNeededToBeAdded)
         {
             //campaign client of some sort that is able to tell is if a campaign is currently live or not
         }

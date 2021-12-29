@@ -14,6 +14,7 @@ namespace Promo.Clients.Internal
     public interface ISweepsClient
     {
         Task<bool> CreateSweepsForCampaignAsync(string campaignName, Guid campaignUid, DateTime startDate, DateTime endDate);
+        Task CreateSweepsEntryAsync(int entryCount, Guid campaignUid, string screenName, string userIdentifierType, bool acceptedTerms);
     }
 
     public class SweepsClient : ISweepsClient
@@ -45,6 +46,41 @@ namespace Promo.Clients.Internal
             }
 
             return result.IsSuccessStatusCode;
+        }
+
+        public async Task CreateSweepsEntryAsync(int entryCount, Guid campaignUid, string screenName, string userIdentifierType, bool acceptedTerms)
+        {
+            var authModel = await AuthenticateService();
+
+            var result = new HttpResponseMessage();
+            var content = GetSweepEntryContent(entryCount, campaignUid, screenName, userIdentifierType, acceptedTerms);
+            var url = ServiceUrls.CreateCampaignSweepsEntry.Replace("{campaignUid:Guid}", campaignUid.ToString());
+
+            using var requestMessage = new HttpRequestMessage(HttpMethod.Post, url);
+            requestMessage.Content = new StringContent(content, Encoding.UTF8, "application/json");
+            requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", authModel.IdToken);
+
+            result = await _client.SendAsync(requestMessage);
+            if (result.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+                throw new Exception(ExceptionMessages.UnauthroizedAccessToAPI);
+        }
+
+        private static string GetSweepEntryContent(int entryCount, Guid campaignUid, string userIdentifier, string userIdentifierType, bool acceptedTerms)
+        {
+            return JsonConvert.SerializeObject(
+                new
+                {
+                    entryCount,
+                    campaignUid,
+                    userIdentifier,
+                    userIdentifierType,
+                    acceptedTerms
+                },
+                new JsonSerializerSettings
+                {
+                    ContractResolver = new CamelCasePropertyNamesContractResolver()
+                }
+            );
         }
 
         private async Task<AuthenticationModel> AuthenticateService()
