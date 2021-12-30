@@ -63,7 +63,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Promo.Harvester.Core", "Pro
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Promo.Harvester.Infrastructure", "Promo.Harvester.Infrastructure\Promo.Harvester.Infrastructure.csproj", "{5850FC94-6CE2-4B0A-8A1C-F4ECCD78F4CC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Promo.Sweeps.Service", "Promo.Sweeps.Service\Promo.Sweeps.Service.csproj", "{90D8D580-19F7-4C8E-815C-048C3E607108}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Promo.Sweeps.Draw.Service", "Promo.Sweeps.Service\Promo.Sweeps.Draw.Service.csproj", "{90D8D580-19F7-4C8E-815C-048C3E607108}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
