@@ -41,7 +41,7 @@ namespace Promo.Harvester.Core.Services
             var tweetUid = Guid.NewGuid();
 
             //we should throw these into a queue
-            foreach (var rule in rules)
+            foreach (var rule in rules.Distinct())
             {
                 var harvestedUid = Guid.NewGuid();
                 await _repository.CreateHarvestedRecordAsync(harvestedUid, rule.RuleUid, json);
