@@ -55,6 +55,7 @@ namespace Promo.Harvester.Core.RequestHandlers
                     request.Campaign.CampaignUid, 
                     request.TweetReceived.Tweet.CreatedBy.ScreenName, 
                     request.TweetReceived.Tweet.CreatedBy.IdStr,
+                    request.TweetReceived.Tweet.IdStr,
                     UserIdentifierType.TwitterHandle.ToString()
                     )
                 );

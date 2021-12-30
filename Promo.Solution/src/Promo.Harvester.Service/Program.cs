@@ -13,6 +13,7 @@ using Promo.Harvester.Infrastructure;
 using System;
 using System.Reflection;
 using Tweetinvi;
+using Tweetinvi.Models;
 
 namespace Promo.Harvester.Service
 {
@@ -124,13 +125,13 @@ namespace Promo.Harvester.Service
         private static TwitterClient GenerateTwitterClient(IServiceProvider c)
         {
             var twitterAccount = c.GetService<TwitterAccount>();
+            var userCredentials = new TwitterCredentials(
+                twitterAccount.ConsumerKey, 
+                twitterAccount.ConsumerSecret, 
+                twitterAccount.AccessToken, 
+                twitterAccount.AccessTokenSecret);
 
-            var client = new TwitterClient(
-                twitterAccount.ConsumerKey,
-                twitterAccount.ConsumerSecret,
-                twitterAccount.AccessToken,
-                twitterAccount.AccessTokenSecret
-            );
+            var client = new TwitterClient(userCredentials);
             client.Config.RateLimitTrackerMode = RateLimitTrackerMode.TrackAndAwait;
 
             return client;

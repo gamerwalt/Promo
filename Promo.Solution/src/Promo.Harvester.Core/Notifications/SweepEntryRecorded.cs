@@ -1,5 +1,9 @@
 ﻿using MediatR;
 using System;
+using System.Threading;
+using System.Threading.Tasks;
+using Tweetinvi;
+using Tweetinvi.Parameters;
 
 namespace Promo.Harvester.Core.Notifications
 {
@@ -15,13 +19,15 @@ namespace Promo.Harvester.Core.Notifications
         private string screenName;
         private string userIdentifierType;
         private string tweetUserId;
+        private string tweetId;
 
-        public SweepEntryRecorded(Guid campaignUid, string screenName, string tweetUserId, string userIdentifierType)
+        public SweepEntryRecorded(Guid campaignUid, string screenName, string tweetUserId, string tweetId, string userIdentifierType)
         {
             this.campaignUid = campaignUid;
             this.screenName = screenName;
             this.userIdentifierType = userIdentifierType;
             this.tweetUserId = tweetUserId;
+            this.tweetId = tweetId;
         }
 
         public Guid CampaignUid
@@ -42,6 +48,34 @@ namespace Promo.Harvester.Core.Notifications
         public string TweetUserId
         {
             get { return tweetUserId; }
+        }
+
+        public string TweetId
+        {
+            get { return tweetId; }
+        }
+    }
+
+    public class SendNotificationToUser : INotificationHandler<SweepEntryRecorded>
+    {
+        private readonly ITwitterClient _twitterClient;
+
+        public SendNotificationToUser(ITwitterClient twitterClient)
+        {
+            _twitterClient = twitterClient;
+        }
+
+        public async Task Handle(SweepEntryRecorded notification, CancellationToken cancellationToken)
+        {
+            
+            var userId = notification.TweetUserId;
+            var tweetId = notification.TweetId;
+
+            var tweet = await _twitterClient.Tweets.GetTweetAsync(long.Parse(tweetId));
+
+            var text = $"@{tweet.CreatedBy} You just got entered into a sweepstakes entry to win (Prize details will be placed here :)).";
+
+            await _twitterClient.Tweets.PublishTweetAsync(new PublishTweetParameters (text){ InReplyToTweet = tweet });
         }
     }
 }

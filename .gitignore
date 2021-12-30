@@ -369,3 +369,5 @@ Promo.Solution/src/Promo.Rules.API/appsettings.json
 Promo.Solution/src/Promo.Sweeps.API/appsettings.json
 Promo.Solution/src/Promo.Emails.API/appsettings.json
 Promo.Solution/src/Promo.Membership.Service/appsettings.json
+Promo.Solution/src/Promo.Sweeps.Service/appsettings.json
+Promo.Solution/src/Promo.Sweeps.Service/appsettings.Development.json

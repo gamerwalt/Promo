@@ -63,6 +63,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Promo.Harvester.Core", "Pro
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Promo.Harvester.Infrastructure", "Promo.Harvester.Infrastructure\Promo.Harvester.Infrastructure.csproj", "{5850FC94-6CE2-4B0A-8A1C-F4ECCD78F4CC}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Promo.Sweeps.Service", "Promo.Sweeps.Service\Promo.Sweeps.Service.csproj", "{90D8D580-19F7-4C8E-815C-048C3E607108}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -157,6 +159,10 @@ Global
 		{5850FC94-6CE2-4B0A-8A1C-F4ECCD78F4CC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5850FC94-6CE2-4B0A-8A1C-F4ECCD78F4CC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5850FC94-6CE2-4B0A-8A1C-F4ECCD78F4CC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{90D8D580-19F7-4C8E-815C-048C3E607108}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{90D8D580-19F7-4C8E-815C-048C3E607108}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{90D8D580-19F7-4C8E-815C-048C3E607108}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{90D8D580-19F7-4C8E-815C-048C3E607108}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -190,6 +196,7 @@ Global
 		{A03EB414-413A-426A-A0E5-14C40F73C27D} = {8F542792-CDF6-458D-A451-3708C1D088C9}
 		{25A70D18-C41E-4559-8E9C-0EAF2A04F400} = {8F542792-CDF6-458D-A451-3708C1D088C9}
 		{5850FC94-6CE2-4B0A-8A1C-F4ECCD78F4CC} = {8F542792-CDF6-458D-A451-3708C1D088C9}
+		{90D8D580-19F7-4C8E-815C-048C3E607108} = {08EA081E-D1EA-43F5-BBC0-250F3943163E}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {94B46B7F-1545-465E-863A-AAD0C58A8C0F}
