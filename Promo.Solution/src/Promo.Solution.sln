@@ -23,47 +23,85 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Membership", "Membership", 
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Sweeps", "Sweeps", "{08EA081E-D1EA-43F5-BBC0-250F3943163E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Promo.Membership.Core", "Promo.Membership.Core\Promo.Membership.Core.csproj", "{3771019C-AB89-40F6-8003-54D34362FD57}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Promo.Membership.Core", "Promo.Membership.Core\Promo.Membership.Core.csproj", "{3771019C-AB89-40F6-8003-54D34362FD57}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Promo.Membership.Infrastructure", "Promo.Membership.Infrastructure\Promo.Membership.Infrastructure.csproj", "{7580042D-127B-49FF-9C2F-2A3F92262ACD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Promo.Membership.Infrastructure", "Promo.Membership.Infrastructure\Promo.Membership.Infrastructure.csproj", "{7580042D-127B-49FF-9C2F-2A3F92262ACD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Promo.Clients", "Promo.Clients\Promo.Clients.csproj", "{A00BC361-8E90-4D30-87F2-A33CBBEB34D3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Promo.Clients", "Promo.Clients\Promo.Clients.csproj", "{A00BC361-8E90-4D30-87F2-A33CBBEB34D3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Promo.Campaign.Core", "Promo.Campaign.Core\Promo.Campaign.Core.csproj", "{D46821FE-186F-4DA4-9E14-E5824462323E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Promo.Campaign.Core", "Promo.Campaign.Core\Promo.Campaign.Core.csproj", "{D46821FE-186F-4DA4-9E14-E5824462323E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Promo.Campaign.Infrastructure", "Promo.Campaign.Infrastructure\Promo.Campaign.Infrastructure.csproj", "{B8E47891-EC18-4B9F-B0EB-085946F1EDD2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Promo.Campaign.Infrastructure", "Promo.Campaign.Infrastructure\Promo.Campaign.Infrastructure.csproj", "{B8E47891-EC18-4B9F-B0EB-085946F1EDD2}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Emails", "Emails", "{4D9F09C1-869D-4B05-AB15-590B71E80875}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Promo.Emails.API", "Promo.Emails.API\Promo.Emails.API.csproj", "{714D96D0-5659-4D58-B042-74DD5CB75F2F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Promo.Emails.API", "Promo.Emails.API\Promo.Emails.API.csproj", "{714D96D0-5659-4D58-B042-74DD5CB75F2F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Promo.Sweeps.Infrastructure", "Promo.Sweeps.Infrastructure\Promo.Sweeps.Infrastructure.csproj", "{04BEADBA-411A-4000-90B4-B50A8A109130}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Promo.Sweeps.Infrastructure", "Promo.Sweeps.Infrastructure\Promo.Sweeps.Infrastructure.csproj", "{04BEADBA-411A-4000-90B4-B50A8A109130}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Promo.Sweeps.Core", "Promo.Sweeps.Core\Promo.Sweeps.Core.csproj", "{FC402F9A-A88C-4C1C-9416-8E5FE39186FC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Promo.Sweeps.Core", "Promo.Sweeps.Core\Promo.Sweeps.Core.csproj", "{FC402F9A-A88C-4C1C-9416-8E5FE39186FC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Promo.Emails.Core", "Promo.Emails.Core\Promo.Emails.Core.csproj", "{E2CE7E0C-1BB0-4C75-AEFF-7F7C99476F7E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Promo.Emails.Core", "Promo.Emails.Core\Promo.Emails.Core.csproj", "{E2CE7E0C-1BB0-4C75-AEFF-7F7C99476F7E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Promo.Emails.Infrastructure", "Promo.Emails.Infrastructure\Promo.Emails.Infrastructure.csproj", "{77AD790F-389A-4A30-B3FD-54D7A4BBB6DB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Promo.Emails.Infrastructure", "Promo.Emails.Infrastructure\Promo.Emails.Infrastructure.csproj", "{77AD790F-389A-4A30-B3FD-54D7A4BBB6DB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Promo.Membership.Service", "Promo.Membership.Service\Promo.Membership.Service.csproj", "{C0AD7F81-31F1-468F-BB58-275E7FCCDBB5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Promo.Membership.Service", "Promo.Membership.Service\Promo.Membership.Service.csproj", "{C0AD7F81-31F1-468F-BB58-275E7FCCDBB5}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Rules", "Rules", "{CD7A391F-189A-4AF8-B033-73690CEDBFCA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Promo.Rules.API", "Promo.Rules.API\Promo.Rules.API.csproj", "{DEB1A878-6DD1-4A65-840D-45D8A4C07150}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Promo.Rules.API", "Promo.Rules.API\Promo.Rules.API.csproj", "{DEB1A878-6DD1-4A65-840D-45D8A4C07150}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Promo.Rules.Core", "Promo.Rules.Core\Promo.Rules.Core.csproj", "{81C01B6C-EA19-4CC2-B692-8C2C94AEC916}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Promo.Rules.Core", "Promo.Rules.Core\Promo.Rules.Core.csproj", "{81C01B6C-EA19-4CC2-B692-8C2C94AEC916}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Promo.Rules.Infrastructure", "Promo.Rules.Infrastructure\Promo.Rules.Infrastructure.csproj", "{0CE83CF8-A350-4450-902F-1E1E85560E48}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Promo.Rules.Infrastructure", "Promo.Rules.Infrastructure\Promo.Rules.Infrastructure.csproj", "{0CE83CF8-A350-4450-902F-1E1E85560E48}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Harvester", "Harvester", "{8F542792-CDF6-458D-A451-3708C1D088C9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Promo.Harvester.Service", "Promo.Harvester.Service\Promo.Harvester.Service.csproj", "{A03EB414-413A-426A-A0E5-14C40F73C27D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Promo.Harvester.Service", "Promo.Harvester.Service\Promo.Harvester.Service.csproj", "{A03EB414-413A-426A-A0E5-14C40F73C27D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Promo.Harvester.Core", "Promo.Harvester.Core\Promo.Harvester.Core.csproj", "{25A70D18-C41E-4559-8E9C-0EAF2A04F400}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Promo.Harvester.Core", "Promo.Harvester.Core\Promo.Harvester.Core.csproj", "{25A70D18-C41E-4559-8E9C-0EAF2A04F400}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Promo.Harvester.Infrastructure", "Promo.Harvester.Infrastructure\Promo.Harvester.Infrastructure.csproj", "{5850FC94-6CE2-4B0A-8A1C-F4ECCD78F4CC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Promo.Harvester.Infrastructure", "Promo.Harvester.Infrastructure\Promo.Harvester.Infrastructure.csproj", "{5850FC94-6CE2-4B0A-8A1C-F4ECCD78F4CC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Promo.Sweeps.Draw.Service", "Promo.Sweeps.Service\Promo.Sweeps.Draw.Service.csproj", "{90D8D580-19F7-4C8E-815C-048C3E607108}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Promo.Sweeps.Draw.Service", "Promo.Sweeps.Service\Promo.Sweeps.Draw.Service.csproj", "{90D8D580-19F7-4C8E-815C-048C3E607108}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{B4B41DAC-85D4-429B-9139-586080A9FAEB}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "mysql-scripts", "mysql-scripts", "{353ED1C8-F630-4B3B-8BD0-1F2DCCFFE0A0}"
+	ProjectSection(SolutionItems) = preProject
+		Promo.Campaign.Infrastructure\campaign_types.sql = Promo.Campaign.Infrastructure\campaign_types.sql
+		promo.campaign.sql = promo.campaign.sql
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "mysql-scripts", "mysql-scripts", "{DDF190BD-1B3D-4670-B2DC-0690EB238EC8}"
+	ProjectSection(SolutionItems) = preProject
+		promo.email.sql = promo.email.sql
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "mysql-scripts", "mysql-scripts", "{89C4B0CA-72E7-4A27-8240-6EBB63C427C9}"
+	ProjectSection(SolutionItems) = preProject
+		promo.harvester.sql = promo.harvester.sql
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "mysql-scripts", "mysql-scripts", "{2958C22C-11FC-4643-9C16-2972B3ACB4A9}"
+	ProjectSection(SolutionItems) = preProject
+		promo.membership.sql = promo.membership.sql
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "mysql-scripts", "mysql-scripts", "{BC428908-6C40-4618-AAEE-851B67BAE812}"
+	ProjectSection(SolutionItems) = preProject
+		promo.rules.sql = promo.rules.sql
+		C:\Users\Gamer\OneDrive\Documents\watch_type_campaign_types.csv = C:\Users\Gamer\OneDrive\Documents\watch_type_campaign_types.csv
+		C:\Users\Gamer\OneDrive\Documents\watch_types.csv = C:\Users\Gamer\OneDrive\Documents\watch_types.csv
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "mysql-scripts", "mysql-scripts", "{7F56C758-F831-4018-AA13-4A5FA7B4ED03}"
+	ProjectSection(SolutionItems) = preProject
+		promo.sweeps.sql = promo.sweeps.sql
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -197,6 +235,12 @@ Global
 		{25A70D18-C41E-4559-8E9C-0EAF2A04F400} = {8F542792-CDF6-458D-A451-3708C1D088C9}
 		{5850FC94-6CE2-4B0A-8A1C-F4ECCD78F4CC} = {8F542792-CDF6-458D-A451-3708C1D088C9}
 		{90D8D580-19F7-4C8E-815C-048C3E607108} = {08EA081E-D1EA-43F5-BBC0-250F3943163E}
+		{353ED1C8-F630-4B3B-8BD0-1F2DCCFFE0A0} = {A20CFF79-75DC-4DF7-916A-E8754E79A6EF}
+		{DDF190BD-1B3D-4670-B2DC-0690EB238EC8} = {4D9F09C1-869D-4B05-AB15-590B71E80875}
+		{89C4B0CA-72E7-4A27-8240-6EBB63C427C9} = {8F542792-CDF6-458D-A451-3708C1D088C9}
+		{2958C22C-11FC-4643-9C16-2972B3ACB4A9} = {59AC14F3-E99A-4A32-B877-D114711D1FC0}
+		{BC428908-6C40-4618-AAEE-851B67BAE812} = {CD7A391F-189A-4AF8-B033-73690CEDBFCA}
+		{7F56C758-F831-4018-AA13-4A5FA7B4ED03} = {08EA081E-D1EA-43F5-BBC0-250F3943163E}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {94B46B7F-1545-465E-863A-AAD0C58A8C0F}
