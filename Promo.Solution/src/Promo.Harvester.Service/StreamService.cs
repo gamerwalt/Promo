@@ -22,10 +22,9 @@ namespace Promo.Harvester.Service
         private readonly IHarvesterService _harvesterService;
 
         private IFilteredStream currentStream;
-        private IFilteredStreamV2 newStream;
 
         public StreamService(
-            ITwitterClient twitterClient,
+			ITwitterClient twitterClient,
             IRulesClient rulesClient,
             IHarvesterService harvesterService)
         {
@@ -65,7 +64,7 @@ namespace Promo.Harvester.Service
 
         private async Task FilterRunningCampaignsAsync(IEnumerable<Promo.Core.Models.Rule> tracksNeededToBeAdded)
         {
-            //campaign client of some sort that is able to tell is if a campaign is currently live or not
+            
         }
     }
 }

@@ -6,11 +6,11 @@
         public static string Sweeps = "v1/sweeps";
 
         //Campaign Sweeps
-        public static string CreateCampaignSweepsEntry = "v1/campaign/{campaignUid:Guid}/sweeps";
+        public static string CreateCampaignSweepsEntry = "v1/campaign/{campaignUid}/sweeps";
+		public static string GetCampaignSweep = "v1/campaign/{campaignUid}/sweeps";
 
-
-        //Rules
-        public static string Rules = "v1/rules";
+		//Rules
+		public static string Rules = "v1/rules";
         public static string GetRule = "v1/rule/{ruleUid}";
         public static string GetRulesForHashtags = "v1/rules/hashtags";
         public static string GetHashtagRules = "v1/rules/Hashtag";
