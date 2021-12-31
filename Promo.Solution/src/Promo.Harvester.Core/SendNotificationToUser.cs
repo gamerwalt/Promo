@@ -20,7 +20,7 @@ namespace Promo.Harvester.Core
 		{
 			var tweet = await _twitterClient.Tweets.GetTweetAsync(long.Parse(notification.TweetId));
 
-			var text = $"@{tweet.CreatedBy} You just got entered into a sweepstakes entry to win (Prize details will be placed here :)).";
+			var text = $"@{tweet.CreatedBy} You just got entered into a sweepstakes entry to win...";
 
 			await _twitterClient.Tweets.PublishTweetAsync(new PublishTweetParameters(text) { InReplyToTweet = tweet });
 		}
