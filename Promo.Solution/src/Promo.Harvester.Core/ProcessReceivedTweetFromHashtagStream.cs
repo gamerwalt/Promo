@@ -43,7 +43,9 @@ namespace Promo.Harvester.Core
             var campaign = await GetCampaignAsync(notification.Rule.CampaignUid);
 			var sweeps = await GetCampaignSweepsAsync(notification.Rule.CampaignUid);
 
-			if (campaign == null || sweeps.FirstOrDefault() == null)
+			var sweepStakesToEnter = sweeps.FirstOrDefault(c => notification.Rule.SweepUid.Equals(c.SweepUid));
+
+			if (campaign == null || sweepStakesToEnter == null)
 				throw new Exception("Campaign or Sweeps is null");
 
             switch (campaign.CampaignType.CampaignTypeCode)
@@ -51,7 +53,7 @@ namespace Promo.Harvester.Core
                 case CampaignTypeCode.AutoAll:
                     break;
 				case CampaignTypeCode.AutoEnterSweepsFromHashtag:
-					await EnterSweepsAsync(notification, campaign, sweeps.FirstOrDefault());
+					await EnterSweepsAsync(notification, campaign, sweepStakesToEnter);
 					break;
 				case CampaignTypeCode.AutoEnterSweepsFromTweet:
                     break;

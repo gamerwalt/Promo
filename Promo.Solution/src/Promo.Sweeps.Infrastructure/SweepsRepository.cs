@@ -37,7 +37,8 @@ namespace Promo.Sweeps.Infrastructure
                 .AddParameter("campaignUid", sweep.CampaignUid)
                 .AddParameter("sweepName", sweep.Name)
                 .AddParameter("startDate", sweep.StartDate)
-                .AddParameter("endDate", sweep.EndDate);
+                .AddParameter("endDate", sweep.EndDate)
+				.AddParameter("drawDate", sweep.DrawDate);
 
             await conn.OpenAsync();
             await command.ExecuteNonQueryAsync();

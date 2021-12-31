@@ -46,7 +46,8 @@ namespace Promo.Rules.Core.RequestHandlers
                     RuleUid = rule.RuleUid,
                     ActiveInd = rule.ActiveInd,
                     WatchTypeCode = rule.WatchTypeCode,
-                    WatchValue = rule.WatchValue
+                    WatchValue = rule.WatchValue,
+					SweepUid = rule.SweepUid
                 });
 
                 rules.Add(await _repository.GetAsync(rule.RuleUid));

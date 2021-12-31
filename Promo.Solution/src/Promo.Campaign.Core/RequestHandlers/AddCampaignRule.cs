@@ -9,97 +9,105 @@ using Promo.Core.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Promo.Campaign.Core.RequestHandlers
 {
-    public class AddCampaignRuleValidator : AbstractValidator<AddCampaignRule>
-    {
-        private readonly ICampaignRepository _campaignRepository;
-        private readonly IRulesClient _rulesClient;
+	public class AddCampaignRuleValidator : AbstractValidator<AddCampaignRule>
+	{
+		private readonly ICampaignRepository _campaignRepository;
+		private readonly IRulesClient _rulesClient;
 
-        public AddCampaignRuleValidator(ICampaignRepository campaignRepository, IRulesClient rulesClient)
-        {
-            _campaignRepository = campaignRepository;
-            _rulesClient = rulesClient;
+		public AddCampaignRuleValidator(ICampaignRepository campaignRepository, IRulesClient rulesClient)
+		{
+			_campaignRepository = campaignRepository;
+			_rulesClient = rulesClient;
 
-            RuleFor(x => x.CampaignUid).NotEmpty().NotNull().WithMessage("Please supply a valid campaign uid");
-            RuleFor(x => x.CampaignRule).Must(x => RuleShouldHaveAValidWatchTypeCode(x)).WithMessage("Invalid watch type code.");
-            
-            RuleFor(x => x).MustAsync(async (x, cancellation) =>
-            {
-                var watchTypeCode = (WatchTypeCode)Enum.Parse(typeof(WatchTypeCode), x.CampaignRule.WatchTypeCode);
-                var watchTypeCampaignTypes = await _rulesClient.GetWatchTypeCampaignTypesAsync();
-                var campaign = await _campaignRepository.GetCampaignByUidAsync(x.CampaignUid);
+			RuleFor(x => x.CampaignUid).NotEmpty().NotNull().WithMessage("Please supply a valid campaign uid");
+			RuleFor(x => x.CampaignRule).Must(x => RuleShouldHaveAValidWatchTypeCode(x)).WithMessage("Invalid watch type code.");
+			RuleFor(x => x.SweepUid).NotEmpty().NotNull().WithMessage("Please supply a valid sweep uid");
 
-                var watchTypeCampaigns = watchTypeCampaignTypes.Where(c => c.CampaignTypeUid == campaign.CampaignType.CampaignTypeUid);
-                
-                return watchTypeCampaigns.Any(c => c.WatchTypeCode.Equals(watchTypeCode.ToString()));
-            }).WithMessage("Your watch type does not match the campaign type.");
-        }
+			RuleFor(x => x).MustAsync(async (x, cancellation) =>
+			{
+				var watchTypeCode = (WatchTypeCode)Enum.Parse(typeof(WatchTypeCode), x.CampaignRule.WatchTypeCode);
+				var watchTypeCampaignTypes = await _rulesClient.GetWatchTypeCampaignTypesAsync();
+				var campaign = await _campaignRepository.GetCampaignByUidAsync(x.CampaignUid);
 
-        private bool RuleShouldHaveAValidWatchTypeCode(CampaignRule campaignRule)
-        {
-            return Enum.TryParse(typeof(WatchTypeCode), campaignRule.WatchTypeCode, out var watchTypeCode);
-        }
-    }
+				var watchTypeCampaigns = watchTypeCampaignTypes.Where(c => c.CampaignTypeUid == campaign.CampaignType.CampaignTypeUid);
 
-    public class AddCampaignRule : IRequest<IEnumerable<Rule>>
-    {
-        private Guid campaignUid;
-        private CampaignRule rule;
+				return watchTypeCampaigns.Any(c => c.WatchTypeCode.Equals(watchTypeCode.ToString()));
+			}).WithMessage("Your watch type does not match the campaign type.");
+		}
 
-        public AddCampaignRule(Guid campaignUid, CampaignRule rule)
-        {
-            this.campaignUid = campaignUid;
-            this.rule = rule;
-        }
+		private bool RuleShouldHaveAValidWatchTypeCode(CampaignRule campaignRule)
+		{
+			return Enum.TryParse(typeof(WatchTypeCode), campaignRule.WatchTypeCode, out var watchTypeCode);
+		}
+	}
 
-        public Guid CampaignUid
-        {
-            get { return campaignUid; }
-        }
+	public class AddCampaignRule : IRequest<IEnumerable<Rule>>
+	{
+		private Guid campaignUid;
+		private Guid sweepUid;
+		private CampaignRule rule;
 
-        public CampaignRule CampaignRule
-        {
-            get { return rule; }
-        }
-    }
+		public AddCampaignRule(Guid campaignUid, Guid sweepUid, CampaignRule rule)
+		{
+			this.sweepUid = sweepUid;
+			this.campaignUid = campaignUid;
+			this.rule = rule;
+		}
 
-    public class AddCampaignRuleHandler : IRequestHandler<AddCampaignRule, IEnumerable<Rule>>
-    {
-        private readonly IRulesClient _rulesClient;
-        private readonly IMediator _mediator;
+		public Guid CampaignUid
+		{
+			get { return campaignUid; }
+		}
 
-        public AddCampaignRuleHandler(IRulesClient rulesClient, IMediator mediator)
-        {
-            _rulesClient = rulesClient;
-            _mediator = mediator;
-        }
+		public Guid SweepUid
+		{
+			get { return sweepUid; }
+		}
 
-        public async Task<IEnumerable<Rule>> Handle(AddCampaignRule request, CancellationToken cancellationToken)
-        {
-            var rules = new List<Rule>();
+		public CampaignRule CampaignRule
+		{
+			get { return rule; }
+		}
+	}
 
-            foreach(var property in request.CampaignRule.WatchProperties)
-            {
-                rules.Add(new Rule
-                {
-                    CampaignUid = request.CampaignUid,
-                    RuleUid = Guid.NewGuid(),
-                    WatchValue = property,
-                    ActiveInd = true,
-                    WatchTypeCode = request.CampaignRule.WatchTypeCode
-                });               
-            }
+	public class AddCampaignRuleHandler : IRequestHandler<AddCampaignRule, IEnumerable<Rule>>
+	{
+		private readonly IRulesClient _rulesClient;
+		private readonly IMediator _mediator;
 
-            await _rulesClient.CreateCampaignRulesAsync(rules);
+		public AddCampaignRuleHandler(IRulesClient rulesClient, IMediator mediator)
+		{
+			_rulesClient = rulesClient;
+			_mediator = mediator;
+		}
 
-            await _mediator.Publish(new RulesAdded(rules));
+		public async Task<IEnumerable<Rule>> Handle(AddCampaignRule request, CancellationToken cancellationToken)
+		{
+			var rules = new List<Rule>();
 
-            return rules;
-        }
-    }
+			foreach (var property in request.CampaignRule.WatchProperties)
+			{
+				rules.Add(new Rule
+				{
+					CampaignUid = request.CampaignUid,
+					SweepUid = request.SweepUid,
+					RuleUid = Guid.NewGuid(),
+					WatchValue = property,
+					ActiveInd = true,
+					WatchTypeCode = request.CampaignRule.WatchTypeCode
+				});
+			}
+
+			await _rulesClient.CreateCampaignRulesAsync(rules);
+
+			await _mediator.Publish(new RulesAdded(rules));
+
+			return rules;
+		}
+	}
 }

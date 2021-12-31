@@ -92,7 +92,7 @@ BEGIN
         acceptedTerms,
         CURRENT_TIMESTAMP();
 
-CREATE PROCEDURE 'sweep_create'(IN sweepUid VARCHAR(50), IN campaignUid VARCHAR(50), IN sweepName VARCHAR(100), IN startDate DATETIME, IN endDate DATETIME)
+CREATE PROCEDURE `sweep_create`(IN sweepUid VARCHAR(50), IN campaignUid VARCHAR(50), IN sweepName VARCHAR(100), IN startDate DATETIME, IN endDate DATETIME, IN drawDate DATETIME)
 BEGIN
 	INSERT INTO sweep
 	(
@@ -101,6 +101,7 @@ BEGIN
         sweep_name,
         start_date,
         end_date,
+        draw_date,
         created_date
     )
     SELECT
@@ -109,7 +110,9 @@ BEGIN
         sweepName,
         startDate,
         endDate,
+        drawDate,
 		CURRENT_TIMESTAMP();
+END
 
 CREATE PROCEDURE 'sweep_entry_get_by_uid'(IN sweepEntryGuid VARCHAR(50))
 BEGIN

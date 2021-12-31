@@ -23,8 +23,7 @@ namespace Promo.Harvester.Service
 
         private IFilteredStream currentStream;
 
-        public StreamService(
-			ITwitterClient twitterClient,
+        public StreamService(ITwitterClient twitterClient,
             IRulesClient rulesClient,
             IHarvesterService harvesterService)
         {
@@ -38,15 +37,14 @@ namespace Promo.Harvester.Service
         public async Task StartStreamingAsync(CancellationToken token)
         {
             var hashTagRules = await _rulesClient.GetHashTagRulesAsync();
-            await FilterRunningCampaignsAsync(hashTagRules);
 
-            if (hashTagRules.Count() > 0)
+            if (hashTagRules.Any())
             {
-                foreach (var track in hashTagRules)
+                foreach (var rule in hashTagRules)
                 {
-                    if (track.ActiveInd)
+                    if (rule.ActiveInd)
                     {
-                        currentStream.AddTrack(track.WatchValue);
+                        currentStream.AddTrack(rule.WatchValue);
                     }
                 }
             }
@@ -60,11 +58,6 @@ namespace Promo.Harvester.Service
         {
             System.Console.WriteLine(e.Json);
             Task.Run(async () => await _harvesterService.SaveTweetReceivedAsync(e.Json, e.Tweet)).Wait();
-        }
-
-        private async Task FilterRunningCampaignsAsync(IEnumerable<Promo.Core.Models.Rule> tracksNeededToBeAdded)
-        {
-            
         }
     }
 }

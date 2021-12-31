@@ -8,6 +8,7 @@ namespace Promo.Rules.Infrastructure.Models
         public int RuleId { get; set; }
         public Guid RuleUid { get; set; }
         public Guid CampaignUid { get; set; }
+		public Guid SweepUid { get; set; }
         public WatchTypeCode WatchTypeCode { get; set; }
         public string WatchValue { get; set; }
         public bool ActiveInd { get; set; }

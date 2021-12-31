@@ -41,7 +41,8 @@ namespace Promo.Sweeps.Core.RequestHandlers
                 CampaignUid = request.Request.CampaignUid,
                 Name = request.Request.Name,
                 StartDate = request.Request.StartDate,
-                EndDate = request.Request.EndDate
+                EndDate = request.Request.EndDate,
+				DrawDate = request.Request.DrawDate
             });
 
             return await _repository.GetAsync(sweepUid);
