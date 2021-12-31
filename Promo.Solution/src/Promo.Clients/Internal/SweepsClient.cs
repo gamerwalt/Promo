@@ -5,6 +5,7 @@ using Promo.Core.Authentication;
 using Promo.Core.Exceptions;
 using Promo.Core.Models;
 using System;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
@@ -16,7 +17,7 @@ namespace Promo.Clients.Internal
     {
         Task<bool> CreateSweepsForCampaignAsync(string campaignName, Guid campaignUid, DateTime startDate, DateTime endDate);
         Task CreateSweepsEntryAsync(int entryCount, Guid campaignUid, string screenName, string userIdentifierType, bool acceptedTerms);
-		Task<Sweep> GetCampaignSweeps(Guid campaignUid);
+		Task<IEnumerable<Sweep>> GetCampaignSweepsAsync(Guid campaignUid);
 	}
 
     public class SweepsClient : ISweepsClient
@@ -67,14 +68,14 @@ namespace Promo.Clients.Internal
                 throw new Exception(ExceptionMessages.UnauthroizedAccessToAPI);
         }
 
-		public async Task<Sweep> GetCampaignSweeps(Guid campaignUid)
+		public async Task<IEnumerable<Sweep>> GetCampaignSweepsAsync(Guid campaignUid)
 		{
 			var authModel = await AuthenticateService();
 
 			var result = new HttpResponseMessage();
 			var url = ServiceUrls.GetCampaignSweep.Replace("{campaignUid}", campaignUid.ToString());
 
-			using var requestMessage = new HttpRequestMessage(HttpMethod.Post, url);
+			using var requestMessage = new HttpRequestMessage(HttpMethod.Get, url);
 			requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", authModel.IdToken);
 
 			result = await _client.SendAsync(requestMessage);
@@ -82,7 +83,7 @@ namespace Promo.Clients.Internal
 				throw new Exception(ExceptionMessages.UnauthroizedAccessToAPI);
 
 			if(result.IsSuccessStatusCode)
-				return JsonConvert.DeserializeObject<Sweep>(await result.Content.ReadAsStringAsync());
+				return JsonConvert.DeserializeObject<IEnumerable<Sweep>>(await result.Content.ReadAsStringAsync());
 
 			return null;
 		}

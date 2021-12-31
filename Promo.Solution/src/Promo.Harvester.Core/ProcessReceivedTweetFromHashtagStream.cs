@@ -6,6 +6,8 @@ using Promo.Core.Models;
 using Promo.Harvester.Core.Notifications;
 using Promo.Harvester.Core.RequestHandlers;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -39,14 +41,17 @@ namespace Promo.Harvester.Core
             _logger.LogInformation("Started handling {action}", nameof(ProcessReceivedTweetFromHashtagStream));
 
             var campaign = await GetCampaignAsync(notification.Rule.CampaignUid);
-			var sweep = await GetCampaignSweepsAsync(notification.Rule.CampaignUid);
+			var sweeps = await GetCampaignSweepsAsync(notification.Rule.CampaignUid);
+
+			if (campaign == null || sweeps.FirstOrDefault() == null)
+				throw new Exception("Campaign or Sweeps is null");
 
             switch (campaign.CampaignType.CampaignTypeCode)
             {
                 case CampaignTypeCode.AutoAll:
                     break;
 				case CampaignTypeCode.AutoEnterSweepsFromHashtag:
-					await EnterSweepsAsync(notification, campaign, sweep);
+					await EnterSweepsAsync(notification, campaign, sweeps.FirstOrDefault());
 					break;
 				case CampaignTypeCode.AutoEnterSweepsFromTweet:
                     break;
@@ -63,8 +68,8 @@ namespace Promo.Harvester.Core
             _logger.LogInformation("Finished handling {action}", nameof(ProcessReceivedTweetFromHashtagStream));
         }
 
-		private async Task<Sweep> GetCampaignSweepsAsync(Guid campaignUid) 
-			=> await _sweepsClient.GetCampaignSweeps(campaignUid);
+		private async Task<IEnumerable<Sweep>> GetCampaignSweepsAsync(Guid campaignUid) 
+			=> await _sweepsClient.GetCampaignSweepsAsync(campaignUid);
 
 		private async Task EnterSweepsAsync(NewHashTagTweetReceived notification, Campaign campaign, Sweep sweep)
 		{
@@ -73,7 +78,24 @@ namespace Promo.Harvester.Core
 				await _mediator.Send(new EnterSweeps(notification, campaign));
 
 				_logger.LogInformation("{action} called for CampaignName: {campaignName}", nameof(EnterSweepsAsync), campaign.CampaignName);
+
+				return;
 			}
+
+			_logger.LogInformation("Could not enter sweep for Campaign : {campaignName}", 
+				campaign.CampaignName);
+			
+			_logger.LogInformation("Campaign Details - Start Date: {startDate}, End Date: {endDate}", 
+				campaign.StartDate.ToShortDateString(), 
+				campaign.EndDate.ToShortDateString());
+			
+			_logger.LogInformation("Sweepstakes Details - Start Date: {startDate}, End Date: {endDate}, Draw Date: {drawDate}",
+				sweep.StartDate.ToShortDateString(),
+				sweep.EndDate.ToShortDateString(),
+				sweep.DrawDate.GetValueOrDefault().ToShortDateString());
+
+			//Todo: DO we want to inform the user that the sweeps is not active yet?
+			await _mediator.Publish(new UnableToEnterSweeps(notification, campaign, sweep));
 		}
 
 		private bool SweepsIsRunningAndNotYetDrawn(Sweep sweep) 

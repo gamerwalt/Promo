@@ -14,11 +14,11 @@ namespace Promo.Sweeps.API.Controllers.v1
     [ApiController]
     [Route("v1/campaign/{campaignUid:Guid}")]
     [Authorize]
-    public class CampaignSweepEntriesController : Controller
+    public class CampaignSweepController : Controller
     {
         private readonly IMediator _mediator;
 
-        public CampaignSweepEntriesController(IMediator mediator)
+        public CampaignSweepController(IMediator mediator)
         {
             _mediator = mediator;
         }
@@ -33,5 +33,5 @@ namespace Promo.Sweeps.API.Controllers.v1
 
             return Ok(sweepEntries);
         }
-    }
+	}
 }
