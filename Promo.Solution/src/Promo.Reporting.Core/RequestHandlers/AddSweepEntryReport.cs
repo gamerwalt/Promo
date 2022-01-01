@@ -1,13 +1,15 @@
 ﻿using MediatR;
+using Promo.Reporting.Core.Notifications;
 using Promo.Reporting.Core.Requests;
 using Promo.Reporting.Infrastructure;
 using Promo.Reporting.Infrastructure.Models;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Promo.Reporting.Core.RequestHandlers
 {
-	public class AddSweepEntryReport : IRequest<SweepEntryReport>
+	public class AddSweepEntryReport : IRequest
 	{
 		private CreateSweepEntryReport request;
 
@@ -22,7 +24,7 @@ namespace Promo.Reporting.Core.RequestHandlers
 		}
 	}
 
-	public class AddSweepEntryReportHandler : IRequestHandler<AddSweepEntryReport, SweepEntryReport>
+	public class AddSweepEntryReportHandler : AsyncRequestHandler<AddSweepEntryReport>
 	{
 		private readonly IReportingRepository _repository;
 		private readonly IMediator _mediator;
@@ -33,11 +35,21 @@ namespace Promo.Reporting.Core.RequestHandlers
 			_mediator = mediator;
 		}
 
-		public async Task<SweepEntryReport> Handle(AddSweepEntryReport request, CancellationToken cancellationToken)
+		protected async override Task Handle(AddSweepEntryReport request, CancellationToken cancellationToken)
 		{
-			await _repository.DoSomething();
+			await _repository.UpsertSweepEntryReportAsync(new SweepEntryReport
+			{
+				SweepEntryReportUid = Guid.NewGuid(),
+				CampaignUid = request.Request.CampaignUid,
+				SweepUid = request.Request.SweepUid,
+				Entries = 1,
+				ScreenName = request.Request.ScreenName,
+				ExternalId = request.Request.ExternalId,
+				ExternalUserId = request.Request.ExternalUserId,
+				UserIdentifierType = request.Request.UserIdentifierType
+			});
 
-			return new SweepEntryReport();
+			await _mediator.Publish(new SweepEntryReportUpserted(request));
 		}
 	}
 }

@@ -20,5 +20,9 @@
 
         //Campaigns
         public static string GetCampaign = "v1/campaigns/{campaignUid}";
-    }
+
+		//Reporting
+		public static string CreateReportSweepEntry = "v1/reporting/sweeps";
+
+	}
 }

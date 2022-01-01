@@ -50,15 +50,6 @@ namespace Promo.Sweeps.API
 
         private void AddGoogleServicesAuthentication(IServiceCollection services)
         {
-            //var client = new HttpClient();
-            //var jsonResult = client.GetStringAsync(Configuration["GoogleSecureTokenCertificateUrl"]).Result;
-            //var metaData = JObject.Parse(jsonResult)
-            //    .Children()
-            //    .Cast<JProperty>()
-            //    .Select(i => new x509Metadata(i.Path, i.Value.ToString()));
-
-            //var issuerSigningKeys = metaData.Select(s => s.X509SecurityKey);
-
             var googleServicesOptions = Configuration
                 .GetSection(GoogleServicesOptions.GoogleServices)
                 .Get<GoogleServicesOptions>();
@@ -74,7 +65,6 @@ namespace Promo.Sweeps.API
                         ValidateAudience = true,
                         ValidAudience = googleServicesOptions.ProjectId,
                         ValidateLifetime = true
-                        //IssuerSigningKeys = issuerSigningKeys,
                     };
                 });
         }
