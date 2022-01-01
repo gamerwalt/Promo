@@ -56,7 +56,6 @@ namespace Promo.Harvester.Service
 
         private void CurrentStream_MatchingTweetReceived(object sender, Tweetinvi.Events.MatchedTweetReceivedEventArgs e)
         {
-            System.Console.WriteLine(e.Json);
             Task.Run(async () => await _harvesterService.SaveTweetReceivedAsync(e.Json, e.Tweet)).Wait();
         }
     }

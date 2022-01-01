@@ -12,14 +12,16 @@ namespace Promo.Harvester.Core.Notifications
 	public class SweepEntryRecorded : INotification
 	{
 		private Guid campaignUid;
+		private Guid sweepUid;
 		private string screenName;
 		private string userIdentifierType;
 		private string tweetUserId;
 		private string tweetId;
 
-		public SweepEntryRecorded(Guid campaignUid, string screenName, string tweetUserId, string tweetId, string userIdentifierType)
+		public SweepEntryRecorded(Guid campaignUid, Guid sweepUid, string screenName, string tweetUserId, string tweetId, string userIdentifierType)
 		{
 			this.campaignUid = campaignUid;
+			this.sweepUid = sweepUid;
 			this.screenName = screenName;
 			this.userIdentifierType = userIdentifierType;
 			this.tweetUserId = tweetUserId;
@@ -29,6 +31,11 @@ namespace Promo.Harvester.Core.Notifications
 		public Guid CampaignUid
 		{
 			get { return campaignUid; }
+		}
+
+		public Guid SweepUid
+		{
+			get { return sweepUid; }
 		}
 
 		public string ScreenName

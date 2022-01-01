@@ -12,12 +12,19 @@ namespace Promo.Harvester.Core.RequestHandlers
     {
         private NewHashTagTweetReceived notification;
         private Campaign campaign;
+		private Sweep sweep;
 
-        public EnterSweeps(NewHashTagTweetReceived notification, Campaign campaign)
+        public EnterSweeps(NewHashTagTweetReceived notification, Campaign campaign, Sweep sweep)
         {
             this.notification = notification;
             this.campaign = campaign;
+			this.sweep = sweep;
         }
+
+		public Sweep Sweep
+		{
+			get { return sweep; }
+		}
 
         public NewHashTagTweetReceived TweetReceived
         {
@@ -45,6 +52,7 @@ namespace Promo.Harvester.Core.RequestHandlers
         {
             await _sweepsClient.CreateSweepsEntryAsync(
                 entryCount: 1,
+				sweepUid: request.Sweep.SweepUid,
                 campaignUid: request.Campaign.CampaignUid,
                 screenName: $"@{request.TweetReceived.Tweet.CreatedBy.ScreenName}",
                 userIdentifierType: UserIdentifierType.TwitterHandle.ToString(),
@@ -53,6 +61,7 @@ namespace Promo.Harvester.Core.RequestHandlers
             await _mediator.Publish(
                 new SweepEntryRecorded(
                     request.Campaign.CampaignUid, 
+					request.Sweep.SweepUid,
                     request.TweetReceived.Tweet.CreatedBy.ScreenName, 
                     request.TweetReceived.Tweet.CreatedBy.IdStr,
                     request.TweetReceived.Tweet.IdStr,

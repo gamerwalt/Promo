@@ -77,9 +77,9 @@ namespace Promo.Harvester.Core
 		{
 			if(campaign.ActiveInd && CampaignIsRunning(campaign) && SweepsIsRunningAndNotYetDrawn(sweep))
 			{
-				await _mediator.Send(new EnterSweeps(notification, campaign));
-
 				_logger.LogInformation("{action} called for CampaignName: {campaignName}", nameof(EnterSweepsAsync), campaign.CampaignName);
+
+				await _mediator.Send(new EnterSweeps(notification, campaign, sweep));
 
 				return;
 			}

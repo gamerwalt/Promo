@@ -16,7 +16,7 @@ namespace Promo.Clients.Internal
     public interface ISweepsClient
     {
         Task<bool> CreateSweepsForCampaignAsync(string campaignName, Guid campaignUid, DateTime startDate, DateTime endDate);
-        Task CreateSweepsEntryAsync(int entryCount, Guid campaignUid, string screenName, string userIdentifierType, bool acceptedTerms);
+        Task CreateSweepsEntryAsync(int entryCount, Guid campaignUid, Guid sweepUid, string screenName, string userIdentifierType, bool acceptedTerms);
 		Task<IEnumerable<Sweep>> GetCampaignSweepsAsync(Guid campaignUid);
 	}
 
@@ -51,12 +51,12 @@ namespace Promo.Clients.Internal
             return result.IsSuccessStatusCode;
         }
 
-        public async Task CreateSweepsEntryAsync(int entryCount, Guid campaignUid, string screenName, string userIdentifierType, bool acceptedTerms)
+        public async Task CreateSweepsEntryAsync(int entryCount, Guid campaignUid, Guid sweepUid, string screenName, string userIdentifierType, bool acceptedTerms)
         {
             var authModel = await AuthenticateService();
 
             var result = new HttpResponseMessage();
-            var content = GetSweepEntryContent(entryCount, campaignUid, screenName, userIdentifierType, acceptedTerms);
+            var content = GetSweepEntryContent(entryCount, campaignUid, sweepUid, screenName, userIdentifierType, acceptedTerms);
             var url = ServiceUrls.CreateCampaignSweepsEntry.Replace("{campaignUid}", campaignUid.ToString());
 
             using var requestMessage = new HttpRequestMessage(HttpMethod.Post, url);
@@ -88,13 +88,14 @@ namespace Promo.Clients.Internal
 			return null;
 		}
 
-		private static string GetSweepEntryContent(int entryCount, Guid campaignUid, string userIdentifier, string userIdentifierType, bool acceptedTerms)
+		private static string GetSweepEntryContent(int entryCount, Guid campaignUid, Guid sweepUid, string userIdentifier, string userIdentifierType, bool acceptedTerms)
         {
             return JsonConvert.SerializeObject(
                 new
                 {
                     entryCount,
                     campaignUid,
+					sweepUid,
                     userIdentifier,
                     userIdentifierType,
                     acceptedTerms

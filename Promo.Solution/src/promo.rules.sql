@@ -1,4 +1,4 @@
-CREATE DATABASE promo.rules /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
+CREATE DATABASE promo.rules /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */ /*!80016 DEFAULT ENCRYPTION=`N` */;
 
 CREATE TABLE rules (
   rule_id int unsigned NOT NULL AUTO_INCREMENT,
@@ -6,8 +6,8 @@ CREATE TABLE rules (
   campaign_uid varchar(50) NOT NULL,
   watch_type_id int unsigned NOT NULL,
   watch_value varchar(500) NOT NULL,
-  active_ind bit(1) NOT NULL DEFAULT b'0',
-  added_for_tracking bit(1) DEFAULT b'0',
+  active_ind bit(1) NOT NULL DEFAULT b`0`,
+  added_for_tracking bit(1) DEFAULT b`0`,
   date_added_for_tracking datetime DEFAULT NULL,
   created_date datetime NOT NULL,
   updated_date datetime DEFAULT NULL,
@@ -109,8 +109,8 @@ BEGIN
     SELECT @watchTypeId := watch_type_id FROM watch_types WHERE watch_type_code = watchTypeCode;
 
     IF(@watchTypeId = 0) THEN 
-		SIGNAL SQLSTATE '45000'
-			SET MESSAGE_TEXT = 'Watch type not found';
+		SIGNAL SQLSTATE `45000`
+			SET MESSAGE_TEXT = `Watch type not found`;
 	END IF;
     
     INSERT INTO rules

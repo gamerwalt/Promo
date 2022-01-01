@@ -49,6 +49,7 @@ namespace Promo.Sweeps.Infrastructure
             command.CommandType = CommandType.StoredProcedure;
             command
                 .AddParameter("sweepEntryUid", sweepEntry.SweepEntryUid)
+				.AddParameter("sweepUid", sweepEntry.SweepUid)
                 .AddParameter("campaignUid", sweepEntry.CampaignUid)
                 .AddParameter("userIdentifier", sweepEntry.UserIdentifier)
                 .AddParameter("userIdentifierType", sweepEntry.UserIdentifierType.ToString())

@@ -51,6 +51,7 @@ namespace Promo.Sweeps.Core.RequestHandlers
                 await _repository.CreateCampaignSweepsEntryAsync(new CampaignSweepsEntry
                 {
                     SweepEntryUid = sweepEntryUid,
+					SweepUid = request.Request.SweepUid,
                     CampaignUid = request.CampaignUid,
                     UserIdentifier = request.Request.UserIdentifier,
                     UserIdentifierType = request.Request.UserIdentifierType,
