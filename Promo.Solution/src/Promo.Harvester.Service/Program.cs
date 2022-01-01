@@ -41,11 +41,12 @@ namespace Promo.Harvester.Service
                     AddCampaignsClient(services);
                     AddSweepsClient(services);
                     AddTwitterClient(services);
+					AddReportingClient(services);
                     AddHrvsterServiceAuthenticationclient(services);
                     AddDatabaseAndRepositories(services);
                 });
 
-        private static void AddMediator(IServiceCollection services)
+		private static void AddMediator(IServiceCollection services)
         {
             var domainAssembly = typeof(ProcessReceivedTweetFromHashtagStream).GetTypeInfo().Assembly;
             services.AddMediatR(domainAssembly);
@@ -97,7 +98,18 @@ namespace Promo.Harvester.Service
             });
         }
 
-        private static void AddCampaignsClient(IServiceCollection services)
+		private static void AddReportingClient(IServiceCollection services)
+		{
+			var reportingApi = Configuration["PromoReportUrl"];
+
+			services.AddHttpClient<IReportingClient, ReportingClient>(client =>
+			{
+				client.BaseAddress = new Uri(reportingApi);
+				client.DefaultRequestHeaders.Add("Accept", "application/json");
+			});
+		}
+
+		private static void AddCampaignsClient(IServiceCollection services)
         {
             var campaignBaseApi = Configuration["PromoCampaignsUrl"];
 
