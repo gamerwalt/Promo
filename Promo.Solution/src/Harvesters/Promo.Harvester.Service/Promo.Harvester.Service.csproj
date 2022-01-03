@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk.Worker">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+    <UserSecretsId>dotnet-Promo.Harvester.Service-EBF2A39D-74D7-4FFC-8372-D94A5B3783F8</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MediatR" Version="9.0.0" />
+    <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="9.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="5.0.0" />
+    <PackageReference Include="TweetinviAPI" Version="5.0.4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Promo.Clients\Promo.Clients.csproj" />
+    <ProjectReference Include="..\..\Promo.Core\Promo.Core.csproj" />
+    <ProjectReference Include="..\Promo.Harvester.Core\Promo.Harvester.Core.csproj" />
+    <ProjectReference Include="..\Promo.Harvester.Infrastructure\Promo.Harvester.Infrastructure.csproj" />
+  </ItemGroup>
+</Project>

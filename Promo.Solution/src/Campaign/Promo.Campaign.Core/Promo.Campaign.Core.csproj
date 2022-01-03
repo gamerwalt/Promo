@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FluentValidation" Version="10.3.6" />
+    <PackageReference Include="MediatR" Version="9.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Promo.Clients\Promo.Clients.csproj" />
+    <ProjectReference Include="..\..\Promo.Core\Promo.Core.csproj" />
+    <ProjectReference Include="..\Promo.Campaign.Infrastructure\Promo.Campaign.Infrastructure.csproj" />
+  </ItemGroup>
+
+</Project>
