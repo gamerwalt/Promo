@@ -18,11 +18,15 @@
         public static string UpdateRuleAsAdded = "v1/rule/{ruleUid}/added";
         public static string WatchTypeCampaignTypes = "v1/watchtypes";
 
-        //Campaigns
-        public static string GetCampaign = "v1/campaigns/{campaignUid}";
+		//EntryRule
+		public static string GetEntryRule = "v1/campaign/{campaignUid}/sweeps/{sweepUid}/entryrule";
+
+		//Campaigns
+		public static string GetCampaign = "v1/campaigns/{campaignUid}";
 
 		//Reporting
 		public static string CreateReportSweepEntry = "v1/reporting/sweeps";
+		public static string GetCampaignSweepUserEntryReport = "v1/reporting/campaign/{campaignUid}/sweeps/{sweepUid}";
 
 	}
 }

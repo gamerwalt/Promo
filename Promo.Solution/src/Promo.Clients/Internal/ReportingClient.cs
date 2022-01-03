@@ -2,6 +2,7 @@
 using Newtonsoft.Json.Serialization;
 using Promo.Core.Authentication;
 using Promo.Core.Exceptions;
+using Promo.Core.Models;
 using System;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -13,6 +14,7 @@ namespace Promo.Clients.Internal
 	public interface IReportingClient
 	{
 		Task ReportSweepEntryAsync(Guid sweepUid, Guid campaignUid, string screenName, string userIdentifierType, string externalUserId, string externalId);
+		Task<SweepEntryReport> GetCampaignSweepUserCountAsync(Guid campaignUid, Guid sweepUid, string externalUserId, string screenName, string userIdentifierType);
 	}
 
 	public class ReportingClient : IReportingClient
@@ -24,6 +26,46 @@ namespace Promo.Clients.Internal
 		{
 			_client = client ?? throw new ArgumentNullException(nameof(client));
 			_serviceAuthenticate = serviceAuthenticate ?? throw new ArgumentNullException(nameof(serviceAuthenticate));
+		}
+
+		public async Task<SweepEntryReport> GetCampaignSweepUserCountAsync(
+			Guid campaignUid, Guid sweepUid, string externalUserId, string screenName, string userIdentifierType)
+		{
+			var authModel = await AuthenticateService();
+
+			var result = new HttpResponseMessage();
+			string content = JsonConvert.SerializeObject(
+				new
+				{
+					screenName,
+					userIdentifierType,
+					externalUserId
+				}, new JsonSerializerSettings
+				{
+					ContractResolver = new CamelCasePropertyNamesContractResolver()
+				}
+			);
+
+			var url = ServiceUrls.GetCampaignSweepUserEntryReport
+				.Replace("{campaignUid}", campaignUid.ToString())
+				.Replace("{sweepUid}", sweepUid.ToString());
+
+			using (var requestMessage = new HttpRequestMessage(HttpMethod.Get, url))
+			{
+				requestMessage.Content = new StringContent(content, Encoding.UTF8, "application/json");
+				requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", authModel.IdToken);
+
+				result = await _client.SendAsync(requestMessage);
+				if (result.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+					throw new Exception(ExceptionMessages.UnauthroizedAccessToAPI);
+
+				if (result.IsSuccessStatusCode)
+				{
+					return JsonConvert.DeserializeObject<SweepEntryReport>(await result.Content.ReadAsStringAsync());
+				}
+			}
+
+			return null;
 		}
 
 		public async Task ReportSweepEntryAsync(Guid sweepUid, Guid campaignUid, string screenName, string userIdentifierType, string externalUserId, string externalId)

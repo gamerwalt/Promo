@@ -39,7 +39,7 @@ namespace Promo.Reporting.Core.RequestHandlers
 		{
 			await _repository.UpsertSweepEntryReportAsync(new SweepEntryReport
 			{
-				SweepEntryReportUid = Guid.NewGuid(),
+				SweepEntryUid = Guid.NewGuid(),
 				CampaignUid = request.Request.CampaignUid,
 				SweepUid = request.Request.SweepUid,
 				Entries = 1,
