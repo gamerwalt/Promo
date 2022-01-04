@@ -18,19 +18,12 @@ namespace Promo.Core
 
     public enum CampaignTypeCode
     {
-		[EnumMember(Value = "AutoAll")]
 		AutoAll,
-		[EnumMember(Value = "AutoReplyTweet")]
 		AutoReplyTweet,
-		[EnumMember(Value = "AutoReplyDM")]
 		AutoReplyDM,
-		[EnumMember(Value = "AutoReplyHashtag")]
 		AutoReplyHashtag,
-		[EnumMember(Value = "AutoReplyLikedTweet")]
 		AutoReplyLikedTweet,
-		[EnumMember(Value = "AutoEnterSweepsFromTweet")]
 		AutoEnterSweepsFromTweet,
-		[EnumMember(Value = "AutoEnterSweepsFromHashtag")]
 		AutoEnterSweepsFromHashtag
     }
 

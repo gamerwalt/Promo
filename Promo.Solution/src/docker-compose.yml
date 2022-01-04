@@ -16,102 +16,102 @@ services:
         - ./databases/CampaignDb/init-file.sql:/docker-entrypoint-initdb.d/1.sql
     build:
         context: .
-  #emaildb:
-  #  image: mysql
-  #  restart: always
-  #  command: --default-authentication-plugin=mysql_native_password
-  #  environment:
-  #      MYSQL_ROOT_PASSWORD: iKv7w99Jb^2mKn7%
-  #      MYSQL_DATABASE: promo.email
-  #      MYSQL_USER: email_app_user
-  #      MYSQL_PASSWORD: M%Dpz5^g9GCmGJxF
-  #  ports:
-  #      - "3309:3306"
-  #  volumes:
-  #      - ./databases/EmailDb/promo.email.tables.sql:/docker-entrypoint-initdb.d/1.sql
-  #      - ./databases/EmailDb/promo.email.stored_procedures.sql:/docker-entrypoint-initdb.d/2.sql
-  #  build:
-  #      context: .
-  #harvesterdb:
-  #  image: mysql
-  #  restart: always
-  #  command: --default-authentication-plugin=mysql_native_password
-  #  environment:
-  #      MYSQL_ROOT_PASSWORD: e@ghX#m5^BTD6tc8
-  #      MYSQL_DATABASE: promo.harvester
-  #      MYSQL_USER: harvester_app_user
-  #      MYSQL_PASSWORD: unqA!S@2mkbx4MK6
-  #  ports:
-  #      - "3310:3306"
-  #  volumes:
-  #      - ./databases/HarvesterDb/promo.harvester.tables.sql:/docker-entrypoint-initdb.d/1.sql
-  #      - ./databases/HarvesterDb/promo.harvester.stored_procedures.sql:/docker-entrypoint-initdb.d/2.sql
-  #  build:
-  #      context: .
-  #membershipdb:
-  #  image: mysql
-  #  restart: always
-  #  command: --default-authentication-plugin=mysql_native_password
-  #  environment:
-  #      MYSQL_ROOT_PASSWORD: P!32oJ8Bzn7JZHC8
-  #      MYSQL_DATABASE: promo.membership
-  #      MYSQL_USER: membership_app_user
-  #      MYSQL_PASSWORD: S!eYkEdpFq3P#QES
-  #  ports:
-  #      - "3311:3306"
-  #  volumes:
-  #      - ./databases/MembershipDb/promo.membership.tables.sql:/docker-entrypoint-initdb.d/1.sql
-  #      - ./databases/MembershipDb/promo.membership.stored_procedures.sql:/docker-entrypoint-initdb.d/2.sql
-  #  build:
-  #      context: .
-  #reportingdb:
-  #  image: mysql
-  #  restart: always
-  #  command: --default-authentication-plugin=mysql_native_password
-  #  environment:
-  #      MYSQL_ROOT_PASSWORD: pDmBXf^a3GkVqEm8
-  #      MYSQL_DATABASE: promo.reporting
-  #      MYSQL_USER: reporting_app_user
-  #      MYSQL_PASSWORD: 2wSSULHT4nk^UuWg
-  #  ports:
-  #      - "3312:3306"
-  #  volumes:
-  #      - ./databases/ReportingDb/promo.reporting.tables.sql:/docker-entrypoint-initdb.d/1.sql
-  #      - ./databases/ReportingDb/promo.reporting.stored_procedures.sql:/docker-entrypoint-initdb.d/2.sql
-  #  build:
-  #      context: .
-  #rulesdb:
-  #  image: mysql
-  #  restart: always
-  #  command: --default-authentication-plugin=mysql_native_password
-  #  environment:
-  #      MYSQL_ROOT_PASSWORD: V%CWS64M!idk4HfH
-  #      MYSQL_DATABASE: promo.rules
-  #      MYSQL_USER: rules_app_user
-  #      MYSQL_PASSWORD: V%CWS64M!idk4HfH
-  #  ports:
-  #      - "3313:3306"
-  #  volumes:
-  #      - ./databases/RulesDb/promo.rules.tables.sql:/docker-entrypoint-initdb.d/1.sql
-  #      - ./databases/RulesDb/promo.rules.stored_procedures.sql:/docker-entrypoint-initdb.d/2.sql
-  #  build:
-  #      context: .
-  #sweepsdb:
-  #  image: mysql
-  #  restart: always
-  #  command: --default-authentication-plugin=mysql_native_password
-  #  environment:
-  #      MYSQL_ROOT_PASSWORD: Vs8DTYgqW!iyLtv7
-  #      MYSQL_DATABASE: promo.sweepstakes
-  #      MYSQL_USER: sweeps_app_user
-  #      MYSQL_PASSWORD: e8Fa6cqhES4x%XUM
-  #  ports:
-  #      - "3314:3306"
-  #  volumes:
-  #      - ./databases/SweepsDb/promo.sweeps.tables.sql:/docker-entrypoint-initdb.d/1.sql
-  #      - ./databases/SweepsDb/promo.sweeps.stored_procedures.sql:/docker-entrypoint-initdb.d/2.sql
-  #  build:
-  #      context: .
+  emaildb:
+    image: mysql
+    restart: always
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+        MYSQL_ROOT_PASSWORD: iKv7w99Jb^2mKn7%
+        MYSQL_DATABASE: promo.email
+        MYSQL_USER: email_app_user
+        MYSQL_PASSWORD: M%Dpz5^g9GCmGJxF
+    ports:
+        - "3309:3306"
+    volumes:
+        - ./databases/EmailDb/promo.email.tables.sql:/docker-entrypoint-initdb.d/1.sql
+        - ./databases/EmailDb/promo.email.stored_procedures.sql:/docker-entrypoint-initdb.d/2.sql
+    build:
+        context: .
+  harvesterdb:
+    image: mysql
+    restart: always
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+        MYSQL_ROOT_PASSWORD: e@ghX#m5^BTD6tc8
+        MYSQL_DATABASE: promo.harvester
+        MYSQL_USER: harvester_app_user
+        MYSQL_PASSWORD: unqA!S@2mkbx4MK6
+    ports:
+        - "3310:3306"
+    volumes:
+        - ./databases/HarvesterDb/promo.harvester.tables.sql:/docker-entrypoint-initdb.d/1.sql
+        - ./databases/HarvesterDb/promo.harvester.stored_procedures.sql:/docker-entrypoint-initdb.d/2.sql
+    build:
+        context: .
+  membershipdb:
+    image: mysql
+    restart: always
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+        MYSQL_ROOT_PASSWORD: P!32oJ8Bzn7JZHC8
+        MYSQL_DATABASE: promo.membership
+        MYSQL_USER: membership_app_user
+        MYSQL_PASSWORD: S!eYkEdpFq3P#QES
+    ports:
+        - "3311:3306"
+    volumes:
+        - ./databases/MembershipDb/promo.membership.tables.sql:/docker-entrypoint-initdb.d/1.sql
+        - ./databases/MembershipDb/promo.membership.stored_procedures.sql:/docker-entrypoint-initdb.d/2.sql
+    build:
+        context: .
+  reportingdb:
+    image: mysql
+    restart: always
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+        MYSQL_ROOT_PASSWORD: pDmBXf^a3GkVqEm8
+        MYSQL_DATABASE: promo.reporting
+        MYSQL_USER: reporting_app_user
+        MYSQL_PASSWORD: 2wSSULHT4nk^UuWg
+    ports:
+        - "3312:3306"
+    volumes:
+        - ./databases/ReportingDb/promo.reporting.tables.sql:/docker-entrypoint-initdb.d/1.sql
+        - ./databases/ReportingDb/promo.reporting.stored_procedures.sql:/docker-entrypoint-initdb.d/2.sql
+    build:
+        context: .
+  rulesdb:
+    image: mysql
+    restart: always
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+        MYSQL_ROOT_PASSWORD: V%CWS64M!idk4HfH
+        MYSQL_DATABASE: promo.rules
+        MYSQL_USER: rules_app_user
+        MYSQL_PASSWORD: V%CWS64M!idk4HfH
+    ports:
+        - "3313:3306"
+    volumes:
+        - ./databases/RulesDb/promo.rules.tables.sql:/docker-entrypoint-initdb.d/1.sql
+        - ./databases/RulesDb/promo.rules.stored_procedures.sql:/docker-entrypoint-initdb.d/2.sql
+    build:
+        context: .
+  sweepsdb:
+    image: mysql
+    restart: always
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+        MYSQL_ROOT_PASSWORD: Vs8DTYgqW!iyLtv7
+        MYSQL_DATABASE: promo.sweepstakes
+        MYSQL_USER: sweeps_app_user
+        MYSQL_PASSWORD: e8Fa6cqhES4x%XUM
+    ports:
+        - "3314:3306"
+    volumes:
+        - ./databases/SweepsDb/promo.sweeps.tables.sql:/docker-entrypoint-initdb.d/1.sql
+        - ./databases/SweepsDb/promo.sweeps.stored_procedures.sql:/docker-entrypoint-initdb.d/2.sql
+    build:
+        context: .
   promo.campaign.api:
     image: ${DOCKER_REGISTRY-}promocampaignapi
     build:
@@ -122,53 +122,53 @@ services:
     ports:
       - "5003:80"
 
-  #promo.reporting.api:
-  #  image: ${DOCKER_REGISTRY-}promoreportingapi
-  #  build:
-  #    context: .
-  #    dockerfile: Reporting/Promo.Reporting.API/Dockerfile
-  #  depends_on:
-  #    - reportingdb
-  #  ports:
-  #    - "5012:80"
+  promo.reporting.api:
+    image: ${DOCKER_REGISTRY-}promoreportingapi
+    build:
+      context: .
+      dockerfile: Reporting/Promo.Reporting.API/Dockerfile
+    depends_on:
+      - reportingdb
+    ports:
+      - "5012:80"
 
-  #promo.membership.api:
-  #  image: ${DOCKER_REGISTRY-}promomembershipapi
-  #  build:
-  #    context: .
-  #    dockerfile: Membership/Promo.Membership.API/Dockerfile
-  #  depends_on:
-  #    - membershipdb
-  #  ports:
-  #    - "5000:80"
+  promo.membership.api:
+    image: ${DOCKER_REGISTRY-}promomembershipapi
+    build:
+      context: .
+      dockerfile: Membership/Promo.Membership.API/Dockerfile
+    depends_on:
+      - membershipdb
+    ports:
+      - "5000:80"
 
-  #promo.rules.api:
-  #  image: ${DOCKER_REGISTRY-}promorulesapi
-  #  build:
-  #    context: .
-  #    dockerfile: Rules/Promo.Rules.API/Dockerfile
-  #  depends_on:
-  #    - rulesdb
-  #  ports:
-  #    - "5010:80"
+  promo.rules.api:
+    image: ${DOCKER_REGISTRY-}promorulesapi
+    build:
+      context: .
+      dockerfile: Rules/Promo.Rules.API/Dockerfile
+    depends_on:
+      - rulesdb
+    ports:
+      - "5010:80"
 
-  #promo.sweeps.api:
-  #  image: ${DOCKER_REGISTRY-}promosweepsapi
-  #  build:
-  #    context: .
-  #    dockerfile: Sweeps/Promo.Sweeps.API/Dockerfile
-  #  depends_on:
-  #    - sweepsdb
-  #  ports:
-  #    - "5005:80"
+  promo.sweeps.api:
+    image: ${DOCKER_REGISTRY-}promosweepsapi
+    build:
+      context: .
+      dockerfile: Sweeps/Promo.Sweeps.API/Dockerfile
+    depends_on:
+      - sweepsdb
+    ports:
+      - "5005:80"
 
-  #promo.emails.api:
-  #  image: ${DOCKER_REGISTRY-}promoemailsapi
-  #  build:
-  #    context: .
-  #    dockerfile: Email/Promo.Emails.API/Dockerfile
-  #  depends_on:
-  #    - emaildb
-  #  ports:
-  #    - "5007:80"
+  promo.emails.api:
+    image: ${DOCKER_REGISTRY-}promoemailsapi
+    build:
+      context: .
+      dockerfile: Email/Promo.Emails.API/Dockerfile
+    depends_on:
+      - emaildb
+    ports:
+      - "5007:80"
 
