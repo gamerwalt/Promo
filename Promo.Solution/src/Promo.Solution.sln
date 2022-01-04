@@ -102,46 +102,43 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "databases", "databases", "{
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CampaignDb", "CampaignDb", "{C2BCE800-060B-46C8-B986-0321684C1B35}"
 	ProjectSection(SolutionItems) = preProject
-		..\databases\CampaignDb\Dockerfile = ..\databases\CampaignDb\Dockerfile
-		..\databases\CampaignDb\init-file.sql = ..\databases\CampaignDb\init-file.sql
+		databases\CampaignDb\init-file.sql = databases\CampaignDb\init-file.sql
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "EmailDb", "EmailDb", "{770537D4-16FD-41F7-A24E-2D26B6D3F0F3}"
 	ProjectSection(SolutionItems) = preProject
-		..\databases\EmailDb\Dockerfile = ..\databases\EmailDb\Dockerfile
-		..\databases\EmailDb\promo.email.stored_procedures.sql = ..\databases\EmailDb\promo.email.stored_procedures.sql
-		..\databases\EmailDb\promo.email.tables.sql = ..\databases\EmailDb\promo.email.tables.sql
+		databases\EmailDb\promo.email.stored_procedures.sql = databases\EmailDb\promo.email.stored_procedures.sql
+		databases\EmailDb\promo.email.tables.sql = databases\EmailDb\promo.email.tables.sql
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "HarvesterDb", "HarvesterDb", "{3A20A910-5953-4B02-916D-14A0522B1BD0}"
 	ProjectSection(SolutionItems) = preProject
-		..\databases\HarvesterDb\Dockerfile = ..\databases\HarvesterDb\Dockerfile
-		..\databases\HarvesterDb\promo.harvester.stored_procedures.sql = ..\databases\HarvesterDb\promo.harvester.stored_procedures.sql
-		..\databases\HarvesterDb\promo.harvester.tables.sql = ..\databases\HarvesterDb\promo.harvester.tables.sql
+		databases\HarvesterDb\promo.harvester.stored_procedures.sql = databases\HarvesterDb\promo.harvester.stored_procedures.sql
+		databases\HarvesterDb\promo.harvester.tables.sql = databases\HarvesterDb\promo.harvester.tables.sql
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "MembershipDb", "MembershipDb", "{F337E0CB-5FE3-4DD4-BE65-BF767A82BABD}"
 	ProjectSection(SolutionItems) = preProject
-		..\databases\MembershipDb\promo.membership.stored_procedures.sql = ..\databases\MembershipDb\promo.membership.stored_procedures.sql
-		..\databases\MembershipDb\promo.membership.tables.sql = ..\databases\MembershipDb\promo.membership.tables.sql
+		databases\MembershipDb\promo.membership.stored_procedures.sql = databases\MembershipDb\promo.membership.stored_procedures.sql
+		databases\MembershipDb\promo.membership.tables.sql = databases\MembershipDb\promo.membership.tables.sql
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ReportingDb", "ReportingDb", "{4C79AFF1-2E03-4557-9E9B-B2DEEB2BE74D}"
 	ProjectSection(SolutionItems) = preProject
-		..\databases\ReportingDb\promo.reporting.stored_procedures.sql = ..\databases\ReportingDb\promo.reporting.stored_procedures.sql
-		..\databases\ReportingDb\promo.reporting.tables.sql = ..\databases\ReportingDb\promo.reporting.tables.sql
+		databases\ReportingDb\promo.reporting.stored_procedures.sql = databases\ReportingDb\promo.reporting.stored_procedures.sql
+		databases\ReportingDb\promo.reporting.tables.sql = databases\ReportingDb\promo.reporting.tables.sql
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "RulesDb", "RulesDb", "{70E567C3-049A-4BFB-AD31-E246B2FE8338}"
 	ProjectSection(SolutionItems) = preProject
-		..\databases\RulesDb\promo.rules.stored_procedures.sql = ..\databases\RulesDb\promo.rules.stored_procedures.sql
-		..\databases\RulesDb\promo.rules.tables.sql = ..\databases\RulesDb\promo.rules.tables.sql
+		databases\RulesDb\promo.rules.stored_procedures.sql = databases\RulesDb\promo.rules.stored_procedures.sql
+		databases\RulesDb\promo.rules.tables.sql = databases\RulesDb\promo.rules.tables.sql
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SweepsDb", "SweepsDb", "{6006051B-7860-463B-9F42-BB56E01CD6B2}"
 	ProjectSection(SolutionItems) = preProject
-		..\databases\SweepsDb\promo.sweeps.stored_procedures.sql = ..\databases\SweepsDb\promo.sweeps.stored_procedures.sql
-		..\databases\SweepsDb\promo.sweeps.tables.sql = ..\databases\SweepsDb\promo.sweeps.tables.sql
+		databases\SweepsDb\promo.sweeps.stored_procedures.sql = databases\SweepsDb\promo.sweeps.stored_procedures.sql
+		databases\SweepsDb\promo.sweeps.tables.sql = databases\SweepsDb\promo.sweeps.tables.sql
 	EndProjectSection
 EndProject
 Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{E8588935-9869-442B-82A0-CCA7E09E221D}"
