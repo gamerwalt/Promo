@@ -20,7 +20,17 @@ namespace Promo.Campaign.API
             Host.CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
-                    webBuilder.UseStartup<Startup>();
+                    webBuilder
+						.UseEnvironment(Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "local")
+						.ConfigureAppConfiguration(BuildConfiguration)
+						.UseStartup<Startup>();
                 });
-    }
+
+		private static void BuildConfiguration(WebHostBuilderContext context, IConfigurationBuilder builder)
+		{
+			builder.SetBasePath(context.HostingEnvironment.ContentRootPath)
+				.AddKeyPerFile("/var/run/secrets/aspnet", true)
+				.AddEnvironmentVariables();
+		}
+	}
 }

@@ -7,10 +7,15 @@
         "emaildb": "StartWithoutDebugging",
         "harvesterdb": "StartWithoutDebugging",
         "membershipdb": "StartWithoutDebugging",
-        "promo.campaign.api": "StartWithoutDebugging",
+        "promo.campaign.api": "StartDebugging",
         "reportingdb": "StartWithoutDebugging",
         "rulesdb": "StartWithoutDebugging",
-        "sweepsdb": "StartWithoutDebugging"
+        "sweepsdb": "StartWithoutDebugging",
+        "promo.emails.api": "StartDebugging",
+        "promo.membership.api": "StartDebugging",
+        "promo.reporting.api": "StartDebugging",
+        "promo.rules.api": "StartDebugging",
+        "promo.sweeps.api": "StartDebugging"
       },
       "composeLaunchAction": "None",
       "commandVersion": "1.0"

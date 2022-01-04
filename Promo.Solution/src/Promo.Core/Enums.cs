@@ -1,4 +1,6 @@
-﻿namespace Promo.Core
+﻿using System.Runtime.Serialization;
+
+namespace Promo.Core
 {
     public enum EmailStatus
     {
@@ -16,13 +18,20 @@
 
     public enum CampaignTypeCode
     {
-        AutoAll,
-        AutoReplyTweet,
-        AutoReplyDM,
-        AutoReplyHashtag,
-        AutoReplyLikedTweet,
-        AutoEnterSweepsFromTweet,
-        AutoEnterSweepsFromHashtag
+		[EnumMember(Value = "AutoAll")]
+		AutoAll,
+		[EnumMember(Value = "AutoReplyTweet")]
+		AutoReplyTweet,
+		[EnumMember(Value = "AutoReplyDM")]
+		AutoReplyDM,
+		[EnumMember(Value = "AutoReplyHashtag")]
+		AutoReplyHashtag,
+		[EnumMember(Value = "AutoReplyLikedTweet")]
+		AutoReplyLikedTweet,
+		[EnumMember(Value = "AutoEnterSweepsFromTweet")]
+		AutoEnterSweepsFromTweet,
+		[EnumMember(Value = "AutoEnterSweepsFromHashtag")]
+		AutoEnterSweepsFromHashtag
     }
 
     public enum UserIdentifierType

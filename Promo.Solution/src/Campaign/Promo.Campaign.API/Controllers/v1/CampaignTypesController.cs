@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using Promo.Campaign.Core.RequestHandlers;
 using Promo.Campaign.Infrastructure.Models;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 
@@ -31,6 +32,10 @@ namespace Promo.Campaign.API.Controllers.v1
         public async Task<ActionResult<IEnumerable<CampaignType>>> GetAllAsync()
         {
             var campaignTypes = await _mediator.Send(new GetAllCampaignTypesRequest());
+			campaignTypes.ToList().Add(new CampaignType
+			{
+				CampaignTypeId = 555
+			});
 
             return new OkObjectResult(campaignTypes);
         }

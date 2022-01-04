@@ -25,6 +25,7 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Reflection;
+using System.Text.Json.Serialization;
 using Tweetinvi;
 
 namespace Promo.Campaign.API
@@ -42,7 +43,11 @@ namespace Promo.Campaign.API
         public void ConfigureServices(IServiceCollection services)
         {
 
-            services.AddControllers();
+			services.AddControllers().AddJsonOptions(v =>
+			{
+				var enumConverter = new JsonStringEnumConverter();
+				v.JsonSerializerOptions.Converters.Add(enumConverter);
+			});
 
             services.AddSwaggerGen(c =>
             {
@@ -136,8 +141,9 @@ namespace Promo.Campaign.API
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory loggerFactory)
         {
-            if (env.IsDevelopment())
-            {
+			loggerFactory.CreateLogger<Startup>().LogInformation($"We are using {env.EnvironmentName} config");
+			if (env.IsDevelopment())
+            {				
                 app.UseDeveloperExceptionPage();
                 app.UseSwagger();
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Promo.Campaign.API v1"));
