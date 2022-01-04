@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "promoharvesterservice.fullname" . }}
+  labels:
+    app: {{ template "promoharvesterservice.name" . }}
+    chart: {{ template "promoharvesterservice.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app: {{ template "promoharvesterservice.name" . }}
+    release: {{ .Release.Name }}

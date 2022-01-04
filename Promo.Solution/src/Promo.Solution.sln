@@ -18,10 +18,19 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Promo.Sweeps.API", "Sweeps\Promo.Sweeps.API\Promo.Sweeps.API.csproj", "{D67AA555-BF71-41EC-B7BB-022DF19633E7}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Campaign", "Campaign", "{A20CFF79-75DC-4DF7-916A-E8754E79A6EF}"
+	ProjectSection(SolutionItems) = preProject
+		Campaign\Promo.Campaign.API\Dockerfile = Campaign\Promo.Campaign.API\Dockerfile
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Membership", "Membership", "{59AC14F3-E99A-4A32-B877-D114711D1FC0}"
+	ProjectSection(SolutionItems) = preProject
+		Membership\Promo.Membership.API\Dockerfile = Membership\Promo.Membership.API\Dockerfile
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Sweeps", "Sweeps", "{08EA081E-D1EA-43F5-BBC0-250F3943163E}"
+	ProjectSection(SolutionItems) = preProject
+		Sweeps\Promo.Sweeps.API\Dockerfile = Sweeps\Promo.Sweeps.API\Dockerfile
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Promo.Membership.Core", "Membership\Promo.Membership.Core\Promo.Membership.Core.csproj", "{3771019C-AB89-40F6-8003-54D34362FD57}"
 EndProject
@@ -34,6 +43,9 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Promo.Campaign.Infrastructure", "Campaign\Promo.Campaign.Infrastructure\Promo.Campaign.Infrastructure.csproj", "{B8E47891-EC18-4B9F-B0EB-085946F1EDD2}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Emails", "Emails", "{4D9F09C1-869D-4B05-AB15-590B71E80875}"
+	ProjectSection(SolutionItems) = preProject
+		Email\Promo.Emails.API\Dockerfile = Email\Promo.Emails.API\Dockerfile
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Promo.Emails.API", "Email\Promo.Emails.API\Promo.Emails.API.csproj", "{714D96D0-5659-4D58-B042-74DD5CB75F2F}"
 EndProject
@@ -48,6 +60,9 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Promo.Membership.Service", "Membership\Promo.Membership.Service\Promo.Membership.Service.csproj", "{C0AD7F81-31F1-468F-BB58-275E7FCCDBB5}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Rules", "Rules", "{CD7A391F-189A-4AF8-B033-73690CEDBFCA}"
+	ProjectSection(SolutionItems) = preProject
+		Rules\Promo.Rules.API\Dockerfile = Rules\Promo.Rules.API\Dockerfile
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Promo.Rules.API", "Rules\Promo.Rules.API\Promo.Rules.API.csproj", "{DEB1A878-6DD1-4A65-840D-45D8A4C07150}"
 EndProject
@@ -56,6 +71,11 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Promo.Rules.Infrastructure", "Rules\Promo.Rules.Infrastructure\Promo.Rules.Infrastructure.csproj", "{0CE83CF8-A350-4450-902F-1E1E85560E48}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Harvester", "Harvester", "{8F542792-CDF6-458D-A451-3708C1D088C9}"
+	ProjectSection(SolutionItems) = preProject
+		Harvesters\Promo.Harvester.Service\azds.yaml = Harvesters\Promo.Harvester.Service\azds.yaml
+		Harvesters\Promo.Harvester.Service\Dockerfile = Harvesters\Promo.Harvester.Service\Dockerfile
+		Harvesters\Promo.Harvester.Service\Dockerfile.develop = Harvesters\Promo.Harvester.Service\Dockerfile.develop
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Promo.Harvester.Service", "Harvesters\Promo.Harvester.Service\Promo.Harvester.Service.csproj", "{A03EB414-413A-426A-A0E5-14C40F73C27D}"
 EndProject
@@ -70,51 +90,61 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.editorconfig = .editorconfig
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "mysql-scripts", "mysql-scripts", "{353ED1C8-F630-4B3B-8BD0-1F2DCCFFE0A0}"
-	ProjectSection(SolutionItems) = preProject
-		Promo.Campaign.Infrastructure\campaign_types.sql = Promo.Campaign.Infrastructure\campaign_types.sql
-		promo.campaign.sql = promo.campaign.sql
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "mysql-scripts", "mysql-scripts", "{DDF190BD-1B3D-4670-B2DC-0690EB238EC8}"
-	ProjectSection(SolutionItems) = preProject
-		promo.email.sql = promo.email.sql
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "mysql-scripts", "mysql-scripts", "{89C4B0CA-72E7-4A27-8240-6EBB63C427C9}"
-	ProjectSection(SolutionItems) = preProject
-		promo.harvester.sql = promo.harvester.sql
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "mysql-scripts", "mysql-scripts", "{2958C22C-11FC-4643-9C16-2972B3ACB4A9}"
-	ProjectSection(SolutionItems) = preProject
-		promo.membership.sql = promo.membership.sql
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "mysql-scripts", "mysql-scripts", "{BC428908-6C40-4618-AAEE-851B67BAE812}"
-	ProjectSection(SolutionItems) = preProject
-		promo.rules.sql = promo.rules.sql
-		C:\Users\Gamer\OneDrive\Documents\watch_type_campaign_types.csv = C:\Users\Gamer\OneDrive\Documents\watch_type_campaign_types.csv
-		C:\Users\Gamer\OneDrive\Documents\watch_types.csv = C:\Users\Gamer\OneDrive\Documents\watch_types.csv
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "mysql-scripts", "mysql-scripts", "{7F56C758-F831-4018-AA13-4A5FA7B4ED03}"
-	ProjectSection(SolutionItems) = preProject
-		promo.sweeps.sql = promo.sweeps.sql
-	EndProjectSection
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Reporting", "Reporting", "{7590E748-DAF2-4826-A9C4-F7FFDC9A4F57}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "mysql-scripts", "mysql-scripts", "{9C99D14F-F82C-41D2-B0A7-A5B49A3A9FC4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Promo.Reporting.API", "Reporting\Promo.Reporting.API\Promo.Reporting.API.csproj", "{2152338A-111C-4E61-ABFF-C9BE1A17D61A}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Promo.Reporting.Core", "Reporting\Promo.Reporting.Core\Promo.Reporting.Core.csproj", "{872FFE66-C7A9-465B-A668-378C27AEAA9D}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Promo.Reporting.Infrastructure", "Reporting\Promo.Reporting.Infrastructure\Promo.Reporting.Infrastructure.csproj", "{4CD13194-1061-48F5-86F6-5F6A60B00B2A}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "databases", "databases", "{CAE06D12-D886-4C59-9572-C2CF5033C576}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CampaignDb", "CampaignDb", "{C2BCE800-060B-46C8-B986-0321684C1B35}"
 	ProjectSection(SolutionItems) = preProject
-		promo.reporting.sql = promo.reporting.sql
+		..\databases\CampaignDb\Dockerfile = ..\databases\CampaignDb\Dockerfile
+		..\databases\CampaignDb\init-file.sql = ..\databases\CampaignDb\init-file.sql
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Promo.Reporting.API", "Reporting\Promo.Reporting.API\Promo.Reporting.API.csproj", "{2152338A-111C-4E61-ABFF-C9BE1A17D61A}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "EmailDb", "EmailDb", "{770537D4-16FD-41F7-A24E-2D26B6D3F0F3}"
+	ProjectSection(SolutionItems) = preProject
+		..\databases\EmailDb\Dockerfile = ..\databases\EmailDb\Dockerfile
+		..\databases\EmailDb\promo.email.stored_procedures.sql = ..\databases\EmailDb\promo.email.stored_procedures.sql
+		..\databases\EmailDb\promo.email.tables.sql = ..\databases\EmailDb\promo.email.tables.sql
+	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Promo.Reporting.Core", "Reporting\Promo.Reporting.Core\Promo.Reporting.Core.csproj", "{872FFE66-C7A9-465B-A668-378C27AEAA9D}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "HarvesterDb", "HarvesterDb", "{3A20A910-5953-4B02-916D-14A0522B1BD0}"
+	ProjectSection(SolutionItems) = preProject
+		..\databases\HarvesterDb\Dockerfile = ..\databases\HarvesterDb\Dockerfile
+		..\databases\HarvesterDb\promo.harvester.stored_procedures.sql = ..\databases\HarvesterDb\promo.harvester.stored_procedures.sql
+		..\databases\HarvesterDb\promo.harvester.tables.sql = ..\databases\HarvesterDb\promo.harvester.tables.sql
+	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Promo.Reporting.Infrastructure", "Reporting\Promo.Reporting.Infrastructure\Promo.Reporting.Infrastructure.csproj", "{4CD13194-1061-48F5-86F6-5F6A60B00B2A}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "MembershipDb", "MembershipDb", "{F337E0CB-5FE3-4DD4-BE65-BF767A82BABD}"
+	ProjectSection(SolutionItems) = preProject
+		..\databases\MembershipDb\promo.membership.stored_procedures.sql = ..\databases\MembershipDb\promo.membership.stored_procedures.sql
+		..\databases\MembershipDb\promo.membership.tables.sql = ..\databases\MembershipDb\promo.membership.tables.sql
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ReportingDb", "ReportingDb", "{4C79AFF1-2E03-4557-9E9B-B2DEEB2BE74D}"
+	ProjectSection(SolutionItems) = preProject
+		..\databases\ReportingDb\promo.reporting.stored_procedures.sql = ..\databases\ReportingDb\promo.reporting.stored_procedures.sql
+		..\databases\ReportingDb\promo.reporting.tables.sql = ..\databases\ReportingDb\promo.reporting.tables.sql
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "RulesDb", "RulesDb", "{70E567C3-049A-4BFB-AD31-E246B2FE8338}"
+	ProjectSection(SolutionItems) = preProject
+		..\databases\RulesDb\promo.rules.stored_procedures.sql = ..\databases\RulesDb\promo.rules.stored_procedures.sql
+		..\databases\RulesDb\promo.rules.tables.sql = ..\databases\RulesDb\promo.rules.tables.sql
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SweepsDb", "SweepsDb", "{6006051B-7860-463B-9F42-BB56E01CD6B2}"
+	ProjectSection(SolutionItems) = preProject
+		..\databases\SweepsDb\promo.sweeps.stored_procedures.sql = ..\databases\SweepsDb\promo.sweeps.stored_procedures.sql
+		..\databases\SweepsDb\promo.sweeps.tables.sql = ..\databases\SweepsDb\promo.sweeps.tables.sql
+	EndProjectSection
+EndProject
+Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{E8588935-9869-442B-82A0-CCA7E09E221D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -226,6 +256,10 @@ Global
 		{4CD13194-1061-48F5-86F6-5F6A60B00B2A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4CD13194-1061-48F5-86F6-5F6A60B00B2A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4CD13194-1061-48F5-86F6-5F6A60B00B2A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E8588935-9869-442B-82A0-CCA7E09E221D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E8588935-9869-442B-82A0-CCA7E09E221D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E8588935-9869-442B-82A0-CCA7E09E221D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E8588935-9869-442B-82A0-CCA7E09E221D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -260,17 +294,17 @@ Global
 		{25A70D18-C41E-4559-8E9C-0EAF2A04F400} = {8F542792-CDF6-458D-A451-3708C1D088C9}
 		{5850FC94-6CE2-4B0A-8A1C-F4ECCD78F4CC} = {8F542792-CDF6-458D-A451-3708C1D088C9}
 		{90D8D580-19F7-4C8E-815C-048C3E607108} = {08EA081E-D1EA-43F5-BBC0-250F3943163E}
-		{353ED1C8-F630-4B3B-8BD0-1F2DCCFFE0A0} = {A20CFF79-75DC-4DF7-916A-E8754E79A6EF}
-		{DDF190BD-1B3D-4670-B2DC-0690EB238EC8} = {4D9F09C1-869D-4B05-AB15-590B71E80875}
-		{89C4B0CA-72E7-4A27-8240-6EBB63C427C9} = {8F542792-CDF6-458D-A451-3708C1D088C9}
-		{2958C22C-11FC-4643-9C16-2972B3ACB4A9} = {59AC14F3-E99A-4A32-B877-D114711D1FC0}
-		{BC428908-6C40-4618-AAEE-851B67BAE812} = {CD7A391F-189A-4AF8-B033-73690CEDBFCA}
-		{7F56C758-F831-4018-AA13-4A5FA7B4ED03} = {08EA081E-D1EA-43F5-BBC0-250F3943163E}
 		{7590E748-DAF2-4826-A9C4-F7FFDC9A4F57} = {B71190C8-5608-4FFE-8C71-DA20A334CFC6}
-		{9C99D14F-F82C-41D2-B0A7-A5B49A3A9FC4} = {7590E748-DAF2-4826-A9C4-F7FFDC9A4F57}
 		{2152338A-111C-4E61-ABFF-C9BE1A17D61A} = {7590E748-DAF2-4826-A9C4-F7FFDC9A4F57}
 		{872FFE66-C7A9-465B-A668-378C27AEAA9D} = {7590E748-DAF2-4826-A9C4-F7FFDC9A4F57}
 		{4CD13194-1061-48F5-86F6-5F6A60B00B2A} = {7590E748-DAF2-4826-A9C4-F7FFDC9A4F57}
+		{C2BCE800-060B-46C8-B986-0321684C1B35} = {CAE06D12-D886-4C59-9572-C2CF5033C576}
+		{770537D4-16FD-41F7-A24E-2D26B6D3F0F3} = {CAE06D12-D886-4C59-9572-C2CF5033C576}
+		{3A20A910-5953-4B02-916D-14A0522B1BD0} = {CAE06D12-D886-4C59-9572-C2CF5033C576}
+		{F337E0CB-5FE3-4DD4-BE65-BF767A82BABD} = {CAE06D12-D886-4C59-9572-C2CF5033C576}
+		{4C79AFF1-2E03-4557-9E9B-B2DEEB2BE74D} = {CAE06D12-D886-4C59-9572-C2CF5033C576}
+		{70E567C3-049A-4BFB-AD31-E246B2FE8338} = {CAE06D12-D886-4C59-9572-C2CF5033C576}
+		{6006051B-7860-463B-9F42-BB56E01CD6B2} = {CAE06D12-D886-4C59-9572-C2CF5033C576}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {94B46B7F-1545-465E-863A-AAD0C58A8C0F}

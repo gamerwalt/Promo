@@ -374,3 +374,4 @@ Promo.Solution/src/Promo.Sweeps.Service/appsettings.Development.json
 Promo.Solution/src/Promo.Reporting.API/appsettings.json
 Promo.Solution/src/Promo.Reporting.API/appsettings.Development.json
 Promo.Solution/src/Promo.Reporting.API/Properties/launchSettings.json
+Promo.Solution/docker-compose.yml

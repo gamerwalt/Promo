@@ -1,0 +1,19 @@
+{
+  "profiles": {
+    "Docker Compose": {
+      "commandName": "DockerCompose",
+      "serviceActions": {
+        "campaigndb": "StartWithoutDebugging",
+        "emaildb": "StartWithoutDebugging",
+        "harvesterdb": "StartWithoutDebugging",
+        "membershipdb": "StartWithoutDebugging",
+        "promo.campaign.api": "StartWithoutDebugging",
+        "reportingdb": "StartWithoutDebugging",
+        "rulesdb": "StartWithoutDebugging",
+        "sweepsdb": "StartWithoutDebugging"
+      },
+      "composeLaunchAction": "None",
+      "commandVersion": "1.0"
+    }
+  }
+}
