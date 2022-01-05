@@ -23,9 +23,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Campaign", "Campaign", "{A2
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Membership", "Membership", "{59AC14F3-E99A-4A32-B877-D114711D1FC0}"
-	ProjectSection(SolutionItems) = preProject
-		Membership\Promo.Membership.API\Dockerfile = Membership\Promo.Membership.API\Dockerfile
-	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Sweeps", "Sweeps", "{08EA081E-D1EA-43F5-BBC0-250F3943163E}"
 	ProjectSection(SolutionItems) = preProject
@@ -71,11 +68,6 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Promo.Rules.Infrastructure", "Rules\Promo.Rules.Infrastructure\Promo.Rules.Infrastructure.csproj", "{0CE83CF8-A350-4450-902F-1E1E85560E48}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Harvester", "Harvester", "{8F542792-CDF6-458D-A451-3708C1D088C9}"
-	ProjectSection(SolutionItems) = preProject
-		Harvesters\Promo.Harvester.Service\azds.yaml = Harvesters\Promo.Harvester.Service\azds.yaml
-		Harvesters\Promo.Harvester.Service\Dockerfile = Harvesters\Promo.Harvester.Service\Dockerfile
-		Harvesters\Promo.Harvester.Service\Dockerfile.develop = Harvesters\Promo.Harvester.Service\Dockerfile.develop
-	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Promo.Harvester.Service", "Harvesters\Promo.Harvester.Service\Promo.Harvester.Service.csproj", "{A03EB414-413A-426A-A0E5-14C40F73C27D}"
 EndProject
@@ -88,9 +80,13 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{B4B41DAC-85D4-429B-9139-586080A9FAEB}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
+		Readme.md = Readme.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Reporting", "Reporting", "{7590E748-DAF2-4826-A9C4-F7FFDC9A4F57}"
+	ProjectSection(SolutionItems) = preProject
+		Reporting\Promo.Reporting.API\Dockerfile = Reporting\Promo.Reporting.API\Dockerfile
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Promo.Reporting.API", "Reporting\Promo.Reporting.API\Promo.Reporting.API.csproj", "{2152338A-111C-4E61-ABFF-C9BE1A17D61A}"
 EndProject

@@ -1,37 +1,6 @@
 version: '3.4'
 
 services:
-  campaigndb:
-    image: mysql
-    restart: always
-    command: --default-authentication-plugin=mysql_native_password
-    environment:
-        MYSQL_ROOT_PASSWORD: iKv7w99Jb^2mKn7%
-        MYSQL_DATABASE: promo.campaign
-        MYSQL_USER: campaign_app_user
-        MYSQL_PASSWORD: iKv7w99Jb^2mKn7%
-    ports:
-        - "3308:3306"
-    volumes:
-        - ./databases/CampaignDb/init-file.sql:/docker-entrypoint-initdb.d/1.sql
-    build:
-        context: .
-  emaildb:
-    image: mysql
-    restart: always
-    command: --default-authentication-plugin=mysql_native_password
-    environment:
-        MYSQL_ROOT_PASSWORD: iKv7w99Jb^2mKn7%
-        MYSQL_DATABASE: promo.email
-        MYSQL_USER: email_app_user
-        MYSQL_PASSWORD: M%Dpz5^g9GCmGJxF
-    ports:
-        - "3309:3306"
-    volumes:
-        - ./databases/EmailDb/promo.email.tables.sql:/docker-entrypoint-initdb.d/1.sql
-        - ./databases/EmailDb/promo.email.stored_procedures.sql:/docker-entrypoint-initdb.d/2.sql
-    build:
-        context: .
   harvesterdb:
     image: mysql
     restart: always
@@ -48,6 +17,73 @@ services:
         - ./databases/HarvesterDb/promo.harvester.stored_procedures.sql:/docker-entrypoint-initdb.d/2.sql
     build:
         context: .
+  campaigndb:
+    image: mysql
+    restart: always
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+        MYSQL_ROOT_PASSWORD: iKv7w99Jb^2mKn7%
+        MYSQL_DATABASE: promo.campaign
+        MYSQL_USER: campaign_app_user
+        MYSQL_PASSWORD: iKv7w99Jb^2mKn7%
+    ports:
+        - "3308:3306"
+    volumes:
+        - ./databases/CampaignDb/init-file.sql:/docker-entrypoint-initdb.d/1.sql
+    build:
+        context: .
+  campaignapi:
+    image: ${DOCKER_REGISTRY-}campaignapi
+    build:
+      context: .
+      dockerfile: Campaign/Promo.Campaign.API/Dockerfile
+    depends_on:
+      - campaigndb
+    ports:
+      - "5003:80"
+      - "5002:443"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=https://+:443;http://+:80
+      - ASPNETCORE_Kestrel__Certificates__Default__Password=campaignapi
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/campaignapi.pfx
+    volumes:
+      - ~/.aspnet/https:/https:ro
+
+  emaildb:
+    image: mysql
+    restart: always
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+        MYSQL_ROOT_PASSWORD: iKv7w99Jb^2mKn7%
+        MYSQL_DATABASE: promo.email
+        MYSQL_USER: email_app_user
+        MYSQL_PASSWORD: M%Dpz5^g9GCmGJxF
+    ports:
+        - "3309:3306"
+    volumes:
+        - ./databases/EmailDb/promo.email.tables.sql:/docker-entrypoint-initdb.d/1.sql
+        - ./databases/EmailDb/promo.email.stored_procedures.sql:/docker-entrypoint-initdb.d/2.sql
+    build:
+        context: .
+  emailsapi:
+    image: ${DOCKER_REGISTRY-}emailsapi
+    build:
+      context: .
+      dockerfile: Email/Promo.Emails.API/Dockerfile
+    depends_on:
+      - emaildb
+    ports:
+      - "5007:80"
+      - "5006:443"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=https://+:443;http://+:80
+      - ASPNETCORE_Kestrel__Certificates__Default__Password=campaignapi
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/campaignapi.pfx
+    volumes:
+      - ~/.aspnet/https:/https:ro
+
   membershipdb:
     image: mysql
     restart: always
@@ -64,6 +100,24 @@ services:
         - ./databases/MembershipDb/promo.membership.stored_procedures.sql:/docker-entrypoint-initdb.d/2.sql
     build:
         context: .
+  membership.api:
+    image: ${DOCKER_REGISTRY-}membershipapi
+    build:
+      context: .
+      dockerfile: Membership/Promo.Membership.API/Dockerfile
+    depends_on:
+      - membershipdb
+    ports:
+      - "5000:80"
+      - "5001:443"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=https://+:443;http://+:80
+      - ASPNETCORE_Kestrel__Certificates__Default__Password=campaignapi
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/campaignapi.pfx
+    volumes:
+      - ~/.aspnet/https:/https:ro
+
   reportingdb:
     image: mysql
     restart: always
@@ -80,6 +134,25 @@ services:
         - ./databases/ReportingDb/promo.reporting.stored_procedures.sql:/docker-entrypoint-initdb.d/2.sql
     build:
         context: .
+
+  reportingapi:
+    image: ${DOCKER_REGISTRY-}reportingapi
+    build:
+      context: .
+      dockerfile: Reporting/Promo.Reporting.API/Dockerfile
+    depends_on:
+      - reportingdb
+    ports:
+      - "5012:80"
+      - "5011:443"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=https://+:443;http://+:80
+      - ASPNETCORE_Kestrel__Certificates__Default__Password=campaignapi
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/campaignapi.pfx
+    volumes:
+      - ~/.aspnet/https:/https:ro
+
   rulesdb:
     image: mysql
     restart: always
@@ -96,6 +169,25 @@ services:
         - ./databases/RulesDb/promo.rules.stored_procedures.sql:/docker-entrypoint-initdb.d/2.sql
     build:
         context: .
+
+  rulesapi:
+    image: ${DOCKER_REGISTRY-}rulesapi
+    build:
+      context: .
+      dockerfile: Rules/Promo.Rules.API/Dockerfile
+    depends_on:
+      - rulesdb
+    ports:
+      - "5010:80"
+      - "5009:443"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=https://+:443;http://+:80
+      - ASPNETCORE_Kestrel__Certificates__Default__Password=campaignapi
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/campaignapi.pfx
+    volumes:
+      - ~/.aspnet/https:/https:ro
+
   sweepsdb:
     image: mysql
     restart: always
@@ -112,48 +204,9 @@ services:
         - ./databases/SweepsDb/promo.sweeps.stored_procedures.sql:/docker-entrypoint-initdb.d/2.sql
     build:
         context: .
-  promo.campaign.api:
-    image: ${DOCKER_REGISTRY-}promocampaignapi
-    build:
-      context: .
-      dockerfile: Campaign/Promo.Campaign.API/Dockerfile
-    depends_on:
-      - campaigndb
-    ports:
-      - "5003:80"
 
-  promo.reporting.api:
-    image: ${DOCKER_REGISTRY-}promoreportingapi
-    build:
-      context: .
-      dockerfile: Reporting/Promo.Reporting.API/Dockerfile
-    depends_on:
-      - reportingdb
-    ports:
-      - "5012:80"
-
-  promo.membership.api:
-    image: ${DOCKER_REGISTRY-}promomembershipapi
-    build:
-      context: .
-      dockerfile: Membership/Promo.Membership.API/Dockerfile
-    depends_on:
-      - membershipdb
-    ports:
-      - "5000:80"
-
-  promo.rules.api:
-    image: ${DOCKER_REGISTRY-}promorulesapi
-    build:
-      context: .
-      dockerfile: Rules/Promo.Rules.API/Dockerfile
-    depends_on:
-      - rulesdb
-    ports:
-      - "5010:80"
-
-  promo.sweeps.api:
-    image: ${DOCKER_REGISTRY-}promosweepsapi
+  sweepsapi:
+    image: ${DOCKER_REGISTRY-}sweepsapi
     build:
       context: .
       dockerfile: Sweeps/Promo.Sweeps.API/Dockerfile
@@ -161,14 +214,11 @@ services:
       - sweepsdb
     ports:
       - "5005:80"
-
-  promo.emails.api:
-    image: ${DOCKER_REGISTRY-}promoemailsapi
-    build:
-      context: .
-      dockerfile: Email/Promo.Emails.API/Dockerfile
-    depends_on:
-      - emaildb
-    ports:
-      - "5007:80"
-
+      - "5004:443"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=https://+:443;http://+:80
+      - ASPNETCORE_Kestrel__Certificates__Default__Password=campaignapi
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/campaignapi.pfx
+    volumes:
+      - ~/.aspnet/https:/https:ro
