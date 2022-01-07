@@ -148,12 +148,14 @@ namespace Promo.Campaign.API
                 app.UseSwagger();
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Promo.Campaign.API v1"));
             }
+			else
+			{
+				app.UseHttpsRedirection();
+			}
 
             app.ConfigureExceptionHandler(app.ApplicationServices.GetRequiredService<ILogger<Startup>>());
 
-            loggerFactory.AddFile(@"C:\Logs\log.txt");
-
-            app.UseHttpsRedirection();
+            //loggerFactory.AddFile(@"C:\Logs\log.txt");            
 
             app.UseRouting();
 

@@ -22,6 +22,4 @@ RUN dotnet publish "Promo.Sweeps.API.csproj" -c Release -o /app/publish
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-COPY Campaign/Promo.Campaign.API/campaignapi.crt /usr/local/share/ca-certificates
-RUN chmod 644 /usr/local/share/ca-certificates/campaignapi.crt && update-ca-certificates
 ENTRYPOINT ["dotnet", "Promo.Sweeps.API.dll"]

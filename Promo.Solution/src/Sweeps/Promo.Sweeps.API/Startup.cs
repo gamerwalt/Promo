@@ -78,10 +78,12 @@ namespace Promo.Sweeps.API
                 app.UseSwagger();
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Promo.Sweeps.API v1"));
             }
+			else
+			{
+				app.UseHttpsRedirection();
+			}
 
-            app.UseHttpsRedirection();
-
-            app.UseRouting();
+			app.UseRouting();
 
             app.UseAuthentication();
             app.UseAuthorization();

@@ -38,7 +38,7 @@ namespace Promo.Harvester.Service
         {
             var hashTagRules = await _rulesClient.GetHashTagRulesAsync();
 
-            if (hashTagRules.Any())
+            if (hashTagRules != null)
             {
                 foreach (var rule in hashTagRules)
                 {

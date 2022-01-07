@@ -18,9 +18,6 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Promo.Sweeps.API", "Sweeps\Promo.Sweeps.API\Promo.Sweeps.API.csproj", "{D67AA555-BF71-41EC-B7BB-022DF19633E7}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Campaign", "Campaign", "{A20CFF79-75DC-4DF7-916A-E8754E79A6EF}"
-	ProjectSection(SolutionItems) = preProject
-		Campaign\Promo.Campaign.API\Dockerfile = Campaign\Promo.Campaign.API\Dockerfile
-	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Membership", "Membership", "{59AC14F3-E99A-4A32-B877-D114711D1FC0}"
 EndProject
@@ -40,9 +37,6 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Promo.Campaign.Infrastructure", "Campaign\Promo.Campaign.Infrastructure\Promo.Campaign.Infrastructure.csproj", "{B8E47891-EC18-4B9F-B0EB-085946F1EDD2}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Emails", "Emails", "{4D9F09C1-869D-4B05-AB15-590B71E80875}"
-	ProjectSection(SolutionItems) = preProject
-		Email\Promo.Emails.API\Dockerfile = Email\Promo.Emails.API\Dockerfile
-	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Promo.Emails.API", "Email\Promo.Emails.API\Promo.Emails.API.csproj", "{714D96D0-5659-4D58-B042-74DD5CB75F2F}"
 EndProject
@@ -57,9 +51,6 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Promo.Membership.Service", "Membership\Promo.Membership.Service\Promo.Membership.Service.csproj", "{C0AD7F81-31F1-468F-BB58-275E7FCCDBB5}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Rules", "Rules", "{CD7A391F-189A-4AF8-B033-73690CEDBFCA}"
-	ProjectSection(SolutionItems) = preProject
-		Rules\Promo.Rules.API\Dockerfile = Rules\Promo.Rules.API\Dockerfile
-	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Promo.Rules.API", "Rules\Promo.Rules.API\Promo.Rules.API.csproj", "{DEB1A878-6DD1-4A65-840D-45D8A4C07150}"
 EndProject
@@ -84,9 +75,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Reporting", "Reporting", "{7590E748-DAF2-4826-A9C4-F7FFDC9A4F57}"
-	ProjectSection(SolutionItems) = preProject
-		Reporting\Promo.Reporting.API\Dockerfile = Reporting\Promo.Reporting.API\Dockerfile
-	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Promo.Reporting.API", "Reporting\Promo.Reporting.API\Promo.Reporting.API.csproj", "{2152338A-111C-4E61-ABFF-C9BE1A17D61A}"
 EndProject
@@ -137,7 +125,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SweepsDb", "SweepsDb", "{60
 		databases\SweepsDb\promo.sweeps.tables.sql = databases\SweepsDb\promo.sweeps.tables.sql
 	EndProjectSection
 EndProject
-Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{E8588935-9869-442B-82A0-CCA7E09E221D}"
+Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{2B26F9D1-08EE-4142-B495-EABE2FECE416}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "k8s", "k8s", "{31B8B14C-022C-4665-AD04-9ED7FFA90028}"
+	ProjectSection(SolutionItems) = preProject
+		deployment.yaml = deployment.yaml
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -249,10 +242,10 @@ Global
 		{4CD13194-1061-48F5-86F6-5F6A60B00B2A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4CD13194-1061-48F5-86F6-5F6A60B00B2A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4CD13194-1061-48F5-86F6-5F6A60B00B2A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{E8588935-9869-442B-82A0-CCA7E09E221D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E8588935-9869-442B-82A0-CCA7E09E221D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E8588935-9869-442B-82A0-CCA7E09E221D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E8588935-9869-442B-82A0-CCA7E09E221D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2B26F9D1-08EE-4142-B495-EABE2FECE416}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2B26F9D1-08EE-4142-B495-EABE2FECE416}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2B26F9D1-08EE-4142-B495-EABE2FECE416}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2B26F9D1-08EE-4142-B495-EABE2FECE416}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

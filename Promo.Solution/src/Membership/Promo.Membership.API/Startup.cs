@@ -148,14 +148,12 @@ namespace Promo.Membership.API
                 app.UseSwagger();
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Promo.Web.API v1"));
             }
-            else
-            {
-                //setup ExceptionHandler
-            }
+			else
+			{
+				app.UseHttpsRedirection();
+			}
 
-            app.UseHttpsRedirection();
-
-            app.UseRouting();
+			app.UseRouting();
 
             app.UseAuthentication();
             app.UseAuthorization();
