@@ -21,3 +21,30 @@ Add OpenSsl to Path
 
 
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+
+To set images for Docker
+D:\Promo\Promo.Solution\src>docker image tag promocampaignapi promocampaignapi:latest
+
+D:\Promo\Promo.Solution\src>docker image tag promoemailsapi promoemailsapi:latest
+
+D:\Promo\Promo.Solution\src>docker image tag promomembershipapi promomembershipapi:latest
+
+D:\Promo\Promo.Solution\src>docker image tag promoreportingapi promoreportingapi:latest
+
+D:\Promo\Promo.Solution\src>docker image tag promorulesapi promorulesapi:latest
+
+D:\Promo\Promo.Solution\src>docker image tag promosweepsapi promosweepsapi:latest
+
+D:\Promo\Promo.Solution\src>docker push gamerwalt/promosweepsapi:latest
+The push refers to repository [docker.io/gamerwalt/promosweepsapi]
+An image does not exist locally with the tag: gamerwalt/promosweepsapi
+
+D:\Promo\Promo.Solution\src>docker tag promocampaignapi:latest gamerwalt/dockerhub:promocampaignapi
+
+D:\Promo\Promo.Solution\src>docker tag promoemailsapi:latest gamerwalt/dockerhub:promoemailsapi
+
+D:\Promo\Promo.Solution\src>docker tag promomembershipapi:latest gamerwalt/dockerhub:promomembershipapi
+
+D:\Promo\Promo.Solution\src>docker tag promoreportingapi:latest gamerwalt/dockerhub:promoreportingapi
+
+D:\Promo\Promo.Solution\src>docker tag promorulesapi:latest gamerwalt/dockerhub:promorulesapi
