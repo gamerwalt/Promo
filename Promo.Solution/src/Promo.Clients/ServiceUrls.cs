@@ -4,7 +4,7 @@
     {
         //Sweeps
         public static string Sweeps = "v1/sweeps";
-		
+
 		public static string GetCampaignSweep = "v1/sweeps/campaign/{campaignUid}";
 
         //Campaign Sweeps
@@ -21,8 +21,12 @@
 		//EntryRule
 		public static string GetEntryRule = "v1/campaign/{campaignUid}/sweeps/{sweepUid}/entryrule";
 
+		//DrawRule
+		public static string GetSweepDrawRules = "v1/sweeps/drawrules/list";
+
 		//Campaigns
 		public static string GetCampaign = "v1/campaigns/{campaignUid}";
+		public static string GetCampaignsByUidList = "v1/campaigns/list";
 
 		//Reporting
 		public static string CreateReportSweepEntry = "v1/reporting/sweeps";

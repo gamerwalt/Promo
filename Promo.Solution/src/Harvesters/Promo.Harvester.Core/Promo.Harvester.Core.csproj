@@ -5,7 +5,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Json.NET.ContractResolverExtentions" Version="1.0.1" />
     <PackageReference Include="MediatR" Version="9.0.0" />
     <PackageReference Include="TweetinviAPI" Version="5.0.4" />
   </ItemGroup>

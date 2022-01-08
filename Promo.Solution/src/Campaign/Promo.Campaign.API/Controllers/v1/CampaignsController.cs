@@ -74,7 +74,17 @@ namespace Promo.Campaign.API.Controllers.v1
             return new OkObjectResult(campaign);
         }
 
-        [HttpPut("campaigns/{campaignUid:Guid}")]
+		[HttpGet("campaigns/list")]
+		[Produces("application/json")]
+		[ProducesResponseType((int)HttpStatusCode.OK, Type = typeof(IEnumerable<Infrastructure.Models.Campaign>))]
+		public async Task<ActionResult<Infrastructure.Models.Campaign>> GetListAsync([FromBody] CampaignUidList campaignUids)
+		{
+			var campaigns = await _mediator.Send(new GetCampaigns(campaignUids.CampaignUids));
+
+			return new OkObjectResult(campaigns);
+		}
+
+		[HttpPut("campaigns/{campaignUid:Guid}")]
         [Produces("application/json")]
         [ProducesResponseType((int)HttpStatusCode.OK, Type = typeof(Infrastructure.Models.Campaign))]
         [ProducesResponseType((int)HttpStatusCode.Unauthorized)]

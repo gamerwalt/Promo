@@ -23,6 +23,7 @@ namespace Promo.Clients.Internal
         Task<List<Rule>> GetRulesForReceivedTweetAsync(List<IHashtagEntity> hashtags);
         Task<Rule> GetRuleAsync(Guid ruleUid);
 		Task<EntryRule> GetEntryRulesForCampaignAndSweepsAsync(Campaign campaign, Sweep sweep);
+		Task<IEnumerable<SweepDrawRule>> GetSweepRulesAsync(IEnumerable<Guid> enumerable);
 	}
 
     public class RulesClient : IRulesClient
@@ -237,6 +238,42 @@ namespace Promo.Clients.Internal
 				if (result.IsSuccessStatusCode)
 				{
 					return JsonConvert.DeserializeObject<EntryRule>(await result.Content.ReadAsStringAsync());
+				}
+			}
+
+			return null;
+		}
+
+		public async Task<IEnumerable<SweepDrawRule>> GetSweepRulesAsync(IEnumerable<Guid> sweepUids)
+		{
+			var authModel = await AuthenticateService();
+
+			var result = new HttpResponseMessage();
+			string content = JsonConvert.SerializeObject(
+				new
+				{
+					sweepUids = sweepUids.ToList()
+				},
+				new JsonSerializerSettings
+				{
+					ContractResolver = new CamelCasePropertyNamesContractResolver()
+				}
+			);
+
+			var url = ServiceUrls.GetSweepDrawRules;
+
+			using (var requestMessage = new HttpRequestMessage(HttpMethod.Get, url))
+			{
+				requestMessage.Content = new StringContent(content, Encoding.UTF8, "application/json");
+				requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", authModel.IdToken);
+
+				result = await _client.SendAsync(requestMessage);
+				if (result.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+					throw new Exception(ExceptionMessages.UnauthroizedAccessToAPI);
+
+				if (result.IsSuccessStatusCode)
+				{
+					return JsonConvert.DeserializeObject<IEnumerable<SweepDrawRule>>(await result.Content.ReadAsStringAsync());
 				}
 			}
 

@@ -18,6 +18,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\Promo.Core\Promo.Core.csproj" />
+    <ProjectReference Include="..\..\Sweeps\Promo.Sweeps.Core\Promo.Sweeps.Core.csproj" />
     <ProjectReference Include="..\Promo.Rules.Core\Promo.Rules.Core.csproj" />
     <ProjectReference Include="..\Promo.Rules.Infrastructure\Promo.Rules.Infrastructure.csproj" />
   </ItemGroup>

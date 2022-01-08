@@ -190,3 +190,12 @@ BEGIN
     INNER JOIN watch_types as wt ON ct.watch_type_id = wt.watch_type_id;
 END$$
 DELIMITER ;
+
+DELIMITER $$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sweeps_draw_rule_get`(IN sweepUid VARCHAR(50))
+BEGIN
+	SELECT *
+    FROM sweep_draw_rules
+    WHERE sweep_uid = sweepUid;
+END$$
+DELIMITER ;

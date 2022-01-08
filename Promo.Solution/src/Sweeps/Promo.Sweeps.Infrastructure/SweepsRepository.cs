@@ -15,7 +15,8 @@ namespace Promo.Sweeps.Infrastructure
         Task<Sweep> GetAsync(Guid sweepUid);
         Task<IEnumerable<Sweep>> GetAllForCampaignAsync(Guid campaignUid);
         Task UpdateAsync(Guid sweepUid, Sweep sweep);
-    }
+		Task<IEnumerable<Sweep>> GetSweepsRequiringADrawAsync();
+	}
 
     public class SweepsRepository : ISweepsRepository
     {
@@ -92,7 +93,30 @@ namespace Promo.Sweeps.Infrastructure
             return sweep;
         }
 
-        public async Task UpdateAsync(Guid sweepUid, Sweep sweep)
+		public async Task<IEnumerable<Sweep>> GetSweepsRequiringADrawAsync()
+		{
+			var sweeps = new List<Sweep>();
+
+			using (var conn = new MySqlConnection(_database.GetConnectionString()))
+			{
+				var command = conn.CreateCommand();
+				command.CommandText = "sweep_requiring_draw_get";
+				command.CommandType = CommandType.StoredProcedure;
+
+				await conn.OpenAsync();
+				using (var reader = await command.ExecuteReaderAsync())
+				{
+					while (await reader.ReadAsync())
+					{
+						sweeps.Add(CreateSweepFrom(reader));
+					}
+				}
+			}
+
+			return sweeps;
+		}
+
+		public async Task UpdateAsync(Guid sweepUid, Sweep sweep)
         {
             using var conn = new MySqlConnection(_database.GetConnectionString());
             var command = conn.CreateCommand();

@@ -138,3 +138,15 @@ BEGIN
     WHERE campaign_uid = campaignUid;
 END$$
 DELIMITER ;
+
+DELIMITER $$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sweep_requiring_draw_get`(IN currentDate DATETIME)
+BEGIN
+	SELECT
+		*
+    FROM sweep
+    WHERE start_date < CURDATE()
+    AND end_date < CURDATE()
+    AND draw_date <= CURDATE();
+END$$
+DELIMITER ;

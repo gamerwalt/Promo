@@ -1,6 +1,7 @@
 ﻿using MySqlConnector;
 using Promo.Core;
 using Promo.Core.Extensions;
+using Promo.Rules.Infrastructure.Models;
 using System;
 using System.Collections.Generic;
 using System.Data;
