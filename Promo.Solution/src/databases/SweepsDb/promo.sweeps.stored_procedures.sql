@@ -150,3 +150,28 @@ BEGIN
     AND draw_date <= CURDATE();
 END$$
 DELIMITER ;
+
+DELIMITER $$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sweep_entries_get`(IN sweepUid VARCHAR(50))
+BEGIN
+	SELECT
+		se.sweep_entry_id,
+        se.sweep_entry_uid,
+        se.user_identifier,
+        se.user_identifier_type,
+        se.accepted_terms,
+        se.created_date,
+        se.updated_date,
+        s.sweep_uid,
+        s.sweep_id,
+        s.campaign_uid,
+        s.sweep_name,
+        s.start_date,
+        s.end_date,
+        s.draw_date,
+        s.created_date as sweep_created_date
+    FROM sweep_entry as se
+    INNER JOIN sweep as s ON se.sweep_id = s.sweep_id
+    WHERE s.sweep_uid = sweepUid;
+END$$
+DELIMITER ;

@@ -3,23 +3,25 @@ using Promo.Core;
 using Promo.Core.Extensions;
 using Promo.Sweeps.Infrastructure.Models;
 using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Threading.Tasks;
 
 namespace Promo.Sweeps.Infrastructure
 {
-    public interface ISweepsEntryRepository
+    public interface ISweepsEntriesRepository
     {
         Task CreateAsync(SweepEntry sweepEntry);
         Task<SweepEntry> GetAsync(Guid sweepEntryGuid);
         Task CreateCampaignSweepsEntryAsync(CampaignSweepsEntry campaignSweepsEntry);
-    }
+		Task<IEnumerable<SweepEntry>> GetSweepEntriesAsync(Guid sweepUid);
+	}
 
-    public class SweepsEntryRepository : ISweepsEntryRepository
+    public class SweepsEntriesRepository : ISweepsEntriesRepository
     {
         private readonly IDatabase _database;
 
-        public SweepsEntryRepository(IDatabase database)
+        public SweepsEntriesRepository(IDatabase database)
         {
             _database = database;
         }
@@ -83,7 +85,31 @@ namespace Promo.Sweeps.Infrastructure
             return sweepEntry;
         }
 
-        private SweepEntry CreateSweepEntryFrom(MySqlDataReader reader)
+		public async Task<IEnumerable<SweepEntry>> GetSweepEntriesAsync(Guid sweepUid)
+		{
+			var sweepEntries = new List<SweepEntry>();
+
+			using (var conn = new MySqlConnection(_database.GetConnectionString()))
+			{
+				var command = conn.CreateCommand();
+				command.CommandText = "sweep_entries_get";
+				command.CommandType = CommandType.StoredProcedure;
+				command.AddParameter(nameof(sweepUid), sweepUid);
+
+				await conn.OpenAsync();
+				using (var reader = await command.ExecuteReaderAsync())
+				{
+					while (await reader.ReadAsync())
+					{
+						sweepEntries.Add(CreateSweepEntryFrom(reader));
+					}
+				}
+			}
+
+			return sweepEntries;
+		}
+
+		private SweepEntry CreateSweepEntryFrom(MySqlDataReader reader)
         {
             return new SweepEntry
             {

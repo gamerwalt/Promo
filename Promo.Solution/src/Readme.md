@@ -48,3 +48,7 @@ D:\Promo\Promo.Solution\src>docker tag promomembershipapi:latest gamerwalt/docke
 D:\Promo\Promo.Solution\src>docker tag promoreportingapi:latest gamerwalt/dockerhub:promoreportingapi
 
 D:\Promo\Promo.Solution\src>docker tag promorulesapi:latest gamerwalt/dockerhub:promorulesapi
+
+
+#randomness
+https://khalidabuhakmeh.com/creating-random-numbers-with-dotnet-core

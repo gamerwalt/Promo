@@ -35,12 +35,12 @@ namespace Promo.Sweeps.Core.RequestHandlers
 
     public class CreateSweepEntryHandler : IRequestHandler<CreateSweepEntry, IEnumerable<SweepEntry>>
     {
-        private readonly ISweepsEntryRepository _repository;
+        private readonly ISweepsEntriesRepository _repository;
         private readonly ISweepsRepository _sweepsRepository;
 
         private List<Guid> EntryGuids;
 
-        public CreateSweepEntryHandler(ISweepsEntryRepository repository, ISweepsRepository sweepsRepository)
+        public CreateSweepEntryHandler(ISweepsEntriesRepository repository, ISweepsRepository sweepsRepository)
         {
             _repository = repository;
             _sweepsRepository = sweepsRepository;

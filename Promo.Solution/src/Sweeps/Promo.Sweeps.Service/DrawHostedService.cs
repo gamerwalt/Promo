@@ -1,26 +1,23 @@
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Promo.Sweeps.Draw.Service;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Promo.Sweeps.Service
 {
-    public class DrawHostedService : IHostedService
-    {
+	public class DrawHostedService : IHostedService
+	{
 		private readonly IDrawService _drawService;
-        private readonly ILogger<DrawHostedService> _logger;
+		private readonly ILogger<DrawHostedService> _logger;
 		private readonly IHostApplicationLifetime _appLifeTime;
 		private readonly CancellationTokenSource _cancellationTokenSource;
 
 		public DrawHostedService(
 			IDrawService drawService,
-			ILogger<DrawHostedService> logger, 
+			ILogger<DrawHostedService> logger,
 			IHostApplicationLifetime appLifeTime)
-        {
+		{
 			_drawService = drawService;
 			_logger = logger;
 			_appLifeTime = appLifeTime;

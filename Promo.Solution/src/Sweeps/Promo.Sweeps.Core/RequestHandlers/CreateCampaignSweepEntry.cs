@@ -33,9 +33,9 @@ namespace Promo.Sweeps.Core.RequestHandlers
 
     public class CreateCampaignSweepEntryHandler : IRequestHandler<CreateCampaignSweepEntry, IEnumerable<SweepEntry>>
     {
-        private readonly ISweepsEntryRepository _repository;
+        private readonly ISweepsEntriesRepository _repository;
 
-        public CreateCampaignSweepEntryHandler(ISweepsEntryRepository repository)
+        public CreateCampaignSweepEntryHandler(ISweepsEntriesRepository repository)
         {
             _repository = repository;
         }
@@ -55,7 +55,7 @@ namespace Promo.Sweeps.Core.RequestHandlers
                     CampaignUid = request.CampaignUid,
                     UserIdentifier = request.Request.UserIdentifier,
                     UserIdentifierType = request.Request.UserIdentifierType,
-                    AcceptedTerms = false
+                    AcceptedTerms = true
                 });
 
                 listOfSweepEntry.Add(await _repository.GetAsync(sweepEntryUid));
