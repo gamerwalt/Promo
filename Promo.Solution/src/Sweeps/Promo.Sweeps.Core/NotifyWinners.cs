@@ -6,6 +6,9 @@ using Promo.Sweeps.Core.Notifications;
 using System.Threading;
 using System.Threading.Tasks;
 using Tweetinvi;
+using Tweetinvi.Core.Exceptions;
+using Tweetinvi.Core.Models.Properties;
+using Tweetinvi.Exceptions;
 using Tweetinvi.Parameters;
 
 namespace Promo.Sweeps.Core
@@ -38,22 +41,20 @@ namespace Promo.Sweeps.Core
 
 			foreach(var winner in notification.Winners)
 			{
-				_logger.LogInformation($"Sending information to {winner.UserIdentifier}");
-				var tweet = await _twitterClient.Tweets.PublishTweetAsync(message.Replace("@screenName", winner.UserIdentifier));
-				
-				var newMessage = $"See contest rules {notification.SweepDrawRule.RulesUrl} for more details.";
+				try
+				{
+					_logger.LogInformation($"Sending information to {winner.UserIdentifier}");
+					var tweet = await _twitterClient.Tweets.PublishTweetAsync(message.Replace("@screenName", winner.UserIdentifier));
 
-				await _twitterClient.Tweets.PublishTweetAsync(new PublishTweetParameters(newMessage) { InReplyToTweet = tweet });
-				//try
-				//{
-				//	var winnerExternalIdentifier = await GetWinnerIdentifierAsync(winner.UserIdentifier);
-				//	await _twitterClient.Messages.PublishMessageAsync(message, long.Parse(winnerExternalIdentifier.ExternalId));
-				//}
-				//catch (System.Exception ex)
-				//{
-				//	_logger.LogError(ex,message);
-				//}
-				
+					var newMessage = $"See contest rules {notification.SweepDrawRule.RulesUrl} for more details.";
+
+					await _twitterClient.Tweets.PublishTweetAsync(new PublishTweetParameters(newMessage) { InReplyToTweet = tweet });
+				}
+				catch (TwitterException tex)
+				{
+					_logger.LogError(tex.Message);
+					//Todo: Send this to a queue to be sent later
+				}
 			}
 			
 		}
