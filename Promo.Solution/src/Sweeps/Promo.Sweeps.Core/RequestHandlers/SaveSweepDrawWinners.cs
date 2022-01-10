@@ -52,9 +52,9 @@ namespace Promo.Sweeps.Core.RequestHandlers
 				_logger.LogInformation("Sweep winners for Sweep: {sweepName} and Campaign {campaignName} successfully saved.", request.SweepDrawRule.SweepName, 
 					request.SweepDrawRule.CampaignName);
 
-				await _mediator.Publish(new WinnerSaved(request.Winners, request.SweepDrawRule));
+				await _mediator.Publish(new SweepDrawHappened(request.SweepDrawRule));
 
-				await _mediator.Publish(new UpdateSweepAsDrawn(request.SweepDrawRule.SweepUid));
+				await _mediator.Publish(new WinnerSaved(request.Winners, request.SweepDrawRule));
 				
 				return;
 			}

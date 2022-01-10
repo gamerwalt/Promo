@@ -15,6 +15,8 @@ using Promo.Sweeps.Infrastructure;
 using Serilog;
 using System;
 using System.Reflection;
+using Tweetinvi;
+using Tweetinvi.Models;
 using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace Promo.Sweeps.Service
@@ -45,11 +47,36 @@ namespace Promo.Sweeps.Service
 					AddMediator(services);
 					AddClients(services);
 					AddDataAccess(services);
+					AddTwitterClient(services);
 					AddHrvsterServiceAuthenticationclient(services);
 
 					AddOptions(services);
 					services.AddSingleton(typeof(ILogger), typeof(Logger<Program>));
 				});
+
+		private static void AddTwitterClient(IServiceCollection services)
+		{
+			services.Configure<TwitterAccount>(Configuration);
+			services.Configure<TwitterAccount>(Configuration.GetSection(TwitterAccount.SectionName));
+			services.AddTransient(p => p.GetService<IOptions<TwitterAccount>>().Value);
+
+			services.AddTransient<ITwitterClient, TwitterClient>(c => GenerateTwitterClient(c));
+		}
+
+		private static TwitterClient GenerateTwitterClient(IServiceProvider c)
+		{
+			var twitterAccount = c.GetService<TwitterAccount>();
+			var userCredentials = new TwitterCredentials(
+				twitterAccount.ConsumerKey,
+				twitterAccount.ConsumerSecret,
+				twitterAccount.AccessToken,
+				twitterAccount.AccessTokenSecret);
+
+			var client = new TwitterClient(userCredentials);
+			client.Config.RateLimitTrackerMode = RateLimitTrackerMode.TrackAndAwait;
+
+			return client;
+		}
 
 		private static void AddOptions(IServiceCollection services)
 		{
@@ -91,6 +118,18 @@ namespace Promo.Sweeps.Service
 			AddCampaignClient(services);
 			AddRulesClient(services);
 			AddWinnersClient(services);
+			AddHarvesterClient(services);
+		}
+
+		private static void AddHarvesterClient(IServiceCollection services)
+		{
+			var harvesterBaseUrl = Configuration["PromoHarvesterUrl"];
+
+			services.AddHttpClient<IHarvesterClient, HarvesterClient>(client =>
+			{
+				client.BaseAddress = new Uri(harvesterBaseUrl);
+				client.DefaultRequestHeaders.Add("Accept", "application/json");
+			});
 		}
 
 		private static void AddWinnersClient(IServiceCollection services)

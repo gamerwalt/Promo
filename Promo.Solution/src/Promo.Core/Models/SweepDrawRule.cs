@@ -15,5 +15,6 @@ namespace Promo.Core.Models
 		public Guid SweepDrawRuleUid { get; set; }
 		public int WinnerCount { get; set; }
 		public int WinnerBackupCount { get; set; }
+		public Uri RulesUrl { get; set; }
 	}
 }

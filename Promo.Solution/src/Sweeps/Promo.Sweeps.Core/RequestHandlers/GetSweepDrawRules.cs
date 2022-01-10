@@ -77,6 +77,7 @@ namespace Promo.Sweeps.Core.RequestHandlers
 			sweepDrawRule.StartDate = sweep.StartDate;
 			sweepDrawRule.EndDate = sweep.EndDate;
 			sweepDrawRule.DrawDate = sweep.DrawDate.GetValueOrDefault();
+			sweepDrawRule.RulesUrl = sweep.RulesUrl;
 
 			return sweepDrawRule;
 		}

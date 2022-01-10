@@ -16,6 +16,7 @@ namespace Promo.Sweeps.Infrastructure
         Task<IEnumerable<Sweep>> GetAllForCampaignAsync(Guid campaignUid);
         Task UpdateAsync(Guid sweepUid, Sweep sweep);
 		Task<IEnumerable<Sweep>> GetSweepsRequiringADrawAsync();
+		Task UpdateSweepAsDrawnAsync(Guid sweepUid);
 	}
 
     public class SweepsRepository : ISweepsRepository
@@ -133,7 +134,19 @@ namespace Promo.Sweeps.Infrastructure
             await command.ExecuteNonQueryAsync();
         }
 
-        private Sweep CreateSweepFrom(MySqlDataReader reader)
+		public async Task UpdateSweepAsDrawnAsync(Guid sweepUid)
+		{
+			using var conn = new MySqlConnection(_database.GetConnectionString());
+			var command = conn.CreateCommand();
+			command.CommandText = "sweep_update_as_drawn";
+			command.CommandType = CommandType.StoredProcedure;
+			command.AddParameter("sweepUid", sweepUid);
+
+			await conn.OpenAsync();
+			await command.ExecuteNonQueryAsync();
+		}
+
+		private Sweep CreateSweepFrom(MySqlDataReader reader)
         {
             return new Sweep
             {
@@ -141,6 +154,7 @@ namespace Promo.Sweeps.Infrastructure
                 CampaignUid = reader.GetGuid("campaign_uid"),
                 SweepUid = reader.GetGuid("sweep_uid"),
                 Name = reader.GetString("sweep_name"),
+				RulesUrl = new Uri(reader.GetString("rules_url")),
                 StartDate = reader.GetDateTime("start_date"),
                 EndDate = reader.GetDateTime("end_date"),
                 DrawDate = GetNullableDateTimeValue(reader, "draw_date"),

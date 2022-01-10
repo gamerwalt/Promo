@@ -34,5 +34,8 @@
 
 		//Winners
 		public static string SaveSweepWinners = "v1/winners/sweeps/{sweepUid}/list";
+
+		//Harvester
+		public static string GetHarvestedTwitterUser = "v1/users/{userIdentifier}";
 	}
 }

@@ -1,6 +1,7 @@
 ﻿using MySqlConnector;
 using Promo.Core;
 using Promo.Core.Extensions;
+using Promo.Core.Models;
 using System;
 using System.Data;
 using System.Threading.Tasks;
@@ -13,7 +14,8 @@ namespace Promo.Harvester.Infrastructure
         Task CreateHarvestedRecordAsync(Guid harvestedUid, Guid ruleUid, string json);
         Task CreateTweetUserAsync(Guid userUid, IUser user);
         Task CreateTweetRecordAsync(Guid tweetUid, Guid harvestedUid, Guid ruleUid, Guid userUid, ITweet tweet);
-    }
+		Task<HarvestedUser> GetHarvestedUserByUserIdentifierAsync(string userIdentifier);
+	}
 
     public class HarvesterRepository : IHarvesterRepository
     {
@@ -76,5 +78,40 @@ namespace Promo.Harvester.Infrastructure
             await conn.OpenAsync();
             await command.ExecuteNonQueryAsync();
         }
-    }
+
+		public async Task<HarvestedUser> GetHarvestedUserByUserIdentifierAsync(string userIdentifier)
+		{
+			var harvestedUser = default(HarvestedUser);
+
+			using (var conn = new MySqlConnection(_database.GetConnectionString()))
+			{
+				var command = conn.CreateCommand();
+				command.CommandText = "users_get_by_screen_name";
+				command.CommandType = CommandType.StoredProcedure;
+				command.AddParameter(nameof(userIdentifier), userIdentifier);
+
+				await conn.OpenAsync();
+				using (var reader = await command.ExecuteReaderAsync())
+				{
+					while (await reader.ReadAsync())
+					{
+						harvestedUser = CreateHarvestedUserFrom(reader);
+					}
+				}
+			}
+
+			return harvestedUser;
+		}
+
+		private HarvestedUser CreateHarvestedUserFrom(MySqlDataReader reader)
+		{
+			//Todo: Add remaining fields
+			return new HarvestedUser
+			{
+				UserId = reader.GetInt32("user_id"),
+				UserUid = reader.GetGuid("user_uid"),
+				ExternalId = reader.GetString("external_id")
+			};
+		}
+	}
 }

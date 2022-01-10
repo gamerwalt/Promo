@@ -5,3 +5,4 @@
 "PromoRulesUrl": "https://localhost:5009;http://localhost:5010"
 "PromoReportingUrl": "https://localhost:5011;http://localhost:5012"
 "PromoWinnersUrl": "https://localhost:5013;http://localhost:5014"
+"PromoHarvesterUrl": "https://localhost:5015;http://localhost:5016"
