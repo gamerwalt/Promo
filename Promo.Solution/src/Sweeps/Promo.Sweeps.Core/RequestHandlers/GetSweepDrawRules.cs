@@ -40,7 +40,7 @@ namespace Promo.Sweeps.Core.RequestHandlers
 			_logger.LogInformation("Retrieving sweeps requiring a draw...");
 			var sweepsRequiringDraw = await _sweepsRepository.GetSweepsRequiringADrawAsync();
 
-			_logger.LogInformation($"Retrieved {sweepsRequiringDraw.Count()} received requiring a draw.");
+			_logger.LogInformation($"Retrieved {sweepsRequiringDraw.Count()} sweepstakes received requiring a draw.");
 
 			if (sweepsRequiringDraw == null)
 				return new List<SweepDrawRule>();

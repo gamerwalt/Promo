@@ -1,0 +1,7 @@
+"PromoMembershipUrl": "https://localhost:5001;http://localhost:5000"
+"PromoCampaignUrl": "https://localhost:5002;http://localhost:5003"
+"PromoSweepsUrl": "https://localhost:5004;http://localhost:5005"
+"PromoEmailsUrl": "https://localhost:5006;http://localhost:5007"
+"PromoRulesUrl": "https://localhost:5009;http://localhost:5010"
+"PromoReportingUrl": "https://localhost:5011;http://localhost:5012"
+"PromoWinnersUrl": "https://localhost:5013;http://localhost:5014"

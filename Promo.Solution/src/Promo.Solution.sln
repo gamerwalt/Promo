@@ -71,7 +71,9 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{B4B41DAC-85D4-429B-9139-586080A9FAEB}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
+		LogginReadme.md = LogginReadme.md
 		Readme.md = Readme.md
+		ServiceUrls.md = ServiceUrls.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Reporting", "Reporting", "{7590E748-DAF2-4826-A9C4-F7FFDC9A4F57}"
@@ -133,10 +135,18 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "k8s", "k8s", "{31B8B14C-022
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "WinnersDb", "WinnersDb", "{A06B1A42-23BF-4886-ABD9-CFE37E27479D}"
+	ProjectSection(SolutionItems) = preProject
+		databases\WinnersDb\promo.winners.stored_procedures.sql = databases\WinnersDb\promo.winners.stored_procedures.sql
+		databases\WinnersDb\promo.winners.tables.sql = databases\WinnersDb\promo.winners.tables.sql
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Winners", "Winners", "{C5A1B115-6C9B-4F3A-B7B2-83F1D5737B65}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Promo.Winners.API", "Winners\Promo.Winners.API\Promo.Winners.API.csproj", "{C8D9440B-C2B4-4A36-B711-4C727CB8FC72}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Promo.Winners.Core", "Winners\Promo.Winners.Core\Promo.Winners.Core.csproj", "{428F6B3D-8CC7-4A65-B468-BD321E83183A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Promo.Winners.Infrastructure", "Winners\Promo.Winners.Infrastructure\Promo.Winners.Infrastructure.csproj", "{B10E225B-0676-4811-A1D5-B4E6B0B2813D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -256,6 +266,14 @@ Global
 		{C8D9440B-C2B4-4A36-B711-4C727CB8FC72}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C8D9440B-C2B4-4A36-B711-4C727CB8FC72}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C8D9440B-C2B4-4A36-B711-4C727CB8FC72}.Release|Any CPU.Build.0 = Release|Any CPU
+		{428F6B3D-8CC7-4A65-B468-BD321E83183A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{428F6B3D-8CC7-4A65-B468-BD321E83183A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{428F6B3D-8CC7-4A65-B468-BD321E83183A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{428F6B3D-8CC7-4A65-B468-BD321E83183A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B10E225B-0676-4811-A1D5-B4E6B0B2813D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B10E225B-0676-4811-A1D5-B4E6B0B2813D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B10E225B-0676-4811-A1D5-B4E6B0B2813D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B10E225B-0676-4811-A1D5-B4E6B0B2813D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -304,6 +322,8 @@ Global
 		{A06B1A42-23BF-4886-ABD9-CFE37E27479D} = {CAE06D12-D886-4C59-9572-C2CF5033C576}
 		{C5A1B115-6C9B-4F3A-B7B2-83F1D5737B65} = {B71190C8-5608-4FFE-8C71-DA20A334CFC6}
 		{C8D9440B-C2B4-4A36-B711-4C727CB8FC72} = {C5A1B115-6C9B-4F3A-B7B2-83F1D5737B65}
+		{428F6B3D-8CC7-4A65-B468-BD321E83183A} = {C5A1B115-6C9B-4F3A-B7B2-83F1D5737B65}
+		{B10E225B-0676-4811-A1D5-B4E6B0B2813D} = {C5A1B115-6C9B-4F3A-B7B2-83F1D5737B65}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {94B46B7F-1545-465E-863A-AAD0C58A8C0F}

@@ -103,6 +103,7 @@ namespace Promo.Sweeps.Core.RequestHandlers
 
 				winnerList.Add(new SweepWinner
 				{
+					SweepWinnerId = winnerIndex,
 					SweepEntryId = winnerSweepEntryId,
 					SweepEntryUid = sweepEntry.SweepEntryUid,
 					UserIdentifier = sweepEntry.UserIdentifier,

@@ -1,5 +1,7 @@
 ﻿using MediatR;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
+using Promo.Clients.Internal;
 using Promo.Core.Models;
 using Promo.Sweeps.Core.Notifications;
 using System.Collections.Generic;
@@ -34,21 +36,35 @@ namespace Promo.Sweeps.Core.RequestHandlers
 	{
 		private readonly ILogger<SaveSweepDrawWinnersHandler> _logger;
 		private readonly IMediator _mediator;
+		private readonly IWinnersClient _winnersClient;
 
-		public SaveSweepDrawWinnersHandler(ILoggerFactory loggerFactory, IMediator mediator)
+		public SaveSweepDrawWinnersHandler(ILoggerFactory loggerFactory, IMediator mediator, IWinnersClient winnersClient)
 		{
 			_logger = loggerFactory.CreateLogger<SaveSweepDrawWinnersHandler>();
 			_mediator = mediator;
+			_winnersClient = winnersClient;
 		}
 
 		protected async override Task Handle(SaveSweepDrawWinners request, CancellationToken cancellationToken)
 		{
-			foreach(var winner in request.Winners)
+			if(await _winnersClient.SaveSweepWinnersAsync(request.Winners, request.SweepDrawRule.SweepUid))
 			{
+				_logger.LogInformation("Sweep winners for Sweep: {sweepName} and Campaign {campaignName} successfully saved.", request.SweepDrawRule.SweepName, 
+					request.SweepDrawRule.CampaignName);
 
+				await _mediator.Publish(new WinnerSaved(request.Winners, request.SweepDrawRule));
+
+				await _mediator.Publish(new UpdateSweepAsDrawn(request.SweepDrawRule.SweepUid));
+				
+				return;
 			}
 
-			await _mediator.Publish(new WinnerSaved(request.Winners, request.SweepDrawRule));
+			_logger.LogWarning("Unable to save winners for Sweep: {sweepName} and Campaign: {campaignName}. See attached Winners: {winners}",
+				request.SweepDrawRule.SweepName,
+				request.SweepDrawRule.CampaignName,
+				JsonConvert.SerializeObject(request.Winners));
+
+			await _mediator.Publish(new SaveWinnersFailed(request.Winners, request.SweepDrawRule.CampaignName, request.SweepDrawRule.SweepName));
 		}
 	}
 }

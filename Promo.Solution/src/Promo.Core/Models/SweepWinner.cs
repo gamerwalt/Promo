@@ -10,6 +10,7 @@ namespace Promo.Core.Models
 			BackupWinners = new List<SweepWinner>();
 		}
 
+		public int SweepWinnerId { get; set; }
 		public int SweepEntryId { get; set; }
 		public List<SweepWinner> BackupWinners { get; set; }
 		public Guid? SweepEntryUid { get; set; }

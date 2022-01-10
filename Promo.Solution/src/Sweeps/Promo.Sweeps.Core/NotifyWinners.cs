@@ -1,9 +1,6 @@
 ﻿using MediatR;
+using Microsoft.Extensions.Logging;
 using Promo.Sweeps.Core.Notifications;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -11,9 +8,16 @@ namespace Promo.Sweeps.Core
 {
 	public class NotifyWinners : INotificationHandler<WinnerSaved>
 	{
+		private readonly ILogger<NotifyWinners> _logger;
+
+		public NotifyWinners(ILoggerFactory loggerFactory)
+		{
+			_logger = loggerFactory.CreateLogger<NotifyWinners>();
+		}
+
 		public async Task Handle(WinnerSaved notification, CancellationToken cancellationToken)
 		{
-			throw new NotImplementedException();
+			_logger.LogInformation("Notifying winners of their win.");
 		}
 	}
 }

@@ -32,5 +32,7 @@
 		public static string CreateReportSweepEntry = "v1/reporting/sweeps";
 		public static string GetCampaignSweepUserEntryReport = "v1/reporting/campaign/{campaignUid}/sweeps/{sweepUid}";
 
+		//Winners
+		public static string SaveSweepWinners = "v1/winners/sweeps/{sweepUid}/list";
 	}
 }

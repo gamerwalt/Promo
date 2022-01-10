@@ -90,6 +90,18 @@ namespace Promo.Sweeps.Service
 		{
 			AddCampaignClient(services);
 			AddRulesClient(services);
+			AddWinnersClient(services);
+		}
+
+		private static void AddWinnersClient(IServiceCollection services)
+		{
+			var winnersBaseApi = Configuration["PromoWinnersUrl"];
+
+			services.AddHttpClient<IWinnersClient, WinnersClient>(client =>
+			{
+				client.BaseAddress = new Uri(winnersBaseApi);
+				client.DefaultRequestHeaders.Add("Accept", "application/json");
+			});
 		}
 
 		private static void AddRulesClient(IServiceCollection services)

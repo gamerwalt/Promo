@@ -111,6 +111,7 @@ namespace Promo.Sweeps.Core.RequestHandlers
 
 					winner.BackupWinners.Add(new SweepWinner
 					{
+						SweepWinnerId = backupWinnerIndex,
 						SweepEntryId = backupWinnerSweepEntryId,
 						SweepEntryUid = sweepEntry.SweepEntryUid,
 						UserIdentifier = sweepEntry.UserIdentifier,
