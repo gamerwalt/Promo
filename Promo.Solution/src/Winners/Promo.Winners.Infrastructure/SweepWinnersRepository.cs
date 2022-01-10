@@ -15,6 +15,7 @@ namespace Promo.Winners.Infrastructure
 		Task<SweepWinner> GetSweepWinnerAsync(Guid sweepWinnerUid);
 		Task SaveSweepBackupWinnerAsync(SweepWinner sweepWinner);
 		Task<IEnumerable<SweepBackupWinner>> GetSweepBackupWinnersAsync(Guid sweepWinnerUid);
+		Task<IEnumerable<SweepWinner>> GetSweepWinnersAsync(Guid sweepUid);
 	}
 
 	public class SweepWinnersRepository : ISweepWinnersRepository
@@ -152,6 +153,30 @@ namespace Promo.Winners.Infrastructure
 				CreatedDate = reader.GetDateTime("created_date"),
 				UpdatedDate = GetNullableDateTimeValue(reader, "updated_date")
 			};
+		}
+
+		public async Task<IEnumerable<SweepWinner>> GetSweepWinnersAsync(Guid sweepUid)
+		{
+			var sweepWinners = new List<SweepWinner>();
+
+			using (var conn = new MySqlConnection(_database.GetConnectionString()))
+			{
+				var command = conn.CreateCommand();
+				command.CommandText = "sweep_winners_get";
+				command.CommandType = CommandType.StoredProcedure;
+				command.AddParameter(nameof(sweepUid), sweepUid);
+
+				await conn.OpenAsync();
+				using (var reader = await command.ExecuteReaderAsync())
+				{
+					while (await reader.ReadAsync())
+					{
+						sweepWinners.Add(CreateSweepWinnerFrom(reader));
+					}
+				}
+			}
+
+			return sweepWinners;
 		}
 	}
 }
