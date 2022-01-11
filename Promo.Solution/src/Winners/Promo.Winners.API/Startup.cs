@@ -90,8 +90,10 @@ namespace Promo.Winners.API
 				app.UseSwagger();
 				app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Promo.Winners.API v1"));
 			}
-
-			app.UseHttpsRedirection();
+			else
+			{
+				app.UseHttpsRedirection();
+			}
 
 			app.UseSerilogRequestLogging();
 
