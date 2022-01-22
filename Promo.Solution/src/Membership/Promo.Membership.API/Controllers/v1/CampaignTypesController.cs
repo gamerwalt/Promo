@@ -1,0 +1,43 @@
+﻿using MediatR;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
+using Promo.Membership.Core.RequestHandlers;
+using Promo.Membership.Infrastructure.Models;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net;
+using System.Threading.Tasks;
+
+namespace Promo.Membership.API.Controllers.v1
+{
+    [ApiController]
+    [Route("v1")]
+    public class CampaignTypesController : ControllerBase
+    {
+        private readonly ILogger<CampaignTypesController> _logger;
+        private readonly IMediator _mediator;
+
+        public CampaignTypesController(
+            ILogger<CampaignTypesController> logger,
+            IMediator mediator)
+        {
+            _logger = logger;
+            _mediator = mediator;
+        }
+
+        [HttpGet("campaigntypes")]
+        [Produces("application/json")]
+        [ProducesResponseType((int)HttpStatusCode.OK, Type = typeof(CampaignType))]
+        [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
+        public async Task<ActionResult<IEnumerable<CampaignType>>> GetAllAsync()
+        {
+            var campaignTypes = await _mediator.Send(new GetAllCampaignTypesRequest());
+			campaignTypes.ToList().Add(new CampaignType
+			{
+				CampaignTypeId = 555
+			});
+
+            return new OkObjectResult(campaignTypes);
+        }
+    }
+}
