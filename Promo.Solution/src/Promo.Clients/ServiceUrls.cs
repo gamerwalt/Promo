@@ -37,5 +37,8 @@
 
 		//Harvester
 		public static string GetHarvestedTwitterUser = "v1/users/{userIdentifier}";
+
+		//Prizes
+		public static string GetSweepPrizes = "v1/prizes/sweeps/{sweepUid}";
 	}
 }
