@@ -36,7 +36,7 @@ namespace Promo.Winners.API.Controllers.v1
 		public async Task<ActionResult<IEnumerable<Infrastructure.Models.SweepWinner>>> CreateAsync([FromRoute] Guid sweepUid, [FromBody] SweepWinnerRequest request)
 		{
 			var winnersExists = await _mediator.Send(new GetSweepWinners(sweepUid));
-			if(winnersExists != null || winnersExists.Count() > 0)
+			if(winnersExists.Count() > 0)
 			{
 				_logger.LogWarning("Sweep winners already exists for Sweep with Uid: {sweepUid}", sweepUid);
 				return new BadRequestObjectResult(new { message = "Winners already exists for this sweepstakes." });

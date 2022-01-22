@@ -119,6 +119,18 @@ namespace Promo.Sweeps.Service
 			AddRulesClient(services);
 			AddWinnersClient(services);
 			AddHarvesterClient(services);
+			AddPrizesClient(services);
+		}
+
+		private static void AddPrizesClient(IServiceCollection services)
+		{
+			var prizesBaseUrl = Configuration["PromoPrizesUrl"];
+
+			services.AddHttpClient<IPrizesClient, PrizesClient>(client =>
+			{
+				client.BaseAddress = new Uri(prizesBaseUrl);
+				client.DefaultRequestHeaders.Add("Accept", "application/json");
+			});
 		}
 
 		private static void AddHarvesterClient(IServiceCollection services)

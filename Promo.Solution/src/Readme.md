@@ -52,3 +52,28 @@ D:\Promo\Promo.Solution\src>docker tag promorulesapi:latest gamerwalt/dockerhub:
 
 #randomness
 https://khalidabuhakmeh.com/creating-random-numbers-with-dotnet-core
+
+
+
+#Push to Azure ACR
+#Login First
+az login
+az acr login --name hrvsterdevservices.azurecr.io
+
+docker tag promocampaignapi hrvsterdevservices.azurecr.io/promodev/promocampaignapi
+docker push hrvsterdevservices.azurecr.io/promodev/promocampaignapi
+
+docker tag promomembershipapi hrvsterdevservices.azurecr.io/promodev/promomembershipapi
+docker push hrvsterdevservices.azurecr.io/promodev/promomembershipapi
+
+docker tag promoemailsapi hrvsterdevservices.azurecr.io/promodev/promoemailsapi
+docker push hrvsterdevservices.azurecr.io/promodev/promoemailsapi
+
+docker tag promoreportingapi hrvsterdevservices.azurecr.io/promodev/promoreportingapi
+docker push hrvsterdevservices.azurecr.io/promodev/promoreportingapi
+
+docker tag promorulesapi hrvsterdevservices.azurecr.io/promodev/promorulesapi
+docker push hrvsterdevservices.azurecr.io/promodev/promorulesapi
+
+docker tag promosweepsapi hrvsterdevservices.azurecr.io/promodev/promosweepsapi
+docker push hrvsterdevservices.azurecr.io/promodev/promosweepsapi
