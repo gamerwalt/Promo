@@ -60,6 +60,7 @@ namespace Promo.Harvester.Service
             });
 
             services.AddTransient<IHarvesterRepository, HarvesterRepository>();
+			services.AddTransient<IBlacklistedSweepsUsersRepository, BlacklistedSweepsUsersRepository>();
         }
 
         private static void AddHrvsterServiceAuthenticationclient(IServiceCollection services)

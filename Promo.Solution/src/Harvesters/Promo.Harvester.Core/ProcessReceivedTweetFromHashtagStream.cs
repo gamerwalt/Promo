@@ -49,6 +49,7 @@ namespace Promo.Harvester.Core
 
 			var campaign = await GetCampaignAsync(notification.Rule.CampaignUid);
 			var sweeps = await GetCampaignSweepsAsync(notification.Rule.CampaignUid);
+			var blacklistedUsers = await GetBlacklistedUsersForSweepstakesAsync(notification.Rule.SweepUid);
 
 			var sweepStakesToEnter = sweeps.FirstOrDefault(c => notification.Rule.SweepUid.Equals(c.SweepUid));
 
@@ -60,9 +61,10 @@ namespace Promo.Harvester.Core
 				case CampaignTypeCode.AutoAll:
 					break;
 				case CampaignTypeCode.AutoEnterSweepsFromHashtag:
-					if (await UserCanStillEnterSweepsAsync(sweepStakesToEnter, campaign, notification.Tweet.CreatedBy) &&
-							TweetIsInReplyToRuleTweetId(notification))
+					if (await CanEnterSweepstakes(notification, campaign, sweepStakesToEnter, blacklistedUsers))
+					{
 						await EnterSweepsAsync(notification, campaign, sweepStakesToEnter);
+					}
 					break;
 				case CampaignTypeCode.AutoEnterSweepsFromTweet:
 					break;
@@ -77,6 +79,23 @@ namespace Promo.Harvester.Core
 			}
 
 			_logger.LogInformation("Finished handling {action}", nameof(ProcessReceivedTweetFromHashtagStream));
+		}
+
+		private async Task<IEnumerable<long>> GetBlacklistedUsersForSweepstakesAsync(Guid sweepUid)
+		{
+			return await _mediator.Send(new GetSweepsBlacklistedUsers(sweepUid));
+		}
+
+		private async Task<bool> CanEnterSweepstakes(NewHashTagTweetReceived notification, Campaign campaign, Sweep sweepStakesToEnter, IEnumerable<long> blacklistedUsers)
+		{
+			return await UserCanStillEnterSweepsAsync(sweepStakesToEnter, campaign, notification.Tweet.CreatedBy) &&
+				TweetIsInReplyToRuleTweetId(notification) &&
+				UserIsNotInBlacklistedUsers(notification, blacklistedUsers);
+		}
+
+		private bool UserIsNotInBlacklistedUsers(NewHashTagTweetReceived notification, IEnumerable<long> blacklistedUsers)
+		{
+			return !blacklistedUsers.Any(c => c.Equals(notification.Tweet.CreatedBy.Id));
 		}
 
 		private static bool TweetIsInReplyToRuleTweetId(NewHashTagTweetReceived notification) 
