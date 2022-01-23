@@ -1,3 +1,5 @@
+use `promo.campaign`;
+
 CREATE TABLE `campaign_types` (
   `campaign_type_id` int unsigned NOT NULL AUTO_INCREMENT,
   `campaign_type_uid` varchar(50) NOT NULL,
@@ -12,6 +14,7 @@ CREATE TABLE `campaign_types` (
   UNIQUE KEY `campaign_type_uid_UNIQUE` (`campaign_type_uid`),
   UNIQUE KEY `campaign_name_UNIQUE` (`campaign_type_code`)
 ) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
 
 LOCK TABLES `campaign_types` WRITE;
 /*!40000 ALTER TABLE `campaign_types` DISABLE KEYS */;
@@ -110,7 +113,6 @@ BEGIN
 END$$
 DELIMITER ;
 
-
 DELIMITER $$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `campaign_get_by_uid`(IN campaignUid VARCHAR(50))
 BEGIN
@@ -136,16 +138,6 @@ BEGIN
 END$$
 DELIMITER ;
 
-
-DELIMITER $$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `campaign_types_get`()
-BEGIN
-	SELECT *
-    FROM campaign_types;
-END$$
-DELIMITER ;
-
-
 DELIMITER $$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `campaign_type_get_by_uid`(IN campaignTypeUid VARCHAR(50))
 BEGIN
@@ -155,6 +147,13 @@ BEGIN
 END$$
 DELIMITER ;
 
+DELIMITER $$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `campaign_types_get`()
+BEGIN
+	SELECT *
+    FROM campaign_types;
+END$$
+DELIMITER ;
 
 DELIMITER $$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `campaign_update_via_uid`(IN campaignUid VARCHAR(50), IN campaignName VARCHAR(50), IN campaignDescription VARCHAR(500), IN startDate DATETIME, IN endDate DATETIME, IN activeInd BIT, IN campaignTypeUid VARCHAR(50))
@@ -180,3 +179,28 @@ BEGIN
 END$$
 DELIMITER ;
 
+DELIMITER $$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `campaigns_get_by_account_uid`(IN accountUid VARCHAR(50))
+BEGIN
+	    
+    SELECT
+		c.campaign_id,
+        c.campaign_uid,
+        c.campaign_name,
+        c.campaign_description,
+        c.start_date,
+        c.end_date,
+        c.created_date,
+        c.updated_date,
+        c.active_ind,
+        c.account_uid,
+        ct.campaign_type_id,
+        ct.campaign_type_uid,
+        ct.campaign_type_code,
+        ct.campaign_type_name,
+        ct.active_ind as campaign_type_active_ind
+    FROM campaigns as c
+    INNER JOIN campaign_types as ct ON ct.campaign_type_id = c.campaign_type_id
+	WHERE account_uid = accountUid;
+END$$
+DELIMITER ;

@@ -176,6 +176,83 @@ services:
     volumes:
         - ./databases/HarvesterDb/promo.harvester.tables.sql:/docker-entrypoint-initdb.d/1.sql
         - ./databases/HarvesterDb/promo.harvester.stored_procedures.sql:/docker-entrypoint-initdb.d/2.sql
+        - harvester-data:/var/lib/mysql
+
+  harvstercron:
+    image: ${DOCKER_REGISTRY-}promosweepsdrawservice
+    build:
+      context: .
+      dockerfile: Harvesters/Promo.Harvester.Service/Dockerfile
+    depends_on:
+      - harvesterdb
+    environment:
+      - CRON_ConnectionStrings__Harvester=server=harvesterdb;port=3306;user=harvester_app_user;password=unqA!S@2mkbx4MK6;database=promo.harvester
+
+  promo.harvester.api:
+    image: ${DOCKER_REGISTRY-}promoharvesterapi
+    build:
+      context: .
+      dockerfile: Harvesters/Promo.Harvester.API/Dockerfile
+    depends_on:
+      - harvesterdb
+    ports:
+      - "5016:80"
+      - "5015:443"
+
+  prizesdb:
+    image: mysql
+    restart: always
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+        MYSQL_ROOT_PASSWORD: e@ghX#m5^BTD6tc8
+        MYSQL_DATABASE: promo.prizes
+        MYSQL_USER: prizes_app_user
+        MYSQL_PASSWORD: unqA!S@2mkbx4MK6
+    ports:
+        - "3315:3306"
+    volumes:
+        - ./databases/PrizesDb/promo.prizes.tables.sql:/docker-entrypoint-initdb.d/1.sql
+        - ./databases/PrizesDb/promo.prizes.stored_procedures.sql:/docker-entrypoint-initdb.d/2.sql
+        - prizes-data:/var/lib/mysql
+
+  promo.prizes.api:
+    image: ${DOCKER_REGISTRY-}promoharvesterapi
+    build:
+      context: .
+      dockerfile: Prizes/Promo.Prizes.API/Dockerfile
+    depends_on:
+      - prizesdb
+    ports:
+      - "5018:80"
+      - "5017:443"
+
+  winnersdb:
+    image: mysql
+    restart: always
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+        MYSQL_ROOT_PASSWORD: e@ghYdd5^CTD6tc7
+        MYSQL_DATABASE: promo.winners
+        MYSQL_USER: winners_app_user
+        MYSQL_PASSWORD: unqA!S@2mkbx4MK6
+    ports:
+        - "3316:3306"
+    volumes:
+        - ./databases/PrizesDb/promo.winners.tables.sql:/docker-entrypoint-initdb.d/1.sql
+        - ./databases/PrizesDb/promo.winners.stored_procedures.sql:/docker-entrypoint-initdb.d/2.sql
+        - winners-data:/var/lib/mysql
+
+  promo.winners.api:
+    image: ${DOCKER_REGISTRY-}promowinnersapi
+    build:
+      context: .
+      dockerfile: Winners/Promo.Winners.API/Dockerfile
+    depends_on:
+      - winnersdb
+    ports:
+      - "5014:80"
+      - "5013:443"
+
   
 volumes:
     campaign-data:
@@ -185,3 +262,5 @@ volumes:
     reporting-data:
     rules-data:
     sweeps-data:
+    prizes-data:
+    winners-data:

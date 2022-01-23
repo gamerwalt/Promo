@@ -16,6 +16,39 @@ CREATE TABLE `watch_type_campaign_types` (
   UNIQUE KEY `id_UNIQUE` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
+CREATE TABLE `rules` (
+  `rule_id` int unsigned NOT NULL AUTO_INCREMENT,
+  `rule_uid` varchar(50) NOT NULL,
+  `campaign_uid` varchar(50) NOT NULL,
+  `sweep_uid` varchar(50) DEFAULT NULL,
+  `watch_type_id` int unsigned NOT NULL,
+  `watch_value` varchar(500) NOT NULL,
+  `active_ind` bit(1) NOT NULL DEFAULT b'0',
+  `tweet_id` bigint DEFAULT NULL,
+  `added_for_tracking` bit(1) DEFAULT b'0',
+  `date_added_for_tracking` datetime DEFAULT NULL,
+  `created_date` datetime NOT NULL,
+  `updated_date` datetime DEFAULT NULL,
+  PRIMARY KEY (`rule_id`),
+  UNIQUE KEY `rule_id_UNIQUE` (`rule_id`),
+  UNIQUE KEY `rule_uid_UNIQUE` (`rule_uid`),
+  KEY `watch_types_rules_idx` (`watch_type_id`),
+  CONSTRAINT `watch_types_rules` FOREIGN KEY (`watch_type_id`) REFERENCES `watch_types` (`watch_type_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+
+CREATE TABLE `sweep_draw_rules` (
+  `sweep_draw_rule_id` int unsigned NOT NULL AUTO_INCREMENT,
+  `sweep_draw_rule_uid` varchar(50) NOT NULL,
+  `sweep_uid` varchar(50) NOT NULL,
+  `winner_count` int NOT NULL,
+  `winner_backup_count` int NOT NULL,
+  `created_date` datetime NOT NULL,
+  `updated_date` datetime DEFAULT NULL,
+  PRIMARY KEY (`sweep_draw_rule_id`),
+  UNIQUE KEY `sweep_draw_rule_id_UNIQUE` (`sweep_draw_rule_id`),
+  UNIQUE KEY `sweep_draw_rule_uid_UNIQUE` (`sweep_draw_rule_uid`)
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 CREATE TABLE `sweep_entry_rules` (
   `entry_rule_id` int unsigned NOT NULL AUTO_INCREMENT,
@@ -30,25 +63,6 @@ CREATE TABLE `sweep_entry_rules` (
   UNIQUE KEY `entry_rule_uid_UNIQUE` (`entry_rule_uid`) /*!80000 INVISIBLE */,
   UNIQUE KEY `entry_rule_unique_accross_campaigns` (`campaign_uid`,`sweep_uid`)
 ) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
-CREATE TABLE `rules` (
-  `rule_id` int unsigned NOT NULL AUTO_INCREMENT,
-  `rule_uid` varchar(50) NOT NULL,
-  `campaign_uid` varchar(50) NOT NULL,
-  `sweep_uid` varchar(50) DEFAULT NULL,
-  `watch_type_id` int unsigned NOT NULL,
-  `watch_value` varchar(500) NOT NULL,
-  `active_ind` bit(1) NOT NULL DEFAULT b'0',
-  `added_for_tracking` bit(1) DEFAULT b'0',
-  `date_added_for_tracking` datetime DEFAULT NULL,
-  `created_date` datetime NOT NULL,
-  `updated_date` datetime DEFAULT NULL,
-  PRIMARY KEY (`rule_id`),
-  UNIQUE KEY `rule_id_UNIQUE` (`rule_id`),
-  UNIQUE KEY `rule_uid_UNIQUE` (`rule_uid`),
-  KEY `watch_types_rules_idx` (`watch_type_id`),
-  CONSTRAINT `watch_types_rules` FOREIGN KEY (`watch_type_id`) REFERENCES `watch_types` (`watch_type_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 
 LOCK TABLES `watch_types` WRITE;

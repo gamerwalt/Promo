@@ -1,5 +1,4 @@
 use `promo.rules`;
-
 DELIMITER $$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `entry_rule_create`(IN entryRuleUid VARCHAR(50), IN campaignUid VARCHAR(50), IN sweepUid VARCHAR(50), IN entryPerUser INT)
 BEGIN
@@ -84,6 +83,7 @@ BEGIN
         r.sweep_uid,
         r.watch_value,
         r.active_ind,
+        r.tweet_id,
         r.created_date,
         r.updated_date,
         wt.watch_type_id,
@@ -105,6 +105,7 @@ BEGIN
         r.sweep_uid,
         r.watch_value,
         r.active_ind,
+        r.tweet_id,
         r.added_for_tracking,
         r.date_added_for_tracking,
         wt.watch_type_code,
@@ -127,6 +128,7 @@ BEGIN
         r.sweep_uid,
         r.watch_value,
         r.active_ind,
+        r.tweet_id,
         wv.watch_type_id,
         wv.watch_type_code,
         wv.watch_type_name,
@@ -179,6 +181,15 @@ END$$
 DELIMITER ;
 
 DELIMITER $$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sweeps_draw_rule_get`(IN sweepUid VARCHAR(50))
+BEGIN
+	SELECT *
+    FROM sweep_draw_rules
+    WHERE sweep_uid = sweepUid;
+END$$
+DELIMITER ;
+
+DELIMITER $$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `watch_type_campaign_types_get`()
 BEGIN
 	SELECT
@@ -188,14 +199,5 @@ BEGIN
         ct.campaign_type_uid
     FROM watch_type_campaign_types as ct
     INNER JOIN watch_types as wt ON ct.watch_type_id = wt.watch_type_id;
-END$$
-DELIMITER ;
-
-DELIMITER $$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `sweeps_draw_rule_get`(IN sweepUid VARCHAR(50))
-BEGIN
-	SELECT *
-    FROM sweep_draw_rules
-    WHERE sweep_uid = sweepUid;
 END$$
 DELIMITER ;

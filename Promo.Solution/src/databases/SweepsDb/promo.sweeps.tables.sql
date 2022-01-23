@@ -5,9 +5,12 @@ CREATE TABLE `sweep` (
   `sweep_uid` varchar(50) NOT NULL,
   `campaign_uid` varchar(50) NOT NULL,
   `sweep_name` varchar(100) NOT NULL,
+  `rules_url` text,
   `start_date` datetime NOT NULL,
   `end_date` datetime NOT NULL,
   `draw_date` datetime DEFAULT NULL,
+  `drawn_ind` bit(1) NOT NULL DEFAULT b'0',
+  `date_drawn` datetime DEFAULT NULL,
   `created_date` datetime NOT NULL,
   `updated_date` datetime DEFAULT NULL,
   PRIMARY KEY (`sweep_id`),
@@ -29,4 +32,4 @@ CREATE TABLE `sweep_entry` (
   UNIQUE KEY `sweep_entry_uid_UNIQUE` (`sweep_entry_uid`),
   KEY `sweep_sweep_entry_idx` (`sweep_id`),
   CONSTRAINT `sweep_sweep_entry` FOREIGN KEY (`sweep_id`) REFERENCES `sweep` (`sweep_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=46 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=50 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;

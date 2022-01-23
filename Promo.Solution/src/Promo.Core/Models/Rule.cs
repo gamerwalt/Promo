@@ -11,5 +11,6 @@ namespace Promo.Core.Models
         public string WatchTypeCode { get; set; }
         public string WatchValue { get; set; }
         public bool ActiveInd { get; set; }
-    }
+		public long TweetId { get; set; }
+	}
 }

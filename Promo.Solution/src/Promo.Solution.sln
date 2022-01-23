@@ -127,13 +127,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SweepsDb", "SweepsDb", "{60
 		databases\SweepsDb\promo.sweeps.tables.sql = databases\SweepsDb\promo.sweeps.tables.sql
 	EndProjectSection
 EndProject
-Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{2B26F9D1-08EE-4142-B495-EABE2FECE416}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "k8s", "k8s", "{31B8B14C-022C-4665-AD04-9ED7FFA90028}"
-	ProjectSection(SolutionItems) = preProject
-		deployment.yaml = deployment.yaml
-	EndProjectSection
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "WinnersDb", "WinnersDb", "{A06B1A42-23BF-4886-ABD9-CFE37E27479D}"
 	ProjectSection(SolutionItems) = preProject
 		databases\WinnersDb\promo.winners.stored_procedures.sql = databases\WinnersDb\promo.winners.stored_procedures.sql
@@ -149,16 +142,20 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Promo.Winners.Infrastructure", "Winners\Promo.Winners.Infrastructure\Promo.Winners.Infrastructure.csproj", "{B10E225B-0676-4811-A1D5-B4E6B0B2813D}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "PrizesDb", "PrizesDb", "{2C06BA8E-1D84-4677-92F1-ED2EC441C8EF}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Promo.Harvester.API", "..\Promo.Harvester.API\Promo.Harvester.API.csproj", "{BBA9476D-26D2-4E04-8828-0A93BF391F67}"
+	ProjectSection(SolutionItems) = preProject
+		databases\PrizesDb\promo.prizes.stored_procedures.sql = databases\PrizesDb\promo.prizes.stored_procedures.sql
+		databases\PrizesDb\promo.prizes.tables.sql = databases\PrizesDb\promo.prizes.tables.sql
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Prizes", "Prizes", "{AEF0B21A-1BA7-414C-BA69-877672563F4F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Promo.Prizes.API", "Prizes\Promo.Prizes.API\Promo.Prizes.API.csproj", "{852C149D-5404-4864-9762-B7365A81227A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Promo.Prizes.API", "Prizes\Promo.Prizes.API\Promo.Prizes.API.csproj", "{852C149D-5404-4864-9762-B7365A81227A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Promo.Prizes.Core", "Prizes\Promo.Prizes.Core\Promo.Prizes.Core.csproj", "{67BE2F38-60E0-4EFC-AE12-331822FA05A7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Promo.Prizes.Core", "Prizes\Promo.Prizes.Core\Promo.Prizes.Core.csproj", "{67BE2F38-60E0-4EFC-AE12-331822FA05A7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Promo.Prizes.Infrastructure", "Prizes\Promo.Prizes.Infrastructure\Promo.Prizes.Infrastructure.csproj", "{B48B619F-3D3A-4DD9-AD07-7AAEC8A62D58}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Promo.Prizes.Infrastructure", "Prizes\Promo.Prizes.Infrastructure\Promo.Prizes.Infrastructure.csproj", "{B48B619F-3D3A-4DD9-AD07-7AAEC8A62D58}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Promo.Harvester.API", "Harvesters\Promo.Harvester.API\Promo.Harvester.API.csproj", "{8B1F2D2E-B907-4438-A825-D4B194115D4E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -270,10 +267,6 @@ Global
 		{4CD13194-1061-48F5-86F6-5F6A60B00B2A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4CD13194-1061-48F5-86F6-5F6A60B00B2A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4CD13194-1061-48F5-86F6-5F6A60B00B2A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{2B26F9D1-08EE-4142-B495-EABE2FECE416}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{2B26F9D1-08EE-4142-B495-EABE2FECE416}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{2B26F9D1-08EE-4142-B495-EABE2FECE416}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{2B26F9D1-08EE-4142-B495-EABE2FECE416}.Release|Any CPU.Build.0 = Release|Any CPU
 		{C8D9440B-C2B4-4A36-B711-4C727CB8FC72}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{C8D9440B-C2B4-4A36-B711-4C727CB8FC72}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C8D9440B-C2B4-4A36-B711-4C727CB8FC72}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -286,10 +279,6 @@ Global
 		{B10E225B-0676-4811-A1D5-B4E6B0B2813D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B10E225B-0676-4811-A1D5-B4E6B0B2813D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B10E225B-0676-4811-A1D5-B4E6B0B2813D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{BBA9476D-26D2-4E04-8828-0A93BF391F67}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{BBA9476D-26D2-4E04-8828-0A93BF391F67}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{BBA9476D-26D2-4E04-8828-0A93BF391F67}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{BBA9476D-26D2-4E04-8828-0A93BF391F67}.Release|Any CPU.Build.0 = Release|Any CPU
 		{852C149D-5404-4864-9762-B7365A81227A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{852C149D-5404-4864-9762-B7365A81227A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{852C149D-5404-4864-9762-B7365A81227A}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -302,6 +291,10 @@ Global
 		{B48B619F-3D3A-4DD9-AD07-7AAEC8A62D58}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B48B619F-3D3A-4DD9-AD07-7AAEC8A62D58}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B48B619F-3D3A-4DD9-AD07-7AAEC8A62D58}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8B1F2D2E-B907-4438-A825-D4B194115D4E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8B1F2D2E-B907-4438-A825-D4B194115D4E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8B1F2D2E-B907-4438-A825-D4B194115D4E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8B1F2D2E-B907-4438-A825-D4B194115D4E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -353,11 +346,11 @@ Global
 		{428F6B3D-8CC7-4A65-B468-BD321E83183A} = {C5A1B115-6C9B-4F3A-B7B2-83F1D5737B65}
 		{B10E225B-0676-4811-A1D5-B4E6B0B2813D} = {C5A1B115-6C9B-4F3A-B7B2-83F1D5737B65}
 		{2C06BA8E-1D84-4677-92F1-ED2EC441C8EF} = {CAE06D12-D886-4C59-9572-C2CF5033C576}
-		{BBA9476D-26D2-4E04-8828-0A93BF391F67} = {8F542792-CDF6-458D-A451-3708C1D088C9}
 		{AEF0B21A-1BA7-414C-BA69-877672563F4F} = {B71190C8-5608-4FFE-8C71-DA20A334CFC6}
 		{852C149D-5404-4864-9762-B7365A81227A} = {AEF0B21A-1BA7-414C-BA69-877672563F4F}
 		{67BE2F38-60E0-4EFC-AE12-331822FA05A7} = {AEF0B21A-1BA7-414C-BA69-877672563F4F}
 		{B48B619F-3D3A-4DD9-AD07-7AAEC8A62D58} = {AEF0B21A-1BA7-414C-BA69-877672563F4F}
+		{8B1F2D2E-B907-4438-A825-D4B194115D4E} = {8F542792-CDF6-458D-A451-3708C1D088C9}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {94B46B7F-1545-465E-863A-AAD0C58A8C0F}

@@ -11,7 +11,8 @@ namespace Promo.Rules.Infrastructure.Models
 		public Guid SweepUid { get; set; }
         public WatchTypeCode WatchTypeCode { get; set; }
         public string WatchValue { get; set; }
-        public bool ActiveInd { get; set; }
+		public long TweetId { get; set; }
+		public bool ActiveInd { get; set; }
         public DateTime CreatedDate { get; set; }
         public DateTime? UpdatedDate { get; set; }
     }

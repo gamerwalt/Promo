@@ -44,10 +44,10 @@ namespace Promo.Harvester.Core
 
         //Ideally, we should just send this to a queue to handle this process
         public async Task Handle(NewHashTagTweetReceived notification, CancellationToken cancellationToken)
-        {
-            _logger.LogInformation("Started handling {action}", nameof(ProcessReceivedTweetFromHashtagStream));
+		{
+			_logger.LogInformation("Started handling {action}", nameof(ProcessReceivedTweetFromHashtagStream));
 
-            var campaign = await GetCampaignAsync(notification.Rule.CampaignUid);
+			var campaign = await GetCampaignAsync(notification.Rule.CampaignUid);
 			var sweeps = await GetCampaignSweepsAsync(notification.Rule.CampaignUid);
 
 			var sweepStakesToEnter = sweeps.FirstOrDefault(c => notification.Rule.SweepUid.Equals(c.SweepUid));
@@ -55,28 +55,32 @@ namespace Promo.Harvester.Core
 			if (campaign == null || sweepStakesToEnter == null)
 				throw new Exception("Campaign or Sweeps is null");
 
-            switch (campaign.CampaignType.CampaignTypeCode)
-            {
-                case CampaignTypeCode.AutoAll:
-                    break;
+			switch (campaign.CampaignType.CampaignTypeCode)
+			{
+				case CampaignTypeCode.AutoAll:
+					break;
 				case CampaignTypeCode.AutoEnterSweepsFromHashtag:
-					if (await UserCanStillEnterSweepsAsync(sweepStakesToEnter, campaign, notification.Tweet.CreatedBy)) 
+					if (await UserCanStillEnterSweepsAsync(sweepStakesToEnter, campaign, notification.Tweet.CreatedBy) &&
+							TweetIsInReplyToRuleTweetId(notification))
 						await EnterSweepsAsync(notification, campaign, sweepStakesToEnter);
 					break;
 				case CampaignTypeCode.AutoEnterSweepsFromTweet:
-                    break;
-                case CampaignTypeCode.AutoReplyDM:
-                    break;
-                case CampaignTypeCode.AutoReplyHashtag:
-                    break;
-                case CampaignTypeCode.AutoReplyLikedTweet:
-                    break;
-                case CampaignTypeCode.AutoReplyTweet:
-                    break;
-            }
+					break;
+				case CampaignTypeCode.AutoReplyDM:
+					break;
+				case CampaignTypeCode.AutoReplyHashtag:
+					break;
+				case CampaignTypeCode.AutoReplyLikedTweet:
+					break;
+				case CampaignTypeCode.AutoReplyTweet:
+					break;
+			}
 
-            _logger.LogInformation("Finished handling {action}", nameof(ProcessReceivedTweetFromHashtagStream));
-        }
+			_logger.LogInformation("Finished handling {action}", nameof(ProcessReceivedTweetFromHashtagStream));
+		}
+
+		private static bool TweetIsInReplyToRuleTweetId(NewHashTagTweetReceived notification) 
+			=> notification.Tweet.InReplyToStatusId.Equals(notification.Rule.TweetId);
 
 		private async Task<IEnumerable<Sweep>> GetCampaignSweepsAsync(Guid campaignUid) 
 			=> await _sweepsClient.GetCampaignSweepsAsync(campaignUid);

@@ -133,10 +133,22 @@ namespace Promo.Rules.Infrastructure
 				RuleUid = reader.GetGuid("rule_uid"),
 				WatchValue = reader.GetString("watch_value"),
 				WatchTypeCode = (WatchTypeCode)Enum.Parse(typeof(WatchTypeCode), reader.GetString("watch_type_code")),
+				TweetId = GetLongValue(reader, "tweet_id"),
 				ActiveInd = reader.GetBoolean("active_ind"),
 				CreatedDate = reader.GetDateTime("created_date"),
 				UpdatedDate = GetNullableDateTimeValue(reader, "updated_date")
 			};
+		}
+
+		private long GetLongValue(MySqlDataReader reader, string fieldName)
+		{
+			var value = reader[fieldName].ToString();
+			if (string.IsNullOrWhiteSpace(value))
+			{
+				return 0;
+			}
+
+			return reader.GetInt64(fieldName);
 		}
 
 		private DateTime? GetNullableDateTimeValue(MySqlDataReader reader, string fieldName)

@@ -18,7 +18,6 @@ BEGIN
 END$$
 DELIMITER ;
 
-
 DELIMITER $$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `tweet_create`(IN tweetUid VARCHAR(50), IN harvestedUid VARCHAR(50), IN userUid VARCHAR(50), IN externalId VARCHAR(100), IN body TEXT, IN retweeted BIT, IN externalCreatedAt DATETIME)
 BEGIN
@@ -141,5 +140,14 @@ BEGIN
       description = description,
       screen_name = screenName,
       updated_date = CURRENT_TIMESTAMP();
+END$$
+DELIMITER ;
+
+DELIMITER $$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `users_get_by_screen_name`(IN userIdentifier VARCHAR(100))
+BEGIN
+	SELECT *
+    FROM users
+    WHERE screen_name = userIdentifier;
 END$$
 DELIMITER ;

@@ -47,7 +47,7 @@ namespace Promo.Harvester.Service
         {
             _logger.LogInformation("OnStarted has been called");
 
-            Task.Run(async () => await _streamService.StartStreamingAsync(_cancellationTokenSource.Token)).Wait();
+			Task.Run(async () => await _streamService.StartStreamingAsync(_cancellationTokenSource.Token)).Wait();
 
             _appLifeTime.StopApplication();
         }
