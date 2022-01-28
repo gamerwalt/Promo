@@ -1,4 +1,5 @@
-﻿using Promo.Clients.Internal;
+﻿using Microsoft.Extensions.Logging;
+using Promo.Clients.Internal;
 using Promo.Harvester.Core.Services;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,16 +21,19 @@ namespace Promo.Harvester.Service
         private readonly ITwitterClient _twitterClient;
         private readonly IRulesClient _rulesClient;
         private readonly IHarvesterService _harvesterService;
+		private readonly ILogger<StreamService> _logger;
 
         private IFilteredStream currentStream;
 
         public StreamService(ITwitterClient twitterClient,
             IRulesClient rulesClient,
-            IHarvesterService harvesterService)
+            IHarvesterService harvesterService,
+			ILoggerFactory loggerFactory)
         {
             _twitterClient = twitterClient;
             _rulesClient = rulesClient;
             _harvesterService = harvesterService;
+			_logger = loggerFactory.CreateLogger<StreamService>();
 
             currentStream = _twitterClient.Streams.CreateFilteredStream();
         }
@@ -44,14 +48,20 @@ namespace Promo.Harvester.Service
                 {
                     if (rule.ActiveInd)
                     {
-                        currentStream.AddTrack(rule.WatchValue);
+						_logger.LogInformation("Adding {watchValue} to stream service for rules to look out for.", rule.WatchValue);
+						currentStream.AddTrack(rule.WatchValue);
                     }
                 }
             }
 
-            currentStream.MatchingTweetReceived += CurrentStream_MatchingTweetReceived;
+			if(currentStream.TracksCount > 0)
+			{
+				currentStream.MatchingTweetReceived += CurrentStream_MatchingTweetReceived;
 
-            await currentStream.StartMatchingAnyConditionAsync();
+				_logger.LogInformation("Started streaming fromt twitter.");
+
+				await currentStream.StartMatchingAnyConditionAsync();
+			}
         }
 
         private void CurrentStream_MatchingTweetReceived(object sender, Tweetinvi.Events.MatchedTweetReceivedEventArgs e)

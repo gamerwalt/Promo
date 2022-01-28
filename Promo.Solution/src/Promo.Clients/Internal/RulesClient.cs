@@ -23,7 +23,7 @@ namespace Promo.Clients.Internal
         Task<List<Rule>> GetRulesForReceivedTweetAsync(List<IHashtagEntity> hashtags);
         Task<Rule> GetRuleAsync(Guid ruleUid);
 		Task<EntryRule> GetEntryRulesForCampaignAndSweepsAsync(Campaign campaign, Sweep sweep);
-		Task<IEnumerable<SweepDrawRule>> GetSweepRulesAsync(IEnumerable<Guid> enumerable);
+		Task<IEnumerable<SweepDrawRule>> GetSweepDrawRulesAsync(IEnumerable<Guid> enumerable);
 	}
 
     public class RulesClient : IRulesClient
@@ -244,7 +244,7 @@ namespace Promo.Clients.Internal
 			return null;
 		}
 
-		public async Task<IEnumerable<SweepDrawRule>> GetSweepRulesAsync(IEnumerable<Guid> sweepUids)
+		public async Task<IEnumerable<SweepDrawRule>> GetSweepDrawRulesAsync(IEnumerable<Guid> sweepUids)
 		{
 			var authModel = await AuthenticateService();
 

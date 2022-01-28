@@ -154,6 +154,7 @@ namespace Promo.Harvester.API
             });
 
             services.AddTransient<IHarvesterRepository, HarvesterRepository>();
+			services.AddTransient<ISweepPrizeRepository, SweepPrizeRepository>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

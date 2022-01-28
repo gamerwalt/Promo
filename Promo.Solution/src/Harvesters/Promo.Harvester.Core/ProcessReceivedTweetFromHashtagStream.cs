@@ -95,7 +95,10 @@ namespace Promo.Harvester.Core
 
 		private bool UserIsNotInBlacklistedUsers(NewHashTagTweetReceived notification, IEnumerable<long> blacklistedUsers)
 		{
-			return !blacklistedUsers.Any(c => c.Equals(notification.Tweet.CreatedBy.Id));
+			//using var isInBlacklistedScope = _logger.IsInBlackLis
+
+			var isInBlacklistedUsers = blacklistedUsers.Any(c => c.Equals(notification.Tweet.CreatedBy.Id));
+			return !isInBlacklistedUsers;
 		}
 
 		private static bool TweetIsInReplyToRuleTweetId(NewHashTagTweetReceived notification) 
@@ -109,7 +112,7 @@ namespace Promo.Harvester.Core
 			if(campaign.ActiveInd && CampaignIsRunning(campaign) && SweepsIsRunningAndNotYetDrawn(sweep))
 			{
 				_logger.LogInformation("{action} called for CampaignName: {campaignName}", nameof(EnterSweepsAsync), campaign.CampaignName);
-
+				_logger.LogInformation("Entering {screenName} into the sweepstakes {sweepName}", notification.Tweet.CreatedBy.ScreenName, sweep.Name);
 				await _mediator.Send(new EnterSweeps(notification, campaign, sweep));
 
 				return;
@@ -151,10 +154,10 @@ namespace Promo.Harvester.Core
 		}
 
 		private bool SweepsIsRunningAndNotYetDrawn(Sweep sweep) 
-			=> DateTime.UtcNow < sweep.EndDate && DateTime.UtcNow > sweep.StartDate && DateTime.UtcNow < sweep.DrawDate;
+			=> DateTime.Now < sweep.EndDate && DateTime.Now > sweep.StartDate && DateTime.Now < sweep.DrawDate;
 
 		private bool CampaignIsRunning(Campaign campaign) 
-			=> DateTime.UtcNow < campaign.EndDate && DateTime.UtcNow > campaign.StartDate;
+			=> DateTime.Now < campaign.EndDate && DateTime.Now > campaign.StartDate;
 
 		private async Task<Campaign> GetCampaignAsync(Guid campaignUid) 
 			=> await _campaignsClient.GetCampaignAsync(campaignUid);

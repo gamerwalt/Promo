@@ -43,10 +43,33 @@ namespace Promo.Sweeps.Core
 				_logger.LogError("Unable to continue. Sweep {sweepName} has no prizes. This needs to be fixed or configured ASAP. Winners has already been saved for sweep uid : {sweepUid}",
 					notification.SweepDrawRule.SweepName,
 					notification.SweepDrawRule.SweepUid);
+
+				var counter = 1;
+				foreach(var winner in notification.Winners)
+				{
+					_logger.LogInformation($"Sending information to {winner.UserIdentifier}");
+					
+					var winningMessage = "";
+					if(counter == 1)
+					{
+						winningMessage = $"{winner.UserIdentifier} {DateTime.UtcNow:MMM dd, yyyy hh:mm:ss:fffff} -You are potentially the grand prize winner. However since there are no prizes, we have marked you as the grand winner.";
+					}
+					else
+					{
+						winningMessage = $"{winner.UserIdentifier} {DateTime.UtcNow:MMM dd, yyyy hh:mm:ss:fffff} -You are potentially a winner. However since there are no prizes, we have marked you as one of the winners.";
+					}
+
+					counter++;
+					_logger.LogInformation("Sending {message} to {screenName}", winningMessage, winner.UserIdentifier);
+
+					var originalTweet = await _twitterClient.Tweets.PublishTweetAsync(winningMessage);
+				}
+
+				return;
 			}
 
 			_logger.LogInformation("Notifying winners of their win.");
-			var message = $"@screenName - {DateTime.UtcNow.ToString("MMM dd, yyyy hh:mm:ss")} - You are a potential winner for the sweepstakes {notification.SweepDrawRule.SweepName} ran by [Company/Personality].";
+			var message = $"@screenName - {DateTime.UtcNow.ToString("MMM dd, yyyy hh:mm:ss")} - You are a potential winner for the sweepstakes {notification.SweepDrawRule.SweepName} ran by @hrvsterHQ.";
 
 			var prizePosition = 1;
 
@@ -63,16 +86,20 @@ namespace Promo.Sweeps.Core
 					var newMessage = "";
 					if (prizePosition == 1)
 					{
-						newMessage = $"{winner.UserIdentifier} {DateTime.UtcNow.ToString("MMM dd, yyyy hh:mm:ss")} - You have potentially won the grand prize of {prizeName}.";
+						newMessage = $"{winner.UserIdentifier} {DateTime.UtcNow.ToString("MMM dd, yyyy hh:mm:ss:fffff")} - You have potentially won the grand prize of {prizeName}.";
 					}
 					else
 					{
-						newMessage = $"{winner.UserIdentifier} {DateTime.UtcNow.ToString("MMM dd, yyyy hh:mm:ss")} - You have won {prizeName}";
+						newMessage = $"{winner.UserIdentifier} {DateTime.UtcNow.ToString("MMM dd, yyyy hh:mm:ss:fffff")} - You have potentially won {prizeName}";
 					}
 					var prizeTweet = await _twitterClient.Tweets.PublishTweetAsync(new PublishTweetParameters(newMessage) { InReplyToTweet = originalTweet });
 
-					newMessage = $"{winner.UserIdentifier} {DateTime.UtcNow.ToString("MMM dd, yyyy hh:mm:ss")} - See contest rules {notification.SweepDrawRule.RulesUrl} for more details.";
+					newMessage = $"{winner.UserIdentifier} {DateTime.UtcNow.ToString("MMM dd, yyyy hh:mm:ss:fffff")} - We will contact you with details on how to claim your prize.";
 					await _twitterClient.Tweets.PublishTweetAsync(new PublishTweetParameters(newMessage) { InReplyToTweet = prizeTweet });
+
+					//Todo: once we implement the rule pages
+					//newMessage = $"{winner.UserIdentifier} {DateTime.UtcNow.ToString("MMM dd, yyyy hh:mm:ss")} - See contest rules {notification.SweepDrawRule.RulesUrl} for more details.";
+					//await _twitterClient.Tweets.PublishTweetAsync(new PublishTweetParameters(newMessage) { InReplyToTweet = prizeTweet });
 
 					prizePosition++;
 				}

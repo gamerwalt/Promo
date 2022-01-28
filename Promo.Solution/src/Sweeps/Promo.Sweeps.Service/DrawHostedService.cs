@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Promo.Sweeps.Draw.Service;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -45,7 +46,29 @@ namespace Promo.Sweeps.Service
 		{
 			_logger.LogInformation("OnStarted has been called");
 
-			Task.Run(async () => await _drawService.DrawAvailableSweepsAsync(_cancellationTokenSource.Token)).Wait();
+			Task.Run(
+				async () =>
+				{
+					while(true)
+					{
+						try
+						{
+							_logger.LogInformation("Started running draw swervice.");
+
+							await _drawService.DrawAvailableSweepsAsync(_cancellationTokenSource.Token);
+
+							_logger.LogInformation("Delaying for 600 seconds.");
+
+							await Task.Delay(TimeSpan.FromSeconds(600));
+						}
+						catch(Exception e)
+						{
+							_logger.LogError("An error occurred... Exception: {message}: StackTrace: {stackTrace}", e.Message, e.StackTrace);
+							_logger.LogInformation("An error occurred... delaying for 120 seconds.");
+						}
+					}
+				}
+			).Wait();
 
 			_appLifeTime.StopApplication();
 		}

@@ -52,6 +52,8 @@ namespace Promo.Harvester.Service
 						{
 							try
 							{
+								_logger.LogInformation("Started streaming services for twitter.");
+
 								await _streamService.StartStreamingAsync(_cancellationTokenSource.Token);
 
 								_logger.LogInformation("Delaying for 60 seconds...");
@@ -60,7 +62,7 @@ namespace Promo.Harvester.Service
 							}
 							catch (Exception e)
 							{
-								_logger.LogError("An error occurred... Exception: {message}", e.Message);
+								_logger.LogError("An error occurred... Exception: {message}: StackTrace: {stackTrace}", e.Message, e.StackTrace);
 								_logger.LogInformation("An error occurred... delaying for 120 seconds.");
 							}
 						}

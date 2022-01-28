@@ -101,6 +101,8 @@ namespace Promo.Sweeps.Core.RequestHandlers
 
 				request.MissingBetween.Add(winnerSweepEntryId);
 
+				_logger.LogInformation("Winner picked for {sweepName} is {userIdentifier}.", request.SweepDrawRule.SweepName, sweepEntry.UserIdentifier);
+
 				winnerList.Add(new SweepWinner
 				{
 					SweepWinnerId = winnerIndex,

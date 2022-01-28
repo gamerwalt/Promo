@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using Microsoft.Extensions.Logging;
+using Promo.Prizes.Core.Notifications;
 using Promo.Prizes.Core.Request;
 using Promo.Prizes.Infrastructure;
 using Promo.Prizes.Infrastructure.Models;
@@ -35,11 +36,13 @@ namespace Promo.Prizes.Core.RequestHandlers
 	public class CreateSweepPrizeRequestHandler : IRequestHandler<CreateSweepPrizeRequest, IEnumerable<SweepPrize>>
 	{
 		private readonly ISweepPrizesRepository _repository;
+		private readonly IMediator _mediator;
 		private readonly ILogger<CreateSweepPrizeRequestHandler> _logger;
 
-		public CreateSweepPrizeRequestHandler(ISweepPrizesRepository repository, ILoggerFactory loggerFactory)
+		public CreateSweepPrizeRequestHandler(ISweepPrizesRepository repository, IMediator mediator, ILoggerFactory loggerFactory)
 		{
 			_repository = repository;
+			_mediator = mediator;
 			_logger = loggerFactory.CreateLogger<CreateSweepPrizeRequestHandler>();
 		}
 
@@ -64,7 +67,7 @@ namespace Promo.Prizes.Core.RequestHandlers
 
 		private async Task CreateSweepPrizeAsync(Guid sweepUid, Guid prizeUid, CreateSweepPrize item)
 		{
-			await _repository.CreateSweepPrizeAsync(new SweepPrize
+			var sweepPrize = new SweepPrize
 			{
 				PrizeUid = prizeUid,
 				SweepUid = sweepUid,
@@ -74,7 +77,11 @@ namespace Promo.Prizes.Core.RequestHandlers
 				PrizeDescription = item.PrizeDescription,
 				PrizeValue = item.PrizeValue,
 				Locale = item.Locale
-			});
+			};
+
+			await _repository.CreateSweepPrizeAsync(sweepPrize);
+
+			await _mediator.Publish(new SweepPrizeCreated(sweepPrize));
 		}
 	}
 }

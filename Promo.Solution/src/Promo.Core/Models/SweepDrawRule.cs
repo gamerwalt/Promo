@@ -16,5 +16,6 @@ namespace Promo.Core.Models
 		public int WinnerCount { get; set; }
 		public int WinnerBackupCount { get; set; }
 		public Uri RulesUrl { get; set; }
+		public long OriginalTweetiId { get; set; }
 	}
 }

@@ -10,6 +10,7 @@ using Promo.Core.Models;
 using Promo.Harvester.Core;
 using Promo.Harvester.Core.Services;
 using Promo.Harvester.Infrastructure;
+using Serilog;
 using System;
 using System.Reflection;
 using Tweetinvi;
@@ -29,7 +30,12 @@ namespace Promo.Harvester.Service
         public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
                 .ConfigureAppConfiguration(ConfigureAppConfiguration)
-                .ConfigureServices((hostContext, services) =>
+				.UseSerilog((context, configuration) =>
+					configuration.ReadFrom.Configuration(context.Configuration)
+						.WriteTo.Console()
+						.Enrich.FromLogContext()
+						.MinimumLevel.Debug(), preserveStaticLogger: true)
+				.ConfigureServices((hostContext, services) =>
                 {
                     services.AddHostedService<HarvesterHostedService>();
                     services.AddTransient<IStreamService, StreamService>();
@@ -61,6 +67,7 @@ namespace Promo.Harvester.Service
 
             services.AddTransient<IHarvesterRepository, HarvesterRepository>();
 			services.AddTransient<IBlacklistedSweepsUsersRepository, BlacklistedSweepsUsersRepository>();
+			services.AddTransient<ISweepPrizeRepository, SweepPrizeRepository>();
         }
 
         private static void AddHrvsterServiceAuthenticationclient(IServiceCollection services)

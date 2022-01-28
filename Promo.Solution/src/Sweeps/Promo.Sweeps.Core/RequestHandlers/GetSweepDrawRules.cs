@@ -50,8 +50,12 @@ namespace Promo.Sweeps.Core.RequestHandlers
 			var campaignList = await _campaignClient.GetCampaignsAsync(campaignGuidList);
 			_logger.LogInformation($"Retrieved {campaignList.Count()} campaigns retrieved to map to SweepDrawRule");
 
-			var rules = await _rulesClient.GetSweepRulesAsync(sweepsRequiringDraw.Select(c => c.SweepUid));
+			var rules = await _rulesClient.GetSweepDrawRulesAsync(sweepsRequiringDraw.Select(c => c.SweepUid));
 			_logger.LogInformation($"Retrieved {rules.Count()} draw rules retrieved to map to SweepDrawRule");
+
+			var sweepRules = await _rulesClient.GetHashTagRulesAsync();
+
+			//var sweepRules = await _rulesClient.getSwee
 
 			var sweepDrawRules = new List<SweepDrawRule>();
 
@@ -60,7 +64,8 @@ namespace Promo.Sweeps.Core.RequestHandlers
 				sweepDrawRules.Add(CreateSweepDrawRuleFrom(
 					sweep,
 					campaignList.FirstOrDefault(c => c.CampaignUid.Equals(sweep.CampaignUid)),
-					rules.FirstOrDefault(c => c.SweepUid.Equals(sweep.SweepUid))
+					rules.FirstOrDefault(c => c.SweepUid.Equals(sweep.SweepUid)),
+					sweepRules.FirstOrDefault(c => c.SweepUid.Equals(sweep.SweepUid))
 					)
 				);
 			}
@@ -68,7 +73,7 @@ namespace Promo.Sweeps.Core.RequestHandlers
 			return sweepDrawRules;
 		}
 
-		private SweepDrawRule CreateSweepDrawRuleFrom(Infrastructure.Models.Sweep sweep, Campaign campaign, SweepDrawRule sweepDrawRule)
+		private SweepDrawRule CreateSweepDrawRuleFrom(Infrastructure.Models.Sweep sweep, Campaign campaign, SweepDrawRule sweepDrawRule, Rule rule)
 		{
 			sweepDrawRule.CampaignName = campaign.CampaignName;
 			sweepDrawRule.CampaignUid = campaign.CampaignUid;
@@ -78,6 +83,7 @@ namespace Promo.Sweeps.Core.RequestHandlers
 			sweepDrawRule.EndDate = sweep.EndDate;
 			sweepDrawRule.DrawDate = sweep.DrawDate.GetValueOrDefault();
 			sweepDrawRule.RulesUrl = sweep.RulesUrl;
+			sweepDrawRule.OriginalTweetiId = rule.TweetId;
 
 			return sweepDrawRule;
 		}

@@ -41,7 +41,7 @@ namespace Promo.Harvester.Core.RequestHandlers
 
 			var results = await _repository.GetBlacklistedSweepUsersAsync(request.SweepUid);
 
-			_logger.LogInformation("Retrieved {} number of blacklisted users for sweep with uid: {sweepUid}", results.Count(), request.SweepUid);
+			_logger.LogInformation("Retrieved {blacklistCount} number of blacklisted users for sweep with uid: {sweepUid}", results.Count(), request.SweepUid);
 
 			return results.ToList().Select(c => c.TweetUserId);
 		}
