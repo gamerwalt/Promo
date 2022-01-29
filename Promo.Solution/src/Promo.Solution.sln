@@ -157,6 +157,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Promo.Prizes.Infrastructure
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Promo.Harvester.API", "Harvesters\Promo.Harvester.API\Promo.Harvester.API.csproj", "{8B1F2D2E-B907-4438-A825-D4B194115D4E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Promo.Membership.API.Tests", "..\tests\Membership\Promo.Membership.API.Tests\Promo.Membership.API.Tests.csproj", "{FFD37C6D-0CDC-44B5-9E6E-E82BAE641900}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -295,6 +297,10 @@ Global
 		{8B1F2D2E-B907-4438-A825-D4B194115D4E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8B1F2D2E-B907-4438-A825-D4B194115D4E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8B1F2D2E-B907-4438-A825-D4B194115D4E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FFD37C6D-0CDC-44B5-9E6E-E82BAE641900}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FFD37C6D-0CDC-44B5-9E6E-E82BAE641900}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FFD37C6D-0CDC-44B5-9E6E-E82BAE641900}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FFD37C6D-0CDC-44B5-9E6E-E82BAE641900}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -351,6 +357,7 @@ Global
 		{67BE2F38-60E0-4EFC-AE12-331822FA05A7} = {AEF0B21A-1BA7-414C-BA69-877672563F4F}
 		{B48B619F-3D3A-4DD9-AD07-7AAEC8A62D58} = {AEF0B21A-1BA7-414C-BA69-877672563F4F}
 		{8B1F2D2E-B907-4438-A825-D4B194115D4E} = {8F542792-CDF6-458D-A451-3708C1D088C9}
+		{FFD37C6D-0CDC-44B5-9E6E-E82BAE641900} = {8F3D8585-5B5D-4512-A73E-E109D4178F38}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {94B46B7F-1545-465E-863A-AAD0C58A8C0F}
