@@ -6,5 +6,6 @@ namespace Promo.Core
     {
         string GetConnectionString();
         string GetConnectionName();
-    }
+		void DeleteTestData();
+	}
 }

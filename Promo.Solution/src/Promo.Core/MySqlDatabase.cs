@@ -22,7 +22,12 @@ namespace Promo.Core
             ConnectionString = _config.GetConnectionString(connectionName);
         }
 
-        public string GetConnectionName()
+		public void DeleteTestData()
+		{
+			throw new Exception("Need To connect and delete the database data");
+		}
+
+		public string GetConnectionName()
         {
             return ConnectionName;
         }
