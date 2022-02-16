@@ -25,7 +25,7 @@ namespace Promo.Prizes.API
 					Log.Information("Starting Web Host for Promo.Winners.API");
 					webBuilder
 						.UseStartup<Startup>()
-						.UseSerilog(ConfigureSerilog, preserveStaticLogger: true, true); ;
+						.UseSerilog(ConfigureSerilog, preserveStaticLogger: true, true);
 				});
 
 		private static void ConfigureSerilog(WebHostBuilderContext hostingContext, LoggerConfiguration loggerConfiguration)

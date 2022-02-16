@@ -26,7 +26,6 @@ using System.Linq;
 using System.Net.Http;
 using System.Reflection;
 using System.Text.Json.Serialization;
-using Tweetinvi;
 
 namespace Promo.Campaign.API
 {
@@ -155,9 +154,7 @@ namespace Promo.Campaign.API
 
             app.ConfigureExceptionHandler(app.ApplicationServices.GetRequiredService<ILogger<Startup>>());
 
-            //loggerFactory.AddFile(@"C:\Logs\log.txt");            
-
-            app.UseRouting();
+			app.UseRouting();
 
             app.UseAuthentication();
             app.UseAuthorization();

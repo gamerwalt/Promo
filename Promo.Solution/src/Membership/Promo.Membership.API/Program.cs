@@ -1,5 +1,8 @@
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
+using Serilog;
+using System;
 
 namespace Promo.Membership.API
 {
@@ -7,14 +10,30 @@ namespace Promo.Membership.API
     {
         public static void Main(string[] args)
         {
-            CreateHostBuilder(args).Build().Run();
+			var env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+
+			var configuration = new ConfigurationBuilder()
+				.AddJsonFile("appsettings.json")
+				.AddJsonFile($"appsettings.{env}.json")
+				.Build();
+
+			Log.Logger = new LoggerConfiguration()
+				.ReadFrom.Configuration(configuration)
+				.CreateLogger();
+			CreateHostBuilder(args).Build().Run();
         }
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
-                    webBuilder.UseStartup<Startup>();
-                });
-    }
+					Log.Information("Starting Web Host for Promo.Membership.API");
+					webBuilder
+						.UseStartup<Startup>()
+						.UseSerilog(ConfigureSerilog, preserveStaticLogger: true, true);
+				});
+
+		private static void ConfigureSerilog(WebHostBuilderContext hostingContext, LoggerConfiguration loggerConfiguration)
+			=> loggerConfiguration.ReadFrom.Configuration(hostingContext.Configuration);
+	}
 }

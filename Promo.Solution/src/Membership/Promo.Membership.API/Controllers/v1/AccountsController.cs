@@ -22,11 +22,8 @@ namespace Promo.Membership.API.Controllers.v1
     {
         private readonly IIdentityClient _identityClient;
         private readonly IMediator _mediator;
-        private readonly ITokenAcquisition _tokenAcquisition;
 
-        public AccountsController(
-            IIdentityClient identityClient,
-            IMediator mediator)
+        public AccountsController(IIdentityClient identityClient, IMediator mediator)
         {
             _identityClient = identityClient;
             _mediator = mediator;
@@ -52,13 +49,10 @@ namespace Promo.Membership.API.Controllers.v1
             request.ReturnSecureToken = true;
             var response = await _identityClient.SignIn(request);
 
-            if (response != null)
-                return new OkObjectResult(response);
+			return response != null ? new OkObjectResult(response) : new UnauthorizedResult();
+		}
 
-            return new UnauthorizedResult();
-        }
-
-        [HttpGet("accounts")]
+		[HttpGet("accounts")]
         [Produces("application/json")]
         [ProducesResponseType((int)HttpStatusCode.OK, Type = typeof(Account))]
         [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
