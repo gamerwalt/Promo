@@ -50,6 +50,8 @@ namespace Promo.Membership.API
 			});
 
 			services.AddTransient<IAccountsRepository, AccountsRepository>();
+			services.AddTransient<ICampaignRepository, CampaignRepository>();
+			services.AddTransient<ICampaignTypesRepository, CampaignTypesRepository>();
 
 			services.AddHttpClient<IIdentityClient, IdentityClient>();
 			AddMailClient(services);

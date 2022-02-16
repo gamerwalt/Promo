@@ -17,7 +17,7 @@ namespace Promo.TestUtilities.Common
 
         protected virtual Action<IServiceCollection> AdditionalServices { get; } = null;
         public virtual TFeature Initialize(
-            string testingApi = TestingAPI.Membership,
+            string testingApi = null,
             Action<IConfiguration> additionalConfiguration = null,
             Action<IServiceCollection> additionalServiceConfiguration = null)
         {

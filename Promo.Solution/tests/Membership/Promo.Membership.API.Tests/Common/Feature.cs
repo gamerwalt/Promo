@@ -19,7 +19,7 @@ namespace Promo.Membership.API.Tests.Common
 
         public Feature()
         {
-            Initialize();
+            Initialize(TestingAPI.Membership);
         }
 
         public override Feature Initialize(

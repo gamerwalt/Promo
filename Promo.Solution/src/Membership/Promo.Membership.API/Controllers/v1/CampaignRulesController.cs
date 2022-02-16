@@ -1,6 +1,15 @@
 ﻿using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Promo.Clients.External;
+using Microsoft.Extensions.Logging;
+using Promo.Core;
+using Promo.Membership.Core.RequestHandlers;
+using Promo.Membership.Infrastructure.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net;
+using System.Threading.Tasks;
 
 namespace Promo.Membership.API.Controllers.v1
 {
@@ -9,12 +18,37 @@ namespace Promo.Membership.API.Controllers.v1
 	public class CampaignRulesController : ControllerBase
 	{
 		private readonly IMediator _mediator;
+		private readonly ILogger<CampaignRulesController> _logger;
 
 		public CampaignRulesController(
-			IIdentityClient identityClient,
+			ILoggerFactory loggerFactory,
 			IMediator mediator)
 		{
+			_logger = loggerFactory.CreateLogger<CampaignRulesController>();
 			_mediator = mediator;
+		}
+
+		[HttpPost("campaigns/{campaignUid:Guid}/sweeps/{sweepUid:Guid}/rules")]
+		[Produces("application/json")]
+		[ProducesResponseType((int)HttpStatusCode.OK, Type = typeof(CampaignType))]
+		[ProducesResponseType((int)HttpStatusCode.Unauthorized)]
+		[ProducesResponseType((int)HttpStatusCode.NotFound)]
+		[Authorize]
+		public async Task<ActionResult> AddRules([FromRoute] Guid campaignUid, [FromRoute] Guid sweepUid, [FromBody] CampaignRule rule)
+		{
+			await _mediator.Send(new AddCampaignRule(campaignUid, sweepUid, rule));
+
+			return Ok();
+		}
+
+		[HttpGet("campaigns/watchtypes")]
+		[Produces("application/json")]
+		[ProducesResponseType((int)HttpStatusCode.OK, Type = typeof(IEnumerable<WatchTypeCode>))]
+		public async Task<ActionResult<IEnumerable<WatchTypeCode>>> GetWatchTypes()
+		{
+			var watchTypeCodes = Enum.GetValues(typeof(WatchTypeCode))
+				.Cast<WatchTypeCode>().Select(c => c.ToString());
+			return new OkObjectResult(watchTypeCodes);
 		}
 	}
 }
