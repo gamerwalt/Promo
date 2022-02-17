@@ -10,6 +10,9 @@
 
   <ItemGroup>
     <PackageReference Include="FirebaseAdmin" Version="2.2.0" />
+    <PackageReference Include="MassTransit.AspNetCore" Version="7.3.1" />
+    <PackageReference Include="MassTransit.Extensions.DependencyInjection" Version="7.3.1" />
+    <PackageReference Include="MassTransit.RabbitMQ" Version="7.3.1" />
     <PackageReference Include="MediatR" Version="9.0.0" />
     <PackageReference Include="MediatR.Extensions.FluentValidation.AspNetCore" Version="1.2.0" />
     <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="9.0.0" />
@@ -26,6 +29,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\Promo.Clients\Promo.Clients.csproj" />
+    <ProjectReference Include="..\..\Promo.Configuration\Promo.Configuration.csproj" />
     <ProjectReference Include="..\..\Promo.Core\Promo.Core.csproj" />
     <ProjectReference Include="..\Promo.Membership.Core\Promo.Membership.Core.csproj" />
     <ProjectReference Include="..\Promo.Membership.Infrastructure\Promo.Membership.Infrastructure.csproj" />

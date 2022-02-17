@@ -20,6 +20,12 @@
     },
     "Container in Kubernetes": {
       "commandName": "AzureDevSpaces"
+    },
+    "Docker": {
+      "commandName": "Docker",
+      "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}/swagger",
+      "publishAllPorts": true,
+      "useSSL": true
     }
   }
 }

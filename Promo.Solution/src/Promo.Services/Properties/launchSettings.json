@@ -1,0 +1,11 @@
+{
+  "profiles": {
+    "Promo.Services": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "local"
+      },
+      "dotnetRunMessages": "true"
+    }
+  }
+}

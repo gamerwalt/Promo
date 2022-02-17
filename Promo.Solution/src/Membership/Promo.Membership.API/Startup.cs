@@ -1,5 +1,6 @@
 using FirebaseAdmin;
 using Google.Apis.Auth.OAuth2;
+using MassTransit;
 using MediatR;
 using MediatR.Extensions.FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -14,9 +15,11 @@ using Microsoft.OpenApi.Models;
 using Newtonsoft.Json;
 using Promo.Clients.External;
 using Promo.Clients.Internal;
+using Promo.Configuration.Extensions;
 using Promo.Core;
 using Promo.Core.Authentication;
 using Promo.Core.Authentication.ConfigurationOptions;
+using Promo.Core.MessageContracts;
 using Promo.Core.Models;
 using Promo.Membership.Core.RequestHandlers;
 using Promo.Membership.Infrastructure;
@@ -44,6 +47,14 @@ namespace Promo.Membership.API
 				c.SwaggerDoc("v1", new OpenApiInfo { Title = "Promo.Membership.API", Version = "v1" });
 			});
 
+			services.AddMassTransit(config =>
+			{
+				config.AddBus(provider => Bus.Factory.CreateUsingRabbitMq());
+
+				config.AddRequestClient<IRulesAdded>();
+			});
+			services.AddMassTransitHostedService();
+
 			services.AddSingleton<IDatabase>(c =>
 			{
 				return new MySqlDatabase("Identity", Configuration);
@@ -61,7 +72,7 @@ namespace Promo.Membership.API
 
 			var domainAssembly = typeof(GetAccountRequest).GetTypeInfo().Assembly;
 			services.AddMediatR(domainAssembly);
-			services.AddFluentValidation(new[] { domainAssembly });
+			//services.AddFluentValidation(new[] { domainAssembly });
 
 			AddGoogleServicesAuthentication(services);
 			AddFirebaseServices(services, Configuration);

@@ -1,5 +1,6 @@
 ﻿//using FluentValidation;
 using MediatR;
+using Promo.Core;
 using Promo.Core.Models;
 using Promo.Membership.Core.Notifications;
 using Promo.Membership.Infrastructure.Models;
@@ -97,7 +98,7 @@ namespace Promo.Membership.Core.RequestHandlers
 				});
 			}
 
-			//send this rules to the Rules Service using RabbitMQ
+			await _mediator.Publish(new RulesAdded(rules));
 
 			return rules;
 		}
