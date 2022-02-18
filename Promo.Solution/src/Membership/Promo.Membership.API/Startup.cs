@@ -52,6 +52,7 @@ namespace Promo.Membership.API
 				config.AddBus(provider => Bus.Factory.CreateUsingRabbitMq());
 
 				config.AddRequestClient<IRulesAdded>();
+				config.AddRequestClient<IAccountCreated>();
 			});
 			services.AddMassTransitHostedService();
 
@@ -65,7 +66,6 @@ namespace Promo.Membership.API
 			services.AddTransient<ICampaignTypesRepository, CampaignTypesRepository>();
 
 			services.AddHttpClient<IIdentityClient, IdentityClient>();
-			AddMailClient(services);
 
 			//Service Authentication
 			AddHrvsterServiceAuthenticationclient(services);
@@ -88,17 +88,6 @@ namespace Promo.Membership.API
 			services.AddHttpClient<IServiceAuthenticate, ServiceAuthenticate>(client =>
 			{
 				client.BaseAddress = new Uri("https://identitytoolkit.googleapis.com");
-				client.DefaultRequestHeaders.Add("Accept", "application/json");
-			});
-		}
-
-		private void AddMailClient(IServiceCollection services)
-		{
-			var mailBaseApi = Configuration["PromoMailUrl"];
-
-			services.AddHttpClient<IMailClient, MailClient>(client =>
-			{
-				client.BaseAddress = new Uri(mailBaseApi);
 				client.DefaultRequestHeaders.Add("Accept", "application/json");
 			});
 		}

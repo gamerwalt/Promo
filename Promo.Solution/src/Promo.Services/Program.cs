@@ -2,15 +2,18 @@ using MassTransit;
 using MassTransit.Courier.Contracts;
 using MassTransit.Definition;
 using MassTransit.RabbitMqTransport;
+using MediatR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Promo.Core.MessageComponents.BatchConsumers;
 using Promo.Core.MessageComponents.Consumers;
+using Promo.Core.Notifications;
 using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 
 namespace Promo.RabbitMq.Consumer.Services
@@ -38,6 +41,10 @@ namespace Promo.RabbitMq.Consumer.Services
                 .ConfigureServices((hostContext, services) =>
                 {
 					Log.Information("Starting Host for Promo.Services");
+
+					var domainAssembly = typeof(AccountCreated).GetTypeInfo().Assembly;
+					services.AddMediatR(domainAssembly);
+
 
 					services.AddMassTransit(cfg =>
 					{
