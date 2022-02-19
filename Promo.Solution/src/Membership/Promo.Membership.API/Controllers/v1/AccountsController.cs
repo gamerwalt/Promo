@@ -27,7 +27,7 @@ namespace Promo.Membership.API.Controllers.v1
         {
             _identityClient = identityClient;
             _mediator = mediator;
-         }
+        }
 
         [HttpPost("accounts")]
         [Produces("application/json")]
@@ -41,16 +41,6 @@ namespace Promo.Membership.API.Controllers.v1
 
             return new OkObjectResult(account);
         }
-
-        [HttpPost("accounts/signin")]
-        [Produces("application/json")]
-        public async Task<ActionResult> SignIn([FromBody] AuthenticateRequest request)
-        {
-            request.ReturnSecureToken = true;
-            var response = await _identityClient.SignIn(request);
-
-			return response != null ? new OkObjectResult(response) : new UnauthorizedResult();
-		}
 
 		[HttpGet("accounts")]
         [Produces("application/json")]

@@ -22,6 +22,17 @@
       "DownstreamPathTemplate": "/v1/accounts",
       "DownstreamScheme": "http",
       "UpstreamPathTemplate": "/accounts"
+    },
+    {
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5000
+        }
+      ],
+      "DownstreamPathTemplate": "/v1/sessions",
+      "DownstreamScheme": "http",
+      "UpstreamPathTemplate": "/signin"
     }
   ],
   "GlobalConfiguration": {
