@@ -15,18 +15,15 @@ namespace Promo.Membership.Core
     {
         private readonly ICampaignTypesRepository _campaignTypesRepository;
         private readonly ICampaignRepository _campaignRepository;
-        private readonly ISweepsClient _sweepsClient;
         private readonly IServiceAuthenticate _serviceAuthenticate;
 
         public HandleCampaignCreatedService(
             ICampaignTypesRepository campaignTypesRepository,
             ICampaignRepository campaignRepository,
-            ISweepsClient sweepsClient,
             IServiceAuthenticate serviceAuthenticate)
         {
             _campaignTypesRepository = campaignTypesRepository;
             _campaignRepository = campaignRepository;
-            _sweepsClient = sweepsClient;
             _serviceAuthenticate = serviceAuthenticate;
         }
 
@@ -75,7 +72,7 @@ namespace Promo.Membership.Core
                 throw new InvalidCampaignException($"An error occurred while trying to run the method {nameof(CreateSweepsForCampaignAsync)} to create a sweeps for the campaignUid {campaignUid}");
 
 			//send to Games/Sweeps API, HarvsterAPI and Fulfillment API
-            await _sweepsClient.CreateSweepsForCampaignAsync($"{campaign.CampaignName}_sweeps", campaign.CampaignUid, campaign.StartDate, campaign.EndDate);
+            //await _sweepsClient.CreateSweepsForCampaignAsync($"{campaign.CampaignName}_sweeps", campaign.CampaignUid, campaign.StartDate, campaign.EndDate);
         }
     }
 }

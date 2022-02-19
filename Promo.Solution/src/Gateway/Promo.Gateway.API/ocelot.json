@@ -1,0 +1,30 @@
+{
+  "Routes": [
+    {
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5000
+        }
+      ],
+      "DownstreamPathTemplate": "/v1/campaigntypes",
+      "DownstreamScheme": "http",
+      "UpstreamPathTemplate": "/campaigntypes",
+      "UpstreamHttpMethod": [ "GET" ]
+    },
+    {
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5000
+        }
+      ],
+      "DownstreamPathTemplate": "/v1/accounts",
+      "DownstreamScheme": "http",
+      "UpstreamPathTemplate": "/accounts"
+    }
+  ],
+  "GlobalConfiguration": {
+    "BaseUrl": "http://localhost:4998"
+  }
+}
