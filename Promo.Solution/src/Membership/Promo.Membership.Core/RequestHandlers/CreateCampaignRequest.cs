@@ -58,10 +58,13 @@ namespace Promo.Membership.Core.RequestHandlers
                 {
                     CampaignTypeUid = request.NewCampaign.CampaignTypeUid
                 },
-                AccountUid = request.AccountUid
+				Account = new Account
+				{
+					AccountUid = request.AccountUid
+				}
             });
 
-            await _mediator.Publish(new CampaignCreated(request.NewCampaign, campaignUid));
+            await _mediator.Publish(new CampaignCreated(request.NewCampaign, request.AccountUid, campaignUid));
 
             return campaignUid;
         }

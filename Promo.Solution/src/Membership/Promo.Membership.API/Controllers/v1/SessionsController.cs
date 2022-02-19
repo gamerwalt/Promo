@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Logging;
 using Promo.Clients.External;
 using Promo.Core.Authentication;
+using Promo.Core.Models;
 using System.Threading.Tasks;
 
 namespace Promo.Membership.API.Controllers.v1
@@ -25,9 +26,11 @@ namespace Promo.Membership.API.Controllers.v1
 		{
 			request.ReturnSecureToken = true;
 
-			var response = await _identityClient.SignIn(request);
+			var signInResponse = await _identityClient.SignIn(request);
 
-			return response != null ? new OkObjectResult(response) : new UnauthorizedResult();
+			return signInResponse != null 
+				? new OkObjectResult(new ApiResponse(signInResponse, 200)) 
+				: new UnauthorizedResult();
 		}
 	}
 }

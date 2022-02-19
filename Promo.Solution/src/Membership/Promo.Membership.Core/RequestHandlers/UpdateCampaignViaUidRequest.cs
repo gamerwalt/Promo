@@ -11,13 +11,20 @@ namespace Promo.Membership.Core.RequestHandlers
     public class UpdateCampaignViaUidRequest : IRequest<Infrastructure.Models.Campaign>
     {
         private Guid _campaignUid;
+		private Guid _accountUid;
         private UpdateCampaignRequest _request;
 
-        public UpdateCampaignViaUidRequest(Guid campaignUid, UpdateCampaignRequest request)
+        public UpdateCampaignViaUidRequest(Guid campaignUid, Guid accountUid, UpdateCampaignRequest request)
         {
             _campaignUid = campaignUid;
             _request = request;
+			_accountUid = accountUid;
         }
+
+		public Guid AccountUid
+		{
+			get { return _accountUid; }
+		}
 
         public Guid CampaignUid
         {
@@ -56,7 +63,7 @@ namespace Promo.Membership.Core.RequestHandlers
                 }
             });
 
-            var campaign = await _repository.GetCampaignByUidAsync(request.CampaignUid);
+            var campaign = await _repository.GetCampaignByUidAsync(request.CampaignUid, request.AccountUid);
 
             await _mediator.Publish(new CampaignUpdated(request.CampaignUid));
 

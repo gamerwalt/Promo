@@ -33,6 +33,39 @@
       "DownstreamPathTemplate": "/v1/sessions",
       "DownstreamScheme": "http",
       "UpstreamPathTemplate": "/signin"
+    },
+    {
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5000
+        }
+      ],
+      "DownstreamPathTemplate": "/v1/campaigns",
+      "DownstreamScheme": "http",
+      "UpstreamPathTemplate": "/campaigns"
+    },
+    {
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5000
+        }
+      ],
+      "DownstreamPathTemplate": "/v1/campaigns/{campaignUid}",
+      "DownstreamScheme": "http",
+      "UpstreamPathTemplate": "/campaigns/{campaignUid}"
+    },
+    {
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5000
+        }
+      ],
+      "DownstreamPathTemplate": "/v1/watchtypes",
+      "DownstreamScheme": "http",
+      "UpstreamPathTemplate": "/watchtypes"
     }
   ],
   "GlobalConfiguration": {

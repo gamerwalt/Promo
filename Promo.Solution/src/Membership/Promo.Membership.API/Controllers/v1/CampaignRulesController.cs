@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Promo.Core;
+using Promo.Core.Models;
 using Promo.Membership.Core.RequestHandlers;
 using Promo.Membership.Infrastructure.Models;
 using System;
@@ -30,7 +31,7 @@ namespace Promo.Membership.API.Controllers.v1
 
 		[HttpPost("campaigns/{campaignUid:Guid}/sweeps/{sweepUid:Guid}/rules")]
 		[Produces("application/json")]
-		[ProducesResponseType((int)HttpStatusCode.OK, Type = typeof(CampaignType))]
+		[ProducesResponseType((int)HttpStatusCode.OK, Type = typeof(Infrastructure.Models.CampaignType))]
 		[ProducesResponseType((int)HttpStatusCode.Unauthorized)]
 		[ProducesResponseType((int)HttpStatusCode.NotFound)]
 		[Authorize]
@@ -38,17 +39,7 @@ namespace Promo.Membership.API.Controllers.v1
 		{
 			await _mediator.Send(new AddCampaignRule(campaignUid, sweepUid, rule));
 
-			return Ok();
-		}
-
-		[HttpGet("campaigns/watchtypes")]
-		[Produces("application/json")]
-		[ProducesResponseType((int)HttpStatusCode.OK, Type = typeof(IEnumerable<WatchTypeCode>))]
-		public async Task<ActionResult<IEnumerable<WatchTypeCode>>> GetWatchTypes()
-		{
-			var watchTypeCodes = Enum.GetValues(typeof(WatchTypeCode))
-				.Cast<WatchTypeCode>().Select(c => c.ToString());
-			return new OkObjectResult(watchTypeCodes);
+			return new OkObjectResult(new ApiResponse(null, 200));
 		}
 	}
 }

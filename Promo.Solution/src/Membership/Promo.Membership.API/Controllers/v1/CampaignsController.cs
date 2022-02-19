@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Promo.Clients.External;
+using Promo.Core.Models;
 using Promo.Membership.Core.RequestHandlers;
 using Promo.Membership.Core.Requests;
 using Promo.Membership.Infrastructure.Models;
@@ -41,22 +42,23 @@ namespace Promo.Membership.API.Controllers.v1
 
 			var campaignUid = await _mediator.Send(new CreateCampaignRequest(request, User));
 
-			var campaign = await _mediator.Send(new GetCampaignByUidRequest(campaignUid));
+			var campaign = await _mediator.Send(new GetCampaign(campaignUid));
 
-			return new OkObjectResult(campaign);
+			return new OkObjectResult(new ApiResponse(campaign, 200));
 		}
 
 		[HttpGet("campaigns")]
 		[Produces("application/json")]
 		[ProducesResponseType((int)HttpStatusCode.OK, Type = typeof(List<Infrastructure.Models.Campaign>))]
 		[ProducesResponseType((int)HttpStatusCode.Unauthorized)]
+		[Authorize]
 		public async Task<ActionResult<List<Infrastructure.Models.Campaign>>> GetAllAsync()
 		{
 			var accountUid = Guid.Parse(User.Claims.FirstOrDefault(c => c.Type.Equals("user_id", StringComparison.OrdinalIgnoreCase)).Value);
 
 			var campaigns = await _mediator.Send(new GetAllCampaignsForAccount(accountUid));
 
-			return new OkObjectResult(campaigns);
+			return new OkObjectResult(new ApiResponse(campaigns, 200));
 		}
 
 		[HttpGet("campaigns/{campaignUid:Guid}")]
@@ -64,14 +66,17 @@ namespace Promo.Membership.API.Controllers.v1
 		[ProducesResponseType((int)HttpStatusCode.OK, Type = typeof(Infrastructure.Models.Campaign))]
 		[ProducesResponseType((int)HttpStatusCode.Unauthorized)]
 		[ProducesResponseType((int)HttpStatusCode.NotFound)]
+		[Authorize]
 		public async Task<ActionResult<Infrastructure.Models.Campaign>> GetAsync([FromRoute] Guid campaignUid)
 		{
-			var campaign = await _mediator.Send(new GetCampaignByUidRequest(campaignUid));
+			var accountUid = Guid.Parse(User.Claims.FirstOrDefault(c => c.Type.Equals("user_id", StringComparison.OrdinalIgnoreCase)).Value);
+
+			var campaign = await _mediator.Send(new GetCampaignByUidRequest(campaignUid, accountUid));
 
 			if (campaign == null)
 				return new NotFoundObjectResult(new { message = "Campaign not found." });
 
-			return new OkObjectResult(campaign);
+			return new OkObjectResult(new ApiResponse(campaign, 200));
 		}
 
 		[HttpGet("campaigns/list")]
@@ -81,7 +86,7 @@ namespace Promo.Membership.API.Controllers.v1
 		{
 			var campaigns = await _mediator.Send(new GetCampaigns(campaignUids.CampaignUids));
 
-			return new OkObjectResult(campaigns);
+			return new OkObjectResult(new ApiResponse(campaigns, 200));
 		}
 
 		[HttpPut("campaigns/{campaignUid:Guid}")]
@@ -92,14 +97,16 @@ namespace Promo.Membership.API.Controllers.v1
 		[Authorize]
 		public async Task<ActionResult<Infrastructure.Models.Campaign>> UpdateAsync([FromRoute] Guid campaignUid, UpdateCampaignRequest request)
 		{
-			var campaign = await _mediator.Send(new GetCampaignByUidRequest(campaignUid));
+			var accountUid = Guid.Parse(User.Claims.FirstOrDefault(c => c.Type.Equals("user_id", StringComparison.OrdinalIgnoreCase)).Value);
+
+			var campaign = await _mediator.Send(new GetCampaignByUidRequest(campaignUid, accountUid));
 
 			if (campaign == null)
 				return new NotFoundObjectResult(new { message = "Campaign not found." });
 
-			campaign = await _mediator.Send(new UpdateCampaignViaUidRequest(campaignUid, request));
+			campaign = await _mediator.Send(new UpdateCampaignViaUidRequest(campaignUid, accountUid, request));
 
-			return new OkObjectResult(campaign);
+			return new OkObjectResult(new ApiResponse(campaign, 200));
 		}
 	}
 }

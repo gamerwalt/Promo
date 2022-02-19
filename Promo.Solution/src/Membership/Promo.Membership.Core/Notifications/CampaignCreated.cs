@@ -9,11 +9,13 @@ namespace Promo.Membership.Core.Notifications
     {
         private NewCampaignRequest request;
         private Guid campaignUid;
+		private Guid accountUid;
 
-        public CampaignCreated(NewCampaignRequest request, System.Guid campaignUid)
+        public CampaignCreated(NewCampaignRequest request, Guid accountUid, Guid campaignUid)
         {
             this.request = request;
             this.campaignUid = campaignUid;
+			this.accountUid = accountUid;
         }
 
         public NewCampaignRequest Request
@@ -25,5 +27,10 @@ namespace Promo.Membership.Core.Notifications
         {
             get { return this.campaignUid; }
         }
+
+		public Guid AccountUid
+		{
+			get { return this.accountUid; }
+		}
     }
 }

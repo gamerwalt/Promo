@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -16,6 +17,7 @@ using Promo.Clients.External;
 using Promo.Core;
 using Promo.Core.Authentication;
 using Promo.Core.Authentication.ConfigurationOptions;
+using Promo.Core.Exceptions;
 using Promo.Core.MessageContracts;
 using Promo.Core.Models;
 using Promo.Membership.Core.RequestHandlers;
@@ -139,6 +141,8 @@ namespace Promo.Membership.API
 			{
 				app.UseHttpsRedirection();
 			}
+
+			app.ConfigureExceptionHandler(app.ApplicationServices.GetRequiredService<ILogger<Startup>>());
 
 			app.UseSerilogRequestLogging();
 

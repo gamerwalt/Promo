@@ -1,11 +1,12 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Promo.Core.Models;
 using Promo.Membership.Core.RequestHandlers;
-using Promo.Membership.Infrastructure.Models;
 using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
+using CampaignType = Promo.Membership.Infrastructure.Models.CampaignType;
 
 namespace Promo.Membership.API.Controllers.v1
 {
@@ -32,7 +33,7 @@ namespace Promo.Membership.API.Controllers.v1
 		{
 			var campaignTypes = await _mediator.Send(new GetCampaignTypesRequest());
 
-			return new OkObjectResult(campaignTypes);
+			return new OkObjectResult(new ApiResponse(campaignTypes, 200));
 		}
 	}
 }

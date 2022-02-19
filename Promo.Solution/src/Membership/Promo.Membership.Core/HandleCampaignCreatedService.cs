@@ -52,7 +52,7 @@ namespace Promo.Membership.Core
                     break;
                 case CampaignTypeCode.AutoEnterSweepsFromHashtag:
                 case CampaignTypeCode.AutoEnterSweepsFromTweet:
-                    await CreateSweepsForCampaignAsync(notification.CampaignUid);
+                    await CreateSweepsForCampaignAsync(notification.CampaignUid, notification.AccountUid);
                     break;
                 case CampaignTypeCode.AutoReplyDM:
                     break;
@@ -65,9 +65,9 @@ namespace Promo.Membership.Core
             }
         }
 
-        private async Task CreateSweepsForCampaignAsync(Guid campaignUid)
+        private async Task CreateSweepsForCampaignAsync(Guid campaignUid, Guid accountUid)
         {
-            var campaign = await _campaignRepository.GetCampaignByUidAsync(campaignUid);
+            var campaign = await _campaignRepository.GetCampaignByUidAsync(campaignUid, accountUid);
             if (campaign == null)
                 throw new InvalidCampaignException($"An error occurred while trying to run the method {nameof(CreateSweepsForCampaignAsync)} to create a sweeps for the campaignUid {campaignUid}");
 

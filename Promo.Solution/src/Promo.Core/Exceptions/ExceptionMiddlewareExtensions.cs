@@ -27,16 +27,25 @@ namespace Promo.Core.Exceptions
 
                         await context.Response.WriteAsync
                         (
-                            new ErrorModel
-                            {
-                                StatusCode = context.Response.StatusCode,
-                                Message = "Internal Server Error",
-                                AdditionalInformation = contextFeature.Error.Message
-                                    .Replace(Environment.NewLine, "")
-                                    .Replace("  -- :", "")
-                                    .Replace(" Severity: Error", "")
-                                    .Replace("Validation failed: ", "")
-                            }.ToString()
+							new ApiResponse(null, context.Response.StatusCode)
+							{
+								message = contextFeature.Error.Message
+									.Replace(Environment.NewLine, "")
+									.Replace("  -- :", "")
+									.Replace(" Severity: Error", "")
+									.Replace("Validation failed: ", "")
+							}.ToString()
+
+                            //new ErrorModel
+                            //{
+                            //    StatusCode = context.Response.StatusCode,
+                            //    Message = "Internal Server Error",
+                            //    AdditionalInformation = contextFeature.Error.Message
+                            //        .Replace(Environment.NewLine, "")
+                            //        .Replace("  -- :", "")
+                            //        .Replace(" Severity: Error", "")
+                            //        .Replace("Validation failed: ", "")
+                            //}.ToString()
                         );
                     }
                 });

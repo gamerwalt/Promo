@@ -6,7 +6,7 @@ namespace Promo.Membership.Infrastructure.Models
     {
         public int CampaignId { get; set; }
         public Guid CampaignUid { get; set; }
-        public Guid AccountUid { get; set; }
+		public Account Account { get; set; }
         public CampaignType CampaignType { get; set; }
         public string CampaignName { get; set; }
         public string Description { get; set; }
