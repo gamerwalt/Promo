@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 
 namespace Promo.Membership.Core
 {
+
 	public class PublishAccountCreated : INotificationHandler<AccountCreatedViaFirebase>
 	{
 		private readonly ILogger<PublishAccountCreated> _logger;

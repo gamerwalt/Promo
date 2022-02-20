@@ -6,9 +6,12 @@ using MediatR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Promo.Core;
+using Promo.Core.Handlers;
 using Promo.Core.MessageComponents.BatchConsumers;
 using Promo.Core.MessageComponents.Consumers;
 using Promo.Core.Notifications;
+using Promo.Infrastructure.Games;
 using Serilog;
 using System;
 using System.Collections.Generic;
@@ -20,17 +23,18 @@ namespace Promo.RabbitMq.Consumer.Services
 {
     public class Program
     {
+		private static IConfigurationRoot Configuration;
         public static void Main(string[] args)
         {
 			var env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
 
-			var configuration = new ConfigurationBuilder()
+			Configuration = new ConfigurationBuilder()
 				.AddJsonFile("appsettings.json")
 				.AddJsonFile($"appsettings.{env}.json")
 				.Build();
 			
 			Log.Logger = new LoggerConfiguration()
-				.ReadFrom.Configuration(configuration)
+				.ReadFrom.Configuration(Configuration)
 				.CreateLogger();
 
 			CreateHostBuilder(args).Build().Run();
@@ -42,9 +46,7 @@ namespace Promo.RabbitMq.Consumer.Services
                 {
 					Log.Information("Starting Host for Promo.Services");
 
-					var domainAssembly = typeof(AccountCreated).GetTypeInfo().Assembly;
-					services.AddMediatR(domainAssembly);
-
+					services.AddMediatR(typeof(AccountCreated), typeof(AddAccountToGamesDatabase));
 
 					services.AddMassTransit(cfg =>
 					{
@@ -54,7 +56,20 @@ namespace Promo.RabbitMq.Consumer.Services
 					});
 
 					services.AddHostedService<PromoHostedServices>();
+
+					AddDatabaseAndRepositories(services);
                 });
+
+		private static void AddDatabaseAndRepositories(IServiceCollection services)
+		{
+			services.AddSingleton<IDatabase>(c =>
+			{
+				return new MySqlDatabase(ConnectionStrings.Games, Configuration);
+			});
+
+			services.AddTransient<IGamesAccountsRepository, GamesAccountsRepository>();
+			services.AddTransient<IGamesCampaignRepository, GamesCampaignRepository>();
+		}
 
 		private static void ConigureBus(IBusRegistrationContext context, IRabbitMqBusFactoryConfigurator configurator)
 		{

@@ -66,6 +66,17 @@
       "DownstreamPathTemplate": "/v1/watchtypes",
       "DownstreamScheme": "http",
       "UpstreamPathTemplate": "/watchtypes"
+    },
+    {
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5002
+        }
+      ],
+      "DownstreamPathTemplate": "/v1/sweeps",
+      "DownstreamScheme": "http",
+      "UpstreamPathTemplate": "/sweeps"
     }
   ],
   "GlobalConfiguration": {

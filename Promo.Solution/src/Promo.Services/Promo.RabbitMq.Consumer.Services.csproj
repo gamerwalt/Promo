@@ -16,6 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Promo.Core.Handlers\Promo.Core.Handlers.csproj" />
     <ProjectReference Include="..\Promo.Core\Promo.Core.csproj" />
   </ItemGroup>
 </Project>

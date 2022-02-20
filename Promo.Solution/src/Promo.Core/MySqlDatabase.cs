@@ -36,5 +36,25 @@ namespace Promo.Core
         {
             return ConnectionString;
         }
-    }
+
+		public string GetFulfillmentConnectionString()
+		{
+			return _config.GetConnectionString(ConnectionStrings.Fulfillment);
+		}
+
+		public string GetGamesConnectionstring()
+		{
+			return _config.GetConnectionString(ConnectionStrings.Games);
+		}
+
+		public string GetMembershipConnectionString()
+		{
+			return _config.GetConnectionString(ConnectionStrings.Membership);
+		}
+
+		public string GetNotificationConnectionString()
+		{
+			return _config.GetConnectionString(ConnectionStrings.Notification);
+		}
+	}
 }
