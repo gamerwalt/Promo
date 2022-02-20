@@ -1,4 +1,6 @@
-﻿using Promo.Core;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
+using Promo.Core;
 using System;
 
 namespace Promo.Membership.Infrastructure.Models
@@ -7,6 +9,8 @@ namespace Promo.Membership.Infrastructure.Models
 	{
 		public int CampaignTypeId { get; set; }
 		public Guid CampaignTypeUid { get; set; }
+		
+		[JsonConverter(typeof(StringEnumConverter))]
 		public CampaignTypeCode CampaignTypeCode { get; set; }
 		public string CampaignTypeName { get; set; }
 		public string CamapaignTypeDescription { get; set; }

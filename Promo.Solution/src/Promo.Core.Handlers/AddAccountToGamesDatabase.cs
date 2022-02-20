@@ -20,6 +20,8 @@ namespace Promo.Core.Handlers
 
 		public async Task Handle(AccountCreated notification, CancellationToken cancellationToken)
 		{
+			_logger.LogInformation($"Saving the account created {notification.Account.AccountUid} to the Games database");
+
 			await _repository.CreateAsync(notification.Account);
 		}
 	}

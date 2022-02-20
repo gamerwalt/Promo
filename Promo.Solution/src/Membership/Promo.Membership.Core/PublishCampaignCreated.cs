@@ -89,8 +89,7 @@ namespace Promo.Membership.Core
 		private async Task PublishCampaignAsync(Guid campaignUid, Guid accountUid)
 		{
 			var campaign = await GetCampaignAsync(campaignUid, accountUid);
-
-			var (accepted, rejected) = await _submitNewCampaignClient.GetResponse<ICampaignCreatedAccepted, ICampaignCreatedRejected>(new
+			var campaignCreated = new
 			{
 				CampaignUid = campaignUid,
 				AccountUid = accountUid,
@@ -98,7 +97,8 @@ namespace Promo.Membership.Core
 				ActiveInd = campaign.ActiveInd,
 				StartDate = campaign.StartDate,
 				EndDate = campaign.EndDate
-			});
+			};
+			var (accepted, rejected) = await _submitNewCampaignClient.GetResponse<ICampaignCreatedAccepted, ICampaignCreatedRejected>(campaignCreated);
 
 			if (accepted.IsCompletedSuccessfully)
 				_logger.LogInformation("Campaign with Uid {campaignUid} queued successfully.",

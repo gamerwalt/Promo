@@ -24,7 +24,7 @@ namespace Promo.Infrastructure.Games
 		{
 			using var conn = new MySqlConnection(_database.GetGamesConnectionstring());
 			var command = conn.CreateCommand();
-			command.CommandText = "account_create";
+			command.CommandText = "campaign_create";
 			command.CommandType = CommandType.StoredProcedure;
 			command
 				.AddParameter("accountUid", campaignCreated.AccountUid)

@@ -27,6 +27,12 @@ namespace Promo.Core.MessageComponents.Consumers
 
 		public async Task Consume(ConsumeContext<ICampaignCreated> context)
 		{
+			await context.RespondAsync<ICampaignCreatedAccepted>(new
+			{
+				AccountUid = context.Message.AccountUid,
+				CampaignUid = context.Message.CampaignUid
+			});
+
 			await _mediator.Publish(new CampaignCreated(context.Message));
 		}
 	}

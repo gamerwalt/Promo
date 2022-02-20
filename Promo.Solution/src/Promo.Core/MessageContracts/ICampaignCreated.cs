@@ -6,7 +6,7 @@ namespace Promo.Core.MessageContracts
 	{
 		Guid CampaignUid { get; }
 		Guid AccountUid { get; }
-		string CampaignTypeCode { get; }
+		CampaignTypeCode CampaignTypeCode { get; }
 		bool ActiveInd { get; }
 		DateTime StartDate { get; }
 		DateTime EndDate { get; }
