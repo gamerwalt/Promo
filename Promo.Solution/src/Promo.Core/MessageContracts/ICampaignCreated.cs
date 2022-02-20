@@ -6,6 +6,7 @@ namespace Promo.Core.MessageContracts
 	{
 		Guid CampaignUid { get; }
 		Guid AccountUid { get; }
+		string CampaignName { get; }
 		CampaignTypeCode CampaignTypeCode { get; }
 		bool ActiveInd { get; }
 		DateTime StartDate { get; }
@@ -17,7 +18,7 @@ namespace Promo.Core.MessageContracts
 		Guid CampaignUid { get; }
 	}
 
-	public interface ICampaignCreatedRejected : ICampaignCreated
+	public interface ICampaignCreatedRejected
 	{
 		string Reason { get; }
 	}

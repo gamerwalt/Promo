@@ -53,6 +53,7 @@ namespace Promo.Membership.API
 				config.AddRequestClient<IRulesAdded>();
 				config.AddRequestClient<IAccountCreated>();
 				config.AddRequestClient<ICampaignCreated>();
+				config.AddRequestClient<ICampaignUpdated>();
 			});
 			services.AddMassTransitHostedService();
 

@@ -17,9 +17,7 @@ namespace Promo.Core.MessageComponents.Consumers
 
 		public CampaignCreatedConsumer() { }
 
-		public CampaignCreatedConsumer(
-			ILoggerFactory loggerFactory,
-			IMediator mediator)
+		public CampaignCreatedConsumer(ILoggerFactory loggerFactory, IMediator mediator)
 		{
 			_logger = loggerFactory.CreateLogger<CampaignCreatedConsumer>();
 			_mediator = mediator;

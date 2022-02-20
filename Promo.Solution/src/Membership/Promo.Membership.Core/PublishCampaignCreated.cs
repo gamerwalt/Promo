@@ -92,6 +92,7 @@ namespace Promo.Membership.Core
 			var campaignCreated = new
 			{
 				CampaignUid = campaignUid,
+				CampaignName = campaign.CampaignName,
 				AccountUid = accountUid,
 				CampaignTypeCode = campaign.CampaignType.CampaignTypeCode,
 				ActiveInd = campaign.ActiveInd,
