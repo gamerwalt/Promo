@@ -174,13 +174,27 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Promo.Fulfillment.API", "Fu
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Promo.Background.Services", "Services\Promo.Background.Services\Promo.Background.Services.csproj", "{7B8C74A9-7CFC-4C25-A0A2-44AC71F9A560}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Promo.Games.Infrastructure", "Games\Promo.Games.Infrastructure\Promo.Games.Infrastructure.csproj", "{51175569-10A7-44EB-A5E2-950EA6B4B1A2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Promo.Games.Infrastructure", "Games\Promo.Games.Infrastructure\Promo.Games.Infrastructure.csproj", "{51175569-10A7-44EB-A5E2-950EA6B4B1A2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Promo.Games.Core", "Games\Promo.Games.Core\Promo.Games.Core.csproj", "{5060CE2F-5CEA-4ECB-BCFE-CD7FECC43F66}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Promo.Games.Core", "Games\Promo.Games.Core\Promo.Games.Core.csproj", "{5060CE2F-5CEA-4ECB-BCFE-CD7FECC43F66}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Promo.Infrastructure", "Promo.Infrastructure\Promo.Infrastructure.csproj", "{9F05DC63-64EE-4FFF-8725-0B7C07749EB3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Promo.Core.Handlers", "Promo.Core.Handlers\Promo.Core.Handlers.csproj", "{6065F586-FF32-46D7-89E5-870426D2D7AC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Promo.Core.Handlers", "Promo.Core.Handlers\Promo.Core.Handlers.csproj", "{6065F586-FF32-46D7-89E5-870426D2D7AC}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Monolith", "Monolith", "{71429F9B-A81B-4A12-98DD-505C0F9FDB34}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "hrvster.API", "Monolith\hrvster.API\hrvster.API.csproj", "{44A7E461-E46E-4A40-AB59-80E6FEAC86AF}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "hrvster.Core", "Monolith\hrvster.Core\hrvster.Core.csproj", "{1C2408A6-8758-41C9-8F0E-AE3790456105}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "hrvster.Core.Requests", "Monolith\hrvster.Core.Requests\hrvster.Core.Requests.csproj", "{ACA64CFB-531E-4159-8063-8D8725ABE611}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "hrvster.Models", "Monolith\hrvster.Models\hrvster.Models.csproj", "{7479878C-821C-427A-9968-1AD09D779743}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "hrvster.Infrastructure", "Monolith\hrvster.Infrastructure\hrvster.Infrastructure.csproj", "{5CB2A995-941D-4E08-9573-9EB0679932C3}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "hrvster.Core.Handlers", "Monolith\hrvster.Core.Handlers\hrvster.Core.Handlers.csproj", "{93E49A16-4F7F-4429-A56A-013DAF1A7004}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -360,6 +374,30 @@ Global
 		{6065F586-FF32-46D7-89E5-870426D2D7AC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6065F586-FF32-46D7-89E5-870426D2D7AC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6065F586-FF32-46D7-89E5-870426D2D7AC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{44A7E461-E46E-4A40-AB59-80E6FEAC86AF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{44A7E461-E46E-4A40-AB59-80E6FEAC86AF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{44A7E461-E46E-4A40-AB59-80E6FEAC86AF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{44A7E461-E46E-4A40-AB59-80E6FEAC86AF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1C2408A6-8758-41C9-8F0E-AE3790456105}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1C2408A6-8758-41C9-8F0E-AE3790456105}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1C2408A6-8758-41C9-8F0E-AE3790456105}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1C2408A6-8758-41C9-8F0E-AE3790456105}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ACA64CFB-531E-4159-8063-8D8725ABE611}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ACA64CFB-531E-4159-8063-8D8725ABE611}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ACA64CFB-531E-4159-8063-8D8725ABE611}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ACA64CFB-531E-4159-8063-8D8725ABE611}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7479878C-821C-427A-9968-1AD09D779743}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7479878C-821C-427A-9968-1AD09D779743}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7479878C-821C-427A-9968-1AD09D779743}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7479878C-821C-427A-9968-1AD09D779743}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5CB2A995-941D-4E08-9573-9EB0679932C3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5CB2A995-941D-4E08-9573-9EB0679932C3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5CB2A995-941D-4E08-9573-9EB0679932C3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5CB2A995-941D-4E08-9573-9EB0679932C3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{93E49A16-4F7F-4429-A56A-013DAF1A7004}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{93E49A16-4F7F-4429-A56A-013DAF1A7004}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{93E49A16-4F7F-4429-A56A-013DAF1A7004}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{93E49A16-4F7F-4429-A56A-013DAF1A7004}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -430,6 +468,13 @@ Global
 		{5060CE2F-5CEA-4ECB-BCFE-CD7FECC43F66} = {60318CA0-609C-43D1-87D7-E43D0A9B1EC6}
 		{9F05DC63-64EE-4FFF-8725-0B7C07749EB3} = {B71190C8-5608-4FFE-8C71-DA20A334CFC6}
 		{6065F586-FF32-46D7-89E5-870426D2D7AC} = {B71190C8-5608-4FFE-8C71-DA20A334CFC6}
+		{71429F9B-A81B-4A12-98DD-505C0F9FDB34} = {B71190C8-5608-4FFE-8C71-DA20A334CFC6}
+		{44A7E461-E46E-4A40-AB59-80E6FEAC86AF} = {71429F9B-A81B-4A12-98DD-505C0F9FDB34}
+		{1C2408A6-8758-41C9-8F0E-AE3790456105} = {71429F9B-A81B-4A12-98DD-505C0F9FDB34}
+		{ACA64CFB-531E-4159-8063-8D8725ABE611} = {71429F9B-A81B-4A12-98DD-505C0F9FDB34}
+		{7479878C-821C-427A-9968-1AD09D779743} = {71429F9B-A81B-4A12-98DD-505C0F9FDB34}
+		{5CB2A995-941D-4E08-9573-9EB0679932C3} = {71429F9B-A81B-4A12-98DD-505C0F9FDB34}
+		{93E49A16-4F7F-4429-A56A-013DAF1A7004} = {71429F9B-A81B-4A12-98DD-505C0F9FDB34}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {94B46B7F-1545-465E-863A-AAD0C58A8C0F}
