@@ -9,7 +9,7 @@ namespace Promo.Games.Infrastructure.Models
         public Campaign Campaign { get; set; }
 		public Account Account { get; set; }
         public string Name { get; set; }
-		public Uri RulesUrl { get; set; }
+		public string RulesUrl { get; set; }
 		public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
         public DateTime? DrawDate { get; set; }

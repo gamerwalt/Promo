@@ -1,8 +1,5 @@
-using FirebaseAdmin;
-using Google.Apis.Auth.OAuth2;
 using MassTransit;
 using MediatR;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -10,13 +7,11 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using Newtonsoft.Json;
 using Promo.Clients.External;
+using Promo.Configuration.Extensions;
 using Promo.Core;
 using Promo.Core.Authentication;
-using Promo.Core.Authentication.ConfigurationOptions;
 using Promo.Core.Exceptions;
 using Promo.Core.MessageContracts;
 using Promo.Core.Models;
@@ -75,8 +70,8 @@ namespace Promo.Membership.API
 			services.AddMediatR(domainAssembly);
 			//services.AddFluentValidation(new[] { domainAssembly });
 
-			AddGoogleServicesAuthentication(services);
-			AddFirebaseServices(services, Configuration);
+			services.AddGoogleServices(Configuration);
+			services.AddFirebaseServices(Configuration);
 		}
 
 		private void AddHrvsterServiceAuthenticationclient(IServiceCollection services)
@@ -90,43 +85,6 @@ namespace Promo.Membership.API
 			{
 				client.BaseAddress = new Uri("https://identitytoolkit.googleapis.com");
 				client.DefaultRequestHeaders.Add("Accept", "application/json");
-			});
-		}
-
-		private void AddGoogleServicesAuthentication(IServiceCollection services)
-		{
-			var googleServicesOptions = Configuration.GetSection(GoogleServicesOptions.GoogleServices).Get<GoogleServicesOptions>();
-
-			services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-				.AddJwtBearer(options =>
-				{
-					options.Authority = googleServicesOptions.FirebaseAppId;
-					options.TokenValidationParameters = new TokenValidationParameters
-					{
-						ValidateIssuer = true,
-						ValidIssuer = googleServicesOptions.FirebaseAppId,
-						ValidateAudience = true,
-						ValidAudience = googleServicesOptions.ProjectId,
-						ValidateLifetime = true
-					};
-				});
-		}
-
-		private void AddFirebaseServices(IServiceCollection services, IConfiguration configuration)
-		{
-			services.AddSingleton<FirebaseApp>(c => BuildFirebaseApp(configuration));
-		}
-
-		private FirebaseApp BuildFirebaseApp(IConfiguration configuration)
-		{
-			var firebaseConfig = new FirebaseConfig();
-			configuration.Bind(FirebaseConfig.Firebase, firebaseConfig);
-
-			var firebaseConfigSerialized = JsonConvert.SerializeObject(firebaseConfig);
-
-			return FirebaseApp.Create(new AppOptions()
-			{
-				Credential = GoogleCredential.FromJson(firebaseConfigSerialized),
 			});
 		}
 

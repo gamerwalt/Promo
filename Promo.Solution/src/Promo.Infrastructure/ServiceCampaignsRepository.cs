@@ -5,25 +5,19 @@ using Promo.Core.MessageContracts;
 using System.Data;
 using System.Threading.Tasks;
 
-namespace Promo.Infrastructure.Games
+namespace Promo.Infrastructure
 {
-	public interface IGamesCampaignRepository
+	public interface IServiceCampaignsRepository
 	{
-		Task CreateAsync(ICampaignCreated campaignCreated);
-		Task UpdateAsync(ICampaignUpdated campaign);
+		Task CreateAsync(ICampaignCreated campaignCreated, string connectionString);
+		Task UpdateAsync(ICampaignUpdated campaign, string connectionString);
 	}
 
-	public class GamesCampaignRepository : IGamesCampaignRepository
+	public class ServiceCampaignsRepository : IServiceCampaignsRepository
 	{
-		private readonly IDatabase _database;
-		public GamesCampaignRepository(IDatabase database)
+		public async Task CreateAsync(ICampaignCreated campaignCreated, string connectionString)
 		{
-			_database = database;
-		}
-
-		public async Task CreateAsync(ICampaignCreated campaignCreated)
-		{
-			using var conn = new MySqlConnection(_database.GetGamesConnectionstring());
+			using var conn = new MySqlConnection(connectionString);
 			var command = conn.CreateCommand();
 			command.CommandText = "campaign_create";
 			command.CommandType = CommandType.StoredProcedure;
@@ -40,9 +34,9 @@ namespace Promo.Infrastructure.Games
 			await command.ExecuteNonQueryAsync();
 		}
 
-		public async Task UpdateAsync(ICampaignUpdated campaign)
+		public async Task UpdateAsync(ICampaignUpdated campaign, string connectionString)
 		{
-			using var conn = new MySqlConnection(_database.GetGamesConnectionstring());
+			using var conn = new MySqlConnection(connectionString);
 			var command = conn.CreateCommand();
 			command.CommandText = "campaign_update";
 			command.CommandType = CommandType.StoredProcedure;

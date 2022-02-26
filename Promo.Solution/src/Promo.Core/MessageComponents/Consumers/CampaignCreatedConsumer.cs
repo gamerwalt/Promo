@@ -4,6 +4,7 @@ using MassTransit.ConsumeConfigurators;
 using MassTransit.Definition;
 using MediatR;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using Promo.Core.MessageContracts;
 using Promo.Core.Notifications;
 using System.Threading.Tasks;
@@ -25,6 +26,9 @@ namespace Promo.Core.MessageComponents.Consumers
 
 		public async Task Consume(ConsumeContext<ICampaignCreated> context)
 		{
+			var campaignRecieved = JsonConvert.SerializeObject(context.Message);
+			_logger.LogInformation("Campaign Created Received: {campaignReceived}", campaignRecieved);
+
 			await context.RespondAsync<ICampaignCreatedAccepted>(new
 			{
 				AccountUid = context.Message.AccountUid,

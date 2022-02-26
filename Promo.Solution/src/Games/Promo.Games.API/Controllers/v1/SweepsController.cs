@@ -2,12 +2,14 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Promo.Configuration.Extensions;
+using Promo.Core.Models;
 using Promo.Games.Core.RequestHandlers;
 using Promo.Games.Core.Requests;
-using Promo.Games.Infrastructure.Models;
 using System;
 using System.Net;
 using System.Threading.Tasks;
+using Sweep = Promo.Games.Infrastructure.Models.Sweep;
 
 namespace Promo.Games.API.Controllers.v1
 {
@@ -31,9 +33,12 @@ namespace Promo.Games.API.Controllers.v1
 		[Authorize]
 		public async Task<ActionResult<Sweep>> Create([FromBody] NewSweepRequest request)
 		{
+			var accountUid = User.GetAccountUidFromCliam("user_id");
+			request.AccountUid = accountUid;
+
 			var sweep = await _mediator.Send(new CreateSweep(request));
 
-			return Ok(sweep);
+			return new OkObjectResult(new ApiResponse(sweep, 200));
 		}
 
 		[HttpGet("sweeps/{sweepUid:Guid}")]
@@ -48,7 +53,7 @@ namespace Promo.Games.API.Controllers.v1
 			if (sweep == null)
 				return new NotFoundObjectResult(new { message = $"Sweep with Uid: {sweepUid} does not exist." });
 
-			return new OkObjectResult(await _mediator.Send(new GetSweepByUid(sweepUid)));
+			return new OkObjectResult(new ApiResponse(sweep, 200));
 		}
 
 		[HttpPut("sweeps/{sweepUid:Guid}")]
@@ -63,7 +68,9 @@ namespace Promo.Games.API.Controllers.v1
 			if (sweep == null)
 				return new NotFoundObjectResult(new { message = $"Sweep with Uid: {sweepUid} does not exist." });
 
-			return new OkObjectResult(await _mediator.Send(new UpdateSweep(sweepUid, sweep, request)));
+			var updatedSweep = await _mediator.Send(new UpdateSweep(sweepUid, sweep, request));
+
+			return new OkObjectResult(new ApiResponse(updatedSweep, 200));
 		}
 	}
 }

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Promo.Clients.External;
+using Promo.Configuration.Extensions;
 using Promo.Core.Models;
 using Promo.Membership.Core.RequestHandlers;
 using Promo.Membership.Core.Requests;
@@ -54,7 +55,7 @@ namespace Promo.Membership.API.Controllers.v1
 		[Authorize]
 		public async Task<ActionResult<List<Infrastructure.Models.Campaign>>> GetAllAsync()
 		{
-			var accountUid = Guid.Parse(User.Claims.FirstOrDefault(c => c.Type.Equals("user_id", StringComparison.OrdinalIgnoreCase)).Value);
+			var accountUid = User.GetAccountUidFromCliam("user_id");
 
 			var campaigns = await _mediator.Send(new GetAllCampaignsForAccount(accountUid));
 
@@ -69,7 +70,7 @@ namespace Promo.Membership.API.Controllers.v1
 		[Authorize]
 		public async Task<ActionResult<Infrastructure.Models.Campaign>> GetAsync([FromRoute] Guid campaignUid)
 		{
-			var accountUid = Guid.Parse(User.Claims.FirstOrDefault(c => c.Type.Equals("user_id", StringComparison.OrdinalIgnoreCase)).Value);
+			var accountUid = User.GetAccountUidFromCliam("user_id");
 
 			var campaign = await _mediator.Send(new GetCampaignByUidRequest(campaignUid, accountUid));
 
@@ -97,7 +98,7 @@ namespace Promo.Membership.API.Controllers.v1
 		[Authorize]
 		public async Task<ActionResult<Infrastructure.Models.Campaign>> UpdateAsync([FromRoute] Guid campaignUid, UpdateCampaignRequest request)
 		{
-			var accountUid = Guid.Parse(User.Claims.FirstOrDefault(c => c.Type.Equals("user_id", StringComparison.OrdinalIgnoreCase)).Value);
+			var accountUid = User.GetAccountUidFromCliam("user_id");
 
 			var campaign = await _mediator.Send(new GetCampaignByUidRequest(campaignUid, accountUid));
 

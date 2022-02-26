@@ -1,4 +1,6 @@
 ﻿using MediatR;
+using Microsoft.Extensions.Logging;
+using Promo.Games.Core.Notifications;
 using Promo.Games.Core.Requests;
 using Promo.Games.Infrastructure;
 using Promo.Games.Infrastructure.Models;
@@ -17,7 +19,7 @@ namespace Promo.Games.Core.RequestHandlers
             this.request = request;
         }
 
-        public NewSweepRequest Request
+        public NewSweepRequest Sweep
         {
             get { return request; }
         }
@@ -25,30 +27,48 @@ namespace Promo.Games.Core.RequestHandlers
 
     public class CreateSweepRequestHandler : IRequestHandler<CreateSweep, Sweep>
     {
+		private readonly ILogger<CreateSweepRequestHandler> _logger;
+		private readonly IMediator _mediator;
         private readonly ISweepsRepository _repository;
 
-        public CreateSweepRequestHandler(ISweepsRepository repository)
+        public CreateSweepRequestHandler(ILoggerFactory loggerFactory, IMediator mediator, ISweepsRepository repository)
         {
+			_logger = loggerFactory.CreateLogger<CreateSweepRequestHandler>();
+			_mediator = mediator;
             _repository = repository;
         }
 
         public async Task<Sweep> Handle(CreateSweep request, CancellationToken cancellationToken)
         {
+			_logger.LogInformation("{action}... Creating sweep {sweepName} for AccountUid: {accountUid} under campaign {campaignUid}",
+				nameof(CreateSweepRequestHandler),
+				request.Sweep.Name,
+				request.Sweep.AccountUid,
+				request.Sweep.CampaignUid);
+
             var sweepUid = Guid.NewGuid();
             await _repository.CreateAsync(new Sweep
             {
                 SweepUid = sweepUid,
                 Campaign = new Campaign
 				{
-					CampaignUid = request.Request.CampaignUid
+					CampaignUid = request.Sweep.CampaignUid
 				},
-                Name = request.Request.Name,
-                StartDate = request.Request.StartDate,
-                EndDate = request.Request.EndDate,
-				DrawDate = request.Request.DrawDate
+				Account = new Account
+				{
+					AccountUid = request.Sweep.AccountUid
+				},
+                Name = request.Sweep.Name,
+                StartDate = request.Sweep.StartDate,
+                EndDate = request.Sweep.EndDate,
+				DrawDate = request.Sweep.DrawDate
             });
 
-            return await _repository.GetAsync(sweepUid);
+			var sweep = await _repository.GetAsync(sweepUid);
+
+			await _mediator.Publish(new SweepCreated(sweep));
+
+			return sweep;
         }
     }
 }

@@ -11,43 +11,38 @@ using Promo.Core.Handlers;
 using Promo.Core.MessageComponents.BatchConsumers;
 using Promo.Core.MessageComponents.Consumers;
 using Promo.Core.Notifications;
-using Promo.Infrastructure.Games;
+using Promo.Infrastructure;
 using Serilog;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text.Json.Serialization;
-using System.Threading.Tasks;
 
 namespace Promo.RabbitMq.Consumer.Services
 {
-    public class Program
-    {
+	public class Program
+	{
 		private static IConfigurationRoot Configuration;
-        public static void Main(string[] args)
-        {
+		public static void Main(string[] args)
+		{
 			var env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
 
 			Configuration = new ConfigurationBuilder()
 				.AddJsonFile("appsettings.json")
 				.AddJsonFile($"appsettings.{env}.json")
 				.Build();
-			
+
 			Log.Logger = new LoggerConfiguration()
 				.ReadFrom.Configuration(Configuration)
 				.CreateLogger();
 
 			CreateHostBuilder(args).Build().Run();
-        }
+		}
 
-        public static IHostBuilder CreateHostBuilder(string[] args) =>
-            Host.CreateDefaultBuilder(args)
-                .ConfigureServices((hostContext, services) =>
-                {
+		public static IHostBuilder CreateHostBuilder(string[] args) =>
+			Host.CreateDefaultBuilder(args)
+				.ConfigureServices((hostContext, services) =>
+				{
 					Log.Information("Starting Host for Promo.Services");
 
-					services.AddMediatR(typeof(AccountCreated), typeof(AddAccountToGamesDatabase));
+					services.AddMediatR(typeof(AccountCreated), typeof(AddAccountHandler));
 
 					services.AddMassTransit(cfg =>
 					{
@@ -59,17 +54,18 @@ namespace Promo.RabbitMq.Consumer.Services
 					services.AddHostedService<PromoHostedServices>();
 
 					AddDatabaseAndRepositories(services);
-                });
+				});
 
 		private static void AddDatabaseAndRepositories(IServiceCollection services)
 		{
 			services.AddSingleton<IDatabase>(c =>
 			{
-				return new MySqlDatabase(ConnectionStrings.Games, Configuration);
+				return new MySqlDatabase(Constants.GamesConnectionString, Configuration);
 			});
 
-			services.AddTransient<IGamesAccountsRepository, GamesAccountsRepository>();
-			services.AddTransient<IGamesCampaignRepository, GamesCampaignRepository>();
+			services.AddTransient<IServiceAccountsRepository, ServiceAccountsRepository>();
+			services.AddTransient<IServiceCampaignsRepository, ServiceCampaignsRepository>();
+			services.AddTransient<IServiceSweepsRepository, ServiceSweepsRepository>(); 
 		}
 
 		private static void ConigureBus(IBusRegistrationContext context, IRabbitMqBusFactoryConfigurator configurator)

@@ -34,8 +34,9 @@ namespace Promo.Games.Infrastructure
             var command = conn.CreateCommand();
             command.CommandText = "sweep_create";
             command.CommandType = CommandType.StoredProcedure;
-            command
-                .AddParameter("sweepUid", sweep.SweepUid)
+			command
+				.AddParameter("sweepUid", sweep.SweepUid)
+				.AddParameter("accountUid", sweep.Account?.AccountUid)
                 .AddParameter("campaignUid", sweep.Campaign?.CampaignUid)
                 .AddParameter("sweepName", sweep.Name)
                 .AddParameter("startDate", sweep.StartDate)
@@ -153,18 +154,32 @@ namespace Promo.Games.Infrastructure
                 SweepId = reader.GetInt32("sweep_id"),
                 Campaign = new Campaign
 				{
-					CampaignUid = reader.GetGuid("campaign_uid")
+					CampaignUid = reader.GetGuid("campaign_uid"),
+					CampaignName = reader.GetString("campaign_name")
+				},
+				Account = new Account
+				{
+					AccountUid = reader.GetGuid("account_uid")
 				},
                 SweepUid = reader.GetGuid("sweep_uid"),
                 Name = reader.GetString("sweep_name"),
-				RulesUrl = new Uri(reader.GetString("rules_url")),
+				RulesUrl = GetStringValue(reader, "rules_url"),
                 StartDate = reader.GetDateTime("start_date"),
                 EndDate = reader.GetDateTime("end_date"),
-                DrawDate = GetNullableDateTimeValue(reader, "draw_date"),
-                CreatedDate = reader.GetDateTime("created_date"),
-                UpdatedDate = GetNullableDateTimeValue(reader, "updated_date"),
+                DrawDate = GetNullableDateTimeValue(reader, "draw_date")
             };
         }
+
+		private string GetStringValue(MySqlDataReader reader, string fieldName)
+		{
+			var value = reader[fieldName].ToString();
+			if (string.IsNullOrWhiteSpace(value))
+			{
+				return string.Empty;
+			}
+
+			return reader[fieldName].ToString();
+		}
 
         private DateTime? GetNullableDateTimeValue(MySqlDataReader reader, string fieldName)
         {

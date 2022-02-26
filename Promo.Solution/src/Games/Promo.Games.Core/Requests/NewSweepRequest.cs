@@ -9,5 +9,6 @@ namespace Promo.Games.Core.Requests
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
 		public DateTime DrawDate { get; set; }
-    }
+		public Guid AccountUid { get; set; }
+	}
 }

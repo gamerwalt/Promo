@@ -9,7 +9,9 @@ namespace Promo.Core
 		string GetGamesConnectionstring();
 		string GetNotificationConnectionString();
 		string GetFulfillmentConnectionString();
-        string GetConnectionName();
+		string GetHarvesterConnectionString();
+
+		string GetConnectionName();
 		void DeleteTestData();
 	}
 }
