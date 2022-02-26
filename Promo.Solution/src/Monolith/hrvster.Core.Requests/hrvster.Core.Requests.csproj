@@ -12,7 +12,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\hrvster.Models\hrvster.Models.csproj" />
     <ProjectReference Include="..\hrvster.Infrastructure\hrvster.Infrastructure.csproj" />
     <ProjectReference Include="..\hrvster.Models\hrvster.Models.csproj" />
   </ItemGroup>

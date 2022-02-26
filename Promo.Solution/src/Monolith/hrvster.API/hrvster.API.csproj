@@ -16,7 +16,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\hrvster.Infrastructure\hrvster.Infrastructure.csproj" />
     <ProjectReference Include="..\..\Promo.Clients\Promo.Clients.csproj" />
     <ProjectReference Include="..\..\Promo.Configuration\Promo.Configuration.csproj" />
     <ProjectReference Include="..\hrvster.Core.Requests\hrvster.Core.Requests.csproj" />

@@ -6,6 +6,7 @@ using hrvster.Core.Requests.Notifications;
 using hrvster.Infrastructure.Authentication.ConfigurationOptions;
 using MediatR;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System;
 using System.Threading;
@@ -30,17 +31,21 @@ namespace hrvster.Core.Requests
 
 	public class CreateAccountRequestHandler : AsyncRequestHandler<CreateAccountRequest>
 	{
+		private readonly ILogger<CreateAccountRequestHandler> _logger;
 		private readonly IMediator _mediator;
 		private readonly IConfiguration _config;
 
-		public CreateAccountRequestHandler(IMediator mediator, IConfiguration config)
+		public CreateAccountRequestHandler(ILoggerFactory loggerFactory, IMediator mediator, IConfiguration config)
 		{
+			_logger = loggerFactory.CreateLogger<CreateAccountRequestHandler>();
 			_mediator = mediator;
 			_config = config;
 		}
 
 		protected override async Task Handle(CreateAccountRequest request, CancellationToken cancellationToken)
 		{
+			_logger.LogInformation("Creating account for {accountUid}.", request.UserUid);
+
 			var args = new UserRecordArgs
 			{
 				Uid = request.UserUid.ToString(),
@@ -76,6 +81,8 @@ namespace hrvster.Core.Requests
 			}
 
 			var createdUser = await FirebaseAuth.DefaultInstance.CreateUserAsync(args);
+
+			_logger.LogInformation("Account for {accountUid} created in Firebase.", args.Uid);
 
 			FirebaseApp.DefaultInstance.Delete();
 
