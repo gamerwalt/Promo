@@ -5,7 +5,7 @@ using Promo.Clients.External;
 using Promo.Core.Authentication;
 using System.Threading.Tasks;
 
-namespace hrvster.API.Controllers.V1
+namespace hrvster.API.Controllers.v1
 {
 	[ApiController]
 	[Route("v1")]

@@ -22,7 +22,8 @@
 		AutoReplyHashtag,
 		AutoReplyLikedTweet,
 		AutoEnterSweepsFromTweet,
-		AutoEnterSweepsFromHashtag
+		AutoEnterSweepsFromHashtag,
+		AutoEnterSweepsFromTweetReplyHashtag
 	}
 
 	public enum UserIdentifierType

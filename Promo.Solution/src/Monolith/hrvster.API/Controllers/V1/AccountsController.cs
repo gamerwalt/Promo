@@ -10,7 +10,7 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 
-namespace hrvster.API.Controllers.V1
+namespace hrvster.API.Controllers.v1
 {
 	[ApiController]
 	[Route("V1")]
