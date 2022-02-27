@@ -1,6 +1,7 @@
 using hrvster.Core.Requests;
 using hrvster.Core.Requests.Notifications;
 using hrvster.Core.Requests.Notifications.Handlers;
+using hrvster.Core.Requests.Validators;
 using hrvster.Infrastructure;
 using MediatR;
 using MediatR.Extensions.FluentValidation.AspNetCore;
@@ -47,8 +48,10 @@ namespace hrvster.API
 			var handlerAssembly = typeof(GetAccountRequest).GetTypeInfo().Assembly;
 			var notificationAssembly = typeof(AccountCreatedViaFirebase).GetTypeInfo().Assembly;
 			var notificationHandlerAssembly = typeof(StoreAccountInDatabase).GetTypeInfo().Assembly;
+			var validatorAssembly = typeof(CreateSweepValidator).GetTypeInfo().Assembly;
+
 			services.AddMediatR(new[] { handlerAssembly, notificationAssembly, notificationHandlerAssembly });
-			services.AddFluentValidation(new[] { handlerAssembly });
+			services.AddFluentValidation(new[] { handlerAssembly, validatorAssembly });
 		}
 
 		private void AddDatabaseAndRepositories(IServiceCollection services)
@@ -63,6 +66,8 @@ namespace hrvster.API
 			services.AddTransient<ICampaignTypesRepository, CampaignTypesRepository>();
 			services.AddTransient<IRulesRepository, RulesRepository>();
 			services.AddTransient<IWatchTypeCampaignTypesRepository, WatchTypeCampaignTypesRepository>();
+			services.AddTransient<ISweepsRepository, SweepsRepository>();
+			services.AddTransient<ISweepsEntriesRepository, SweepsEntriesRepository>();
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
