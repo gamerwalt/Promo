@@ -21,24 +21,39 @@ namespace hrvster.Infrastructure
 
                     var contextFeature = context.Features.Get<IExceptionHandlerFeature>();
                     if (contextFeature != null)
-                    {
+					{
 
-                        logger.LogError($"Something went wrong... : {contextFeature.Error}");
+						logger.LogError($"Something went wrong... : {contextFeature.Error}");
 
-                        await context.Response.WriteAsync
-                        (
-							new ApiResponse(null, context.Response.StatusCode)
-							{
-								message = contextFeature.Error.Message
-									.Replace(Environment.NewLine, "")
-									.Replace("  -- :", "")
-									.Replace(" Severity: Error", "")
-									.Replace("Validation failed: ", "")
-							}.ToString()
-                        );
-                    }
-                });
+						var apiResponse = new ApiResponse(null, context.Response.StatusCode);
+						var message = RemoveExtraDetails(contextFeature);
+						message = message.Substring(0, GetPositionOfString(message, " --"));
+
+						apiResponse.message = message;
+
+						await context.Response.WriteAsync
+						(
+							apiResponse.ToString()
+						);
+					}
+				});
             });
         }
-    }
+
+		private static string RemoveExtraDetails(IExceptionHandlerFeature contextFeature)
+		{
+			return contextFeature.Error.Message
+				.Replace(Environment.NewLine, "")
+				.Replace("  -- :", "")
+				.Replace(" Severity: Error", "")
+				.Replace("Validation failed: ", "");
+		}
+
+		private static int GetPositionOfString(string message, string find)
+		{
+			var index = message.LastIndexOf(find);
+
+			return index == -1 ? message.Length : index;
+		}
+	}
 }

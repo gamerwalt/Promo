@@ -11,15 +11,22 @@ namespace hrvster.Core.Requests
 	public class GetSweepsForCampaignUid : IRequest<IEnumerable<Sweep>>
 	{
 		private Guid campaignUid;
+		private Guid accountVerifierUid;
 
-		public GetSweepsForCampaignUid(Guid campaignUid)
+		public GetSweepsForCampaignUid(Guid campaignUid, Guid accountVerfierUid)
 		{
 			this.campaignUid = campaignUid;
+			this.accountVerifierUid = accountVerfierUid;
 		}
 
 		public Guid CampaignUid
 		{
 			get { return campaignUid; }
+		}
+
+		public Guid AccountVerifierUid
+		{
+			get { return accountVerifierUid; }
 		}
 	}
 
