@@ -20,7 +20,7 @@ namespace hrvster.Core.Requests
 			this.sweepUid = sweepUid;
 		}
 
-		public List<Guid> SweepWinners
+		public List<Guid> SweepWinnersGuids
 		{
 			get { return sweepWinnerGuids; }
 		}
@@ -44,7 +44,7 @@ namespace hrvster.Core.Requests
 		{
 			var sweepWinners = new List<SweepWinner>();
 
-			foreach (var guid in request.SweepWinners)
+			foreach (var guid in request.SweepWinnersGuids)
 			{
 				var winner = await _repository.GetSweepWinnerAsync(guid);
 

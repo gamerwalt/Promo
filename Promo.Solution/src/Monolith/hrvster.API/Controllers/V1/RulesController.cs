@@ -37,6 +37,52 @@ namespace hrvster.API.Controllers.v1
 			return new OkObjectResult(rulesAdded);
 		}
 
+		[HttpGet("rules/hashtags")]
+		[Produces("application/json")]
+		[ProducesResponseType((int)HttpStatusCode.OK, Type = typeof(IEnumerable<Rule>))]
+		[ProducesResponseType((int)HttpStatusCode.Unauthorized)]
+		[ProducesResponseType((int)HttpStatusCode.BadRequest)]
+		public async Task<ActionResult<IEnumerable<Rule>>> GetRulesByHashtags([FromBody] List<string> hashTags)
+		{
+			var rules = await _mediator.Send(new GetRulesForHashTags(hashTags));
+
+			return new OkObjectResult(rules);
+		}
+
+		[HttpGet("rules/{ruleUid:Guid}")]
+		[Produces("application/json")]
+		[ProducesResponseType((int)HttpStatusCode.OK, Type = typeof(Rule))]
+		[ProducesResponseType((int)HttpStatusCode.NotFound)]
+		public async Task<ActionResult<Rule>> GetRule([FromRoute] Guid ruleUid)
+		{
+			var rule = await _mediator.Send(new GetRule(ruleUid));
+
+			return new OkObjectResult(rule);
+		}
+
+		[HttpGet("rules/watchtype/{watchTypeCode}")]
+		[Produces("application/json")]
+		[ProducesResponseType((int)HttpStatusCode.OK, Type = typeof(IEnumerable<Rule>))]
+		[ProducesResponseType((int)HttpStatusCode.Unauthorized)]
+		[ProducesResponseType((int)HttpStatusCode.BadRequest)]
+		public async Task<ActionResult<IEnumerable<Rule>>> GetRules([FromRoute] string watchTypeCode)
+		{
+			var unaddedRules = await _mediator.Send(new GetRules(watchTypeCode));
+
+			return new OkObjectResult(unaddedRules);
+		}
+
+		[HttpPost("rules/{ruleUid:Guid}/added")]
+		[ProducesResponseType((int)HttpStatusCode.OK, Type = typeof(Rule))]
+		[ProducesResponseType((int)HttpStatusCode.Unauthorized)]
+		[ProducesResponseType((int)HttpStatusCode.BadRequest)]
+		public async Task<ActionResult<Rule>> UpdateRuleAsAded([FromRoute] Guid ruleUid)
+		{
+			var rule = await _mediator.Send(new UpdateRuleAsAdded(ruleUid));
+
+			return new OkObjectResult(rule);
+		}
+
 		private static List<Rule> BuildRulesFromRequest(List<NewRuleRequest> ruleRequests)
 		{
 			var rules = new List<Rule>();
@@ -52,7 +98,7 @@ namespace hrvster.API.Controllers.v1
 					Sweep = new Sweep
 					{
 						SweepUid = rule.SweepUid,
-					},					
+					},
 					WatchTypeCode = (WatchTypeCode)Enum.Parse(typeof(WatchTypeCode), rule.WatchTypeCode),
 					WatchValue = rule.WatchValue,
 					ActiveInd = rule.ActiveInd
@@ -60,52 +106,6 @@ namespace hrvster.API.Controllers.v1
 			}
 
 			return rules;
-		}
-
-		[HttpGet("rules/hashtags")]
-		[Produces("application/json")]
-		[ProducesResponseType((int)HttpStatusCode.OK, Type = typeof(IEnumerable<Rule>))]
-		[ProducesResponseType((int)HttpStatusCode.Unauthorized)]
-		[ProducesResponseType((int)HttpStatusCode.BadRequest)]
-		public async Task<ActionResult<IEnumerable<Rule>>> GetRulesByHashtags([FromBody] List<string> hashTags)
-		{
-			var rules = await _mediator.Send(new GetRulesForHashTags(hashTags));
-
-			return new OkObjectResult(rules);
-		}
-
-		[HttpGet("rule/{ruleUid:Guid}")]
-		[Produces("application/json")]
-		[ProducesResponseType((int)HttpStatusCode.OK, Type = typeof(Rule))]
-		[ProducesResponseType((int)HttpStatusCode.NotFound)]
-		public async Task<ActionResult<Rule>> GetRule([FromRoute] Guid ruleUid)
-		{
-			var rule = await _mediator.Send(new GetRule(ruleUid));
-
-			return new OkObjectResult(rule);
-		}
-
-		[HttpGet("rules/{watchTypeCode}")]
-		[Produces("application/json")]
-		[ProducesResponseType((int)HttpStatusCode.OK, Type = typeof(IEnumerable<Rule>))]
-		[ProducesResponseType((int)HttpStatusCode.Unauthorized)]
-		[ProducesResponseType((int)HttpStatusCode.BadRequest)]
-		public async Task<ActionResult<IEnumerable<Rule>>> GetRules([FromRoute] string watchTypeCode)
-		{
-			var unaddedRules = await _mediator.Send(new GetRules(watchTypeCode));
-
-			return new OkObjectResult(unaddedRules);
-		}
-
-		[HttpPost("rule/{ruleUid:Guid}/added")]
-		[ProducesResponseType((int)HttpStatusCode.OK, Type = typeof(Rule))]
-		[ProducesResponseType((int)HttpStatusCode.Unauthorized)]
-		[ProducesResponseType((int)HttpStatusCode.BadRequest)]
-		public async Task<ActionResult<Rule>> UpdateRuleAsAded([FromRoute] Guid ruleUid)
-		{
-			var rule = await _mediator.Send(new UpdateRuleAsAdded(ruleUid));
-
-			return new OkObjectResult(rule);
 		}
 	}
 }
