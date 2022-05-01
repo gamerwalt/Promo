@@ -71,6 +71,7 @@ namespace hrvster.API
 			services.AddTransient<ISweepsEntriesRepository, SweepsEntriesRepository>();
 			services.AddTransient<IEntryRulesRepository, EntryRulesRepository>();
 			services.AddTransient<IDrawRuleRepository, DrawRuleRepository>();
+			services.AddTransient<ISweepWinnersRepository, SweepWinnersRepository>();
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

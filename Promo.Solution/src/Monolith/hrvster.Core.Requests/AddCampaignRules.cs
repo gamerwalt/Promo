@@ -2,6 +2,7 @@
 using hrvster.Infrastructure;
 using hrvster.Models;
 using MediatR;
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -40,17 +41,18 @@ namespace hrvster.Core.Requests
 
 			foreach (var rule in request.Rules)
 			{
+				var ruleUid = Guid.NewGuid();
 				await _repository.CreateRuleAsync(new Rule
 				{
-					CampaignUid = rule.CampaignUid,
-					RuleUid = rule.RuleUid,
+					RuleUid = ruleUid,
+					Campaign = rule.Campaign,
+					Sweep = rule.Sweep,
 					ActiveInd = rule.ActiveInd,
 					WatchTypeCode = rule.WatchTypeCode,
-					WatchValue = rule.WatchValue,
-					SweepUid = rule.SweepUid
+					WatchValue = rule.WatchValue
 				});
 
-				rules.Add(await _repository.GetAsync(rule.RuleUid));
+				rules.Add(await _repository.GetAsync(ruleUid));
 			}
 
 			await _mediator.Publish(new RulesAdded(rules));

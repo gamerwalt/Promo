@@ -29,12 +29,11 @@ namespace hrvster.Infrastructure
 		{
 			using var conn = new MySqlConnection(_database.GetConnectionString());
 			var command = conn.CreateCommand();
-			command.CommandText = "rule_create";
+			command.CommandText = "sweep_rule_create";
 			command.CommandType = CommandType.StoredProcedure;
 			command
 				.AddParameter("ruleUid", rule.RuleUid)
-				.AddParameter("campaignUid", rule.CampaignUid)
-				.AddParameter("sweepUid", rule.SweepUid)
+				.AddParameter("sweepUid", rule.Sweep.SweepUid)
 				.AddParameter("watchTypeCode", rule.WatchTypeCode.ToString())
 				.AddParameter("watchValue", rule.WatchValue)
 				.AddParameter("activeInd", rule.ActiveInd);
@@ -50,7 +49,7 @@ namespace hrvster.Infrastructure
 			using (var conn = new MySqlConnection(_database.GetConnectionString()))
 			{
 				var command = conn.CreateCommand();
-				command.CommandText = "rule_get";
+				command.CommandText = "sweep_rule_get";
 				command.CommandType = CommandType.StoredProcedure;
 				command.AddParameter("ruleUid", ruleUid);
 
@@ -72,7 +71,7 @@ namespace hrvster.Infrastructure
 			using (var conn = new MySqlConnection(_database.GetConnectionString()))
 			{
 				var command = conn.CreateCommand();
-				command.CommandText = "rules_get_by_watchvalue";
+				command.CommandText = "sweep_rules_get_by_watchvalue";
 				command.CommandType = CommandType.StoredProcedure;
 				command.AddParameter("watchValue", text);
 
@@ -94,7 +93,7 @@ namespace hrvster.Infrastructure
 			using (var conn = new MySqlConnection(_database.GetConnectionString()))
 			{
 				var command = conn.CreateCommand();
-				command.CommandText = "rules_get_by_watch_type_code";
+				command.CommandText = "sweep_rules_get_by_watch_type_code";
 				command.CommandType = CommandType.StoredProcedure;
 				command.AddParameter("watchTypeCode", watchTypeCode);
 
@@ -113,7 +112,7 @@ namespace hrvster.Infrastructure
 		{
 			using var conn = new MySqlConnection(_database.GetConnectionString());
 			var command = conn.CreateCommand();
-			command.CommandText = "rule_update_as_added";
+			command.CommandText = "sweep_rule_update_as_added";
 			command.CommandType = CommandType.StoredProcedure;
 			command.AddParameter("ruleUid", ruleUid);
 
@@ -126,8 +125,27 @@ namespace hrvster.Infrastructure
 			return new Models.Rule
 			{
 				RuleId = reader.GetInt32("rule_id"),
-				CampaignUid = reader.GetGuid("campaign_uid"),
-				SweepUid = reader.GetGuid("sweep_uid"),
+				Campaign = new Campaign
+				{
+					CampaignUid = reader.GetGuid("campaign_uid"),
+					CampaignId = reader.GetInt32("campaign_id"),
+					CampaignName = reader.GetString("campaign_name"),
+					Description = reader.GetString("campaign_description"),
+					ActiveInd = reader.GetBoolean("campaign_active_ind"),
+					StartDate = reader.GetDateTime("campaign_start_date"),
+					EndDate = reader.GetDateTime("campaign_end_date")
+				},
+				Sweep = new Sweep
+				{
+					SweepUid = reader.GetGuid("sweep_uid"),
+					SweepId = reader.GetInt32("sweep_id"),
+					Name = reader.GetString("sweep_name"),
+					RulesUrl = GetStringValue(reader, "rules_url"),
+					StartDate = reader.GetDateTime("start_date"),
+					EndDate = reader.GetDateTime("end_date"),
+					DrawDate = reader.GetDateTime("draw_date"),
+					DateDrawn = GetNullableDateTimeValue(reader, "date_drawn")
+				},
 				RuleUid = reader.GetGuid("rule_uid"),
 				WatchValue = reader.GetString("watch_value"),
 				WatchTypeCode = (WatchTypeCode)Enum.Parse(typeof(WatchTypeCode), reader.GetString("watch_type_code")),
@@ -136,6 +154,17 @@ namespace hrvster.Infrastructure
 				CreatedDate = reader.GetDateTime("created_date"),
 				UpdatedDate = GetNullableDateTimeValue(reader, "updated_date")
 			};
+		}
+
+		private string GetStringValue(MySqlDataReader reader, string fieldName)
+		{
+			var value = reader[fieldName].ToString();
+			if(string.IsNullOrWhiteSpace(value))
+			{
+				return string.Empty;
+			}
+
+			return reader.GetString("rules_url");
 		}
 
 		private long GetLongValue(MySqlDataReader reader, string fieldName)

@@ -57,9 +57,15 @@ namespace hrvster.Core.Requests
 			{
 				rules.Add(new Rule
 				{
-					CampaignUid = request.CampaignUid,
-					SweepUid = request.SweepUid,
 					RuleUid = Guid.NewGuid(),
+					Campaign = new Campaign
+					{
+						CampaignUid = request.CampaignUid
+					},
+					Sweep = new Sweep
+					{
+						SweepUid = request.SweepUid
+					},
 					WatchValue = property,
 					ActiveInd = true,
 					WatchTypeCode = request.CampaignRule.WatchTypeCode

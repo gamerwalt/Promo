@@ -45,8 +45,14 @@ namespace hrvster.API.Controllers.v1
 				rules.Add(new Rule
 				{
 					RuleUid = rule.RuleUid,
-					CampaignUid = rule.CampaignUid,
-					SweepUid = rule.SweepUid,
+					Campaign = new Campaign
+					{
+						CampaignUid = rule.CampaignUid,
+					},
+					Sweep = new Sweep
+					{
+						SweepUid = rule.SweepUid,
+					},					
 					WatchTypeCode = (WatchTypeCode)Enum.Parse(typeof(WatchTypeCode), rule.WatchTypeCode),
 					WatchValue = rule.WatchValue,
 					ActiveInd = rule.ActiveInd

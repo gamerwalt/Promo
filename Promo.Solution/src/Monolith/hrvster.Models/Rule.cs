@@ -6,8 +6,8 @@ namespace hrvster.Models
 	{
 		public int RuleId { get; set; }
 		public Guid RuleUid { get; set; }
-		public Guid CampaignUid { get; set; }
-		public Guid SweepUid { get; set; }
+		public Campaign Campaign { get; set; }
+		public Sweep Sweep { get; set; }
 		public WatchTypeCode WatchTypeCode { get; set; }
 		public string WatchValue { get; set; }
 		public long TweetId { get; set; }
