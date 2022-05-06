@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.31702.278
+# Visual Studio Version 17
+VisualStudioVersion = 17.1.32414.318
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Promo.Membership.API", "Membership\Promo.Membership.API\Promo.Membership.API.csproj", "{70498D59-44C4-49B5-9FCE-ADBCDE044D4C}"
 EndProject
@@ -195,6 +195,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "hrvster.Infrastructure", "Monolith\hrvster.Infrastructure\hrvster.Infrastructure.csproj", "{5CB2A995-941D-4E08-9573-9EB0679932C3}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "hrvster.Core.Handlers", "Monolith\hrvster.Core.Handlers\hrvster.Core.Handlers.csproj", "{93E49A16-4F7F-4429-A56A-013DAF1A7004}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "hrvster.Web", "Monolith\hrvster.Web\hrvster.Web.csproj", "{499BDE28-0792-4AA4-AD38-BFC4C9F8CF1B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -398,6 +400,10 @@ Global
 		{93E49A16-4F7F-4429-A56A-013DAF1A7004}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{93E49A16-4F7F-4429-A56A-013DAF1A7004}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{93E49A16-4F7F-4429-A56A-013DAF1A7004}.Release|Any CPU.Build.0 = Release|Any CPU
+		{499BDE28-0792-4AA4-AD38-BFC4C9F8CF1B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{499BDE28-0792-4AA4-AD38-BFC4C9F8CF1B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{499BDE28-0792-4AA4-AD38-BFC4C9F8CF1B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{499BDE28-0792-4AA4-AD38-BFC4C9F8CF1B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -475,6 +481,7 @@ Global
 		{7479878C-821C-427A-9968-1AD09D779743} = {71429F9B-A81B-4A12-98DD-505C0F9FDB34}
 		{5CB2A995-941D-4E08-9573-9EB0679932C3} = {71429F9B-A81B-4A12-98DD-505C0F9FDB34}
 		{93E49A16-4F7F-4429-A56A-013DAF1A7004} = {71429F9B-A81B-4A12-98DD-505C0F9FDB34}
+		{499BDE28-0792-4AA4-AD38-BFC4C9F8CF1B} = {71429F9B-A81B-4A12-98DD-505C0F9FDB34}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {94B46B7F-1545-465E-863A-AAD0C58A8C0F}
