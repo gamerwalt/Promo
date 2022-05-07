@@ -5,13 +5,14 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="FirebaseAdmin" Version="2.2.0" />
-    <PackageReference Include="FluentValidation" Version="10.3.6" />
-    <PackageReference Include="MediatR" Version="9.0.0" />
+    <PackageReference Include="FirebaseAdmin" Version="2.3.0" />
+    <PackageReference Include="FluentValidation" Version="11.0.1" />
+    <PackageReference Include="MediatR" Version="10.0.1" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="6.0.0" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\Promo.Clients\Promo.Clients.csproj" />
     <ProjectReference Include="..\hrvster.Infrastructure\hrvster.Infrastructure.csproj" />
     <ProjectReference Include="..\hrvster.Models\hrvster.Models.csproj" />
   </ItemGroup>

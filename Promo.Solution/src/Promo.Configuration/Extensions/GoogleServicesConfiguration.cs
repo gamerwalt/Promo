@@ -3,6 +3,7 @@ using Google.Apis.Auth.OAuth2;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 using Promo.Core.Authentication.ConfigurationOptions;
@@ -14,6 +15,10 @@ namespace Promo.Configuration.Extensions
 		public static IServiceCollection AddGoogleServices(this IServiceCollection services, IConfiguration configuration)
 		{
 			var googleServicesOptions = configuration.GetSection(GoogleServicesOptions.GoogleServices).Get<GoogleServicesOptions>();
+
+			services.Configure<GoogleServicesOptions>(configuration);
+			services.Configure<GoogleServicesOptions>(configuration.GetSection(GoogleServicesOptions.GoogleServices));
+			services.AddTransient(p => p.GetService<IOptions<GoogleServicesOptions>>().Value);
 
 			services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 				.AddJwtBearer(options =>

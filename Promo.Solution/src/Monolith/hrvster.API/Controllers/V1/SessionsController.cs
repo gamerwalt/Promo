@@ -1,4 +1,5 @@
-﻿using hrvster.Models;
+﻿
+using hrvster.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Promo.Clients.External;
