@@ -22,7 +22,12 @@
     <ProjectReference Include="..\..\Promo.Clients\Promo.Clients.csproj" />
     <ProjectReference Include="..\..\Promo.Configuration\Promo.Configuration.csproj" />
     <ProjectReference Include="..\hrvster.Core.Requests\hrvster.Core.Requests.csproj" />
+    <ProjectReference Include="..\hrvster.Core\hrvster.Core.csproj" />
     <ProjectReference Include="..\hrvster.Infrastructure\hrvster.Infrastructure.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Views\Promotions\" />
   </ItemGroup>
 
 </Project>

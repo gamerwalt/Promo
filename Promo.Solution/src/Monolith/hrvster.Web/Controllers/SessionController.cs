@@ -8,7 +8,10 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using Promo.Core.Authentication.ConfigurationOptions;
+using System.Security.Claims;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Identity;
+using hrvster.Core.Authentication;
 
 namespace hrvster.Web.Controllers
 {
@@ -29,7 +32,7 @@ namespace hrvster.Web.Controllers
 			authProvider = new FirebaseAuthProvider(new Firebase.Auth.FirebaseConfig(_googleServicesOptions.WebApiKey));
 		}
 
-		// GET: SessionController/Create
+		[HttpGet]
 		public ActionResult SignIn()
 		{
 			var token = HttpContext.Session.GetString("_UserToken");
@@ -46,9 +49,12 @@ namespace hrvster.Web.Controllers
 			{
 				var link = await authProvider.SignInWithEmailAndPasswordAsync(form.Email, form.Password);
 
-				if(!string.IsNullOrWhiteSpace(link.FirebaseToken))
+				if(!string.IsNullOrWhiteSpace(link.FirebaseToken))// && link.User.IsEmailVerified)
 				{
-					HttpContext.Session.SetString("_UserToken", link.FirebaseToken);
+					HttpContext.Session.SetString(SessionConstants.UserToken, link.FirebaseToken);
+					HttpContext.Session.SetString(SessionConstants.UserUid, link.User.LocalId);
+					HttpContext.Session.SetString(SessionConstants.UserEmail, link.User.Email);
+					HttpContext.Session.SetString(SessionConstants.UserDisplayName, link.User.DisplayName);
 
 					return RedirectToAction(actionName: "Index", controllerName: "Dashboard");
 				}
@@ -62,6 +68,13 @@ namespace hrvster.Web.Controllers
 			}
 
 			return RedirectToAction(nameof(SignIn));
+		}
+
+		public async Task<ActionResult> SignOut()
+		{
+			HttpContext.Session.Remove("_UserToken");
+
+			return RedirectToAction("SignIn");
 		}
 	}
 }

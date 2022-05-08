@@ -1,5 +1,6 @@
 using FluentValidation;
 using FluentValidation.AspNetCore;
+using hrvster.Core.Authentication;
 using hrvster.Core.Requests;
 using hrvster.Core.Requests.Notifications;
 using hrvster.Core.Requests.Notifications.Handlers;
@@ -11,6 +12,8 @@ using hrvster.Infrastructure;
 using hrvster.Infrastructure.Harvester;
 using hrvster.Models;
 using MediatR;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -18,10 +21,13 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 using Promo.Clients.External;
 using Promo.Configuration.Extensions;
+using Promo.Core.Authentication.ConfigurationOptions;
 using Serilog;
 using System;
+using System.Net;
 using System.Reflection;
 using Tweetinvi;
 using Tweetinvi.Models;
@@ -42,20 +48,53 @@ namespace hrvster.Web
 		{
 			services.AddControllersWithViews();
 			services.AddMvc().AddSessionStateTempDataProvider();
-			services.AddSession(options =>
-			{
-				options.IdleTimeout = TimeSpan.FromSeconds(30);
-				options.Cookie.HttpOnly = true;
-				options.Cookie.IsEssential = true;
-			});
-
+			
+			AddAuthentication(services);
 			AddDatabaseAndRepositories(services);
 			AddMediatorAndFluentValidation(services);
 			AddTwitterClient(services);
 
 			services.AddHttpClient<IIdentityClient, IdentityClient>();
-			services.AddGoogleServices(Configuration);
+
 			services.AddFirebaseServices(Configuration);
+		}
+
+		private void AddAuthentication(IServiceCollection services)
+		{
+			var googleServicesOptions = Configuration.GetSection(GoogleServicesOptions.GoogleServices).Get<GoogleServicesOptions>();
+
+			services.Configure<GoogleServicesOptions>(Configuration);
+			services.Configure<GoogleServicesOptions>(Configuration.GetSection(GoogleServicesOptions.GoogleServices));
+			services.AddTransient(p => p.GetService<IOptions<GoogleServicesOptions>>().Value);
+			services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+				.AddJwtBearer(options =>
+				{
+					options.Authority = googleServicesOptions.FirebaseAppId;
+					options.TokenValidationParameters = new TokenValidationParameters
+					{
+						ValidateIssuer = true,
+						ValidIssuer = googleServicesOptions.FirebaseAppId,
+						ValidateAudience = true,
+						ValidAudience = googleServicesOptions.ProjectId,
+						ValidateLifetime = true
+					};
+				})
+				.AddCookie(o =>
+				{
+					o.ExpireTimeSpan = TimeSpan.FromMinutes(30);
+					o.SlidingExpiration = true;
+					o.AccessDeniedPath = "/Denied";
+					o.LoginPath = "/Session/SignIn";
+				});
+
+			services.AddSession(options =>
+			{
+				options.IdleTimeout = TimeSpan.FromMinutes(30);
+				options.Cookie.HttpOnly = true;
+				options.Cookie.IsEssential = true;
+			});
+
+			services.AddSingleton<HrvsterUser>();
 		}
 
 		private static void AddMediatorAndFluentValidation(IServiceCollection services)
@@ -149,6 +188,15 @@ namespace hrvster.Web
 
 			app.UseAuthentication();
 			app.UseAuthorization();
+
+			app.UseStatusCodePages(async context =>
+			{
+				var response = context.HttpContext.Response;
+
+				if (response.StatusCode == (int)HttpStatusCode.Unauthorized ||
+					response.StatusCode == (int)HttpStatusCode.Forbidden)
+					response.Redirect("/Session/SignIn");
+			});
 
 			app.UseEndpoints(endpoints =>
 			{

@@ -1,27 +1,23 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using hrvster.Core.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Threading.Tasks;
 
 namespace hrvster.Web.Controllers
 {
+	[FirebaseAuthorize]
 	public class DashboardController : Controller
 	{
-		public DashboardController()
+		private readonly HrvsterUser _hrvsterUser;
+		public DashboardController(HrvsterUser hrvsterUser)
 		{
-
+			_hrvsterUser = hrvsterUser;
 		}
 
-		public IActionResult Index()
+		[HttpGet]
+		public async Task<ActionResult> Index()
 		{
-			var token = HttpContext.Session.GetString("_UserToken");
-			if(token != null)
-			{
-				return View();
-			}
-			else
-			{
-				return RedirectToAction("SignIn", "Session");
-			}
+			return View();
 		}
 	}
 }
