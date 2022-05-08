@@ -1,5 +1,5 @@
 ﻿using hrvster.Core.Authentication;
-using Microsoft.AspNetCore.Http;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 

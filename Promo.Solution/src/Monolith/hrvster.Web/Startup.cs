@@ -1,6 +1,7 @@
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using hrvster.Core.Authentication;
+using hrvster.Core.Mapper;
 using hrvster.Core.Requests;
 using hrvster.Core.Requests.Notifications;
 using hrvster.Core.Requests.Notifications.Handlers;
@@ -95,6 +96,7 @@ namespace hrvster.Web
 			});
 
 			services.AddSingleton<HrvsterUser>();
+			services.AddAutoMapper(typeof(EntityMap));
 		}
 
 		private static void AddMediatorAndFluentValidation(IServiceCollection services)
@@ -181,7 +183,7 @@ namespace hrvster.Web
 
 			app.UseSession();
 
-			app.ConfigureExceptionHandler(app.ApplicationServices.GetRequiredService<ILogger<Startup>>());
+			//app.ConfigureExceptionHandler(app.ApplicationServices.GetRequiredService<ILogger<Startup>>());
 			app.UseSerilogRequestLogging();
 
 			app.UseRouting();

@@ -1,0 +1,54 @@
+﻿@model CreatePromotion
+@{
+    ViewData["Title"] = "Create Promotion";
+}
+<div><h1>Create New Promotion</h1></div>
+<hr />
+
+<div class="col-lg-8 col-xlg-9 col-md7">
+    <div class="card">
+        <div class="card-body">
+            <form asp-controller="Promotions" asp-action="Create" class="form-horizontal form-material mx-2">
+                <div class="form-group">
+                    <label class="col-md-12">Promotion Name</label>
+                    <div class="col-md-12">
+                        <input asp-for="Name" class="form-control form-control-lg" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-md-12">Some Description</label>
+                    <div class="col-md-12">
+                        <textarea asp-for="Description" class="form-control form-control-lg"></textarea>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-md-12">Start Date</label>
+                    <div class="col-md-12">
+                        <input asp-for="StartDate" class="form-control form-control-lg" asp-format="{0:yyyy-MM-ddTHH:mm}" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-md-12">End Date</label>
+                    <div class="col-md-12">
+                        <input asp-for="EndDate" class="form-control form-control-lg" asp-format="{0:yyyy-MM-ddTHH:mm}"/>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-md-12">Promotion Type</label>
+                    <div class="col-md-12">
+                        <select asp-for="CampaignTypeUid" asp-items=@Model.CampaignTypes class="form-control form-control-lg">
+                            <option>Please select one</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-12">
+                        <button class="btn btn-lg btn-primary" type="submit">Create Promotion</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

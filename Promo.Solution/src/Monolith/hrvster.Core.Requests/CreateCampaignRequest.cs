@@ -15,21 +15,34 @@ namespace hrvster.Core.Requests
     {
         private NewCampaignRequest request;
         private ClaimsPrincipal user;
+		private Guid accountUid;
 
-        public CreateCampaignRequest(NewCampaignRequest request, ClaimsPrincipal user)
+		public CreateCampaignRequest(NewCampaignRequest request, ClaimsPrincipal user)
         {
             this.request = request;
             this.user = user;
         }
 
-        public NewCampaignRequest NewCampaign
+		public CreateCampaignRequest(NewCampaignRequest newCampaignRequest, Guid userUid)
+		{
+			request = newCampaignRequest;
+			accountUid = userUid;
+		}
+
+		public NewCampaignRequest NewCampaign
         {
             get { return request; }
         }
 
         public Guid AccountUid
         {
-            get { return Guid.Parse(user.Claims.FirstOrDefault(c => c.Type.Equals("user_id", StringComparison.OrdinalIgnoreCase)).Value); }
+            get 
+			{
+				return 
+					user == null 
+					? this.accountUid 
+					: Guid.Parse(user.Claims.FirstOrDefault(c => c.Type.Equals("user_id", StringComparison.OrdinalIgnoreCase)).Value); 
+			}
         }
     }
 

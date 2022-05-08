@@ -5,6 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="11.0.0" />
     <PackageReference Include="FirebaseAuthentication.net" Version="3.7.2" />
     <PackageReference Include="FluentValidation" Version="11.0.1" />
     <PackageReference Include="FluentValidation.AspNetCore" Version="11.0.1" />
@@ -24,10 +25,6 @@
     <ProjectReference Include="..\hrvster.Core.Requests\hrvster.Core.Requests.csproj" />
     <ProjectReference Include="..\hrvster.Core\hrvster.Core.csproj" />
     <ProjectReference Include="..\hrvster.Infrastructure\hrvster.Infrastructure.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Views\Promotions\" />
   </ItemGroup>
 
 </Project>

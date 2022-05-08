@@ -1,0 +1,18 @@
+﻿@using hrvster.Models.WebModels
+@model IEnumerable<Promotion>
+@{
+    ViewData["Title"] = "Promotions";
+}
+<div><h1>Promotions</h1></div>
+<hr />
+<div>
+    <ul>
+        @foreach(var item in @Model)
+        {
+            <li><a class="nav-link" asp-action="View" asp-route-campaignUid="@item.CampaignUid">@item.CampaignName</a></li>
+        }
+    </ul>
+</div>
+<div class="col-md-3">
+    <a class="btn btn-sm btn-success nav-link" asp-action="Create" >Create New Promotion</a>
+</div>

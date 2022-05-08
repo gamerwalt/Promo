@@ -1,0 +1,10 @@
+﻿@using hrvster.Models.WebModels
+@model Promotion
+@{
+    ViewData["Title"] = @Model.CampaignName;
+}
+<div><h1>@Model.CampaignName</h1></div>
+<div>List of Sweeps go here</div>
+<div>
+    <a class="nav-link" asp-action="Create" asp-controller="SweepsController" asp-route-campaignUid="@Model.CampaignUid">Create new sweep</a>
+</div>
