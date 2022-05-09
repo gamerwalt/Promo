@@ -1,0 +1,12 @@
+﻿using System.Collections.Generic;
+
+namespace hrvster.Models.WebModels.Sweeps
+{
+	public class SweepRule
+	{
+		public Sweepstake Sweepstake { get; set; }
+		public IEnumerable<Rule> Rules { get; set; }
+		public EntryRule EntryRule { get; set; }
+		public DrawRule DrawRule { get; set; }
+	}
+}

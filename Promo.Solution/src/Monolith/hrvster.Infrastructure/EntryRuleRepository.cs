@@ -1,6 +1,7 @@
 ﻿using hrvster.Models;
 using MySqlConnector;
 using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Threading.Tasks;
 
@@ -10,8 +11,8 @@ namespace hrvster.Infrastructure
 	{
 		Task CreateAsync(EntryRule entryRule);
 		Task<EntryRule> GetAsync(Guid entryRuleUid);
-
 		Task<EntryRule> GetBySweepAndCampaignUidAsync(Guid sweepUid, Guid campaignUid);
+		Task<EntryRule> GetSweepEntryRuleAsync(Guid sweepUid);
 	}
 
 	public class EntryRulesRepository : IEntryRulesRepository
@@ -84,14 +85,34 @@ namespace hrvster.Infrastructure
 			return entryRule;
 		}
 
+		public async Task<EntryRule> GetSweepEntryRuleAsync(Guid sweepUid)
+		{
+			var entryRule = default(EntryRule);
+
+			using (var conn = new MySqlConnection(_database.GetConnectionString()))
+			{
+				var command = conn.CreateCommand();
+				command.CommandText = "sweep_entry_rule_get_by_sweep_uid";
+				command.CommandType = CommandType.StoredProcedure;
+				command.AddParameter("sweepUid", sweepUid);
+
+				await conn.OpenAsync();
+				using var reader = await command.ExecuteReaderAsync();
+				while (await reader.ReadAsync())
+				{
+					entryRule = CreateRecordFrom(reader);
+				}
+			}
+
+			return entryRule;
+		}
+
 		private EntryRule CreateRecordFrom(MySqlDataReader reader)
 		{
 			return new EntryRule
 			{
 				Id = reader.GetInt32("entry_rule_id"),
 				EntryRuleUid = reader.GetGuid("entry_rule_uid"),
-				CampaignUid = reader.GetGuid("campaign_uid"),
-				SweepUid = reader.GetGuid("sweep_uid"),
 				EntryPerUser = reader.GetInt32("entry_per_user"),
 				CreatedDate = reader.GetDateTime("created_date"),
 				UpdatedDate = GetNullableDateTimeValue(reader, "updated_date")

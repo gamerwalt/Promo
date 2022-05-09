@@ -1,6 +1,7 @@
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using hrvster.Core.Authentication;
+using hrvster.Core.Handlers.Profiles;
 using hrvster.Core.Mapper;
 using hrvster.Core.Requests;
 using hrvster.Core.Requests.Notifications;
@@ -108,8 +109,9 @@ namespace hrvster.Web
 			var harvsterHandlerAssembly = typeof(NewHashTagTweetReceived).GetTypeInfo().Assembly;
 			var webRequestAssembly = typeof(SigninForm).GetTypeInfo().Assembly;
 			var webRequestValidatorAssembly = typeof(SigninFormValidator).GetTypeInfo().Assembly;
+			var getUserProfileHandler = typeof(GetUserProfileHandler).GetTypeInfo().Assembly;
 
-			services.AddMediatR(new[] { handlerAssembly, notificationAssembly, notificationHandlerAssembly, harvsterHandlerAssembly, webRequestAssembly });
+			services.AddMediatR(new[] { handlerAssembly, notificationAssembly, notificationHandlerAssembly, harvsterHandlerAssembly, webRequestAssembly, getUserProfileHandler });
 			services.AddFluentValidation(f =>
 			{
 				f.RegisterValidatorsFromAssemblies(new[] { handlerAssembly, validatorAssembly, webRequestValidatorAssembly });

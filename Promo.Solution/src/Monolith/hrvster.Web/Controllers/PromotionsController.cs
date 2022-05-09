@@ -3,6 +3,7 @@ using hrvster.Core.Authentication;
 using hrvster.Core.Requests;
 using hrvster.Core.Requests.ApiRequests;
 using hrvster.Models.WebModels;
+using hrvster.Models.WebModels.Sweeps;
 using hrvster.Web.Models;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -40,8 +41,12 @@ namespace hrvster.Web.Controllers
 		public async Task<IActionResult> View(Guid campaignUid)
 		{
 			var campaign = await _mediator.Send(new GetCampaign(campaignUid));
+			var sweeps = await _mediator.Send(new GetSweepsForCampaignUid(campaignUid, _hrvsterUser.UserUid));
 
-			return View(_mapper.Map<Promotion>(campaign));
+			var promotion = _mapper.Map<Promotion>(campaign);
+			promotion.Sweepstakes = _mapper.Map<IEnumerable<Sweepstake>>(sweeps);
+
+			return View(promotion);
 		}
 
 		[HttpGet]

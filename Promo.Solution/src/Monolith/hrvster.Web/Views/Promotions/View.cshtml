@@ -4,7 +4,34 @@
     ViewData["Title"] = @Model.CampaignName;
 }
 <div><h1>@Model.CampaignName</h1></div>
-<div>List of Sweeps go here</div>
+<div class="col-md-12">
+    <div class="card">
+        <div class="card-header">Sweepstakes for @Model.CampaignName</div>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            @foreach(var sweep in @Model.Sweepstakes)
+            {
+                <div class="col-lg-6">
+                    <div class="card text-white bg-dark mb-3">
+                        <div class="card-header font-weight-bolder">@sweep.Name</div>
+                        <div class="card-body">
+                            <p class="card-text">Start Date: @sweep.StartDate</p>
+                            <p class="card-text">End Date: @sweep.EndDate</p>
+                            <p class="card-text">Draw Date: @sweep.DrawDate</p>
+                            <p class="card-text">Is Drawn: @sweep.Drawn</p>
+                            <a class="btn btn-success" asp-action="View" asp-controller="Sweeps" asp-route-sweepUid="@sweep.SweepUid">Details</a>
+                            <a class="btn btn-success" asp-action="View" asp-controller="SweepRules" asp-route-sweepUid="@sweep.SweepUid">Rules</a>
+                            <a class="btn btn-success" asp-action="View" asp-controller="SweepPrizes" asp-route-sweepUid="@sweep.SweepUid">Prizes</a>
+                            <a class="btn btn-success" asp-action="View" asp-controller="SweepDrawRules" asp-route-sweepUid="@sweep.SweepUid">Draw Rules</a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+<hr />
 <div>
-    <a class="nav-link" asp-action="Create" asp-controller="SweepsController" asp-route-campaignUid="@Model.CampaignUid">Create new sweep</a>
+    <a class=" btn btn-primary" asp-action="Create" asp-controller="Sweeps" asp-route-campaignUid="@Model.CampaignUid">Create new sweepstakes</a>
 </div>

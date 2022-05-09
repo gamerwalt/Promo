@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
-using hrvster.Models;
+using hrvster.Models.WebModels;
+using hrvster.Models.WebModels.Sweeps;
 
 namespace hrvster.Core.Mapper
 {
@@ -7,14 +8,13 @@ namespace hrvster.Core.Mapper
 	{
 		public EntityMap()
 		{
-			CreateMap<Campaign, Models.WebModels.Promotion>()
-				.ReverseMap();
-
-			CreateMap<CampaignType, Models.WebModels.PromotionType>()
-				.ReverseMap();
-
-			CreateMap<Models.Account, Models.WebModels.Account>()
-				.ReverseMap();
+			CreateMap<Models.Campaign, Promotion>();
+			CreateMap<Models.CampaignType, PromotionType>();
+			CreateMap<Models.Account, Account>();
+			CreateMap<Models.Sweep, Sweepstake>();
+			CreateMap<Models.Rule, Rule>();
+			CreateMap<Models.EntryRule, EntryRule>();
+			CreateMap<Models.DrawRule, DrawRule>();
 		}
 	}
 }

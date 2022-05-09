@@ -14,6 +14,7 @@ namespace hrvster.Infrastructure
 		Task<IEnumerable<Models.Rule>> GetRules(string watchTypeCode);
 		Task UpdateRuleAsAddedAsync(Guid ruleUid);
 		Task<IEnumerable<Models.Rule>> GetRuleByHashTagAsync(string text);
+		Task<IEnumerable<Models.Rule>> GetSweepRuleAsync(Guid sweepUid);
 	}
 
 	public class RulesRepository : IRulesRepository
@@ -108,6 +109,28 @@ namespace hrvster.Infrastructure
 			return rules;
 		}
 
+		public async Task<IEnumerable<Models.Rule>> GetSweepRuleAsync(Guid sweepUid)
+		{
+			var rules = new List<Models.Rule>();
+
+			using (var conn = new MySqlConnection(_database.GetConnectionString()))
+			{
+				var command = conn.CreateCommand();
+				command.CommandText = "sweep_rules_get_by_sweepUid";
+				command.CommandType = CommandType.StoredProcedure;
+				command.AddParameter("sweepUid", sweepUid);
+
+				await conn.OpenAsync();
+				using var reader = await command.ExecuteReaderAsync();
+				while (await reader.ReadAsync())
+				{
+					rules.Add(CreateRecordFrom(reader));
+				}
+			}
+
+			return rules;
+		}
+
 		public async Task UpdateRuleAsAddedAsync(Guid ruleUid)
 		{
 			using var conn = new MySqlConnection(_database.GetConnectionString());
@@ -188,5 +211,7 @@ namespace hrvster.Infrastructure
 
 			return reader.GetDateTime(fieldName);
 		}
+
+		
 	}
 }

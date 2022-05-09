@@ -1,0 +1,48 @@
+﻿@model CreateSweep
+@{
+    ViewData["Title"] = $"Create Sweep for {@Model.Campaign.CampaignName}";
+}
+<hr />
+<div><h4>Create New Sweepstakes/Raffle for @Model.Campaign.CampaignName</h4></div>
+<hr />
+<div class="col-lg-8 col-xlg-9 col-md7">
+    <div class="card">
+        <div class="card-body">
+            <form asp-controller="Sweeps" asp-action="Create" class="form-horizontal form-material mx-2">
+                @Html.HiddenFor(m => m.Campaign.CampaignUid)
+                <div class="form-group">
+                    <label class="col-md-12">Sweep Name</label>
+                    <div class="col-md-12">
+                        <input asp-for="Name" class="form-control form-control-lg" />
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-md-12">Sweep Start Date</label>
+                    <div class="col-md-12">
+                        <input asp-for="StartDate" class="form-control form-control-lg" asp-format="{0:yyyy-MM-ddTHH:mm}" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-md-12">Sweep End Date</label>
+                    <div class="col-md-12">
+                        <input asp-for="EndDate" class="form-control form-control-lg" asp-format="{0:yyyy-MM-ddTHH:mm}" />
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-md-12">Sweep Draw Date</label>
+                    <div class="col-md-12">
+                        <input asp-for="DrawDate" class="form-control form-control-lg" asp-format="{0:yyyy-MM-ddTHH:mm}" />
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <div class="col-md-12">
+                        <button class="btn btn-lg btn-primary" type="submit">Create Sweepstakes</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

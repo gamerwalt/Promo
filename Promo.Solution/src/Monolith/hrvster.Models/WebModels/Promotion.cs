@@ -1,4 +1,6 @@
-﻿using System;
+﻿using hrvster.Models.WebModels.Sweeps;
+using System;
+using System.Collections.Generic;
 
 namespace hrvster.Models.WebModels
 {
@@ -14,5 +16,6 @@ namespace hrvster.Models.WebModels
 		public DateTime EndDate { get; set; }
 		public DateTime CreatedDate { get; set; }
 		public bool ActiveInd { get; set; }
+		public IEnumerable<Sweepstake> Sweepstakes { get; set; }
 	}
 }

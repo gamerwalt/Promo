@@ -48,7 +48,6 @@ namespace hrvster.Infrastructure
 			{
 				SweepDrawruleId = reader.GetInt32("sweep_draw_rule_id"),
 				SweepDrawRuleUid = reader.GetGuid("sweep_draw_rule_uid"),
-				SweepUid = reader.GetGuid("sweep_uid"),
 				WinnerCount = reader.GetInt32("winner_count"),
 				WinnerBackupCount = reader.GetInt32("winner_backup_count"),
 				CreatedDate = reader.GetDateTime("created_date"),
