@@ -145,6 +145,8 @@ namespace hrvster.Infrastructure
 
 		private Models.Rule CreateRecordFrom(MySqlDataReader reader)
 		{
+			var watchTypeCode = (WatchTypeCode)Enum.Parse(typeof(WatchTypeCode), reader.GetString("watch_type_code"));
+
 			return new Models.Rule
 			{
 				RuleId = reader.GetInt32("rule_id"),

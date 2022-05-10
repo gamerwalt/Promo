@@ -13,7 +13,9 @@ namespace hrvster.Models
         public string Pin { get; set; }
         public Guid AccountUid { get; set; }
         public bool TermsAccepted { get; set; }
-        public DateTime CreatedDate { get; set; }
+		public string TwitterUserName { get; set; }
+
+		public DateTime CreatedDate { get; set; }
         public DateTime? UpdatedDate { get; set; }
     }
 }

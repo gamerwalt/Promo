@@ -1,5 +1,6 @@
 using FluentValidation;
 using FluentValidation.AspNetCore;
+using hrvster.Core;
 using hrvster.Core.Authentication;
 using hrvster.Core.Handlers.Profiles;
 using hrvster.Core.Mapper;
@@ -10,6 +11,7 @@ using hrvster.Core.Requests.Notifications.Harvester;
 using hrvster.Core.Requests.Validators;
 using hrvster.Core.Requests.WebRequests;
 using hrvster.Core.Requests.WebRequests.Validators;
+using hrvster.Core.Settings;
 using hrvster.Infrastructure;
 using hrvster.Infrastructure.Harvester;
 using hrvster.Models;
@@ -55,6 +57,11 @@ namespace hrvster.Web
 			AddDatabaseAndRepositories(services);
 			AddMediatorAndFluentValidation(services);
 			AddTwitterClient(services);
+			AddServicesOptions(services);
+
+			services.AddSingleton<HrvsterUser>();
+			services.AddSingleton<LinkBuilder>();
+			services.AddAutoMapper(typeof(EntityMap));
 
 			services.AddHttpClient<IIdentityClient, IdentityClient>();
 
@@ -95,9 +102,6 @@ namespace hrvster.Web
 				options.Cookie.HttpOnly = true;
 				options.Cookie.IsEssential = true;
 			});
-
-			services.AddSingleton<HrvsterUser>();
-			services.AddAutoMapper(typeof(EntityMap));
 		}
 
 		private static void AddMediatorAndFluentValidation(IServiceCollection services)
@@ -141,6 +145,14 @@ namespace hrvster.Web
 			services.AddTransient<IBlacklistedSweepsUsersRepository, BlacklistedSweepsUsersRepository>();
 			services.AddTransient<IHarvesterRepository, HarvesterRepository>();
 			services.AddTransient<ISweepPrizeRepository, SweepPrizeRepository>();
+		}
+
+		private void AddServicesOptions(IServiceCollection services)
+		{
+			services.Configure<Services>(Configuration);
+			services.Configure<Services>(Configuration.GetSection(Services.SectionName));
+			services.AddTransient(p => p.GetService<IOptions<Services>>().Value);
+
 		}
 
 		private void AddTwitterClient(IServiceCollection services)

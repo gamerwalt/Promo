@@ -12,7 +12,10 @@ namespace hrvster.Core.Mapper
 			CreateMap<Models.CampaignType, PromotionType>();
 			CreateMap<Models.Account, Account>();
 			CreateMap<Models.Sweep, Sweepstake>();
-			CreateMap<Models.Rule, Rule>();
+
+			CreateMap<Models.Rule, Rule>()
+				.ForMember(dest => dest.WatchType, opt => opt.MapFrom(src => src.WatchTypeCode));
+
 			CreateMap<Models.EntryRule, EntryRule>();
 			CreateMap<Models.DrawRule, DrawRule>();
 		}

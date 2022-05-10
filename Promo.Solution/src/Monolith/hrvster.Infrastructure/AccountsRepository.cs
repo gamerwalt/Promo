@@ -110,9 +110,21 @@ namespace hrvster.Infrastructure
 				DisplayName = reader.GetString("display_name"),
 				Pin = reader.GetString("pin"),
 				TermsAccepted = reader.GetBoolean("terms_accepted"),
+				TwitterUserName = GetNullableString(reader, "twitter_user_name"),
 				CreatedDate = reader.GetDateTime("created_date"),
 				UpdatedDate = GetNullableDateTimeValue(reader, "updated_date")
 			};
+		}
+
+		private string GetNullableString(MySqlDataReader reader, string fieldName)
+		{
+			var value = reader[fieldName].ToString();
+			if (string.IsNullOrWhiteSpace(value))
+			{
+				return null;
+			}
+
+			return reader.GetString(fieldName);
 		}
 
 		private DateTime? GetNullableDateTimeValue(MySqlDataReader reader, string fieldName)

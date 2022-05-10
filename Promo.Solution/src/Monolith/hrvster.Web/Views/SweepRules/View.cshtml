@@ -1,5 +1,58 @@
-﻿@using hrvster.Models.WebModels.Sweeps
+﻿@using hrvster.Core
+@using hrvster.Models.WebModels.Sweeps
+
+@inject LinkBuilder linkBuilder
 @model SweepRule
 @{
     ViewData["Title"] = $"{@Model.Sweepstake.Name}'s Rules";
 }
+<div class="row col-md-12">
+    <div class="card col-md-12">
+        <div class="card-header">
+            Rules for Sweepstakes @Model.Sweepstake.Name
+        </div>
+        <div class="card-body">
+            <h5 class="card-title"><span class="font-weight-lighter">Runs from</span> <span class="font-italic">@Model.Sweepstake.StartDate</span> <span class="font-weight-lighter">to</span> <span class="font-italic">@Model.Sweepstake.EndDate</span> <span class="font-weight-lighter">| Draw Date</span>: <span class="font-italic">@Model.Sweepstake.DrawDate</span></h5>
+            <hr />
+            <div class="col-lg-12 col-md-12 col-sm-12">
+                <div class="card">
+                    <div class="card-header">Rules and Watch Values</div>
+                    <div class="card-body">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Watch Type</th>
+                                    <th scope="col">Watch Value</th>
+                                    <th scope="col">Tweet Link</th>
+                                    <th scope="col">Active</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach(var rule in @Model.Rules)
+                                {
+                                    <tr>
+                                        <th scope="row">@rule.WatchType.ToString()</th>
+                                        <td>@rule.WatchValue</td>
+                                        <td>
+                                            <a href="@linkBuilder.BuildTwitterLink(@rule.TweetId).Result" target="_blank">@rule.TweetId</a>
+                                            </td>
+                                        <td>
+                                            @if (@rule.ActiveInd)
+                                            {
+                                                <span>True</span>
+                                            }
+                                            else
+                                            {
+                                                <span>False</span>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
