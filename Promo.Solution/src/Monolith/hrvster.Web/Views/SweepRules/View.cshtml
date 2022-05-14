@@ -5,51 +5,133 @@
 @model SweepRule
 @{
     ViewData["Title"] = $"{@Model.Sweepstake.Name}'s Rules";
+    var entryRuleExists = @Model.EntryRule == null ? false : true;
+    var entryPerUser = @Model.EntryRule == null ? 0 : @Model.EntryRule.EntryPerUser;
+
+    var drawRuleExists = @Model.DrawRule == null ? false : true;
+    var winnerCount = @Model.DrawRule == null ? 0 : @Model.DrawRule.WinnerCount;
+    var winnerBackupCount = @Model.DrawRule == null ? 0 : @Model.DrawRule.WinnerBackupCount;
 }
 <div class="row col-md-12">
     <div class="card col-md-12">
         <div class="card-header">
-            Rules for Sweepstakes @Model.Sweepstake.Name
+            <h4>Rules for Sweepstakes @Model.Sweepstake.Name</h4>
         </div>
         <div class="card-body">
             <h5 class="card-title"><span class="font-weight-lighter">Runs from</span> <span class="font-italic">@Model.Sweepstake.StartDate</span> <span class="font-weight-lighter">to</span> <span class="font-italic">@Model.Sweepstake.EndDate</span> <span class="font-weight-lighter">| Draw Date</span>: <span class="font-italic">@Model.Sweepstake.DrawDate</span></h5>
             <hr />
-            <div class="col-lg-12 col-md-12 col-sm-12">
-                <div class="card">
-                    <div class="card-header">Rules and Watch Values</div>
-                    <div class="card-body">
-                        <table class="table table-striped">
-                            <thead>
-                                <tr>
-                                    <th scope="col">Watch Type</th>
-                                    <th scope="col">Watch Value</th>
-                                    <th scope="col">Tweet Link</th>
-                                    <th scope="col">Active</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach(var rule in @Model.Rules)
-                                {
+            <div class="row">
+                <div class="col-lg-12 col-md-12 col-sm-12">
+                    <div class="card">
+                        <div class="card-header">Rules and Watch Values</div>
+                        <div class="card-body">
+                            <table class="table table-striped">
+                                <thead>
                                     <tr>
-                                        <th scope="row">@rule.WatchType.ToString()</th>
-                                        <td>@rule.WatchValue</td>
-                                        <td>
-                                            <a href="@linkBuilder.BuildTwitterLink(@rule.TweetId).Result" target="_blank">@rule.TweetId</a>
-                                            </td>
-                                        <td>
-                                            @if (@rule.ActiveInd)
-                                            {
-                                                <span>True</span>
-                                            }
-                                            else
-                                            {
-                                                <span>False</span>
-                                            }
-                                        </td>
+                                        <th scope="col">Watch Type</th>
+                                        <th scope="col">Watch Value</th>
+                                        <th scope="col">Tweet Link</th>
+                                        <th scope="col">Active</th>
                                     </tr>
-                                }
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody>
+                                    @foreach(var rule in @Model.Rules)
+                                    {
+                                        <tr>
+                                            <th scope="row">@rule.WatchType.ToString()</th>
+                                            <td>@rule.WatchValue</td>
+                                            <td>
+                                                <a href="@linkBuilder.BuildTwitterLink(@rule.TweetId).Result" target="_blank">@rule.TweetId</a>
+                                                </td>
+                                            <td>
+                                                @if (@rule.ActiveInd)
+                                                {
+                                                    <span>True</span>
+                                                }
+                                                else
+                                                {
+                                                    <span>False</span>
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12">&nbsp;</div>
+            </div>
+            <div class="row">
+                <div class="col-lg-6 col-md-6 col-sm-12">
+                    <div class="card">
+                        <div class="card-header">Entry Rules</div>
+                        <div class="card-body">
+                            @if(entryRuleExists)
+                            {
+                                <p class="card-text">Entries per user: @entryPerUser </p>
+                                <hr />
+                                <p class="card-text">
+                                    <a asp-action="Update" 
+                                    asp-controller="SweepEntryRule" 
+                                    asp-route-sweepEntryUid=@Model.EntryRule.EntryRuleUid
+                                    class="btn btn-primary">
+                                        Update Entry Rules
+                                    </a>
+                                </p>
+                            }
+                            else
+                            {
+                                <p class="card-text">There is no entry rule for this sweepstake.</p>
+                                <hr />
+                                <p class="card-text">
+                                    <a 
+                                    asp-action="Create" 
+                                    asp-controller="SweepEntryRule" 
+                                    asp-route-sweepUid=@Model.Sweepstake.SweepUid
+                                    class="btn btn-primary">
+                                        Add One Now
+                                    </a>
+                                </p>
+                            }
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6 col-md-6 col-sm-12">
+                    <div class="card">
+                        <div class="card-header">Draw Rules</div>
+                        <div class="card-body">
+                            @if(drawRuleExists)
+                            {
+                                <p class="card-text">Winner Count: @winnerCount</p>
+                                <p class="card-text">Backup Per Winner: @winnerBackupCount</p>
+                                <hr />
+                                <p class="card-text">
+                                    <a asp-action="Update" 
+                                    asp-controller="SweepDraw" 
+                                    asp-route-sweepEntryUid=@Model.DrawRule.DrawRuleUid
+                                    class="btn btn-primary">
+                                        Update Draw Rules
+                                    </a>
+                                </p>
+                            }
+                            else
+                            {
+                                <p class="card-text">There is no draw rule for this sweepstake.</p>
+                                <hr />
+                                <p class="card-text">
+                                    <a 
+                                    asp-action="Create" 
+                                    asp-controller="SweepDrawRule" 
+                                    asp-route-sweepUid=@Model.Sweepstake.SweepUid
+                                    class="btn btn-primary">
+                                        Add One Now
+                                    </a>
+                                </p>
+                            }
+                        </div>
                     </div>
                 </div>
             </div>
