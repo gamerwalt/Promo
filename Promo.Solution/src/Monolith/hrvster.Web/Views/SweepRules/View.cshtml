@@ -77,6 +77,8 @@
                                     <a asp-action="Update" 
                                     asp-controller="SweepEntryRule" 
                                     asp-route-sweepEntryUid=@Model.EntryRule.EntryRuleUid
+                                    asp-route-actionName=@ViewContext.RouteData.Values["action"]
+                                    asp-route-controllerName=@ViewContext.RouteData.Values["controller"]
                                     class="btn btn-primary">
                                         Update Entry Rules
                                     </a>
@@ -91,6 +93,8 @@
                                     asp-action="Create" 
                                     asp-controller="SweepEntryRule" 
                                     asp-route-sweepUid=@Model.Sweepstake.SweepUid
+                                    asp-route-actionName=@ViewContext.RouteData.Values["action"]
+                                    asp-route-controllerName=@ViewContext.RouteData.Values["controller"]
                                     class="btn btn-primary">
                                         Add One Now
                                     </a>
@@ -112,6 +116,8 @@
                                     <a asp-action="Update" 
                                     asp-controller="SweepDraw" 
                                     asp-route-sweepEntryUid=@Model.DrawRule.DrawRuleUid
+                                    asp-route-actionName=@ViewContext.RouteData.Values["action"]
+                                    asp-route-controllerName=@ViewContext.RouteData.Values["controller"]
                                     class="btn btn-primary">
                                         Update Draw Rules
                                     </a>
@@ -126,6 +132,8 @@
                                     asp-action="Create" 
                                     asp-controller="SweepDrawRule" 
                                     asp-route-sweepUid=@Model.Sweepstake.SweepUid
+                                    asp-route-actionName=@ViewContext.RouteData.Values["action"]
+                                    asp-route-controllerName=@ViewContext.RouteData.Values["controller"]
                                     class="btn btn-primary">
                                         Add One Now
                                     </a>

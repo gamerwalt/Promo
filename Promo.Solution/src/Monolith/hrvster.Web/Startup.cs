@@ -58,6 +58,7 @@ namespace hrvster.Web
 			AddMediatorAndFluentValidation(services);
 			AddTwitterClient(services);
 			AddServicesOptions(services);
+			ConfigureSweeepstakes(services);
 
 			services.AddSingleton<HrvsterUser>();
 			services.AddSingleton<LinkBuilder>();
@@ -152,7 +153,13 @@ namespace hrvster.Web
 			services.Configure<Services>(Configuration);
 			services.Configure<Services>(Configuration.GetSection(Services.SectionName));
 			services.AddTransient(p => p.GetService<IOptions<Services>>().Value);
+		}
 
+		private void ConfigureSweeepstakes(IServiceCollection services)
+		{
+			services.Configure<SweepConfiguration>(Configuration);
+			services.Configure<SweepConfiguration>(Configuration.GetSection(SweepConfiguration.SectionName));
+			services.AddTransient(p => p.GetService<IOptions<SweepConfiguration>>().Value);
 		}
 
 		private void AddTwitterClient(IServiceCollection services)

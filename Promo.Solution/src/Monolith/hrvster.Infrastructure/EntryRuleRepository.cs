@@ -28,11 +28,10 @@ namespace hrvster.Infrastructure
 		{
 			using var conn = new MySqlConnection(_database.GetConnectionString());
 			var command = conn.CreateCommand();
-			command.CommandText = "entry_rule_create";
+			command.CommandText = "sweep_entry_rule_create";
 			command.CommandType = CommandType.StoredProcedure;
 			command
 				.AddParameter("entryRuleUid", entryRule.EntryRuleUid)
-				.AddParameter("campaignUid", entryRule.CampaignUid)
 				.AddParameter("sweepUid", entryRule.SweepUid)
 				.AddParameter("entryPerUser", entryRule.EntryPerUser);
 
