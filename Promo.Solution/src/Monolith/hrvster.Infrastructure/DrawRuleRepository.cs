@@ -9,6 +9,7 @@ namespace hrvster.Infrastructure
 	public interface IDrawRuleRepository
 	{
 		Task<DrawRule> GetSweepDrawRuleAsync(Guid sweepUid);
+		Task Create(DrawRule drawRule);
 	}
 
 	public class DrawRuleRepository : IDrawRuleRepository
@@ -64,6 +65,22 @@ namespace hrvster.Infrastructure
 			}
 
 			return reader.GetDateTime(fieldName);
+		}
+
+		public async Task Create(DrawRule drawRule)
+		{
+			using var conn = new MySqlConnection(_database.GetConnectionString());
+			var command = conn.CreateCommand();
+			command.CommandText = "sweep_draw_rule_create";
+			command.CommandType = CommandType.StoredProcedure;
+			command
+				.AddParameter("sweepDrawRuleUid", drawRule.SweepDrawRuleUid)
+				.AddParameter("sweepUid", drawRule.SweepUid)
+				.AddParameter("winnerCount", drawRule.WinnerCount)
+				.AddParameter("winnerBackupCount", drawRule.WinnerBackupCount);
+
+			await conn.OpenAsync();
+			await command.ExecuteNonQueryAsync();
 		}
 	}
 }

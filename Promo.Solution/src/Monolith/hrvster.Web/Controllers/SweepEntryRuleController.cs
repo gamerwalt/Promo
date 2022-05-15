@@ -44,7 +44,7 @@ namespace hrvster.Web.Controllers
 				SweepstakeId = sweep.SweepId,
 				SweepstakeUid = sweep.SweepUid,
 				SweepstakeName = sweep.Name,
-				EntryPerUser = _sweepConfig.DefaultRuleEntryPerUser,
+				EntryPerUser = _sweepConfig.EntryPerUser,
 				ReturnAction = actionName ?? HttpContext.Request.RouteValues["action"].ToString(),
 				ReturnController = controllerName ?? HttpContext.Request.RouteValues["controller"].ToString()
 			};

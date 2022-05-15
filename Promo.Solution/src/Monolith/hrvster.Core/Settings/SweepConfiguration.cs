@@ -1,15 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace hrvster.Core.Settings
+﻿namespace hrvster.Core.Settings
 {
 	public class SweepConfiguration
 	{
 		public const string SectionName = "SweepstakeConfigurationOptions";
 
-		public int DefaultRuleEntryPerUser { get; set; } = 0;
+		//Entry Rule Defaults
+		public int EntryPerUser { get; set; } = 0;
+
+		//Draw Rule Defaults
+		public int WinnerCount { get; set; } = 0;
+		public int WinnerBackupCount { get; set; } = 0;
 	}
 }
