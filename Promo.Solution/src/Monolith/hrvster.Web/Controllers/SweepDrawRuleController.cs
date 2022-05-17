@@ -1,4 +1,5 @@
-﻿using hrvster.Core.Requests;
+﻿using hrvster.Core.Authentication;
+using hrvster.Core.Requests;
 using hrvster.Core.Requests.WebRequests.Sweeps;
 using hrvster.Core.Settings;
 using hrvster.Web.Models;
@@ -10,6 +11,7 @@ using System.Threading.Tasks;
 
 namespace hrvster.Web.Controllers
 {
+	[FirebaseAuthorize]
 	public class SweepDrawRuleController : Controller
 	{
 		private readonly ILogger<SweepDrawRuleController> _logger;

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace hrvster.Core.Requests
 {
-	public class GetCampaignSweepEntryRule : IRequest<EntryRule>
+	public class GetCampaignSweepEntryRule : IRequest<SweepEntryRule>
 	{
 		private Guid campaignUid;
 		private Guid sweepUid;
@@ -29,7 +29,7 @@ namespace hrvster.Core.Requests
 		}
 	}
 
-	public class GetCampaignSweepEntryRuleHandler : IRequestHandler<GetCampaignSweepEntryRule, EntryRule>
+	public class GetCampaignSweepEntryRuleHandler : IRequestHandler<GetCampaignSweepEntryRule, SweepEntryRule>
 	{
 		private readonly IEntryRulesRepository _repository;
 
@@ -38,7 +38,7 @@ namespace hrvster.Core.Requests
 			_repository = repository;
 		}
 
-		public async Task<EntryRule> Handle(GetCampaignSweepEntryRule request, CancellationToken cancellationToken)
+		public async Task<SweepEntryRule> Handle(GetCampaignSweepEntryRule request, CancellationToken cancellationToken)
 		{
 			return await _repository.GetBySweepAndCampaignUidAsync(request.SweepUid, request.CampaignUid);
 		}

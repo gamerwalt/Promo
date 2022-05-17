@@ -76,7 +76,8 @@
                                 <p class="card-text">
                                     <a asp-action="Update" 
                                     asp-controller="SweepEntryRule" 
-                                    asp-route-sweepEntryUid=@Model.EntryRule.EntryRuleUid
+                                    asp-route-entryRuleUid=@Model.EntryRule.EntryRuleUid
+                                    asp-route-sweepUid=@Model.Sweepstake.SweepUid
                                     asp-route-actionName=@ViewContext.RouteData.Values["action"]
                                     asp-route-controllerName=@ViewContext.RouteData.Values["controller"]
                                     class="btn btn-primary">
@@ -116,6 +117,7 @@
                                     <a asp-action="Update" 
                                     asp-controller="SweepDraw" 
                                     asp-route-sweepEntryUid=@Model.DrawRule.DrawRuleUid
+                                    asp-route-sweepUid=@Model.Sweepstake.SweepUid
                                     asp-route-actionName=@ViewContext.RouteData.Values["action"]
                                     asp-route-controllerName=@ViewContext.RouteData.Values["controller"]
                                     class="btn btn-primary">

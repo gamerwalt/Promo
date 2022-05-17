@@ -16,7 +16,7 @@ namespace hrvster.Core.Mapper
 			CreateMap<Models.Rule, Rule>()
 				.ForMember(dest => dest.WatchType, opt => opt.MapFrom(src => src.WatchTypeCode));
 
-			CreateMap<Models.EntryRule, EntryRule>();
+			CreateMap<Models.SweepEntryRule, EntryRule>();
 			CreateMap<Models.DrawRule, DrawRule>();
 		}
 	}

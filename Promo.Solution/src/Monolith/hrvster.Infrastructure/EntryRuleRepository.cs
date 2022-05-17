@@ -9,10 +9,11 @@ namespace hrvster.Infrastructure
 {
 	public interface IEntryRulesRepository
 	{
-		Task CreateAsync(EntryRule entryRule);
-		Task<EntryRule> GetAsync(Guid entryRuleUid);
-		Task<EntryRule> GetBySweepAndCampaignUidAsync(Guid sweepUid, Guid campaignUid);
-		Task<EntryRule> GetSweepEntryRuleAsync(Guid sweepUid);
+		Task CreateAsync(SweepEntryRule entryRule);
+		Task<SweepEntryRule> GetAsync(Guid entryRuleUid);
+		Task<SweepEntryRule> GetBySweepAndCampaignUidAsync(Guid sweepUid, Guid campaignUid);
+		Task<SweepEntryRule> GetSweepEntryRuleAsync(Guid sweepUid);
+		Task UpdateSweepEntryRule(SweepEntryRule sweepEntryRule);
 	}
 
 	public class EntryRulesRepository : IEntryRulesRepository
@@ -24,7 +25,7 @@ namespace hrvster.Infrastructure
 			_database = database;
 		}
 
-		public async Task CreateAsync(EntryRule entryRule)
+		public async Task CreateAsync(SweepEntryRule entryRule)
 		{
 			using var conn = new MySqlConnection(_database.GetConnectionString());
 			var command = conn.CreateCommand();
@@ -39,9 +40,25 @@ namespace hrvster.Infrastructure
 			await command.ExecuteNonQueryAsync();
 		}
 
-		public async Task<EntryRule> GetAsync(Guid entryRuleUid)
+		public async Task UpdateSweepEntryRule(SweepEntryRule sweepEntryRule)
 		{
-			var entryRule = default(EntryRule);
+			using var conn = new MySqlConnection(_database.GetConnectionString());
+			var command = conn.CreateCommand();
+			command.CommandText = "sweep_entry_rule_update";
+			command.CommandType = CommandType.StoredProcedure;
+			command
+				.AddParameter("entryRuleUid", sweepEntryRule.EntryRuleUid)
+				.AddParameter("sweepUid", sweepEntryRule.SweepUid)
+				.AddParameter("sweepId", sweepEntryRule.SweepId)
+				.AddParameter("entryPerUser", sweepEntryRule.EntryPerUser);
+
+			await conn.OpenAsync();
+			await command.ExecuteNonQueryAsync();
+		}
+
+		public async Task<SweepEntryRule> GetAsync(Guid entryRuleUid)
+		{
+			var entryRule = default(SweepEntryRule);
 
 			using (var conn = new MySqlConnection(_database.GetConnectionString()))
 			{
@@ -61,9 +78,9 @@ namespace hrvster.Infrastructure
 			return entryRule;
 		}
 
-		public async Task<EntryRule> GetBySweepAndCampaignUidAsync(Guid sweepUid, Guid campaignUid)
+		public async Task<SweepEntryRule> GetBySweepAndCampaignUidAsync(Guid sweepUid, Guid campaignUid)
 		{
-			var entryRule = default(EntryRule);
+			var entryRule = default(SweepEntryRule);
 
 			using (var conn = new MySqlConnection(_database.GetConnectionString()))
 			{
@@ -84,9 +101,9 @@ namespace hrvster.Infrastructure
 			return entryRule;
 		}
 
-		public async Task<EntryRule> GetSweepEntryRuleAsync(Guid sweepUid)
+		public async Task<SweepEntryRule> GetSweepEntryRuleAsync(Guid sweepUid)
 		{
-			var entryRule = default(EntryRule);
+			var entryRule = default(SweepEntryRule);
 
 			using (var conn = new MySqlConnection(_database.GetConnectionString()))
 			{
@@ -106,9 +123,9 @@ namespace hrvster.Infrastructure
 			return entryRule;
 		}
 
-		private EntryRule CreateRecordFrom(MySqlDataReader reader)
+		private SweepEntryRule CreateRecordFrom(MySqlDataReader reader)
 		{
-			return new EntryRule
+			return new SweepEntryRule
 			{
 				Id = reader.GetInt32("entry_rule_id"),
 				EntryRuleUid = reader.GetGuid("entry_rule_uid"),

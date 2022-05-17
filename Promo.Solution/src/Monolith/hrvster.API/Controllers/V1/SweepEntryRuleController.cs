@@ -28,13 +28,13 @@ namespace hrvster.API.Controllers.v1
 		/// <returns></returns>
 		[HttpPost("entryrule")]
 		[Produces("application/json")]
-		[ProducesResponseType((int)HttpStatusCode.OK, Type = typeof(EntryRule))]
+		[ProducesResponseType((int)HttpStatusCode.OK, Type = typeof(SweepEntryRule))]
 		[ProducesResponseType((int)HttpStatusCode.Unauthorized)]
 		[ProducesResponseType((int)HttpStatusCode.BadRequest)]
 		[Authorize]
-		public async Task<ActionResult<Rule>> AddRule([FromBody] NewEntryRuleRequest entryRule)
+		public async Task<ActionResult<Rule>> AddRule([FromBody] NewSweepEntryRuleRequest entryRule)
 		{
-			var entryRuleAdded = await _mediator.Send(new CreateEntryRule(entryRule));
+			var entryRuleAdded = await _mediator.Send(new CreateSweepEntryRule(entryRule));
 
 			return new OkObjectResult(entryRuleAdded);
 		}
@@ -47,9 +47,9 @@ namespace hrvster.API.Controllers.v1
 		/// <returns></returns>
 		[HttpGet("campaign/{campaignUid:Guid}/sweeps/{sweepUid:Guid}/entryrule")]
 		[Produces("application/json")]
-		[ProducesResponseType((int)HttpStatusCode.OK, Type = typeof(EntryRule))]
+		[ProducesResponseType((int)HttpStatusCode.OK, Type = typeof(SweepEntryRule))]
 		[ProducesResponseType((int)HttpStatusCode.NotFound)]
-		public async Task<ActionResult<EntryRule>> GetRuleByCampaignAndSweep([FromRoute] Guid campaignUid, [FromRoute] Guid sweepUid)
+		public async Task<ActionResult<SweepEntryRule>> GetRuleByCampaignAndSweep([FromRoute] Guid campaignUid, [FromRoute] Guid sweepUid)
 		{
 			var entryRule = await _mediator.Send(new GetCampaignSweepEntryRule(campaignUid, sweepUid));
 

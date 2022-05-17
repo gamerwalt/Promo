@@ -8,22 +8,22 @@ using System.Threading.Tasks;
 
 namespace hrvster.Core.Requests
 {
-	public class CreateEntryRule : IRequest<EntryRule>
+	public class CreateSweepEntryRule : IRequest<SweepEntryRule>
 	{
-		private NewEntryRuleRequest entryRuleRequest;
+		private NewSweepEntryRuleRequest entryRuleRequest;
 
-		public CreateEntryRule(NewEntryRuleRequest entryRule)
+		public CreateSweepEntryRule(NewSweepEntryRuleRequest entryRule)
 		{
 			this.entryRuleRequest = entryRule;
 		}
 
-		public NewEntryRuleRequest EntryRuleRequest
+		public NewSweepEntryRuleRequest EntryRuleRequest
 		{
 			get { return entryRuleRequest; }
 		}
 	}
 
-	public class CreateEntryRuleHandler : IRequestHandler<CreateEntryRule, EntryRule>
+	public class CreateEntryRuleHandler : IRequestHandler<CreateSweepEntryRule, SweepEntryRule>
 	{
 		private readonly IEntryRulesRepository _repository;
 
@@ -32,10 +32,10 @@ namespace hrvster.Core.Requests
 			_repository = repository;
 		}
 
-		public async Task<EntryRule> Handle(CreateEntryRule request, CancellationToken cancellationToken)
+		public async Task<SweepEntryRule> Handle(CreateSweepEntryRule request, CancellationToken cancellationToken)
 		{
 			var entryRuleUid = Guid.NewGuid();
-			await _repository.CreateAsync(new EntryRule
+			await _repository.CreateAsync(new SweepEntryRule
 			{
 				EntryRuleUid = entryRuleUid,
 				CampaignUid = request.EntryRuleRequest.CampaignUid,
