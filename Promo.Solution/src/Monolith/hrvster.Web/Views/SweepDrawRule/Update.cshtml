@@ -1,0 +1,46 @@
+﻿@model UpdateSweepDrawRule
+@{
+    ViewData["Title"] = $"Update {@Model.SweepstakeName}'s Entry Rule";
+}
+<div><h1>Update Sweep Draw Rule for @Model.SweepstakeName</h1></div>
+<hr />
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-body">
+                <form 
+                asp-controller="SweepDrawRule" 
+                asp-action="Update" 
+                asp-route-sweepUid=@Model.SweepstakeUid 
+                asp-route-drawRuleUid=@Model.SweepDrawRuleUid
+                class="form-horizontal form-material mx-2">
+
+                @Html.HiddenFor(m => m.SweepstakeId)
+                @Html.HiddenFor(m => m.SweepstakeName)
+                @Html.HiddenFor(m => m.SweepstakeUid)
+                @Html.HiddenFor(m => m.SweepDrawRuleUid)
+                @Html.HiddenFor(m => m.ReturnAction)
+                @Html.HiddenFor(m => m.ReturnController)
+                <div class="form-group">
+                    <label class="col-md-12">Winner Count</label>
+                    <div class="col-md-12">
+                        <input asp-for="WinnerCount" class="form-control form-control-lg" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-md-12">Winner Backup Count</label>
+                    <div class="col-md-12">
+                        <input asp-for="WinnerBackupCount" class="form-control form-control-lg" />
+                    </div>
+                </div>
+                <hr />
+                <div class="form-group">
+                    <div class="col-md-12">
+                        <button class="btn btn-lg btn-primary" type="submit">Update</button>
+                    </div>
+                </div>
+            </form>
+            </div>
+        </div>
+    </div>
+</div>

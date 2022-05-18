@@ -53,6 +53,40 @@ namespace hrvster.Web.Controllers
 			return View(model);
 		}
 
+		[HttpGet]
+		public async Task<ActionResult> Update(Guid sweepUid, Guid drawRuleUid, string actionName, string controllerName)
+		{
+			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
+			if (sweep == null)
+			{
+				_logger.LogError("Could not find sweepstake with uid: {sweepUid}", sweepUid);
+
+				return new NotFoundObjectResult($"Could not find sweepstake with uid: {sweepUid} ");
+			}
+
+			var sweepDrawRule = await _mediator.Send(new GetSweepDrawRuleRequest(drawRuleUid));
+			if(sweepDrawRule == null)
+			{
+				_logger.LogError("Could not find the draw rule with uid: {sweepDrawRuleUid}", drawRuleUid);
+
+				return new NotFoundObjectResult($"Could not find the draw rule with uid: {drawRuleUid}");
+			}
+
+			var model = new UpdateSweepDrawRule
+			{
+				SweepstakeId = sweep.SweepId,
+				SweepstakeUid = sweep.SweepUid,
+				SweepstakeName = sweep.Name,
+				SweepDrawRuleUid = sweepDrawRule.DrawRuleUid,
+				WinnerCount = sweepDrawRule.WinnerCount,
+				WinnerBackupCount = sweepDrawRule.WinnerBackupCount,
+				ReturnAction = actionName ?? HttpContext.Request.RouteValues["action"].ToString(),
+				ReturnController = controllerName ?? HttpContext.Request.RouteValues["controller"].ToString()
+			};
+
+			return View(model);
+		}
+
 		[HttpPost]
 		public async Task<ActionResult> Create(Guid sweepUid, CreateSweepDrawRule model)
 		{
@@ -83,6 +117,44 @@ namespace hrvster.Web.Controllers
 			}
 
 			return View(model);
+		}
+
+		[HttpPost]
+		public async Task<ActionResult> Update(Guid sweepUid, Guid drawRuleUid, UpdateSweepDrawRule form)
+		{
+			if(ModelState.IsValid)
+			{
+				var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
+				if (sweep == null)
+				{
+					_logger.LogError("Could not find sweepstake with uid: {sweepUid}", sweepUid);
+
+					return new NotFoundObjectResult($"Could not find sweepstake with uid: {sweepUid} ");
+				}
+
+				var sweepDrawRule = await _mediator.Send(new GetSweepDrawRuleRequest(drawRuleUid));
+				if (sweepDrawRule == null)
+				{
+					_logger.LogError("Could not find the draw rule with uid: {sweepDrawRuleUid}", drawRuleUid);
+
+					return new NotFoundObjectResult($"Could not find the draw rule with uid: {drawRuleUid}");
+				}
+
+				var request = new UpdateSweepDrawRuleRequest(sweep.SweepId, sweepUid, drawRuleUid, form.WinnerCount, form.WinnerBackupCount);
+
+				await _mediator.Send(request);
+
+				if (string.IsNullOrWhiteSpace(form.ReturnAction))
+					return RedirectToAction("Update", new { sweepUid = sweepUid, drawRuleUid = drawRuleUid });
+
+				return RedirectToAction(
+					form.ReturnAction,
+					form.ReturnController,
+					new
+					{ sweepUid = sweepUid });
+			}
+
+			return View(form);
 		}
 	}
 }

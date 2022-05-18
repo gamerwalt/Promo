@@ -10,6 +10,8 @@ namespace hrvster.Infrastructure
 	{
 		Task<DrawRule> GetSweepDrawRuleAsync(Guid sweepUid);
 		Task Create(DrawRule drawRule);
+		Task<DrawRule> GetDrawRuleAsync(Guid drawRuleUid);
+		Task UpdateDrawRuleAsync(Guid drawRuleUid, int winnerCount, int winnerBackupCount);
 	}
 
 	public class DrawRuleRepository : IDrawRuleRepository
@@ -78,6 +80,43 @@ namespace hrvster.Infrastructure
 				.AddParameter("sweepUid", drawRule.SweepUid)
 				.AddParameter("winnerCount", drawRule.WinnerCount)
 				.AddParameter("winnerBackupCount", drawRule.WinnerBackupCount);
+
+			await conn.OpenAsync();
+			await command.ExecuteNonQueryAsync();
+		}
+
+		public async Task<DrawRule> GetDrawRuleAsync(Guid drawRuleUid)
+		{
+			var drawRule = default(DrawRule);
+
+			using (var conn = new MySqlConnection(_database.GetConnectionString()))
+			{
+				var command = conn.CreateCommand();
+				command.CommandText = "sweeps_draw_rule_get_by_uid";
+				command.CommandType = CommandType.StoredProcedure;
+				command.AddParameter(nameof(drawRuleUid), drawRuleUid);
+
+				await conn.OpenAsync();
+				using var reader = await command.ExecuteReaderAsync();
+				while (await reader.ReadAsync())
+				{
+					drawRule = CreateRecordFrom(reader);
+				}
+			}
+
+			return drawRule;
+		}
+
+		public async Task UpdateDrawRuleAsync(Guid drawRuleUid, int winnerCount, int winnerBackupCount)
+		{
+			using var conn = new MySqlConnection(_database.GetConnectionString());
+			var command = conn.CreateCommand();
+			command.CommandText = "sweep_draw_rule_update";
+			command.CommandType = CommandType.StoredProcedure;
+			command
+				.AddParameter(nameof(drawRuleUid), drawRuleUid)
+				.AddParameter(nameof(winnerCount), winnerCount)
+				.AddParameter(nameof(winnerBackupCount), winnerBackupCount);
 
 			await conn.OpenAsync();
 			await command.ExecuteNonQueryAsync();

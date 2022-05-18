@@ -14,10 +14,13 @@ namespace hrvster.Core.Mapper
 			CreateMap<Models.Sweep, Sweepstake>();
 
 			CreateMap<Models.Rule, Rule>()
-				.ForMember(dest => dest.WatchType, opt => opt.MapFrom(src => src.WatchTypeCode));
+				.ForMember(dest => dest.WatchType, opt => opt.MapFrom(src => src.WatchTypeCode))
+			.ReverseMap();
 
 			CreateMap<Models.SweepEntryRule, EntryRule>();
-			CreateMap<Models.DrawRule, DrawRule>();
+			CreateMap<Models.DrawRule, DrawRule>()
+				.ForMember(dest => dest.DrawRuleUid, opt => opt.MapFrom(src => src.SweepDrawRuleUid))
+			.ReverseMap();
 		}
 	}
 }

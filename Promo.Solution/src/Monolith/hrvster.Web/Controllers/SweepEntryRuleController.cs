@@ -144,13 +144,13 @@ namespace hrvster.Web.Controllers
 				await _mediator.Send(request);
 
 				if (string.IsNullOrWhiteSpace(form.ReturnAction))
-					return RedirectToAction("Update", new { sweepUid = sweepUid });
+					return RedirectToAction("Update", new { sweepUid = sweepUid, entryRuleUid = entryRuleUid });
 
 				return RedirectToAction(
 					form.ReturnAction, 
 					form.ReturnController, 
 					new 
-						{ sweepUid = sweepUid, entryRuleUid = entryRuleUid });
+						{ sweepUid = sweepUid });
 			}
 
 			return View(form);

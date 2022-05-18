@@ -115,8 +115,8 @@
                                 <hr />
                                 <p class="card-text">
                                     <a asp-action="Update" 
-                                    asp-controller="SweepDraw" 
-                                    asp-route-sweepEntryUid=@Model.DrawRule.DrawRuleUid
+                                    asp-controller="SweepDrawRule" 
+                                    asp-route-drawRuleUid=@Model.DrawRule.DrawRuleUid
                                     asp-route-sweepUid=@Model.Sweepstake.SweepUid
                                     asp-route-actionName=@ViewContext.RouteData.Values["action"]
                                     asp-route-controllerName=@ViewContext.RouteData.Values["controller"]
