@@ -75,7 +75,7 @@ namespace hrvster.API
 			services.AddTransient<IAccountsRepository, AccountsRepository>();
 			services.AddTransient<ICampaignRepository, CampaignRepository>();
 			services.AddTransient<ICampaignTypesRepository, CampaignTypesRepository>();
-			services.AddTransient<IRulesRepository, RulesRepository>();
+			services.AddTransient<ISweepRulesRepository, SweepRulesRepository>();
 			services.AddTransient<IWatchTypeCampaignTypesRepository, WatchTypeCampaignTypesRepository>();
 			services.AddTransient<ISweepsRepository, SweepsRepository>();
 			services.AddTransient<ISweepsEntriesRepository, SweepsEntriesRepository>();

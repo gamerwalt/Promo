@@ -24,9 +24,9 @@ namespace hrvster.Core.Requests
 
 	public class GetRulesForHashTagsRequestHandler : IRequestHandler<GetRulesForHashTags, IEnumerable<Rule>>
 	{
-		private readonly IRulesRepository _repository;
+		private readonly ISweepRulesRepository _repository;
 
-		public GetRulesForHashTagsRequestHandler(IRulesRepository repository)
+		public GetRulesForHashTagsRequestHandler(ISweepRulesRepository repository)
 		{
 			_repository = repository;
 		}

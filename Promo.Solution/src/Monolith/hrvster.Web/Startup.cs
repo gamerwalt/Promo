@@ -13,6 +13,7 @@ using hrvster.Core.Requests.WebRequests;
 using hrvster.Core.Requests.WebRequests.Validators;
 using hrvster.Core.Settings;
 using hrvster.Infrastructure;
+using hrvster.Infrastructure.Core;
 using hrvster.Infrastructure.Harvester;
 using hrvster.Models;
 using MediatR;
@@ -134,7 +135,7 @@ namespace hrvster.Web
 			services.AddTransient<IAccountsRepository, AccountsRepository>();
 			services.AddTransient<ICampaignRepository, CampaignRepository>();
 			services.AddTransient<ICampaignTypesRepository, CampaignTypesRepository>();
-			services.AddTransient<IRulesRepository, RulesRepository>();
+			services.AddTransient<ISweepRulesRepository, SweepRulesRepository>();
 			services.AddTransient<IWatchTypeCampaignTypesRepository, WatchTypeCampaignTypesRepository>();
 			services.AddTransient<ISweepsRepository, SweepsRepository>();
 			services.AddTransient<ISweepsEntriesRepository, SweepsEntriesRepository>();
@@ -146,6 +147,8 @@ namespace hrvster.Web
 			services.AddTransient<IBlacklistedSweepsUsersRepository, BlacklistedSweepsUsersRepository>();
 			services.AddTransient<IHarvesterRepository, HarvesterRepository>();
 			services.AddTransient<ISweepPrizeRepository, SweepPrizeRepository>();
+			services.AddTransient<IWatchTypesRepository, WatchTypesRepository>();
+			services.AddTransient<IWatchTypeProvidersRepository, WatchTypeProvidersRepository>();
 		}
 
 		private void AddServicesOptions(IServiceCollection services)

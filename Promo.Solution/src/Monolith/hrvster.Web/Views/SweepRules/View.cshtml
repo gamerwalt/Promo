@@ -58,6 +58,17 @@
                                 </tbody>
                             </table>
                         </div>
+                        <div class="card-footer">
+                            <a 
+                            class="btn btn-primary"
+                            asp-controller="WatchTypeProvider"
+                            asp-action="Select"
+                            asp-route-sweepUid="@Model.Sweepstake.SweepUid"
+                            asp-route-actionName=@ViewContext.RouteData.Values["action"]
+                            asp-route-controllerName=@ViewContext.RouteData.Values["controller"]>
+                                Add new watch type
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>

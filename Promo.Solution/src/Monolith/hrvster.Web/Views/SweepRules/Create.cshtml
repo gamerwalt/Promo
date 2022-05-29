@@ -1,0 +1,47 @@
+﻿@model CreateSweepRule
+@{
+    ViewData["Title"] = $"{@Model.SweepstakeName} - Create Sweep Rule";
+}
+<div><h1>Create Sweep Rule for @Model.SweepstakeName</h1></div>
+<hr />
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-body">
+                <form asp-controller="SweepRules" asp-action="Create" asp-route-sweepUid=@Model.SweepstakeUid class="form-horizontal form-material mx-2">
+                @Html.HiddenFor(m => m.SweepstakeId)
+                @Html.HiddenFor(m => m.SweepstakeName)
+                @Html.HiddenFor(m => m.SweepstakeUid)
+                @Html.HiddenFor(m => m.ReturnAction)
+                @Html.HiddenFor(m => m.ReturnController)
+                <div class="form-group">
+                    <label class="col-md-12">Watch Type</label>
+                    <div class="col-md-12">
+                        <select asp-for="WatchTypeId" asp-items=@Model.WatchTypes class="form-control form-control-lg">
+                            <option>Please select one</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-md-12">Watch Value</label>
+                    <div class="col-md-12">
+                        <input asp-for="WatchValue" class="form-control form-control-lg" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-md-12">Tweet url to monitor</label>
+                    <div class="col-md-12">
+                        <input asp-for="TweetId" class="form-control form-control-lg" />
+                    </div>
+                </div>
+                <hr />
+                <div class="form-group">
+                    <div class="col-md-12">
+                        <button class="btn btn-lg btn-primary" type="submit">Save</button>
+                    </div>
+                </div>
+            </form>
+            </div>
+        </div>
+    </div>
+</div>

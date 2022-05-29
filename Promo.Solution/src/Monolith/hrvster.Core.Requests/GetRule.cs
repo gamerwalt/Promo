@@ -24,9 +24,9 @@ namespace hrvster.Core.Requests
 
 	public class GetRuleHandler : IRequestHandler<GetRule, Rule>
 	{
-		private readonly IRulesRepository _repository;
+		private readonly ISweepRulesRepository _repository;
 
-		public GetRuleHandler(IRulesRepository repository)
+		public GetRuleHandler(ISweepRulesRepository repository)
 		{
 			_repository = repository;
 		}

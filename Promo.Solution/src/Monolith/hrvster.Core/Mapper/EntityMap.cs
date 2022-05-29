@@ -21,6 +21,7 @@ namespace hrvster.Core.Mapper
 			CreateMap<Models.DrawRule, DrawRule>()
 				.ForMember(dest => dest.DrawRuleUid, opt => opt.MapFrom(src => src.SweepDrawRuleUid))
 			.ReverseMap();
+			CreateMap<WatchType, Models.WatchType>().ReverseMap();
 		}
 	}
 }

@@ -27,9 +27,9 @@ namespace hrvster.Core.Requests
 	public class AddCampaigRulesHandler : IRequestHandler<AddCampaignRules, IEnumerable<Rule>>
 	{
 		private readonly IMediator _mediator;
-		private readonly IRulesRepository _repository;
+		private readonly ISweepRulesRepository _repository;
 
-		public AddCampaigRulesHandler(IMediator mediator, IRulesRepository repository)
+		public AddCampaigRulesHandler(IMediator mediator, ISweepRulesRepository repository)
 		{
 			_mediator = mediator;
 			_repository = repository;

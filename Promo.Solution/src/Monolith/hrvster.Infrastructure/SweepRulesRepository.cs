@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace hrvster.Infrastructure
 {
-	public interface IRulesRepository
+	public interface ISweepRulesRepository
 	{
 		Task CreateRuleAsync(Models.Rule rule);
 		Task<Models.Rule> GetAsync(Guid ruleUid);
@@ -17,11 +17,11 @@ namespace hrvster.Infrastructure
 		Task<IEnumerable<Models.Rule>> GetSweepRuleAsync(Guid sweepUid);
 	}
 
-	public class RulesRepository : IRulesRepository
+	public class SweepRulesRepository : ISweepRulesRepository
 	{
 		private readonly IDatabase _database;
 
-		public RulesRepository(IDatabase database)
+		public SweepRulesRepository(IDatabase database)
 		{
 			_database = database;
 		}

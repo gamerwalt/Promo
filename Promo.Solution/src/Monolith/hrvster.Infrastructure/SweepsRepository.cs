@@ -153,7 +153,15 @@ namespace hrvster.Infrastructure
 				Campaign = new Campaign
 				{
 					CampaignUid = reader.GetGuid("campaign_uid"),
-					CampaignName = reader.GetString("campaign_name")
+					CampaignName = reader.GetString("campaign_name"),
+					ActiveInd = reader.GetBoolean("active_ind"),
+					StartDate = reader.GetDateTime("campaign_start_date"),
+					EndDate = reader.GetDateTime("campaign_end_date"),
+					CampaignType = new CampaignType
+					{
+						CampaignTypeCode = (CampaignTypeCode)Enum.Parse(typeof(CampaignTypeCode), reader.GetString("campaign_type_code")),
+						CampaignTypeName = reader.GetString("campaign_type_name")
+					}
 				},
 				Account = new Account
 				{

@@ -21,7 +21,7 @@ namespace hrvster.Core.Requests.Notifications.Handlers
 		private readonly ICampaignRepository _campaignRepository;
 		private readonly IEntryRulesRepository _entryRulesRepository;
 		private readonly ISweepsRepository _sweepsRepository;
-		private readonly IRulesRepository _rulesRepository;
+		private readonly ISweepRulesRepository _rulesRepository;
 		private readonly IReportingRepository _reportingRepository;
 		private readonly IMediator _mediator;
 		private ILogger<ProcessReceivedTweetFromHashtagStream> _logger;
@@ -30,7 +30,7 @@ namespace hrvster.Core.Requests.Notifications.Handlers
 			ICampaignRepository campaignRepository,
 			IEntryRulesRepository entryRulesRepository,
 			ISweepsRepository sweepsRepository,
-			IRulesRepository rulesRepository,
+			ISweepRulesRepository rulesRepository,
 			IReportingRepository reportingRepository,
 			IMediator mediator,
 			ILoggerFactory loggerFactory)

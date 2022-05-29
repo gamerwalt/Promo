@@ -24,9 +24,9 @@ namespace hrvster.Core.Requests
 
 	public class UpdateRuleAsAddedRequestHandler : IRequestHandler<UpdateRuleAsAdded, Rule>
 	{
-		private readonly IRulesRepository _repository;
+		private readonly ISweepRulesRepository _repository;
 
-		public UpdateRuleAsAddedRequestHandler(IRulesRepository repository)
+		public UpdateRuleAsAddedRequestHandler(ISweepRulesRepository repository)
 		{
 			_repository = repository;
 		}
