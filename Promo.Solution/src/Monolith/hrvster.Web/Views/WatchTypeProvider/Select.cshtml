@@ -2,3 +2,38 @@
 @{
     ViewData["Title"] = $"{@Model.Sweep.Name} - Select Provider To Watch";
 }
+<div><h1>Create Sweep Rule for @Model.Sweep.Name</h1></div>
+<hr />
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-body">
+                <form 
+                    asp-controller="WatchTypeProvider" 
+                    asp-action="Select" 
+                    asp-route-sweepUid=@Model.Sweep.SweepUid 
+                    class="form-horizontal form-material mx-2">
+                @Html.HiddenFor(m => m.Sweep)
+                @Html.HiddenFor(m => m.ReturnAction)
+                @Html.HiddenFor(m => m.ReturnController)
+                <div class="form-group">
+                    <label class="col-md-12">Watch Type</label>
+                    <div class="col-md-12">
+                        <select 
+                        asp-for="ProviderCode" 
+                        asp-items=@Model.Providers class="form-control form-control-lg">
+                            <option>Please select one</option>
+                        </select>
+                    </div>
+                </div>
+                <hr />
+                <div class="form-group">
+                    <div class="col-md-12">
+                        <button class="btn btn-lg btn-primary" type="submit">Continue</button>
+                    </div>
+                </div>
+            </form>
+            </div>
+        </div>
+    </div>
+</div>

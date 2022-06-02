@@ -40,4 +40,9 @@
 		Hashtag,
 		DM
 	}
+
+	public enum ProfileType
+	{
+		Twitter
+	}
 }

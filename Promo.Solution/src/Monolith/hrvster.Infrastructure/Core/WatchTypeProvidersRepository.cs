@@ -48,8 +48,21 @@ namespace hrvster.Infrastructure.Core
 				WatchTypeProviderId = reader.GetInt32("watch_type_provider_id"),
 				WatchTypeProviderUid = Guid.Parse(reader.GetString("watch_type_provider_uid")),
 				WatchTypeProviderCode = reader.GetString("provider_code"),
-				WatchTypeProviderName = reader.GetString("provider_name")
+				WatchTypeProviderName = reader.GetString("provider_name"),
+				ActiveInd = reader.GetBoolean("active_ind"),
+				ImageUrl = GetStringValue(reader,"image_url")
 			};
+		}
+
+		private string GetStringValue(MySqlDataReader reader, string fieldName)
+		{
+			var value = reader[fieldName].ToString();
+			if (string.IsNullOrWhiteSpace(value))
+			{
+				return string.Empty;
+			}
+
+			return reader[fieldName].ToString();
 		}
 	}
 }

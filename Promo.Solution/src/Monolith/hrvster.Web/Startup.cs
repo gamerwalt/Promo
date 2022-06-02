@@ -2,6 +2,7 @@ using FluentValidation;
 using FluentValidation.AspNetCore;
 using hrvster.Core;
 using hrvster.Core.Authentication;
+using hrvster.Core.Clients;
 using hrvster.Core.Handlers.Profiles;
 using hrvster.Core.Mapper;
 using hrvster.Core.Requests;
@@ -13,6 +14,7 @@ using hrvster.Core.Requests.WebRequests;
 using hrvster.Core.Requests.WebRequests.Validators;
 using hrvster.Core.Settings;
 using hrvster.Infrastructure;
+using hrvster.Infrastructure.Accounts;
 using hrvster.Infrastructure.Core;
 using hrvster.Infrastructure.Harvester;
 using hrvster.Models;
@@ -35,6 +37,7 @@ using System;
 using System.Net;
 using System.Reflection;
 using Tweetinvi;
+using Tweetinvi.Auth;
 using Tweetinvi.Models;
 
 namespace hrvster.Web
@@ -68,6 +71,9 @@ namespace hrvster.Web
 			services.AddHttpClient<IIdentityClient, IdentityClient>();
 
 			services.AddFirebaseServices(Configuration);
+
+			services.AddTransient<IWatchTypeProvider, WatchTypeProvider>();
+			services.AddTransient<ITwitterWatchTypeProvider, TwitterWatchTypeProvider>();
 		}
 
 		private void AddAuthentication(IServiceCollection services)
@@ -149,6 +155,7 @@ namespace hrvster.Web
 			services.AddTransient<ISweepPrizeRepository, SweepPrizeRepository>();
 			services.AddTransient<IWatchTypesRepository, WatchTypesRepository>();
 			services.AddTransient<IWatchTypeProvidersRepository, WatchTypeProvidersRepository>();
+			services.AddTransient<IProfilesRepository, ProfilesRepository>();
 		}
 
 		private void AddServicesOptions(IServiceCollection services)
@@ -172,6 +179,8 @@ namespace hrvster.Web
 			services.AddTransient(p => p.GetService<IOptions<TwitterAccount>>().Value);
 
 			services.AddTransient<ITwitterClient, TwitterClient>(c => GenerateTwitterClient(c));
+
+			services.AddSingleton<IAuthenticationRequestStore, LocalAuthenticationRequestStore>();
 		}
 
 		private TwitterClient GenerateTwitterClient(IServiceProvider c)

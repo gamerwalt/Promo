@@ -61,12 +61,12 @@
                         <div class="card-footer">
                             <a 
                             class="btn btn-primary"
-                            asp-controller="WatchTypeProvider"
-                            asp-action="Select"
+                            asp-controller="SweepRules"
+                            asp-action="SelectProvider"
                             asp-route-sweepUid="@Model.Sweepstake.SweepUid"
                             asp-route-actionName=@ViewContext.RouteData.Values["action"]
                             asp-route-controllerName=@ViewContext.RouteData.Values["controller"]>
-                                Add new watch type
+                                Create New Tweet
                             </a>
                         </div>
                     </div>

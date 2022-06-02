@@ -8,7 +8,11 @@
     <div class="col-md-12">
         <div class="card">
             <div class="card-body">
-                <form asp-controller="SweepRules" asp-action="Create" asp-route-sweepUid=@Model.SweepstakeUid class="form-horizontal form-material mx-2">
+                <form 
+                asp-controller="SweepRules" 
+                asp-action="Create" 
+                asp-route-sweepUid=@Model.SweepstakeUid 
+                class="form-horizontal form-material mx-2">
                 @Html.HiddenFor(m => m.SweepstakeId)
                 @Html.HiddenFor(m => m.SweepstakeName)
                 @Html.HiddenFor(m => m.SweepstakeUid)
