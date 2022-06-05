@@ -11,6 +11,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\hrvster.Core.Requests\hrvster.Core.Requests.csproj" />
+    <ProjectReference Include="..\hrvster.Core\hrvster.Core.csproj" />
   </ItemGroup>
 
 </Project>

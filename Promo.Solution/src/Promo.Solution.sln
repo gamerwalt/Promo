@@ -200,6 +200,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "hrvster.Web", "Monolith\hrv
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "hrvster.Core.Clients", "Monolith\hrvster.Core.Clients\hrvster.Core.Clients.csproj", "{E6F4769D-3FA6-4F3C-A688-06F8FAD6AAF4}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "hrvster.Extensions", "Monolith\hrvster.Extensions\hrvster.Extensions.csproj", "{DBEB17A2-8303-4642-8B43-99864235236F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -410,6 +412,10 @@ Global
 		{E6F4769D-3FA6-4F3C-A688-06F8FAD6AAF4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E6F4769D-3FA6-4F3C-A688-06F8FAD6AAF4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E6F4769D-3FA6-4F3C-A688-06F8FAD6AAF4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DBEB17A2-8303-4642-8B43-99864235236F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DBEB17A2-8303-4642-8B43-99864235236F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DBEB17A2-8303-4642-8B43-99864235236F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DBEB17A2-8303-4642-8B43-99864235236F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -489,6 +495,7 @@ Global
 		{93E49A16-4F7F-4429-A56A-013DAF1A7004} = {71429F9B-A81B-4A12-98DD-505C0F9FDB34}
 		{004EAAA2-8471-4EAB-BCB2-801AA81CB647} = {71429F9B-A81B-4A12-98DD-505C0F9FDB34}
 		{E6F4769D-3FA6-4F3C-A688-06F8FAD6AAF4} = {71429F9B-A81B-4A12-98DD-505C0F9FDB34}
+		{DBEB17A2-8303-4642-8B43-99864235236F} = {71429F9B-A81B-4A12-98DD-505C0F9FDB34}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {94B46B7F-1545-465E-863A-AAD0C58A8C0F}

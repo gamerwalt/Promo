@@ -41,7 +41,7 @@
                                             <th scope="row">@rule.WatchType.ToString()</th>
                                             <td>@rule.WatchValue</td>
                                             <td>
-                                                <a href="@linkBuilder.BuildTwitterLink(@rule.TweetId).Result" target="_blank">@rule.TweetId</a>
+                                                <a href="@linkBuilder.BuildTwitterLink(@rule.ExternalId).Result" target="_blank">@rule.ExternalId</a>
                                                 </td>
                                             <td>
                                                 @if (@rule.ActiveInd)

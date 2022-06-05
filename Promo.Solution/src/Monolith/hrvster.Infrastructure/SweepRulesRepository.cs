@@ -37,6 +37,7 @@ namespace hrvster.Infrastructure
 				.AddParameter("sweepUid", rule.Sweep.SweepUid)
 				.AddParameter("watchTypeCode", rule.WatchTypeCode.ToString())
 				.AddParameter("watchValue", rule.WatchValue)
+				.AddParameter("externalId", rule.ExternalId)
 				.AddParameter("activeInd", rule.ActiveInd);
 
 			await conn.OpenAsync();
@@ -174,7 +175,7 @@ namespace hrvster.Infrastructure
 				RuleUid = reader.GetGuid("rule_uid"),
 				WatchValue = reader.GetString("watch_value"),
 				WatchTypeCode = (WatchTypeCode)Enum.Parse(typeof(WatchTypeCode), reader.GetString("watch_type_code")),
-				TweetId = GetLongValue(reader, "tweet_id"),
+				ExternalId = GetLongValue(reader, "external_id"),
 				ActiveInd = reader.GetBoolean("active_ind"),
 				CreatedDate = reader.GetDateTime("created_date"),
 				UpdatedDate = GetNullableDateTimeValue(reader, "updated_date")

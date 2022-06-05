@@ -1,10 +1,7 @@
 ﻿using hrvster.Core.Clients.Common;
+using hrvster.Extensions;
 using hrvster.Models;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Tweetinvi;
 using Tweetinvi.Parameters;
@@ -22,14 +19,21 @@ namespace hrvster.Core.Clients.Publishers
 			_twitterAccount = twitterAccount;
 		}
 
-		public async Task PublishAsync(Message message)
+		public async Task<string> PublishAsync(Message message)
 		{
 			var twitterClient = new TwitterClient(_twitterAccount.ConsumerKey, _twitterAccount.ConsumerSecret, message.Profile.AccessToken, message.Profile.AccessTokenSecret);
 
-			await twitterClient.Tweets.PublishTweetAsync(new PublishTweetParameters
+			var tweet = await twitterClient.Tweets.PublishTweetAsync(new PublishTweetParameters
 			{
 				Text = message.Text
 			});
+
+			if(tweet == null)
+			{
+				_logger.LogError("Unable to publish the tweet {message} received.", message.AsJson());
+			}
+
+			return tweet.IdStr;
 		}
 	}
 }

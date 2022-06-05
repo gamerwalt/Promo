@@ -10,7 +10,7 @@ namespace hrvster.Models
 		public Sweep Sweep { get; set; }
 		public WatchTypeCode WatchTypeCode { get; set; }
 		public string WatchValue { get; set; }
-		public long TweetId { get; set; }
+		public long ExternalId { get; set; }
 		public bool ActiveInd { get; set; }
 		public DateTime CreatedDate { get; set; }
 		public DateTime? UpdatedDate { get; set; }

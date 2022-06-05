@@ -8,6 +8,6 @@ namespace hrvster.Models.WebModels.Sweeps
 		public WatchTypeCode WatchType { get; set; }
 		public string WatchValue { get; set; }
 		public bool ActiveInd { get; set; }
-		public string TweetId { get; set; }
+		public string ExternalId { get; set; }
 	}
 }

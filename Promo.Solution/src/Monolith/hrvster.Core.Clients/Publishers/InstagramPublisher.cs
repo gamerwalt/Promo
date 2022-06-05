@@ -9,7 +9,7 @@ namespace hrvster.Core.Clients.Publishers
 {
 	public class InstagramPublisher : IPublisher
 	{
-		public Task PublishAsync(Message message)
+		public Task<string> PublishAsync(Message message)
 		{
 			throw new NotImplementedException();
 		}

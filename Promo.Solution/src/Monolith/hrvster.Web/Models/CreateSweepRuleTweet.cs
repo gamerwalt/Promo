@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using System;
 using System.Collections.Generic;
 
@@ -6,6 +7,8 @@ namespace hrvster.Web.Models
 {
 	public class CreateSweepRuleTweet
 	{
+		public List<SelectListItem> WatchTypes { get; set; }
+		public int WatchTypeId { get; set; }
 		public string WatchValue { get; set; }
 		public string TweetText { get; set; }
 		public int SweepstakeId { get; internal set; }

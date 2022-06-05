@@ -1,9 +1,9 @@
 ﻿using hrvster.Core.Authentication;
 using hrvster.Core.Clients;
-using hrvster.Core.Clients.Common;
 using hrvster.Core.Requests;
 using hrvster.Core.Requests.Notifications;
 using hrvster.Core.Requests.WebRequests.Core;
+using hrvster.Core.Requests.WebRequests.Publishing;
 using hrvster.Models;
 using hrvster.Web.Models;
 using MediatR;
@@ -192,8 +192,11 @@ namespace hrvster.Web.Controllers
 				return new NotFoundObjectResult($"Could not find sweepstake with uid: {sweepUid} ");
 			}
 
+			var watchTypes = await _mediator.Send(new GetWatchTypeRequest());
+
 			var model = new CreateSweepRuleTweet
 			{
+				WatchTypes = watchTypes.Select(a => new SelectListItem() { Text = a.WatchTypeName, Value = a.WatchTypeId.ToString() }).ToList(),
 				SweepstakeId = sweep.SweepId,
 				SweepstakeUid = sweep.SweepUid,
 				SweepstakeName = sweep.Name,
@@ -206,7 +209,7 @@ namespace hrvster.Web.Controllers
 		}
 
 		[HttpPost]
-		public async Task<IActionResult> CreateTweet(Guid sweepUid, CreateSweepRuleTweet form)
+		public async Task<IActionResult> CreateTweet(Guid sweepUid, string returnAction, string returnController, CreateSweepRuleTweet form)
 		{
 			if (ModelState.IsValid)
 			{
@@ -218,16 +221,26 @@ namespace hrvster.Web.Controllers
 					return new NotFoundObjectResult($"Could not find sweepstake with uid: {sweepUid} ");
 				}
 
-				var twitterPublisher = _publisherResolver(PublisherType.Twitter);
-
 				var profile = await _mediator.Send(new GetUserProfile(_hrvsterUser.UserUid, ProfileType.Twitter));
 
-				await twitterPublisher.PublishAsync(new Message
+				await _mediator.Send(
+					new PublishSweepRuleTweetRequest(
+						sweep, 
+						profile,
+						form.WatchTypeId,
+						form.WatchValue, 
+						form.TweetText, 
+						form.PostNow, 
+						form.ScheduledDate));
+				
+				if(string.IsNullOrWhiteSpace(returnAction))
 				{
-					Profile = profile,
-					Text = form.TweetText,
-					IsScheduled = !form.PostNow,
-					ScheduledDate = form.ScheduledDate
+					return View(form);
+				}
+
+				return RedirectToAction(returnAction, returnController, new
+				{
+					sweepUid = sweepUid
 				});
 			}
 

@@ -9,6 +9,6 @@ namespace hrvster.Core.Clients.Publishers
 {
 	public interface IPublisher
 	{
-		Task PublishAsync(Message message);
+		Task<string> PublishAsync(Message message);
 	}
 }

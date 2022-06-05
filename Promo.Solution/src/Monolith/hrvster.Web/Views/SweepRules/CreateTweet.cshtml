@@ -7,13 +7,30 @@
 <form 
 asp-controller="SweepRules" 
 asp-action="CreateTweet" 
-asp-route-sweepUid=@Model.SweepstakeUid 
+asp-route-sweepUid=@Model.SweepstakeUid
+asp-route-returnAction=@Model.ReturnAction
+asp-route-returnController=@Model.ReturnController
 enctype="multipart/form-data"
 class="form-horizontal form-material mx-2">
+    @Html.HiddenFor(m => m.SweepstakeUid)
+    @Html.HiddenFor(m => m.ReturnAction)
+    @Html.HiddenFor(m => m.ReturnController)
     <div class="row">
         <div class="col-md-6">
             <div class="form-group">
-                <label class="col-md-12">Watch Value</label>
+                <div class="form-group">
+                    <label><strong>Watch Type:</strong></label>
+                    <div class="col-md-12">
+                        <select 
+                        asp-for="WatchTypeId" 
+                        asp-items=@Model.WatchTypes class="form-control form-control-lg">
+                            <option>Please select one</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-md-12">Watch Value:</label>
                 <div class="col-md-6">
                     <input 
                         class="form-control form-control-lg" 
@@ -22,7 +39,7 @@ class="form-horizontal form-material mx-2">
                 </div>
             </div>
             <div class="form-group">
-                <label class="col-md-12">Tweet Text</label>
+                <label class="col-md-12">Tweet:</label>
                 <div class="col-md-12">
                     <textarea name="TweetText" 
                         class="form-control form-control-lg" 
@@ -32,7 +49,7 @@ class="form-horizontal form-material mx-2">
             </div>
             <div class="col-md-12">
                 <div class="form-group">
-                    <label><strong>Immediate/Schedule Tweet</strong></label>
+                    <label><strong>Immediate/Schedule:</strong></label>
                     <br />
                     <label>
                         <input type="radio" asp-for="PostNow" id="PostNow" name="PostNow" value="True">
@@ -45,7 +62,7 @@ class="form-horizontal form-material mx-2">
                     </label>
                     <div class="col-md-12" id="scheduleDiv">
                         <div class="form-group">
-                            <label><strong>Schedule Tweet</strong></label>
+                            <label><strong>Date</strong></label>
                             <input asp-for="ScheduledDate" class="form-control form-control-lg" asp-format="{0:yyyy-MM-ddTHH:mm}" />
                         </div>
                     </div>
@@ -54,7 +71,7 @@ class="form-horizontal form-material mx-2">
             <hr />
             <div class="form-group">
                 <div class="col-md-12">
-                    <button class="btn btn-lg btn-primary" type="submit">Save</button>
+                    <button class="btn btn-lg btn-primary" type="submit">Create</button>
                 </div>
             </div>
         </div>

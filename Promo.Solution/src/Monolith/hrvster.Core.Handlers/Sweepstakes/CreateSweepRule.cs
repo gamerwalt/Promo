@@ -38,7 +38,7 @@ namespace hrvster.Core.Handlers.Sweepstakes
 				WatchTypeCode = (WatchTypeCode)Convert.ToInt32(request.WatchTypeId-1),
 				WatchValue = request.WatchValue,
 				RuleUid = Guid.NewGuid(),
-				TweetId = Convert.ToInt64(request.TweetId)
+				ExternalId = Convert.ToInt64(request.TweetId)
 			};
 
 			await _repository.CreateRuleAsync(sweepRule);

@@ -104,7 +104,7 @@ namespace hrvster.Core.Requests.Notifications.Handlers
 		}
 
 		private static bool TweetIsInReplyToRuleTweetId(NewHashTagTweetReceived notification)
-			=> notification.Tweet.InReplyToStatusId.Equals(notification.Rule.TweetId);
+			=> notification.Tweet.InReplyToStatusId.Equals(notification.Rule.ExternalId);
 
 		private async Task<IEnumerable<Sweep>> GetCampaignSweepsAsync(Guid campaignUid)
 			=> await _sweepsRepository.GetAllForCampaignAsync(campaignUid);
