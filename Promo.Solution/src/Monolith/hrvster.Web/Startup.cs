@@ -1,8 +1,8 @@
-using FluentValidation;
 using FluentValidation.AspNetCore;
 using hrvster.Core;
 using hrvster.Core.Authentication;
 using hrvster.Core.Clients;
+using hrvster.Core.Clients.Publishers;
 using hrvster.Core.Handlers.Profiles;
 using hrvster.Core.Mapper;
 using hrvster.Core.Requests;
@@ -19,14 +19,13 @@ using hrvster.Infrastructure.Core;
 using hrvster.Infrastructure.Harvester;
 using hrvster.Models;
 using MediatR;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Promo.Clients.External;
@@ -55,14 +54,18 @@ namespace hrvster.Web
 		public void ConfigureServices(IServiceCollection services)
 		{
 			services.AddControllersWithViews();
-			services.AddMvc().AddSessionStateTempDataProvider();
-			
+			services.AddMvc(o =>
+			{
+				o.Filters.Add(new AutoValidateAntiforgeryTokenAttribute());
+			}).AddSessionStateTempDataProvider();
+
 			AddAuthentication(services);
 			AddDatabaseAndRepositories(services);
 			AddMediatorAndFluentValidation(services);
 			AddTwitterClient(services);
 			AddServicesOptions(services);
 			ConfigureSweeepstakes(services);
+			AddPublishers(services);
 
 			services.AddSingleton<HrvsterUser>();
 			services.AddSingleton<LinkBuilder>();
@@ -74,6 +77,28 @@ namespace hrvster.Web
 
 			services.AddTransient<IWatchTypeProvider, WatchTypeProvider>();
 			services.AddTransient<ITwitterWatchTypeProvider, TwitterWatchTypeProvider>();
+		}
+
+		private void AddPublishers(IServiceCollection services)
+		{
+			services.AddScoped<TwitterPublisher>();
+			services.AddScoped<FacebookPublisher>();
+			services.AddScoped<InstagramPublisher>();
+
+			services.AddTransient<Func<PublisherType, Core.Clients.Publishers.IPublisher>>(sp => serviceTypeName =>
+			{
+				switch (serviceTypeName)
+				{
+					case PublisherType.Twitter:
+						return sp.GetService<TwitterPublisher>();
+					case PublisherType.Facebook:
+						return sp.GetService<FacebookPublisher>();
+					case PublisherType.Instagram:
+						return sp.GetService<InstagramPublisher>();
+					default:
+						return sp.GetService<TwitterPublisher>();
+				}
+			});
 		}
 
 		private void AddAuthentication(IServiceCollection services)

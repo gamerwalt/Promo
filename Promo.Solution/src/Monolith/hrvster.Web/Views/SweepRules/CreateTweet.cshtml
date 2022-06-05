@@ -4,3 +4,59 @@
 }
 <div><h4>Create/Publish Sweep Rule Tweet for @Model.SweepstakeName</h4></div>
 <hr />
+<form 
+asp-controller="SweepRules" 
+asp-action="CreateTweet" 
+asp-route-sweepUid=@Model.SweepstakeUid 
+enctype="multipart/form-data"
+class="form-horizontal form-material mx-2">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="form-group">
+                <label class="col-md-12">Watch Value</label>
+                <div class="col-md-6">
+                    <input 
+                        class="form-control form-control-lg" 
+                        id="WatchValue" 
+                        asp-for="WatchValue" rows="5" cols="70"/>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-md-12">Tweet Text</label>
+                <div class="col-md-12">
+                    <textarea name="TweetText" 
+                        class="form-control form-control-lg" 
+                        id="TweetText" 
+                        asp-for="TweetText" rows="5" cols="70"></textarea>
+                </div>
+            </div>
+            <div class="col-md-12">
+                <div class="form-group">
+                    <label><strong>Immediate/Schedule Tweet</strong></label>
+                    <br />
+                    <label>
+                        <input type="radio" asp-for="PostNow" id="PostNow" name="PostNow" value="True">
+                        Immediate
+                    </label>
+                    <br />
+                    <label>
+                        <input type="radio" asp-for="PostNow" id="PostNow" name="PostNow" value="False" />
+                        Scheduled
+                    </label>
+                    <div class="col-md-12" id="scheduleDiv">
+                        <div class="form-group">
+                            <label><strong>Schedule Tweet</strong></label>
+                            <input asp-for="ScheduledDate" class="form-control form-control-lg" asp-format="{0:yyyy-MM-ddTHH:mm}" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <hr />
+            <div class="form-group">
+                <div class="col-md-12">
+                    <button class="btn btn-lg btn-primary" type="submit">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

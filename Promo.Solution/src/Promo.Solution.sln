@@ -198,7 +198,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "hrvster.Core.Handlers", "Mo
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "hrvster.Web", "Monolith\hrvster.Web\hrvster.Web.csproj", "{004EAAA2-8471-4EAB-BCB2-801AA81CB647}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "hrvster.Core.Clients", "Monolith\hrvster.Core.Clients\hrvster.Core.Clients.csproj", "{E6F4769D-3FA6-4F3C-A688-06F8FAD6AAF4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "hrvster.Core.Clients", "Monolith\hrvster.Core.Clients\hrvster.Core.Clients.csproj", "{E6F4769D-3FA6-4F3C-A688-06F8FAD6AAF4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

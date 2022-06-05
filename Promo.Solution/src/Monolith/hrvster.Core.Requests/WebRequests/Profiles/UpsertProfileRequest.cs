@@ -1,4 +1,6 @@
-﻿using MediatR;
+﻿using hrvster.Core.Clients;
+using hrvster.Models;
+using MediatR;
 using System;
 
 namespace hrvster.Core.Requests.WebRequests.Profiles
@@ -6,7 +8,7 @@ namespace hrvster.Core.Requests.WebRequests.Profiles
 	public class UpsertProfileRequest : IRequest
 	{
 		private Guid userUid;
-		private string profileType;
+		private ProfileType profileType;
 		private string name;
 		private string screenName;
 		private string description;
@@ -14,8 +16,17 @@ namespace hrvster.Core.Requests.WebRequests.Profiles
 		private string accessTokenSecret;
 		private string location;
 		private string profileImageUrl;
+		private UserProviderDetails _userDetails;
 
-		public UpsertProfileRequest(Guid userUid, string profileType, string name, string screenName, string description, string accessToken, string accessTokenSecret, string location, string profileImageUrl)
+		public UpsertProfileRequest(UserProviderDetails userDetails, Guid userUid, ProfileType profileType)
+		{
+			_userDetails = userDetails;
+			this.userUid = userUid;
+			this.profileType = profileType;
+
+		}
+
+		public UpsertProfileRequest(Guid userUid, ProfileType profileType, string name, string screenName, string description, string accessToken, string accessTokenSecret, string location, string profileImageUrl)
 		{
 			this.userUid = userUid;
 			this.profileType = profileType;
@@ -33,7 +44,7 @@ namespace hrvster.Core.Requests.WebRequests.Profiles
 			get { return userUid; }
 		}
 
-		public string ProfileType
+		public ProfileType ProfileType
 		{
 			get { return profileType; }
 		}

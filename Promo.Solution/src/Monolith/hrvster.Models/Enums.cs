@@ -1,5 +1,12 @@
 ﻿namespace hrvster.Models
 {
+	public enum PublisherType
+	{
+		Twitter,
+		Facebook,
+		Instagram
+	}
+
 	public enum EmailStatus
 	{
 		New,

@@ -13,6 +13,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\Promo.Clients\Promo.Clients.csproj" />
+    <ProjectReference Include="..\hrvster.Core.Clients\hrvster.Core.Clients.csproj" />
     <ProjectReference Include="..\hrvster.Infrastructure\hrvster.Infrastructure.csproj" />
     <ProjectReference Include="..\hrvster.Models\hrvster.Models.csproj" />
   </ItemGroup>

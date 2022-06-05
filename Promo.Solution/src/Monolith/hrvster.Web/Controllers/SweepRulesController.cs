@@ -1,11 +1,10 @@
-﻿using AutoMapper;
-using hrvster.Core.Authentication;
+﻿using hrvster.Core.Authentication;
 using hrvster.Core.Clients;
+using hrvster.Core.Clients.Common;
 using hrvster.Core.Requests;
+using hrvster.Core.Requests.Notifications;
 using hrvster.Core.Requests.WebRequests.Core;
-using hrvster.Core.Requests.WebRequests.Sweeps;
 using hrvster.Models;
-using hrvster.Models.WebModels.Sweeps;
 using hrvster.Web.Models;
 using MediatR;
 using Microsoft.AspNetCore.Http;
@@ -15,31 +14,31 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
-using Tweetinvi.Parameters;
 
 namespace hrvster.Web.Controllers
 {
 	[FirebaseAuthorize]
+	[AutoValidateAntiforgeryToken]
 	public class SweepRulesController : Controller
 	{
 		private readonly ILogger<SweepRulesController> _logger;
 		private readonly IMediator _mediator;
-		private readonly HrvsterUser _hrvsterUser;
-		private readonly IMapper _mapper;
 		private readonly IWatchTypeProvider _watchTypeProvider;
+		private readonly Func<PublisherType, Core.Clients.Publishers.IPublisher> _publisherResolver;
+		private readonly HrvsterUser _hrvsterUser;
 
 		public SweepRulesController(
 			ILoggerFactory loggerFactory,
-			IMediator mediator, 
-			HrvsterUser hrvsterUser, 
-			IMapper mapper,
-			IWatchTypeProvider watchTypeProvider)
+			IMediator mediator,
+			IWatchTypeProvider watchTypeProvider,
+			Func<PublisherType, Core.Clients.Publishers.IPublisher> publisherResolver,
+			HrvsterUser hrvsterUser)
 		{
 			_logger = loggerFactory.CreateLogger<SweepRulesController>();
 			_mediator = mediator;
-			_hrvsterUser = hrvsterUser;
-			_mapper = mapper;
 			_watchTypeProvider = watchTypeProvider;
+			_publisherResolver = publisherResolver;
+			_hrvsterUser = hrvsterUser;
 		}
 
 		public async Task<IActionResult> View(Guid sweepUid)
@@ -107,10 +106,9 @@ namespace hrvster.Web.Controllers
 		}
 
 		[HttpPost]
-		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> SelectProvider(Guid sweepUid, SelectWatchTypeProvider form)
 		{
-			if(ModelState.IsValid)
+			if (ModelState.IsValid)
 			{
 				var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
 				if (sweep == null)
@@ -119,6 +117,24 @@ namespace hrvster.Web.Controllers
 
 					return new NotFoundObjectResult($"Could not find sweepstake with uid: {sweepUid} ");
 				}
+
+				//do we have a profile with access tokens already for this provider?
+				//Todo: We should determine if we need to get the access token again
+				//var profile = await _mediator.Send(new GetUserProfile(_hrvsterUser.UserUid, ProfileType.Twitter));
+				//if(profile != null && !string.IsNullOrWhiteSpace(profile.AccessToken))
+				//{
+				//	switch(form.ProviderCode)
+				//	{
+				//		case Constants.TwitterProvider:
+				//			return RedirectToAction("CreateTweet",
+				//				new
+				//				{
+				//					sweepUid = sweepUid,
+				//					actionName = form.ReturnAction,
+				//					controllerName = form.ReturnController
+				//				});
+				//	}
+				//}
 
 				HttpContext.Session.SetString(SessionConstants.SweepUid, sweepUid.ToString());
 				HttpContext.Session.SetString(SessionConstants.ReturnController, form.ReturnController);
@@ -134,14 +150,19 @@ namespace hrvster.Web.Controllers
 
 		public async Task<IActionResult> ValidateTwitterAuth()
 		{
-			if(Request.Query["denied"].Count > 0)
+			if (Request.Query["denied"].Count > 0)
 			{
 				return RedirectToAction("FailedAuthValidation");
 			}
 
 			var userDetails = await _watchTypeProvider.IsValidAuthorization(Constants.TwitterProvider, Request.QueryString.Value);
 
+			_logger.LogInformation("Profile validated for user with uid: {userUid} via {providerType}",
+				_hrvsterUser.UserUid,
+				ProfileType.Twitter.ToString());
+
 			//update the profile
+			await _mediator.Publish(new ProfileValidated(userDetails, _hrvsterUser.UserUid, ProfileType.Twitter));
 
 			var sweepUid = HttpContext.Session.GetString(SessionConstants.SweepUid);
 			var returnController = HttpContext.Session.GetString(SessionConstants.ReturnController);
@@ -151,12 +172,12 @@ namespace hrvster.Web.Controllers
 			HttpContext.Session.Remove(SessionConstants.ReturnController);
 			HttpContext.Session.Remove(SessionConstants.ReturnAction);
 
-			return RedirectToAction("CreateTweet", 
-				new 
-				{ 
-					sweepUid = sweepUid, 
-					actionName = returnAction, 
-					controllerName = returnController 
+			return RedirectToAction("CreateTweet",
+				new
+				{
+					sweepUid = sweepUid,
+					actionName = returnAction,
+					controllerName = returnController
 				});
 		}
 
@@ -177,10 +198,40 @@ namespace hrvster.Web.Controllers
 				SweepstakeUid = sweep.SweepUid,
 				SweepstakeName = sweep.Name,
 				ReturnAction = actionName ?? HttpContext.Request.RouteValues["action"].ToString(),
-				ReturnController = controllerName ?? HttpContext.Request.RouteValues["controller"].ToString()
+				ReturnController = controllerName ?? HttpContext.Request.RouteValues["controller"].ToString(),
+				ScheduledDate = sweep.StartDate.AddHours(-1)
 			};
 
 			return View(model);
+		}
+
+		[HttpPost]
+		public async Task<IActionResult> CreateTweet(Guid sweepUid, CreateSweepRuleTweet form)
+		{
+			if (ModelState.IsValid)
+			{
+				var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
+				if (sweep == null)
+				{
+					_logger.LogError("Could not find sweepstake with uid: {sweepUid}", sweepUid);
+
+					return new NotFoundObjectResult($"Could not find sweepstake with uid: {sweepUid} ");
+				}
+
+				var twitterPublisher = _publisherResolver(PublisherType.Twitter);
+
+				var profile = await _mediator.Send(new GetUserProfile(_hrvsterUser.UserUid, ProfileType.Twitter));
+
+				await twitterPublisher.PublishAsync(new Message
+				{
+					Profile = profile,
+					Text = form.TweetText,
+					IsScheduled = !form.PostNow,
+					ScheduledDate = form.ScheduledDate
+				});
+			}
+
+			return View(form);
 		}
 	}
 }

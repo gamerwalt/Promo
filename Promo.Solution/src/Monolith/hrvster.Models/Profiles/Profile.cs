@@ -12,7 +12,7 @@ namespace hrvster.Models.Profiles
 		public string Description { get; set; }
 		public string ScreenName { get; set; }
 		public string DisplayName { get; set; }
-		public string ProfileType { get; set; }
+		public ProfileType ProfileType { get; set; }
 		public Guid ProfileUid { get; set; }
 	}
 }
