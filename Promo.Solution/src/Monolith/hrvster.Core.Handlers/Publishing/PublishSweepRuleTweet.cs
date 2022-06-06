@@ -44,7 +44,8 @@ namespace hrvster.Core.Handlers.Publishing
 				Profile = request.Profile,
 				Text = request.TweetText,
 				IsScheduled = !request.PostNow,
-				ScheduledDate = request.ScheduledDate
+				ScheduledDate = request.ScheduledDate,
+				Media = request.MediaLocation
 			};
 
 			var tweetId = await twitterPublisher.PublishAsync(message);

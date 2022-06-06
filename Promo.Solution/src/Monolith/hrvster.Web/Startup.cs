@@ -66,7 +66,8 @@ namespace hrvster.Web
 			AddServicesOptions(services);
 			ConfigureSweeepstakes(services);
 			AddPublishers(services);
-
+			
+			services.AddTransient<IFileService, FileService>();
 			services.AddSingleton<HrvsterUser>();
 			services.AddSingleton<LinkBuilder>();
 			services.AddAutoMapper(typeof(EntityMap));
@@ -202,6 +203,10 @@ namespace hrvster.Web
 			services.Configure<TwitterAccount>(Configuration);
 			services.Configure<TwitterAccount>(Configuration.GetSection(TwitterAccount.SectionName));
 			services.AddTransient(p => p.GetService<IOptions<TwitterAccount>>().Value);
+
+			services.Configure<hrvster.Models.Options.FileServerOptions>(Configuration);
+			services.Configure<hrvster.Models.Options.FileServerOptions>(Configuration.GetSection(hrvster.Models.Options.FileServerOptions.SectionName));
+			services.AddTransient(p => p.GetService<IOptions<hrvster.Models.Options.FileServerOptions>>().Value);
 
 			services.AddTransient<ITwitterClient, TwitterClient>(c => GenerateTwitterClient(c));
 

@@ -47,6 +47,7 @@ namespace hrvster.Core.Clients
 
 			return new UserProviderDetails
 			{
+				ExternalProfileId = user.IdStr,
 				Name = user.Name,
 				ScreenName = user.ScreenName,
 				Description = user.Description,

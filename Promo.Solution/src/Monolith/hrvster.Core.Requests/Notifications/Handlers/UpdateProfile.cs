@@ -40,6 +40,7 @@ namespace hrvster.Core.Requests.Notifications.Handlers
 				{
 					AccountUid = model.UserUid
 				},
+				ExternalProfileId = model.UserDetails.ExternalProfileId,
 				ProfileUid = model.UserUid,
 				ProfileType = model.ProfileType,
 				DisplayName = model.UserDetails.Name,

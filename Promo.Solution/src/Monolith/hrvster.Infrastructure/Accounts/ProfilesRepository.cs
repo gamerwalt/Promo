@@ -55,6 +55,7 @@ namespace hrvster.Infrastructure.Accounts
 			{
 				ProfileUid = reader.GetGuid("profile_uid"),
 				ProfileType = (ProfileType)Enum.Parse(typeof(ProfileType), reader.GetString("profile_type")),
+				ExternalProfileId = reader.GetString("external_profile_id"),
 				DisplayName = reader.GetString("display_name"),
 				ScreenName = reader.GetString("screen_name"),
 				Description = reader.GetString("profile_description"),
@@ -78,6 +79,7 @@ namespace hrvster.Infrastructure.Accounts
 			command.CommandType = CommandType.StoredProcedure;
 			command
 				.AddParameter("profileUid", profile.ProfileUid)
+				.AddParameter("externalProfileId", profile.ExternalProfileId)
 				.AddParameter("accountUid", profile.Account.AccountUid)
 				.AddParameter("profileType", profile.ProfileType)
 				.AddParameter("displayName", profile.DisplayName)

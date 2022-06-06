@@ -2,6 +2,7 @@
 using hrvster.Models.Profiles;
 using MediatR;
 using System;
+using System.Collections.Generic;
 
 namespace hrvster.Core.Requests.WebRequests.Publishing
 {
@@ -14,9 +15,17 @@ namespace hrvster.Core.Requests.WebRequests.Publishing
 		private bool _postNow;
 		private DateTime _scheduledDate;
 		private Sweep _sweep;
+		private IEnumerable<string> _mediaLocation;
 
 		public PublishSweepRuleTweetRequest(
-			Sweep sweep, Profile profile, int watchTypeId, string watchValue, string tweetText, bool postNow, DateTime scheduledDate)
+			Sweep sweep,
+			Profile profile,
+			int watchTypeId,
+			string watchValue,
+			string tweetText,
+			bool postNow,
+			DateTime scheduledDate,
+			IEnumerable<string> mediaLocation)
 		{
 			_profile = profile;
 			_watchTypeId = watchTypeId;
@@ -25,6 +34,7 @@ namespace hrvster.Core.Requests.WebRequests.Publishing
 			_postNow = postNow;
 			_scheduledDate = scheduledDate;
 			_sweep = sweep;
+			_mediaLocation = mediaLocation;
 		}
 
 		public Profile Profile
@@ -60,6 +70,11 @@ namespace hrvster.Core.Requests.WebRequests.Publishing
 		public Sweep Sweep
 		{
 			get { return _sweep; }
+		}
+
+		public IEnumerable<string> MediaLocation
+		{
+			get { return _mediaLocation; }
 		}
 	}
 }

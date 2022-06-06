@@ -8,7 +8,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Tweetinvi.Models;
 
-namespace hrvster.Core
+namespace hrvster.Core.Clients
 {
 	//ideally, we need to put this in a queue to make things faster
 	//from the queue, we add it to the database 

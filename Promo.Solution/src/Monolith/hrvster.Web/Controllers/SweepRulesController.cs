@@ -3,6 +3,7 @@ using hrvster.Core.Clients;
 using hrvster.Core.Requests;
 using hrvster.Core.Requests.Notifications;
 using hrvster.Core.Requests.WebRequests.Core;
+using hrvster.Core.Requests.WebRequests.Files;
 using hrvster.Core.Requests.WebRequests.Publishing;
 using hrvster.Models;
 using hrvster.Web.Models;
@@ -12,6 +13,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -21,6 +24,7 @@ namespace hrvster.Web.Controllers
 	[AutoValidateAntiforgeryToken]
 	public class SweepRulesController : Controller
 	{
+		private string[] AllowedExtensions = {".jpeg", ".jpg", ".png", ".gif"};
 		private readonly ILogger<SweepRulesController> _logger;
 		private readonly IMediator _mediator;
 		private readonly IWatchTypeProvider _watchTypeProvider;
@@ -220,6 +224,61 @@ namespace hrvster.Web.Controllers
 
 					return new NotFoundObjectResult($"Could not find sweepstake with uid: {sweepUid} ");
 				}
+				
+				var extension = string.Empty;
+				if (form.Media1 != null)
+				{
+					extension = Path.GetExtension(form.Media1.FileName);
+					if (!AllowedExtensions.Contains(extension))
+					{
+						ModelState.AddModelError("CustomError", "Media 1's extension is not allowed.");
+						return View(form);
+					}
+				}
+				
+				if (form.Media2 != null)
+				{
+					extension = Path.GetExtension(form.Media2.FileName);
+					if (!AllowedExtensions.Contains(extension))
+					{
+						ModelState.AddModelError("CustomError", "Media 2's extension is not allowed.");
+						return View(form);
+					}
+				}
+				
+				if(form.Media3 != null)
+				{
+					extension = Path.GetExtension(form.Media3.FileName);
+					if (!AllowedExtensions.Contains(extension))
+					{
+						ModelState.AddModelError("CustomError", "Media 3's extension is not allowed.");
+						return View(form);
+					}
+				}
+				
+				if(form.Media4 != null)
+				{
+					extension = Path.GetExtension(form.Media3.FileName);
+					if (!AllowedExtensions.Contains(extension))
+					{
+						ModelState.AddModelError("CustomError", "Media 4's extension is not allowed.");
+						return View(form);
+					}
+				}
+				
+
+				//upload files
+				var media = new List<IFormFile>();
+				if (form.Media1 != null || form.Media1?.Length > 0)
+					media.Add(form.Media1);
+				if (form.Media2 != null || form.Media2?.Length > 0)
+					media.Add(form.Media2);
+				if (form.Media3 != null || form.Media3?.Length > 0)
+					media.Add(form.Media3);
+				if (form.Media4 != null || form.Media4?.Length > 0)
+					media.Add(form.Media4);
+
+				var mediaLocation = await _mediator.Send(new UploadFileToFileServerRequest(media, _hrvsterUser.UserUid, ProfileType.Twitter));
 
 				var profile = await _mediator.Send(new GetUserProfile(_hrvsterUser.UserUid, ProfileType.Twitter));
 
@@ -231,7 +290,8 @@ namespace hrvster.Web.Controllers
 						form.WatchValue, 
 						form.TweetText, 
 						form.PostNow, 
-						form.ScheduledDate));
+						form.ScheduledDate,
+						mediaLocation));
 				
 				if(string.IsNullOrWhiteSpace(returnAction))
 				{
@@ -246,5 +306,11 @@ namespace hrvster.Web.Controllers
 
 			return View(form);
 		}
+
+		//[HttpGet]
+		//public async Task<IActionResult> Delete()
+		//{
+
+		//}
 	}
 }

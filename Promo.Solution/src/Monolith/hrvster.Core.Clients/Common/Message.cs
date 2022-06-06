@@ -1,5 +1,6 @@
 ﻿using hrvster.Models.Profiles;
 using System;
+using System.Collections.Generic;
 
 namespace hrvster.Core.Clients.Common
 {
@@ -13,5 +14,6 @@ namespace hrvster.Core.Clients.Common
 		public Profile Profile { get; set; }
 		public string Hashtag { get; set; }
 		public int WatchTypeId { get; set; }
+		public IEnumerable<string> Media { get; set; }
 	}
 }

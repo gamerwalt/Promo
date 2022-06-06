@@ -16,5 +16,6 @@ namespace hrvster.Core.Clients
 		public string Location { get; internal set; }
 		public string ProfileImage { get; internal set; }
 		public string BearerToken { get; internal set; }
+		public string ExternalProfileId { get; internal set; }
 	}
 }

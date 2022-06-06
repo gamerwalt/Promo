@@ -14,5 +14,6 @@ namespace hrvster.Models.Profiles
 		public string DisplayName { get; set; }
 		public ProfileType ProfileType { get; set; }
 		public Guid ProfileUid { get; set; }
+		public string ExternalProfileId { get; set; }
 	}
 }

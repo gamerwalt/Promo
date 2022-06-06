@@ -16,7 +16,10 @@ namespace hrvster.Web.Models
 		public string SweepstakeName { get; internal set; }
 		public string ReturnAction { get; internal set; }
 		public string ReturnController { get; internal set; }
-		public List<IFormFile> Medias { get; set; }
+		public IFormFile Media1 { get; set; }
+		public IFormFile Media2 { get; set; }
+		public IFormFile Media3 { get; set; }
+		public IFormFile Media4 { get; set; }
 		public bool PostNow { get; set; }
 		public DateTime ScheduledDate { get; set; }
 	}
