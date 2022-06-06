@@ -14,5 +14,6 @@ namespace hrvster.Models
 		public bool ActiveInd { get; set; }
 		public DateTime CreatedDate { get; set; }
 		public DateTime? UpdatedDate { get; set; }
+		public bool MustBeFollowing { get; set; }
 	}
 }

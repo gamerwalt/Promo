@@ -7,11 +7,13 @@ namespace hrvster.Core.Requests.Notifications.Publishing
 	{
 		private Message _message;
 		private string _tweetId;
+		private bool _mustBeFollowing;
 
-		public SweepRuleTweetPublished(string tweetId, Message message)
+		public SweepRuleTweetPublished(string tweetId, Message message, bool mustBeFollowing)
 		{
 			_message = message;
 			_tweetId = tweetId;
+			_mustBeFollowing = mustBeFollowing;
 		}
 
 		public Message Message
@@ -22,6 +24,11 @@ namespace hrvster.Core.Requests.Notifications.Publishing
 		public string TweetId
 		{
 			get { return _tweetId; }
+		}
+
+		public bool MustBeFollowing
+		{
+			get { return _mustBeFollowing; }
 		}
 	}
 }

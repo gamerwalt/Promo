@@ -124,21 +124,21 @@ namespace hrvster.Web.Controllers
 
 				//do we have a profile with access tokens already for this provider?
 				//Todo: We should determine if we need to get the access token again
-				//var profile = await _mediator.Send(new GetUserProfile(_hrvsterUser.UserUid, ProfileType.Twitter));
-				//if(profile != null && !string.IsNullOrWhiteSpace(profile.AccessToken))
-				//{
-				//	switch(form.ProviderCode)
-				//	{
-				//		case Constants.TwitterProvider:
-				//			return RedirectToAction("CreateTweet",
-				//				new
-				//				{
-				//					sweepUid = sweepUid,
-				//					actionName = form.ReturnAction,
-				//					controllerName = form.ReturnController
-				//				});
-				//	}
-				//}
+				var profile = await _mediator.Send(new GetUserProfile(_hrvsterUser.UserUid, ProfileType.Twitter));
+				if (profile != null && !string.IsNullOrWhiteSpace(profile.AccessToken))
+				{
+					switch (form.ProviderCode)
+					{
+						case Constants.TwitterProvider:
+							return RedirectToAction("CreateTweet",
+								new
+								{
+									sweepUid = sweepUid,
+									actionName = form.ReturnAction,
+									controllerName = form.ReturnController
+								});
+					}
+				}
 
 				HttpContext.Session.SetString(SessionConstants.SweepUid, sweepUid.ToString());
 				HttpContext.Session.SetString(SessionConstants.ReturnController, form.ReturnController);
@@ -291,6 +291,7 @@ namespace hrvster.Web.Controllers
 						form.TweetText, 
 						form.PostNow, 
 						form.ScheduledDate,
+						form.MustBeFollowing,
 						mediaLocation));
 				
 				if(string.IsNullOrWhiteSpace(returnAction))

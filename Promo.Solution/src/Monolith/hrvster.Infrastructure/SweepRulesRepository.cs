@@ -38,7 +38,8 @@ namespace hrvster.Infrastructure
 				.AddParameter("watchTypeCode", rule.WatchTypeCode.ToString())
 				.AddParameter("watchValue", rule.WatchValue)
 				.AddParameter("externalId", rule.ExternalId)
-				.AddParameter("activeInd", rule.ActiveInd);
+				.AddParameter("activeInd", rule.ActiveInd)
+				.AddParameter("mustBeFollowing", rule.MustBeFollowing);
 
 			await conn.OpenAsync();
 			await command.ExecuteNonQueryAsync();
@@ -177,6 +178,7 @@ namespace hrvster.Infrastructure
 				WatchTypeCode = (WatchTypeCode)Enum.Parse(typeof(WatchTypeCode), reader.GetString("watch_type_code")),
 				ExternalId = GetLongValue(reader, "external_id"),
 				ActiveInd = reader.GetBoolean("active_ind"),
+				MustBeFollowing = reader.GetBoolean("must_be_following"),
 				CreatedDate = reader.GetDateTime("created_date"),
 				UpdatedDate = GetNullableDateTimeValue(reader, "updated_date")
 			};

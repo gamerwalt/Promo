@@ -50,7 +50,7 @@ namespace hrvster.Core.Handlers.Publishing
 
 			var tweetId = await twitterPublisher.PublishAsync(message);
 
-			await _mediator.Publish(new SweepRuleTweetPublished(tweetId, message));
+			await _mediator.Publish(new SweepRuleTweetPublished(tweetId, message, request.MustBeFollowing));
 		}
 	}
 }

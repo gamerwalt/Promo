@@ -22,5 +22,6 @@ namespace hrvster.Web.Models
 		public IFormFile Media4 { get; set; }
 		public bool PostNow { get; set; }
 		public DateTime ScheduledDate { get; set; }
+		public bool MustBeFollowing { get; set; }
 	}
 }

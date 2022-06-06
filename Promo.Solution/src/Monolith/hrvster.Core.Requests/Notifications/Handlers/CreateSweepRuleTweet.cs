@@ -44,7 +44,8 @@ namespace hrvster.Core.Requests.Notifications.Handlers
 				WatchTypeCode = (WatchTypeCode)Enum.Parse(typeof(WatchTypeCode), watchTypeCodeSelected),
 				WatchValue = notification.Message.Hashtag,
 				ExternalId = long.Parse(notification.TweetId),
-				ActiveInd = true
+				ActiveInd = true,
+				MustBeFollowing = notification.MustBeFollowing
 			});
 		}
 	}

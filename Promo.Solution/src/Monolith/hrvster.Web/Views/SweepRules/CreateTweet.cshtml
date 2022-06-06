@@ -76,6 +76,20 @@ class="form-horizontal form-material mx-2">
             </div>
             <div class="col-md-12">
                 <div class="form-group">
+                    <label><strong>Must be following?</strong></label>
+                    <br />
+                    <label>
+                        <input type="radio" asp-for="MustBeFollowing" id="MustBeFollowing" name="MustBeFollowing" checked value="True">
+                        Yes
+                    </label>
+                    <label>
+                        <input type="radio" asp-for="MustBeFollowing" id="MustBeFollowing" name="MustBeFollowing" value="False">
+                        No
+                    </label>
+                </div>
+            </div>
+            <div class="col-md-12">
+                <div class="form-group">
                     <label><strong>Media 1</strong></label>
                     <div class="col-md-12">
                         <input 

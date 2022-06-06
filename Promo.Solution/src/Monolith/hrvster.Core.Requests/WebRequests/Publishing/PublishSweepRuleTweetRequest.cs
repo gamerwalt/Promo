@@ -16,6 +16,7 @@ namespace hrvster.Core.Requests.WebRequests.Publishing
 		private DateTime _scheduledDate;
 		private Sweep _sweep;
 		private IEnumerable<string> _mediaLocation;
+		private bool _mustBeFollowing;
 
 		public PublishSweepRuleTweetRequest(
 			Sweep sweep,
@@ -25,6 +26,7 @@ namespace hrvster.Core.Requests.WebRequests.Publishing
 			string tweetText,
 			bool postNow,
 			DateTime scheduledDate,
+			bool mustBeFollowing,
 			IEnumerable<string> mediaLocation)
 		{
 			_profile = profile;
@@ -35,6 +37,7 @@ namespace hrvster.Core.Requests.WebRequests.Publishing
 			_scheduledDate = scheduledDate;
 			_sweep = sweep;
 			_mediaLocation = mediaLocation;
+			_mustBeFollowing = mustBeFollowing;
 		}
 
 		public Profile Profile
@@ -75,6 +78,11 @@ namespace hrvster.Core.Requests.WebRequests.Publishing
 		public IEnumerable<string> MediaLocation
 		{
 			get { return _mediaLocation; }
+		}
+
+		public bool MustBeFollowing
+		{
+			get { return _mustBeFollowing; }
 		}
 	}
 }

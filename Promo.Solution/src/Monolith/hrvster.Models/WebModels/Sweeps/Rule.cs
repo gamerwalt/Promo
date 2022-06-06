@@ -9,5 +9,6 @@ namespace hrvster.Models.WebModels.Sweeps
 		public string WatchValue { get; set; }
 		public bool ActiveInd { get; set; }
 		public string ExternalId { get; set; }
+		public bool MustBeFollowing { get; set; }
 	}
 }
