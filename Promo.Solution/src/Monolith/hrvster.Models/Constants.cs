@@ -8,6 +8,6 @@
 		public const string InstagramProvider = "INSTAGRAM";
 
 		//urls
-		public const string ScheduledTweetUrl = "https://ads-api.twitter.com/11/accounts/{accountId}/scheduled_tweets?schduled_at={scheduledAt}";
+		public const string ScheduledTweetUrl = "https://ads-api.twitter.com/11/accounts/18ce55gm9g0/scheduled_tweets?as_user_id={asUserId}&schduled_at={scheduledAt}";
 	}
 }

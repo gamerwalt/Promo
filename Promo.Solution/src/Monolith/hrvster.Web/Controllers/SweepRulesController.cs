@@ -124,21 +124,21 @@ namespace hrvster.Web.Controllers
 
 				//do we have a profile with access tokens already for this provider?
 				//Todo: We should determine if we need to get the access token again
-				var profile = await _mediator.Send(new GetUserProfile(_hrvsterUser.UserUid, ProfileType.Twitter));
-				if (profile != null && !string.IsNullOrWhiteSpace(profile.AccessToken))
-				{
-					switch (form.ProviderCode)
-					{
-						case Constants.TwitterProvider:
-							return RedirectToAction("CreateTweet",
-								new
-								{
-									sweepUid = sweepUid,
-									actionName = form.ReturnAction,
-									controllerName = form.ReturnController
-								});
-					}
-				}
+				//var profile = await _mediator.Send(new GetUserProfile(_hrvsterUser.UserUid, ProfileType.Twitter));
+				//if (profile != null && !string.IsNullOrWhiteSpace(profile.AccessToken))
+				//{
+				//	switch (form.ProviderCode)
+				//	{
+				//		case Constants.TwitterProvider:
+				//			return RedirectToAction("CreateTweet",
+				//				new
+				//				{
+				//					sweepUid = sweepUid,
+				//					actionName = form.ReturnAction,
+				//					controllerName = form.ReturnController
+				//				});
+				//	}
+				//}
 
 				HttpContext.Session.SetString(SessionConstants.SweepUid, sweepUid.ToString());
 				HttpContext.Session.SetString(SessionConstants.ReturnController, form.ReturnController);
@@ -265,10 +265,11 @@ namespace hrvster.Web.Controllers
 						return View(form);
 					}
 				}
-				
 
 				//upload files
 				var media = new List<IFormFile>();
+				var mediaLocation = default(IEnumerable<string>);
+
 				if (form.Media1 != null || form.Media1?.Length > 0)
 					media.Add(form.Media1);
 				if (form.Media2 != null || form.Media2?.Length > 0)
@@ -278,11 +279,12 @@ namespace hrvster.Web.Controllers
 				if (form.Media4 != null || form.Media4?.Length > 0)
 					media.Add(form.Media4);
 
-				var mediaLocation = await _mediator.Send(new UploadFileToFileServerRequest(media, _hrvsterUser.UserUid, ProfileType.Twitter));
+				if(media.Count > 0)
+					mediaLocation = await _mediator.Send(new UploadFileToFileServerRequest(media, _hrvsterUser.UserUid, ProfileType.Twitter));
 
 				var profile = await _mediator.Send(new GetUserProfile(_hrvsterUser.UserUid, ProfileType.Twitter));
 
-				await _mediator.Send(
+				var published = await _mediator.Send(
 					new PublishSweepRuleTweetRequest(
 						sweep, 
 						profile,
@@ -304,6 +306,10 @@ namespace hrvster.Web.Controllers
 					sweepUid = sweepUid
 				});
 			}
+
+			var watchTypes = await _mediator.Send(new GetWatchTypeRequest());
+
+			form.WatchTypes = watchTypes.Select(a => new SelectListItem() { Text = a.WatchTypeName, Value = a.WatchTypeId.ToString() }).ToList();
 
 			return View(form);
 		}

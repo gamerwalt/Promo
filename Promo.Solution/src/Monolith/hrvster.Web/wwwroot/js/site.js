@@ -7,7 +7,7 @@ $(document).ready(function () {
         if ($(this).attr('id') == 'PostNow' && $(this).attr('value') == 'False') {
             $('#scheduleDiv').show();
         }
-        else {
+        else if ($(this).attr('id') == 'PostNow' && $(this).attr('value') == 'True') {
             $('#scheduleDiv').hide();
         }
     });

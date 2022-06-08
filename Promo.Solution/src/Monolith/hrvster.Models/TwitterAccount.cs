@@ -8,5 +8,7 @@
         public string AccessToken { get; set; }
         public string AccessTokenSecret { get; set; }
         public string AuthenticationToken { get; set; }
+		public string ClientId { get; set; }
+		public string ClientSecret { get; set; }
     }
 }

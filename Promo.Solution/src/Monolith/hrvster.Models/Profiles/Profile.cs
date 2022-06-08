@@ -15,5 +15,7 @@ namespace hrvster.Models.Profiles
 		public ProfileType ProfileType { get; set; }
 		public Guid ProfileUid { get; set; }
 		public string ExternalProfileId { get; set; }
+		public string ConsumerKey { get; set; }
+		public string ConsumerSecret { get; set; }
 	}
 }

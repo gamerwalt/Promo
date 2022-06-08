@@ -53,6 +53,8 @@ namespace hrvster.Core.Clients
 				Description = user.Description,
 				AccessToken = user.Credentials.AccessToken,
 				AccessTokenSecret = user.Credentials.AccessTokenSecret,
+				ConsumerKey = user.Credentials.ConsumerKey,
+				ConsumerSecret = user.Credentials.ConsumerSecret,
 				BearerToken = user.Credentials.BearerToken,
 				Location = user.Location,
 				ProfileImage = user.ProfileImageUrl400x400

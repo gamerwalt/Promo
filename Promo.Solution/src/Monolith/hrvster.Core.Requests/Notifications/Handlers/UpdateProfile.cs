@@ -48,6 +48,8 @@ namespace hrvster.Core.Requests.Notifications.Handlers
 				Description = model.UserDetails.Description,
 				AccessToken = model.UserDetails.AccessToken,
 				AccessTokenSecret = model.UserDetails.AccessTokenSecret,
+				ConsumerKey = model.UserDetails.ConsumerKey,
+				ConsumerSecret = model.UserDetails.ConsumerSecret,
 				Location = model.UserDetails.Location,
 				ProfileImageUrl = model.UserDetails.ProfileImage
 			};

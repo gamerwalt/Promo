@@ -61,6 +61,8 @@ namespace hrvster.Infrastructure.Accounts
 				Description = reader.GetString("profile_description"),
 				AccessToken = reader.GetString("access_token"),
 				AccessTokenSecret = reader.GetString("access_token_secret"),
+				ConsumerKey = GetStringValue(reader, "consumer_key"),
+				ConsumerSecret = GetStringValue(reader, "consumer_secret"),
 				Location = reader.GetString("location"),
 				ProfileImageUrl = reader.GetString("profile_image_url"),
 				Account = new Account
@@ -87,6 +89,8 @@ namespace hrvster.Infrastructure.Accounts
 				.AddParameter("description", profile.Description)
 				.AddParameter("accessToken", profile.AccessToken)
 				.AddParameter("accessTokenSecret", profile.AccessTokenSecret)
+				.AddParameter("consumerKey", profile.ConsumerKey)
+				.AddParameter("consumerSecret", profile.ConsumerSecret)
 				.AddParameter("location", profile.Location)
 				.AddParameter("profileImageUrl", profile.ProfileImageUrl);
 
@@ -116,6 +120,17 @@ namespace hrvster.Infrastructure.Accounts
 			}
 
 			return profiles;
+		}
+
+		private string GetStringValue(MySqlDataReader reader, string fieldName)
+		{
+			var value = reader[fieldName].ToString();
+			if (string.IsNullOrWhiteSpace(value))
+			{
+				return string.Empty;
+			}
+
+			return reader.GetString(fieldName);
 		}
 	}
 }

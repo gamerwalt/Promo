@@ -17,6 +17,7 @@ using hrvster.Infrastructure;
 using hrvster.Infrastructure.Accounts;
 using hrvster.Infrastructure.Core;
 using hrvster.Infrastructure.Harvester;
+using hrvster.Infrastructure.Scheduling;
 using hrvster.Models;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -182,6 +183,7 @@ namespace hrvster.Web
 			services.AddTransient<IWatchTypesRepository, WatchTypesRepository>();
 			services.AddTransient<IWatchTypeProvidersRepository, WatchTypeProvidersRepository>();
 			services.AddTransient<IProfilesRepository, ProfilesRepository>();
+			services.AddTransient<ISweepTweetSchedulerRepository, SweepTweetSchedulerRepository>();
 		}
 
 		private void AddServicesOptions(IServiceCollection services)

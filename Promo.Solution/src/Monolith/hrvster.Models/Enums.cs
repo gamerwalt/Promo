@@ -52,4 +52,11 @@
 	{
 		Twitter
 	}
+
+	public enum ScheduledStatus
+	{
+		New,
+		Sent,
+		Failed
+	}
 }

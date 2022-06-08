@@ -1,6 +1,7 @@
 ﻿using hrvster.Core.Authentication;
 using hrvster.Core.Settings;
 using hrvster.Infrastructure;
+using hrvster.Infrastructure.Accounts;
 using System;
 using System.Threading.Tasks;
 
@@ -10,14 +11,17 @@ namespace hrvster.Core
 	{
 		private readonly HrvsterUser _hrvsterUser;
 		private readonly IAccountsRepository _accountsRepository;
+		private readonly IProfilesRepository _profilesRepository;
 		private readonly Services _services;
 
 		public LinkBuilder(HrvsterUser hrvsterUser,
 			IAccountsRepository accountsRepository,
+			IProfilesRepository profilesRepository,
 			Services services)
 		{
 			_hrvsterUser = hrvsterUser;
 			_accountsRepository = accountsRepository;
+			_profilesRepository = profilesRepository;
 			_services = services;
 		}
 
@@ -25,8 +29,8 @@ namespace hrvster.Core
 		{
 			if (string.IsNullOrWhiteSpace(_hrvsterUser.TwitterUserName))
 			{
-				var account = await _accountsRepository.GetAsync(_hrvsterUser.UserUid);
-				_hrvsterUser.TwitterUserName = account.TwitterUserName;
+				var profile = await _profilesRepository.GetProfileAsync(_hrvsterUser.UserUid, Models.ProfileType.Twitter);
+				_hrvsterUser.TwitterUserName = profile?.ScreenName;
 			}
 
 			return new Uri(_services.TweetIdUrl

@@ -39,7 +39,8 @@ namespace hrvster.Infrastructure
 				.AddParameter("watchValue", rule.WatchValue)
 				.AddParameter("externalId", rule.ExternalId)
 				.AddParameter("activeInd", rule.ActiveInd)
-				.AddParameter("mustBeFollowing", rule.MustBeFollowing);
+				.AddParameter("mustBeFollowing", rule.MustBeFollowing)
+				.AddParameter("scheduledInd", rule.ScheduledInd);
 
 			await conn.OpenAsync();
 			await command.ExecuteNonQueryAsync();
@@ -192,7 +193,7 @@ namespace hrvster.Infrastructure
 				return string.Empty;
 			}
 
-			return reader.GetString("rules_url");
+			return reader.GetString(fieldName);
 		}
 
 		private long GetLongValue(MySqlDataReader reader, string fieldName)

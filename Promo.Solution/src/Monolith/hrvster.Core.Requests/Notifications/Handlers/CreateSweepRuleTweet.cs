@@ -45,7 +45,8 @@ namespace hrvster.Core.Requests.Notifications.Handlers
 				WatchValue = notification.Message.Hashtag,
 				ExternalId = long.Parse(notification.TweetId),
 				ActiveInd = true,
-				MustBeFollowing = notification.MustBeFollowing
+				MustBeFollowing = notification.MustBeFollowing,
+				ScheduledInd = false
 			});
 		}
 	}

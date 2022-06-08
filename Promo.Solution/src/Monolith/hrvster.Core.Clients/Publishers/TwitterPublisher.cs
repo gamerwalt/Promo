@@ -30,10 +30,9 @@ namespace hrvster.Core.Clients.Publishers
 		{
 			_twitterClient = new TwitterClient(_twitterAccount.ConsumerKey, _twitterAccount.ConsumerSecret, message.Profile.AccessToken, message.Profile.AccessTokenSecret);
 
-			var tweet = default(ITweet);
 			var mediaIds = default(List<long>);
 
-			if (message.Media.Count() > 0)
+			if (message.Media?.Count() > 0)
 			{
 				mediaIds = new List<long>();
 				foreach(var path in message.Media)
@@ -45,42 +44,20 @@ namespace hrvster.Core.Clients.Publishers
 				}
 			}
 
-			if(message.IsScheduled)
+			var tweet = await _twitterClient.Tweets.PublishTweetAsync(new PublishTweetParameters
 			{
-				tweet = await PublishScheduledAsync(message);
-			}
-			else
-			{
-				tweet = await _twitterClient.Tweets.PublishTweetAsync(new PublishTweetParameters
-				{
-					Text = message.Text,
-					MediaIds = message.Media.Count() > 0 ? mediaIds : null,
-				});
-			}			
+				Text = message.Text,
+				MediaIds = message.Media.Count() > 0 ? mediaIds : null,
+			});
 
 			if(tweet == null)
 			{
 				_logger.LogError("Unable to publish the tweet {message} received.", message.AsJson());
+
+				return string.Empty;
 			}
 
-			return tweet.IdStr;
-		}
-
-		private async Task<ITweet> PublishScheduledAsync(Message message)
-		{
-			var url = Constants.ScheduledTweetUrl
-				.Replace("{accountId}", message.Profile.ExternalProfileId)
-				.Replace("{scheduledAt}", message.ScheduledDate.ToString("O"));
-
-			var response = await _twitterClient.Execute.RequestAsync(request =>
-			{
-				request.Url = url;
-				request.HttpMethod = HttpMethod.POST;
-			});
-
-			var jsonResponse = response.Content;
-
-			return default(ITweet);
+			return tweet?.IdStr;
 		}
 	}
 }

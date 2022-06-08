@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 namespace hrvster.Core.Requests.WebRequests.Publishing
 {
-	public class PublishSweepRuleTweetRequest : IRequest
+	public class PublishSweepRuleTweetRequest : IRequest<bool>
 	{
 		private Profile _profile;
 		private int _watchTypeId;
