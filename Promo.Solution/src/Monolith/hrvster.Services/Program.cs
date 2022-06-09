@@ -1,5 +1,6 @@
 using hrvster.Extensions.Configuration;
 using hrvster.Infrastructure;
+using hrvster.Infrastructure.Scheduling;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -32,7 +33,6 @@ namespace hrvster.Services
 			Host.CreateDefaultBuilder(args)
 				.UseSerilog((context, configuration) =>
 					configuration.ReadFrom.Configuration(context.Configuration)
-						.WriteTo.Loggly()
 						.WriteTo.Console()
 						.Enrich.FromLogContext()
 						.MinimumLevel.Debug(), preserveStaticLogger: true)
@@ -53,6 +53,7 @@ namespace hrvster.Services
 			{
 				return new MySqlDatabase("hrvster", Configuration);
 			});
+			services.AddTransient<IScheduledSweepRuleTweetsRepository, ScheduledSweepRuleTweetsRepository>();
 			AddServiceRepositoryAndServices(services);
 		}
 
