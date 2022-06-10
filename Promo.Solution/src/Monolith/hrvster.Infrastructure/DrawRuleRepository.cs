@@ -3,6 +3,7 @@ using MySqlConnector;
 using System;
 using System.Data;
 using System.Threading.Tasks;
+using hrvster.Infrastructure.Extensions;
 
 namespace hrvster.Infrastructure
 {

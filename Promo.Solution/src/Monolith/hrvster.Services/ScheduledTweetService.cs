@@ -1,6 +1,8 @@
-﻿using hrvster.Infrastructure.Scheduling;
+﻿using hrvster.Services.Requests;
+using MediatR;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace hrvster.Services
@@ -8,33 +10,24 @@ namespace hrvster.Services
 	public class ScheduledTweetService : IService
 	{
 		private readonly ILogger<ScheduledTweetService> _logger;
-		private readonly IScheduledSweepRuleTweetsRepository _scheduledSweepRuleTweetsRepository;
 
-		public ScheduledTweetService(
-			ILoggerFactory loggerFactory,
-			IScheduledSweepRuleTweetsRepository scheduledSweepRuleTweetsRepository)
+		private readonly IMediator _mediator;
+
+		public ScheduledTweetService(ILoggerFactory loggerFactory, IMediator mediator)
 		{
 			_logger = loggerFactory.CreateLogger<ScheduledTweetService>();
-			_scheduledSweepRuleTweetsRepository = scheduledSweepRuleTweetsRepository;
+			_mediator = mediator;
 		}
 
 		public async Task ProcessService(System.Threading.CancellationToken token)
 		{
 			_logger.LogInformation("Starting {serviceName}", nameof(ScheduledTweetService));
 
-			var scheduledTweets = await _scheduledSweepRuleTweetsRepository.GetAllToSendAsync(DateTime.UtcNow);
-			
-			_logger.LogInformation("Pulled {count} scheduled sweep rule tweets to send.", scheduledTweets.Count);
+			var scheduledTweets = await _mediator.Send(new GetAllScheduledSweepsRuleTweetsToSendRquest(DateTime.UtcNow));
 
-			foreach (var scheduledTweet in scheduledTweets)
+			if (scheduledTweets.Count() > 0)
 			{
-				var images = await _scheduledSweepRuleTweetsRepository.GetAllImagesAsync(scheduledTweet.ScheduledId);
-
-				_logger.LogInformation("Pulled {count} images for the scheduled id {scheduledUid} to send.", 
-					images.Count, 
-					scheduledTweet.ScheduledId);
-
-				scheduledTweet.Images = images;
+				await _mediator.Send(new PublishScheduledTweetsRequest(scheduledTweets));
 			}
 		}
 	}

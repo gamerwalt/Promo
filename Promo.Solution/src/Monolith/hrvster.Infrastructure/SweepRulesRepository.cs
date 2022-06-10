@@ -1,4 +1,5 @@
-﻿using hrvster.Models;
+﻿using hrvster.Infrastructure.Extensions;
+using hrvster.Models;
 using MySqlConnector;
 using System;
 using System.Collections.Generic;
@@ -15,6 +16,7 @@ namespace hrvster.Infrastructure
 		Task UpdateRuleAsAddedAsync(Guid ruleUid);
 		Task<IEnumerable<Models.Rule>> GetRuleByHashTagAsync(string text);
 		Task<IEnumerable<Models.Rule>> GetSweepRuleAsync(Guid sweepUid);
+		Task UpdateRuleExternalId(Guid ruleUid, string externalId);
 	}
 
 	public class SweepRulesRepository : ISweepRulesRepository
@@ -218,6 +220,17 @@ namespace hrvster.Infrastructure
 			return reader.GetDateTime(fieldName);
 		}
 
-		
+		public async Task UpdateRuleExternalId(Guid ruleUid, string externalId)
+		{
+			using var conn = new MySqlConnection(_database.GetConnectionString());
+			var command = conn.CreateCommand();
+			command.CommandText = "sweep_rule_update_external_id";
+			command.CommandType = CommandType.StoredProcedure;
+			command.AddParameter("ruleUid", ruleUid)
+				.AddParameter("externalId", externalId);
+
+			await conn.OpenAsync();
+			await command.ExecuteNonQueryAsync();
+		}
 	}
 }

@@ -1,4 +1,5 @@
-﻿using hrvster.Models;
+﻿using hrvster.Infrastructure.Extensions;
+using hrvster.Models;
 using hrvster.Models.Scheduling;
 using MySqlConnector;
 using System;
@@ -7,7 +8,6 @@ using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using hrvster.Extensions;
 
 namespace hrvster.Infrastructure.Scheduling
 {
@@ -61,6 +61,7 @@ namespace hrvster.Infrastructure.Scheduling
 			command.CommandText = "scheduled_sweep_rule_tweet_create";
 			command.CommandType = CommandType.StoredProcedure;
 			command
+				.AddParameter("profileUid", model.Profile.ProfileUid)
 				.AddParameter("ruleUid", model.Rule.RuleUid)
 				.AddParameter("scheduledUid", model.ScheduledUid)
 				.AddParameter("tweetText", model.Text)

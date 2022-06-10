@@ -1,11 +1,17 @@
+using hrvster.Core.Clients.Publishers;
 using hrvster.Extensions.Configuration;
 using hrvster.Infrastructure;
-using hrvster.Infrastructure.Scheduling;
+using hrvster.Models;
+using MediatR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 using Serilog;
 using System;
+using Tweetinvi;
+using Tweetinvi.Auth;
+using Tweetinvi.Models;
 
 namespace hrvster.Services
 {
@@ -43,9 +49,71 @@ namespace hrvster.Services
 					services.AddHostedService<HrvsterHostedServices>();
 					services.AddSingleton<IService, ScheduledTweetService>();
 					services.AddSingleton<IService, TestService>();
+					services.AddRepositories();
 
 					AddDatabaseAndRepositories(services);
+
+					AddMediator(services);
+					AddPublishers(services);
+					AddTwitterClient(services);
 				});
+
+		private static void AddTwitterClient(IServiceCollection services)
+		{
+			services.Configure<TwitterAccount>(Configuration);
+			services.Configure<TwitterAccount>(Configuration.GetSection(TwitterAccount.SectionName));
+			services.AddTransient(p => p.GetService<IOptions<TwitterAccount>>().Value);
+
+			services.Configure<hrvster.Models.Options.FileServerOptions>(Configuration);
+			services.Configure<hrvster.Models.Options.FileServerOptions>(Configuration.GetSection(hrvster.Models.Options.FileServerOptions.SectionName));
+			services.AddTransient(p => p.GetService<IOptions<Models.Options.FileServerOptions>>().Value);
+
+			services.AddTransient<ITwitterClient, TwitterClient>(c => GenerateTwitterClient(c));
+
+			services.AddSingleton<IAuthenticationRequestStore, LocalAuthenticationRequestStore>();
+		}
+
+		private static TwitterClient GenerateTwitterClient(IServiceProvider c)
+		{
+			var twitterAccount = c.GetService<TwitterAccount>();
+			var userCredentials = new TwitterCredentials(
+				twitterAccount.ConsumerKey,
+				twitterAccount.ConsumerSecret,
+				twitterAccount.AccessToken,
+				twitterAccount.AccessTokenSecret);
+
+			var client = new TwitterClient(userCredentials);
+			client.Config.RateLimitTrackerMode = RateLimitTrackerMode.TrackAndAwait;
+
+			return client;
+		}
+
+		private static void AddPublishers(IServiceCollection services)
+		{
+			services.AddTransient<TwitterPublisher>();
+			services.AddTransient<FacebookPublisher>();
+			services.AddTransient<InstagramPublisher>();
+
+			services.AddTransient<Func<PublisherType, Core.Clients.Publishers.IPublisher>>(sp => serviceTypeName =>
+			{
+				switch (serviceTypeName)
+				{
+					case PublisherType.Twitter:
+						return sp.GetService<TwitterPublisher>();
+					case PublisherType.Facebook:
+						return sp.GetService<FacebookPublisher>();
+					case PublisherType.Instagram:
+						return sp.GetService<InstagramPublisher>();
+					default:
+						return sp.GetService<TwitterPublisher>();
+				}
+			});
+		}
+
+		private static void AddMediator(IServiceCollection services)
+		{
+			services.AddMediatR(typeof(Program));
+		}
 
 		private static void AddDatabaseAndRepositories(IServiceCollection services)
 		{
@@ -53,17 +121,17 @@ namespace hrvster.Services
 			{
 				return new MySqlDatabase("hrvster", Configuration);
 			});
-			services.AddTransient<IScheduledSweepRuleTweetsRepository, ScheduledSweepRuleTweetsRepository>();
-			AddServiceRepositoryAndServices(services);
+
+			LoadServices(services);
 		}
 
-		private static void AddServiceRepositoryAndServices(IServiceCollection services)
+		private static void LoadServices(IServiceCollection services)
 		{
-			services.AddTransient<IServicesRepository, ServicesRepository>();
-
 			var sp = services.BuildServiceProvider();
 			var repository = sp.GetService<IServicesRepository>();
+
 			var serviceContainer = repository.GetServicesEnabledAsync();
+
 			services.AddServiceContainer(serviceContainer);
 		}
 	}

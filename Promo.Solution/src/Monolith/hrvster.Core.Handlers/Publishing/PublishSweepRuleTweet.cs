@@ -4,8 +4,10 @@ using hrvster.Core.Requests.WebRequests.Publishing;
 using hrvster.Extensions;
 using hrvster.Infrastructure;
 using hrvster.Infrastructure.Core;
+using hrvster.Infrastructure.Extensions;
 using hrvster.Infrastructure.Scheduling;
 using hrvster.Models;
+using hrvster.Models.Profiles;
 using hrvster.Models.Scheduling;
 using MediatR;
 using Microsoft.Extensions.Logging;
@@ -125,6 +127,10 @@ namespace hrvster.Core.Handlers.Publishing
 			await _repository.CreateScheduledSweepRuleTweetAsync(new ScheduledSweepRuleTweet
 			{
 				ScheduledUid = scheduledUid,
+				Profile = new Profile
+				{
+					ProfileUid = message.Profile.ProfileUid
+				},
 				Rule = new Rule
 				{
 					RuleUid = ruleUid

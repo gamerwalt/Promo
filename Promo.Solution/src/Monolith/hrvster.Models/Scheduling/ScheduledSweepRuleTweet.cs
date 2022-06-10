@@ -1,4 +1,5 @@
-﻿using System;
+﻿using hrvster.Models.Profiles;
+using System;
 using System.Collections.Generic;
 
 namespace hrvster.Models.Scheduling
@@ -20,5 +21,6 @@ namespace hrvster.Models.Scheduling
 		public DateTime UpdatedDate { get; set; }
 		public Rule Rule { get; set; }
 		public List<ScheduledSweepRuleTweetImage> Images { get; set; }
+		public Profile Profile { get; set; }
 	}
 }

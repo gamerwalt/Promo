@@ -1,4 +1,6 @@
-﻿using hrvster.Models;
+﻿using hrvster.Infrastructure.Extensions;
+using hrvster.Models;
+using hrvster.Models.Profiles;
 using hrvster.Models.Scheduling;
 using MySqlConnector;
 using System;
@@ -12,6 +14,7 @@ namespace hrvster.Infrastructure.Scheduling
 	{
 		Task<List<ScheduledSweepRuleTweet>> GetAllToSendAsync(DateTime utcNow);
 		Task<List<ScheduledSweepRuleTweetImage>> GetAllImagesAsync(int scheduledId);
+		Task UpdateStatus(ScheduledSweepRuleTweet scheduledTweet, ScheduledStatus status);
 	}
 
 	public class ScheduledSweepRuleTweetsRepository : IScheduledSweepRuleTweetsRepository
@@ -90,8 +93,27 @@ namespace hrvster.Infrastructure.Scheduling
 				ScheduledTime = reader.GetDateTime("scheduled_time"),
 				ScheduledTimeUtc = reader.GetDateTime("scheduled_time_utc"),
 				Status = (ScheduledStatus)Enum.Parse(typeof(ScheduledStatus), reader.GetString("status")),
-				CreatedDate = reader.GetDateTime("created_date")
+				CreatedDate = reader.GetDateTime("created_date"),
+				Profile = new Profile
+				{
+					ProfileUid = reader.GetGuid("profile_uid"),
+					AccessToken = reader.GetString("access_token"),
+					AccessTokenSecret = reader.GetString("access_token_secret")
+				}
 			};
+		}
+
+		public async Task UpdateStatus(ScheduledSweepRuleTweet scheduledTweet, ScheduledStatus status)
+		{
+			using var conn = new MySqlConnection(_database.GetConnectionString());
+			var command = conn.CreateCommand();
+			command.CommandText = "scheduled_sweep_rule_tweet_update_status";
+			command.CommandType = CommandType.StoredProcedure;
+			command.AddParameter("scheduledUid", scheduledTweet.ScheduledUid)
+				.AddParameter("newStatus", status);
+
+			await conn.OpenAsync();
+			await command.ExecuteNonQueryAsync();
 		}
 	}
 }

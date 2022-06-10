@@ -2,7 +2,7 @@
 using System;
 using System.Data.Common;
 
-namespace hrvster.Infrastructure
+namespace hrvster.Infrastructure.Extensions
 {
     public static class DbCommandExtensions
     {

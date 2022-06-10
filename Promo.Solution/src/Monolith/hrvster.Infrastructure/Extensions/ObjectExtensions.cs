@@ -1,7 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System;
 
-namespace hrvster.Extensions
+namespace hrvster.Infrastructure.Extensions
 {
     public static class ObjectExtensions
     {
