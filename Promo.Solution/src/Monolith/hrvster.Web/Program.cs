@@ -4,6 +4,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Serilog;
 using System;
+using System.IO;
 
 namespace hrvster.Web
 {
@@ -32,6 +33,7 @@ namespace hrvster.Web
 
 					webBuilder
 						.UseStartup<Startup>()
+						.UseContentRoot(Directory.GetCurrentDirectory())
 						.UseSerilog(ConfigureSerilog, preserveStaticLogger: true, true);
 				});
 

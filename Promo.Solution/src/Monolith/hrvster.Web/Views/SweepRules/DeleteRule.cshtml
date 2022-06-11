@@ -1,0 +1,54 @@
+﻿@using hrvster.Core
+@inject LinkBuilder linkBuilder
+
+@model DeleteSweepRule
+
+@{
+    ViewData["Title"] = $"Delete Rule";
+}
+<div class="Row">
+    <div><h4><strong>Are you sure you want to delete this rule?</strong></h4></div>
+</div>
+<hr />
+<form 
+asp-controller="SweepRules" 
+asp-action="DeleteRule" 
+asp-route-ruleUid=@Model.Rule.RuleUid
+asp-route-sweepUid=@Model.SweepstakeUid
+asp-route-returnAction=@Model.ReturnAction
+asp-route-returnController=@Model.ReturnController
+enctype="multipart/form-data"
+class="form-horizontal form-material mx-2">
+    @Html.HiddenFor(m => m.SweepstakeId)
+    @Html.HiddenFor(m => m.SweepstakeName)
+    @Html.HiddenFor(m => m.SweepstakeUid)
+    @Html.HiddenFor(m => m.ReturnAction)
+    @Html.HiddenFor(m => m.ReturnController)
+    @Html.HiddenFor(m => m.Rule)
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header"><strong>Sweep Rule</strong></div>
+                <div class="card-body">
+                    <p><strong>Hashtag</strong>: @Model.Rule.WatchValue</p>
+                    <p>
+                        <strong>External Id</strong>: 
+                        @if(@Model.Rule.ExternalId == "0")
+                        {
+                            <span>Tweet is Scheduled</span>
+                        }
+                        else
+                        {
+                            <a href="@linkBuilder.BuildTwitterLink(@Model.Rule.ExternalId).Result" target="_blank">@Model.Rule.ExternalId</a>
+                        }
+                    </p>
+                </div>
+                <div class="card-footer">
+                    <div class="col-md-12">
+                        <button class="btn btn-sm btn-danger" type="submit">Delete</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

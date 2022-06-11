@@ -21,14 +21,14 @@ namespace hrvster.Core.Handlers.Publishing
 	public class PublishSweepRuleTweet : IRequestHandler<PublishSweepRuleTweetRequest, bool>
 	{
 		private readonly ILogger<PublishSweepRuleTweet> _logger;
-		private readonly Func<PublisherType, Clients.Publishers.IPublisher> _publisherResolver;
+		private readonly Func<ExternalClientType, Clients.Publishers.IExternalClient> _publisherResolver;
 		private readonly IMediator _mediator;
 		private readonly ISweepTweetSchedulerRepository _repository;
 		private readonly IWatchTypesRepository _watchTypesRepository;
 
 		public PublishSweepRuleTweet(
 			ILoggerFactory loggerFactory,
-			Func<PublisherType, Clients.Publishers.IPublisher> publisherResolver,
+			Func<ExternalClientType, Clients.Publishers.IExternalClient> publisherResolver,
 			IMediator mediator,
 			ISweepTweetSchedulerRepository repository,
 			IWatchTypesRepository watchTypesRepository)
@@ -64,7 +64,7 @@ namespace hrvster.Core.Handlers.Publishing
 				return await SaveScheduledTweetAsync(message, request.MustBeFollowing);
 			}
 
-			var twitterPublisher = _publisherResolver(PublisherType.Twitter);
+			var twitterPublisher = _publisherResolver(ExternalClientType.Twitter);
 			var tweetId = await twitterPublisher.PublishAsync(message);
 
 			if (string.IsNullOrWhiteSpace(tweetId))

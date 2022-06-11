@@ -72,14 +72,20 @@
                                                     <span>False</span>
                                                 }
                                             </td>
-                                            <td><a 
-                                                class="btn btn-link btn-sm"
-                                                asp-controller="SweepRules"
-                                                asp-action="Delete"
-                                                asp-route-sweepUid="@Model.Sweepstake.SweepUid"
-                                                asp-route-actionName=@ViewContext.RouteData.Values["action"]
-                                                asp-route-controllerName=@ViewContext.RouteData.Values["controller"]>
-                                                Delete</a></td>
+                                            <td>
+                                                @if(@rule.ExternalId != "0")
+                                                {
+                                                     <a 
+                                                    class="btn btn-link btn-sm"
+                                                    asp-controller="SweepRules"
+                                                    asp-action="DeleteRule"
+                                                    asp-route-sweepUid="@Model.Sweepstake.SweepUid"
+                                                    asp-route-ruleUid="@rule.RuleUid"
+                                                    asp-route-actionName=@ViewContext.RouteData.Values["action"]
+                                                    asp-route-controllerName=@ViewContext.RouteData.Values["controller"]>
+                                                    Delete</a>
+                                                }
+                                            </td>
                                         </tr>
                                     }
                                 </tbody>

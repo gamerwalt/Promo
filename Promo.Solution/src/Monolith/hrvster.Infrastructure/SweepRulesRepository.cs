@@ -17,6 +17,7 @@ namespace hrvster.Infrastructure
 		Task<IEnumerable<Models.Rule>> GetRuleByHashTagAsync(string text);
 		Task<IEnumerable<Models.Rule>> GetSweepRuleAsync(Guid sweepUid);
 		Task UpdateRuleExternalId(Guid ruleUid, string externalId);
+		Task DeleteAsync(Guid ruleUid);
 	}
 
 	public class SweepRulesRepository : ISweepRulesRepository
@@ -228,6 +229,18 @@ namespace hrvster.Infrastructure
 			command.CommandType = CommandType.StoredProcedure;
 			command.AddParameter("ruleUid", ruleUid)
 				.AddParameter("externalId", externalId);
+
+			await conn.OpenAsync();
+			await command.ExecuteNonQueryAsync();
+		}
+
+		public async Task DeleteAsync(Guid ruleUid)
+		{
+			using var conn = new MySqlConnection(_database.GetConnectionString());
+			var command = conn.CreateCommand();
+			command.CommandText = "sweep_rule_delete";
+			command.CommandType = CommandType.StoredProcedure;
+			command.AddParameter("ruleUid", ruleUid);
 
 			await conn.OpenAsync();
 			await command.ExecuteNonQueryAsync();

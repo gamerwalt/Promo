@@ -16,13 +16,13 @@ namespace hrvster.Services.Handlers
 	public class PublishScheduledTweets : AsyncRequestHandler<PublishScheduledTweetsRequest>
 	{
 		private readonly ILogger<PublishScheduledTweets> _logger;
-		private readonly Func<PublisherType, Core.Clients.Publishers.IPublisher> _publisherResolver;
+		private readonly Func<ExternalClientType, Core.Clients.Publishers.IExternalClient> _publisherResolver;
 		private readonly IScheduledSweepRuleTweetsRepository _scheduledSweepRuleTweetsRepository;
 		private readonly ISweepRulesRepository _sweepRulesRepository;
 
 		public PublishScheduledTweets(
 			ILoggerFactory loggerFactory,
-			Func<PublisherType, Core.Clients.Publishers.IPublisher> publisherResolver,
+			Func<ExternalClientType, Core.Clients.Publishers.IExternalClient> publisherResolver,
 			IScheduledSweepRuleTweetsRepository scheduledSweepRuleTweetsRepository,
 			ISweepRulesRepository sweepRulesRepository)
 		{
@@ -34,7 +34,7 @@ namespace hrvster.Services.Handlers
 
 		protected override async Task Handle(PublishScheduledTweetsRequest request, CancellationToken cancellationToken)
 		{
-			var twitterPublisher = _publisherResolver(PublisherType.Twitter);
+			var twitterPublisher = _publisherResolver(ExternalClientType.Twitter);
 
 			foreach (var scheduledTweet in request.ScheduledSweepRuleTweets)
 			{

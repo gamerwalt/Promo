@@ -21,7 +21,7 @@ namespace hrvster.Services
 
 		public static void Main(string[] args)
 		{
-			var env = Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT");
+			var env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
 
 			Configuration = new ConfigurationBuilder()
 				.AddJsonFile("appsettings.json")
@@ -68,12 +68,12 @@ namespace hrvster.Services
 			services.Configure<hrvster.Models.Options.FileServerOptions>(Configuration.GetSection(hrvster.Models.Options.FileServerOptions.SectionName));
 			services.AddTransient(p => p.GetService<IOptions<Models.Options.FileServerOptions>>().Value);
 
-			services.AddTransient<ITwitterClient, TwitterClient>(c => GenerateTwitterClient(c));
+			services.AddTransient<ITwitterClient, Tweetinvi.TwitterClient>(c => GenerateTwitterClient(c));
 
 			services.AddSingleton<IAuthenticationRequestStore, LocalAuthenticationRequestStore>();
 		}
 
-		private static TwitterClient GenerateTwitterClient(IServiceProvider c)
+		private static Tweetinvi.TwitterClient GenerateTwitterClient(IServiceProvider c)
 		{
 			var twitterAccount = c.GetService<TwitterAccount>();
 			var userCredentials = new TwitterCredentials(
@@ -82,7 +82,7 @@ namespace hrvster.Services
 				twitterAccount.AccessToken,
 				twitterAccount.AccessTokenSecret);
 
-			var client = new TwitterClient(userCredentials);
+			var client = new Tweetinvi.TwitterClient(userCredentials);
 			client.Config.RateLimitTrackerMode = RateLimitTrackerMode.TrackAndAwait;
 
 			return client;
@@ -90,22 +90,22 @@ namespace hrvster.Services
 
 		private static void AddPublishers(IServiceCollection services)
 		{
-			services.AddTransient<TwitterPublisher>();
-			services.AddTransient<FacebookPublisher>();
-			services.AddTransient<InstagramPublisher>();
+			services.AddTransient<Core.Clients.Publishers.TwitterClient>();
+			services.AddTransient<FacebookClient>();
+			services.AddTransient<InstagramClient>();
 
-			services.AddTransient<Func<PublisherType, Core.Clients.Publishers.IPublisher>>(sp => serviceTypeName =>
+			services.AddTransient<Func<ExternalClientType, Core.Clients.Publishers.IExternalClient>>(sp => serviceTypeName =>
 			{
 				switch (serviceTypeName)
 				{
-					case PublisherType.Twitter:
-						return sp.GetService<TwitterPublisher>();
-					case PublisherType.Facebook:
-						return sp.GetService<FacebookPublisher>();
-					case PublisherType.Instagram:
-						return sp.GetService<InstagramPublisher>();
+					case ExternalClientType.Twitter:
+						return sp.GetService<Core.Clients.Publishers.TwitterClient>();
+					case ExternalClientType.Facebook:
+						return sp.GetService<FacebookClient>();
+					case ExternalClientType.Instagram:
+						return sp.GetService<InstagramClient>();
 					default:
-						return sp.GetService<TwitterPublisher>();
+						return sp.GetService<Core.Clients.Publishers.TwitterClient>();
 				}
 			});
 		}

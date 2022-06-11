@@ -1,5 +1,4 @@
 ﻿using hrvster.Core.Clients.Common;
-using hrvster.Extensions;
 using hrvster.Infrastructure.Extensions;
 using hrvster.Models;
 using Microsoft.Extensions.Logging;
@@ -8,23 +7,37 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using Tweetinvi;
-using Tweetinvi.Models;
 using Tweetinvi.Parameters;
 
 namespace hrvster.Core.Clients.Publishers
 {
-	public class TwitterPublisher : IPublisher
+	public class TwitterClient : IExternalClient
 	{
-		private readonly ILogger<TwitterPublisher> _logger;
+		private readonly ILogger<TwitterClient> _logger;
 		private readonly TwitterAccount _twitterAccount;
 
-		private TwitterClient _twitterClient;
+		private Tweetinvi.TwitterClient _twitterClient;
 
-		public TwitterPublisher(ILoggerFactory loggerFactory, TwitterAccount twitterAccount)
+		public TwitterClient(ILoggerFactory loggerFactory, TwitterAccount twitterAccount)
 		{
-			_logger = loggerFactory.CreateLogger<TwitterPublisher>();
+			_logger = loggerFactory.CreateLogger<TwitterClient>();
 			_twitterAccount = twitterAccount;
+		}
+
+		public async Task DeleteAsync(string externalId, string accessToken, string accessTokenSecret)
+		{
+			BuildTwitterClient(accessToken, accessTokenSecret);
+
+			var tweet = await _twitterClient.Tweets.GetTweetAsync(Convert.ToInt64(externalId));
+
+			if (tweet == null)
+			{
+				_logger.LogInformation("Unable to retrieve the tweet of the external id: {externalId}", externalId);
+
+				return;
+			}
+
+			await _twitterClient.Tweets.DestroyTweetAsync(tweet);
 		}
 
 		public async Task<string> PublishAsync(Message message)
@@ -33,24 +46,17 @@ namespace hrvster.Core.Clients.Publishers
 				message.Text,
 				message.Profile.ProfileUid);
 
-			_twitterClient = new TwitterClient(_twitterAccount.ConsumerKey, _twitterAccount.ConsumerSecret, message.Profile.AccessToken, message.Profile.AccessTokenSecret);
+			BuildTwitterClient(message.Profile.AccessToken, message.Profile.AccessTokenSecret);
 
-			var mediaIds = default(List<long>);
-
-			if (message.Media?.Count() > 0)
-			{
-				_logger.LogInformation("Uploading the media for the tweet for Profile with uid {profileUid}", message.Profile.ProfileUid);
-				
-				mediaIds = await UploadMedia(message);
-			}
+			var mediaIds = await UploadMedia(message);
 
 			var tweet = await _twitterClient.Tweets.PublishTweetAsync(new PublishTweetParameters
 			{
 				Text = message.Text,
-				MediaIds = message.Media.Count() > 0 ? mediaIds : null,
+				MediaIds = message.Media.Any() ? mediaIds : null,
 			});
 
-			if(tweet == null)
+			if (tweet == null)
 			{
 				_logger.LogError("Unable to publish the tweet {message} received.", message.AsJson());
 
@@ -60,8 +66,22 @@ namespace hrvster.Core.Clients.Publishers
 			return tweet?.IdStr;
 		}
 
+		private void BuildTwitterClient(string accessToken, string accessTokenSecret)
+		{
+			_twitterClient = new Tweetinvi.TwitterClient(
+				_twitterAccount.ConsumerKey,
+				_twitterAccount.ConsumerSecret,
+				accessToken,
+				accessTokenSecret);
+		}
+
 		private async Task<List<long>> UploadMedia(Message message)
 		{
+			if (message.Media?.Count() > 0)
+			{
+				_logger.LogInformation("Uploading the media for the tweet for Profile with uid {profileUid}", message.Profile.ProfileUid);
+			}
+
 			var mediaIds = new List<long>();
 			foreach (var path in message.Media)
 			{

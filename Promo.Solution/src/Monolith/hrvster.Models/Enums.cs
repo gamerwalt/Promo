@@ -1,6 +1,6 @@
 ﻿namespace hrvster.Models
 {
-	public enum PublisherType
+	public enum ExternalClientType
 	{
 		Twitter,
 		Facebook,

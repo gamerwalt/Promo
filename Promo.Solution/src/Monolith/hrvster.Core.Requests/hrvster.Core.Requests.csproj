@@ -18,8 +18,4 @@
     <ProjectReference Include="..\hrvster.Models\hrvster.Models.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Scheduling\" />
-  </ItemGroup>
-
 </Project>

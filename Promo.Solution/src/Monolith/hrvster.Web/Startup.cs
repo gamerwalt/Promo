@@ -83,22 +83,22 @@ namespace hrvster.Web
 
 		private void AddPublishers(IServiceCollection services)
 		{
-			services.AddScoped<TwitterPublisher>();
-			services.AddScoped<FacebookPublisher>();
-			services.AddScoped<InstagramPublisher>();
+			services.AddScoped<Core.Clients.Publishers.TwitterClient>();
+			services.AddScoped<FacebookClient>();
+			services.AddScoped<InstagramClient>();
 
-			services.AddTransient<Func<PublisherType, Core.Clients.Publishers.IPublisher>>(sp => serviceTypeName =>
+			services.AddTransient<Func<ExternalClientType, Core.Clients.Publishers.IExternalClient>>(sp => serviceTypeName =>
 			{
 				switch (serviceTypeName)
 				{
-					case PublisherType.Twitter:
-						return sp.GetService<TwitterPublisher>();
-					case PublisherType.Facebook:
-						return sp.GetService<FacebookPublisher>();
-					case PublisherType.Instagram:
-						return sp.GetService<InstagramPublisher>();
+					case ExternalClientType.Twitter:
+						return sp.GetService<Core.Clients.Publishers.TwitterClient>();
+					case ExternalClientType.Facebook:
+						return sp.GetService<FacebookClient>();
+					case ExternalClientType.Instagram:
+						return sp.GetService<InstagramClient>();
 					default:
-						return sp.GetService<TwitterPublisher>();
+						return sp.GetService<Core.Clients.Publishers.TwitterClient>();
 				}
 			});
 		}
@@ -210,12 +210,12 @@ namespace hrvster.Web
 			services.Configure<hrvster.Models.Options.FileServerOptions>(Configuration.GetSection(hrvster.Models.Options.FileServerOptions.SectionName));
 			services.AddTransient(p => p.GetService<IOptions<hrvster.Models.Options.FileServerOptions>>().Value);
 
-			services.AddTransient<ITwitterClient, TwitterClient>(c => GenerateTwitterClient(c));
+			services.AddTransient<ITwitterClient, Tweetinvi.TwitterClient>(c => GenerateTwitterClient(c));
 
 			services.AddSingleton<IAuthenticationRequestStore, LocalAuthenticationRequestStore>();
 		}
 
-		private TwitterClient GenerateTwitterClient(IServiceProvider c)
+		private Tweetinvi.TwitterClient GenerateTwitterClient(IServiceProvider c)
 		{
 			var twitterAccount = c.GetService<TwitterAccount>();
 			var userCredentials = new TwitterCredentials(
@@ -224,7 +224,7 @@ namespace hrvster.Web
 				twitterAccount.AccessToken,
 				twitterAccount.AccessTokenSecret);
 
-			var client = new TwitterClient(userCredentials);
+			var client = new Tweetinvi.TwitterClient(userCredentials);
 			client.Config.RateLimitTrackerMode = RateLimitTrackerMode.TrackAndAwait;
 
 			return client;

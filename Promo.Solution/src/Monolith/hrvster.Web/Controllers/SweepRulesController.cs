@@ -1,4 +1,5 @@
-﻿using hrvster.Core.Authentication;
+﻿using AutoMapper;
+using hrvster.Core.Authentication;
 using hrvster.Core.Clients;
 using hrvster.Core.Requests;
 using hrvster.Core.Requests.Notifications;
@@ -28,21 +29,24 @@ namespace hrvster.Web.Controllers
 		private readonly ILogger<SweepRulesController> _logger;
 		private readonly IMediator _mediator;
 		private readonly IWatchTypeProvider _watchTypeProvider;
-		private readonly Func<PublisherType, Core.Clients.Publishers.IPublisher> _publisherResolver;
+		private readonly Func<ExternalClientType, Core.Clients.Publishers.IExternalClient> _publisherResolver;
 		private readonly HrvsterUser _hrvsterUser;
+		private readonly IMapper _mapper;
 
 		public SweepRulesController(
 			ILoggerFactory loggerFactory,
 			IMediator mediator,
 			IWatchTypeProvider watchTypeProvider,
-			Func<PublisherType, Core.Clients.Publishers.IPublisher> publisherResolver,
-			HrvsterUser hrvsterUser)
+			Func<ExternalClientType, Core.Clients.Publishers.IExternalClient> publisherResolver,
+			HrvsterUser hrvsterUser,
+			IMapper mapper)
 		{
 			_logger = loggerFactory.CreateLogger<SweepRulesController>();
 			_mediator = mediator;
 			_watchTypeProvider = watchTypeProvider;
 			_publisherResolver = publisherResolver;
 			_hrvsterUser = hrvsterUser;
+			_mapper = mapper;
 		}
 
 		public async Task<IActionResult> View(Guid sweepUid)
@@ -52,31 +56,69 @@ namespace hrvster.Web.Controllers
 			return View(sweepRule);
 		}
 
-		//[HttpGet]
-		//public async Task<IActionResult> Create(Guid sweepUid, string actionName, string controllerName)
-		//{
-		//	var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
-		//	if (sweep == null)
-		//	{
-		//		_logger.LogError("Could not find sweepstake with uid: {sweepUid}", sweepUid);
+		[HttpGet]
+		public async Task<IActionResult> DeleteRule(Guid sweepUid, Guid ruleUid, string actionName, string controllerName)
+		{
+			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
+			if (sweep == null)
+			{
+				_logger.LogError("Could not find sweepstake with uid: {sweepUid}", sweepUid);
 
-		//		return new NotFoundObjectResult($"Could not find sweepstake with uid: {sweepUid} ");
-		//	}
-		//	var watchTypes = await _mediator.Send(new GetWatchTypeRequest());
+				return new NotFoundObjectResult($"Could not find sweepstake with uid: {sweepUid} ");
+			}
 
-		//	var model = new CreateSweepRule
-		//	{
-		//		SweepstakeId = sweep.SweepId,
-		//		SweepstakeUid = sweep.SweepUid,
-		//		SweepstakeName = sweep.Name,
-		//		WatchTypes = watchTypes.Select(a => new SelectListItem() { Text = a.WatchTypeName, Value = a.WatchTypeId.ToString() }).ToList(),
-		//		ReturnAction = actionName ?? HttpContext.Request.RouteValues["action"].ToString(),
-		//		ReturnController = controllerName ?? HttpContext.Request.RouteValues["controller"].ToString(),
-		//		Campaign = sweep.Campaign
-		//	};
+			var rule = await _mediator.Send(new GetRule(ruleUid));
+			if(rule == null)
+			{
+				_logger.LogError("Could not find the rule with uid: {ruleUid}", ruleUid);
 
-		//	return View(model);
-		//}
+				return new NotFoundObjectResult($"Could not find rule with uid: {ruleUid} ");
+			}
+
+			var model = new DeleteSweepRule
+			{
+				SweepstakeId = sweep.SweepId,
+				SweepstakeName = sweep.Name,
+				SweepstakeUid = sweep.SweepUid,
+				ReturnAction = actionName,
+				ReturnController = controllerName,
+				Rule = _mapper.Map<hrvster.Models.WebModels.Sweeps.Rule>(rule)
+			};
+
+			return View(model);
+		}
+
+		[HttpPost]
+		public async Task<IActionResult> DeleteRule(Guid sweepUid, Guid ruleUid, string returnAction, string returnController, DeleteSweepRule form)
+		{
+			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
+			if (sweep == null)
+			{
+				_logger.LogError("Could not find sweepstake with uid: {sweepUid}", sweepUid);
+
+				return new NotFoundObjectResult($"Could not find sweepstake with uid: {sweepUid} ");
+			}
+
+			var rule = await _mediator.Send(new GetRule(ruleUid));
+			if (rule == null)
+			{
+				_logger.LogError("Could not find the rule with uid: {ruleUid}", ruleUid);
+
+				return new NotFoundObjectResult($"Could not find rule with uid: {ruleUid} ");
+			}
+
+			if (ModelState.IsValid)
+			{
+				await _mediator.Send(new DeleteSweepTweetRuleRequest(sweepUid, ruleUid, _hrvsterUser.UserUid));
+
+				return RedirectToAction(returnAction, returnController, new
+				{
+					sweepUid = sweepUid
+				});
+			}
+
+			return View(form);
+		}
 
 		[HttpGet]
 		public async Task<IActionResult> SelectProvider(Guid sweepUid, string actionName, string controllerName)
