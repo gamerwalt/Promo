@@ -2,10 +2,6 @@
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
-    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
-	  <DockerComposeProjectPath>..\..\docker-compose.dcproj</DockerComposeProjectPath>
-    <DockerfileContext>..\..</DockerfileContext>
-    <UserSecretsId>2c9a0454-d8f8-4d26-a509-e065692c15e6</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
