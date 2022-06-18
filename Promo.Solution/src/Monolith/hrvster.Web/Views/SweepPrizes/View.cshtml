@@ -1,6 +1,82 @@
 ﻿@using hrvster.Models.WebModels.Sweeps
 
-@model ViewSweepPrize
+@model SweepPrizes
 @{
-    //ViewData["Title"] = $"{@Model.Sweepstake.Name}'s Rules";
+    ViewData["Title"] = $"{@Model.SweepName}'s Prizes";
+    var counter = 0;
 }
+<div class="row">
+    <div class="col-lg-12">
+        <h4><strong>@Model.SweepName's Prizes</strong></h4>
+    </div>
+</div>
+<hr />
+@if(Model.Prizes.Count() < Model.WinnerCount)
+{
+    <div class="row">
+        <div class="col-lg-12">
+            <a class=" btn btn-primary" 
+            asp-action="Create" 
+            asp-controller="SweepPrizes" 
+            asp-route-sweepUid="@Model.SweepUid"
+            asp-route-campaignUid="@Model.CampaignUid"
+            asp-route-returnAction=@Model.ReturnAction
+            asp-route-returnController=@Model.ReturnController>Create Prize</a>
+        </div>
+    </div>
+}
+else
+{
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="alert alert-info">We have all the prize information we need for the winners</div>
+        </div>
+    </div>
+}
+
+<hr />
+<div class="row">
+    @foreach(var prize in @Model.Prizes)
+    {
+        counter++;
+        <div class="col-md-4" style="margin-bottom: 0.5em">
+            <div class="card">
+                <div class="card-header"><strong>Prize Position: @prize.GetPrizePositionLiteral()</strong></div>
+                <div class="card-body">
+                    <div><strong>Name</strong>: @prize.PrizeName</div>
+                    <div><strong>Description</strong>: @prize.PrizeDescription</div>
+                    <div><strong>Value</strong>: @prize.PrizeValue</div>
+                </div>
+                <div class="card-footer">
+                    <a 
+                    class="btn btn-primary btn-sm"
+                    asp-controller="SweepPrizes"
+                    asp-action="EditPrize"
+                    asp-route-prizeUid="@prize.PrizeUid"
+                    asp-route-sweepUid="@Model.SweepUid"
+                    asp-route-campaignUid="@Model.CampaignUid"
+                    asp-route-actionName=@ViewContext.RouteData.Values["action"]
+                    asp-route-controllerName=@ViewContext.RouteData.Values["controller"]>
+                    Edit
+                    </a>
+                    <a 
+                    class="btn btn-danger btn-sm"
+                    asp-controller="SweepPrizes"
+                    asp-action="DeletePrize"
+                    asp-route-prizeUid="@prize.PrizeUid"
+                    asp-route-sweepUid="@Model.SweepUid"
+                    asp-route-campaignUid="@Model.CampaignUid"
+                    asp-route-actionName=@ViewContext.RouteData.Values["action"]
+                    asp-route-controllerName=@ViewContext.RouteData.Values["controller"]>
+                    Delete
+                    </a>
+                </div>
+            </div>
+        </div>
+        if(counter == 3)
+        {
+            counter = 0;
+            <div class="row"><div class="col-lg-12"></div></div>
+        }
+    }
+</div>

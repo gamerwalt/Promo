@@ -1,0 +1,86 @@
+﻿@using hrvster.Models.WebModels
+@model CreateSweepPrize
+
+@{
+    ViewData["Title"] = $"Create Prize for {@Model.SweepName}";
+}
+<div class="row">
+    <div class="col-md-12">
+        <h4><strong>Create a prize for the sweepstakes @Model.SweepName</strong></h4>
+    </div>
+</div>
+<hr />
+@if(Model.DisableAll)
+{
+    @Html.ValidationMessage("CustomError")
+}
+else
+{
+    <div class="row">
+        <div class="col-lg-6">
+            <form 
+            asp-controller="SweepPrizes" 
+            asp-action="Create" 
+            asp-route-sweepUid=@Model.SweepUid
+            asp-route-returnAction=@Model.ReturnAction
+            asp-route-returnController=@Model.ReturnController
+            enctype="multipart/form-data"
+            class="form-horizontal form-material mx-2">
+                @Html.HiddenFor(m => m.SweepName)
+                @Html.HiddenFor(m => m.SweepId)
+                @Html.HiddenFor(m => m.SweepUid)
+                @Html.HiddenFor(m => m.ReturnAction)
+                @Html.HiddenFor(m => m.ReturnController)
+                @Html.HiddenFor(m => m.Position)
+                <div class="card">
+                    <div class="card-header"><strong>Create New Prize</strong></div>
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label class="col-md-12">Winner Position:</label>
+                            <div class="col-md-3">
+                                <input 
+                                    class="form-control form-control-lg" 
+                                    id="Position" 
+                                    asp-for="Position" disabled/>
+                                <span asp-validation-for="Position"></span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-md-12">Name:</label>
+                            <div class="col-md-8">
+                                <input 
+                                    class="form-control form-control-lg" 
+                                    id="PrizeName" 
+                                    asp-for="PrizeName"/>
+                                <span asp-validation-for="PrizeName"></span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-md-12">Description:</label>
+                            <div class="col-md-12">
+                                <input 
+                                    class="form-control form-control-lg" 
+                                    id="PrizeDescription" 
+                                    asp-for="PrizeDescription"/>
+                                <span asp-validation-for="PrizeDescription"></span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-md-12">Montetary Value:</label>
+                            <div class="col-md-5">
+                                <input 
+                                    class="form-control form-control-lg" 
+                                    id="MonetaryValue" 
+                                    asp-for="MonetaryValue"/>
+                                <span asp-validation-for="MonetaryValue"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <button class="btn btn-sm btn-primary" type="submit">Create Prize</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+}
