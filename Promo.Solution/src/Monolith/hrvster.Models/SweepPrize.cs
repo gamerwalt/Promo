@@ -15,6 +15,7 @@ namespace hrvster.Models
 		public string Locale { get; set; }
 		public DateTime CreatedDate { get; set; }
 		public DateTime? UpdatedDate { get; set; }
+		public Sweep Sweep { get; set; }
 
 		public string GetPrizePositionLiteral()
 		{

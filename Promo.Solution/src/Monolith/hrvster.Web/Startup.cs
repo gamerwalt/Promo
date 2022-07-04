@@ -1,3 +1,6 @@
+using AspNetCoreHero.ToastNotification;
+using AspNetCoreHero.ToastNotification.Extensions;
+using FluentValidation;
 using FluentValidation.AspNetCore;
 using hrvster.Core;
 using hrvster.Core.Authentication;
@@ -19,6 +22,8 @@ using hrvster.Infrastructure.Core;
 using hrvster.Infrastructure.Harvester;
 using hrvster.Infrastructure.Scheduling;
 using hrvster.Models;
+using hrvster.Web.Models;
+using hrvster.Web.Validation;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
@@ -60,6 +65,8 @@ namespace hrvster.Web
 				o.Filters.Add(new AutoValidateAntiforgeryTokenAttribute());
 			}).AddSessionStateTempDataProvider();
 
+			AddValidators(services);
+
 			AddAuthentication(services);
 			AddDatabaseAndRepositories(services);
 			AddMediatorAndFluentValidation(services);
@@ -79,6 +86,18 @@ namespace hrvster.Web
 
 			services.AddTransient<IWatchTypeProvider, WatchTypeProvider>();
 			services.AddTransient<ITwitterWatchTypeProvider, TwitterWatchTypeProvider>();
+
+			services.AddNotyf(config =>
+			{
+				config.DurationInSeconds = 10;
+				config.IsDismissable = true;
+				config.Position = NotyfPosition.BottomCenter;
+			});
+		}
+
+		private void AddValidators(IServiceCollection services)
+		{
+			services.AddValidatorsFromAssemblyContaining<CreateSweepPrizeValidator>();
 		}
 
 		private void AddPublishers(IServiceCollection services)
@@ -255,6 +274,8 @@ namespace hrvster.Web
 
 			app.UseAuthentication();
 			app.UseAuthorization();
+
+			app.UseNotyf();
 
 			app.UseStatusCodePages(async context =>
 			{

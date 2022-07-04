@@ -13,6 +13,8 @@ namespace hrvster.Infrastructure
 		Task CreateSweepPrizeAsync(SweepPrize sweepPrize);
 		Task<SweepPrize> GetSweepPrizeAsync(Guid prizeUid);
 		Task<IEnumerable<SweepPrize>> GetSweepPrizesAsync(Guid sweepUid);
+		Task UpdateSweepPrize(Guid prizeUid, string prizeName, string prizeDescription, decimal monetaryValue);
+		Task DeleteSweepPrizeAsync(Guid prizeUid);
 	}
 
 	public class SweepPrizesRepository : ISweepPrizesRepository
@@ -39,6 +41,18 @@ namespace hrvster.Infrastructure
 				.AddParameter("prizeValue", sweepPrize.PrizeValue)
 				.AddParameter("locale", sweepPrize.Locale)
 				.AddParameter("prizePosition", sweepPrize.PrizePosition);
+
+			await conn.OpenAsync();
+			await command.ExecuteNonQueryAsync();
+		}
+
+		public async Task DeleteSweepPrizeAsync(Guid prizeUid)
+		{
+			using var conn = new MySqlConnection(_database.GetConnectionString());
+			var command = conn.CreateCommand();
+			command.CommandText = "sweep_prizes_delete";
+			command.CommandType = CommandType.StoredProcedure;
+			command.AddParameter("prizeUid", prizeUid);
 
 			await conn.OpenAsync();
 			await command.ExecuteNonQueryAsync();
@@ -92,33 +106,40 @@ namespace hrvster.Infrastructure
 			return sweepPrizes;
 		}
 
+		public async Task UpdateSweepPrize(Guid prizeUid, string prizeName, string prizeDescription, decimal monetaryValue)
+		{
+			using var conn = new MySqlConnection(_database.GetConnectionString());
+			var command = conn.CreateCommand();
+			command.CommandText = "sweep_prizes_update";
+			command.CommandType = CommandType.StoredProcedure;
+			command
+				.AddParameter("prizeUid", prizeUid)
+				.AddParameter("prizeName", prizeName)
+				.AddParameter("prizeDescription", prizeDescription)
+				.AddParameter("prizeValue", monetaryValue);
+
+			await conn.OpenAsync();
+			await command.ExecuteNonQueryAsync();
+		}
+
 		private SweepPrize CreateSweepPrizeFrom(MySqlDataReader reader)
 		{
 			return new SweepPrize
 			{
 				PrizeId = reader.GetInt32("prize_id"),
 				PrizeUid = reader.GetGuid("prize_uid"),
-				SweepUid = reader.GetGuid("sweep_uid"),
 				Enabled = reader.GetBoolean("enabled_ind"),
 				PrizeName = reader.GetString("prize_name"),
 				PrizeDescription = reader.GetString("prize_description"),
 				Locale = reader.GetString("locale"),
 				PrizePosition = reader.GetInt32("prize_position"),
 				PrizeValue = reader.GetDecimal("prize_value"),
-				CreatedDate = reader.GetDateTime("created_date"),
-				UpdatedDate = GetNullableDateTimeValue(reader, "updated_date")
+				Sweep = new Sweep
+				{
+					SweepId = reader.GetInt32("sweep_id"),
+					SweepUid = reader.GetGuid("sweep_uid")
+				}
 			};
-		}
-
-		private DateTime? GetNullableDateTimeValue(MySqlDataReader reader, string fieldName)
-		{
-			var value = reader[fieldName].ToString();
-			if (string.IsNullOrWhiteSpace(value))
-			{
-				return null;
-			}
-
-			return reader.GetDateTime(fieldName);
 		}
 	}
 }

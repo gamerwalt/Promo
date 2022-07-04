@@ -7,6 +7,7 @@ namespace hrvster.Web.Models
 		public int SweepId { get; set; }
 		public string SweepName { get; set; }
 		public Guid SweepUid { get; set; }
+		public Guid CampaignUid { get; internal set; }
 		public string ReturnAction { get; set; }
 		public string ReturnController { get; set; }
 		public string PrizeName { get; set; }

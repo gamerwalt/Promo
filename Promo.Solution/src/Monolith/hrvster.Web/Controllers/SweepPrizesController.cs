@@ -1,4 +1,7 @@
-﻿using AutoMapper;
+﻿using AspNetCoreHero.ToastNotification.Abstractions;
+using AutoMapper;
+using FluentValidation;
+using FluentValidation.AspNetCore;
 using hrvster.Core.Authentication;
 using hrvster.Core.Requests;
 using hrvster.Core.Requests.WebRequests.Sweeps;
@@ -16,13 +19,22 @@ namespace hrvster.Web.Controllers
 	{
 		private readonly ILogger<SweepPrizesController> _logger;
 		private readonly IMediator _mediator;
+		private readonly INotyfService _notificationService;
+		private readonly IValidator<CreateSweepPrize> _createSweepPrizeValidator;
+		private readonly IValidator<EditSweepPrize> _editSweepPrizeValidator;
 
 		public SweepPrizesController(
 			ILoggerFactory loggerFactory,
-			IMediator mediator)
+			IMediator mediator,
+			INotyfService notificationService,
+			IValidator<CreateSweepPrize> createSweepPrizeValidator,
+			IValidator<EditSweepPrize> editSweepPrizeValidator)
 		{
 			_logger = loggerFactory.CreateLogger<SweepPrizesController>();
 			_mediator = mediator;
+			_notificationService = notificationService;
+			_createSweepPrizeValidator = createSweepPrizeValidator;
+			_editSweepPrizeValidator = editSweepPrizeValidator;
 		}
 
 		[HttpGet]
@@ -31,18 +43,16 @@ namespace hrvster.Web.Controllers
 			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
 			if (sweep == null)
 			{
-				_logger.LogError("Could not find sweepstake with uid: {sweepUid}", sweepUid);
-
-				return new NotFoundObjectResult($"Could not find sweepstake with uid: {sweepUid} ");
+				return LogAndRedirectBack(
+					$"Could not find sweepstake with uid: {sweepUid}",
+					sweepUid, campaignUid, returnAction, returnController);
 			}
 			var drawRule = await _mediator.Send(new GetDrawRuleForSweepsRequest(sweepUid));
 			if (drawRule == null)
 			{
-				_logger.LogError("Could not find the draw rules for the sweepstake with uid: {sweepUid}", sweepUid);
-
-				ModelState.AddModelError("CustomError", "Could not find the draw rules for the sweepstake.");
-
-				return RedirectToAction(returnAction, returnController, new { sweepUid = sweepUid });
+				return LogAndRedirectBack(
+					$"Could not find the draw rules for the sweepstake with uid: {sweepUid}",
+					sweepUid, campaignUid, returnAction, returnController);
 			}
 
 			var model = await _mediator.Send(new GetSweepPrizesBySweepUidRequest(sweepUid));
@@ -62,19 +72,17 @@ namespace hrvster.Web.Controllers
 			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
 			if (sweep == null)
 			{
-				_logger.LogError("Could not find sweepstake with uid: {sweepUid}", sweepUid);
-
-				return new NotFoundObjectResult($"Could not find sweepstake with uid: {sweepUid} ");
+				return LogAndRedirectBack(
+					$"Could not find sweepstake with uid: {sweepUid}", 
+					sweepUid, campaignUid, returnAction, returnController);
 			}
 
 			var drawRule = await _mediator.Send(new GetDrawRuleForSweepsRequest(sweepUid));
 			if(drawRule == null)
 			{
-				_logger.LogError("Could not find the draw rules for the sweepstake with uid: {sweepUid}", sweepUid);
-
-				ModelState.AddModelError("CustomError", "Could not find the draw rules for the sweepstake.");
-
-				return RedirectToAction(returnAction, returnController, new { sweepUid = sweepUid });
+				return LogAndRedirectBack(
+					$"Could not find the draw rules for the sweepstake with uid: {sweepUid}",
+					sweepUid, campaignUid, returnAction, returnController);
 			}
 
 			var currentPrizes = await _mediator.Send(new GetSweepPrizesBySweepUidRequest(sweepUid));
@@ -84,6 +92,7 @@ namespace hrvster.Web.Controllers
 				SweepId = sweep.SweepId,
 				SweepName = sweep.Name,
 				SweepUid = sweepUid,
+				CampaignUid = campaignUid,
 				ReturnAction = returnAction,
 				ReturnController = returnController,
 				Position = GetNextPosition(currentPrizes)
@@ -92,7 +101,8 @@ namespace hrvster.Web.Controllers
 			if (currentPrizes.Prizes.Count == drawRule.WinnerCount)
 			{
 				model.DisableAll = true;
-				ModelState.AddModelError("CustomError", "We have all the prizes we need for this sweepstake.");
+				_notificationService.Information("We have all the prizes we need for this sweepstake.");
+				
 				return RedirectToAction(returnAction, returnController, new { campaignUid = campaignUid });
 			}
 
@@ -100,24 +110,22 @@ namespace hrvster.Web.Controllers
 		}
 
 		[HttpPost]
-		public async Task<IActionResult> Create(Guid sweepUid, string returnAction, string returnController, CreateSweepPrize form)
+		public async Task<IActionResult> Create(Guid sweepUid, Guid campaignUid, string returnAction, string returnController, CreateSweepPrize form)
 		{
 			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
 			if (sweep == null)
 			{
-				_logger.LogError("Could not find sweepstake with uid: {sweepUid}", sweepUid);
-
-				return new NotFoundObjectResult($"Could not find sweepstake with uid: {sweepUid} ");
+				return LogAndRedirectBack(
+					$"Could not find sweepstake with uid: {sweepUid}",
+					sweepUid, campaignUid, returnAction, returnController);
 			}
 
 			var drawRule = await _mediator.Send(new GetDrawRuleForSweepsRequest(sweepUid));
 			if (drawRule == null)
 			{
-				_logger.LogError("Could not find the draw rules for the sweepstake with uid: {sweepUid}", sweepUid);
-
-				ModelState.AddModelError("CustomError", "Could not find the draw rules for the sweepstake.");
-
-				return RedirectToAction(returnAction, returnController, new { sweepUid = sweepUid });
+				return LogAndRedirectBack(
+					$"Could not find the draw rules for the sweepstake with uid: {sweepUid}",
+					sweepUid, campaignUid, returnAction, returnController);
 			}
 
 			var currentPrizes = await _mediator.Send(new GetSweepPrizesBySweepUidRequest(sweepUid));
@@ -125,10 +133,12 @@ namespace hrvster.Web.Controllers
 			{
 				ModelState.AddModelError("CustomError", "We already have the total number of prizes we require.");
 
-				return RedirectToAction(returnAction, returnController, new { sweepUid = sweepUid });
+				return RedirectToAction(returnAction, returnController, new { campaignUid = campaignUid, sweepUid = sweepUid });
 			}
+
+			var validationResult = await _createSweepPrizeValidator.ValidateAsync(form);
 			
-			if(ModelState.IsValid)
+			if(validationResult.IsValid)
 			{
 				await _mediator.Send(new CreateASweepPrizeRequest(sweepUid, form.Position, form.PrizeName, form.PrizeDescription, form.MonetaryValue));
 
@@ -136,12 +146,182 @@ namespace hrvster.Web.Controllers
 					"View", 
 					new { 
 						sweepUid = sweepUid, 
+						campaignUid = campaignUid,
 						returnAction = returnAction, 
 						returnController = returnController 
 					});
 			}
 
+			_notificationService.Error(
+				$"There were issues saving the Sweep Prize. ${System.Environment.NewLine}Errors returned: {string.Join(", ", validationResult.Errors)}");
+
 			return View(form);
+		}
+
+		[HttpGet]
+		public async Task<IActionResult> DeletePrize(Guid prizeUid, Guid sweepUid, Guid campaignUid, string actionName, string controllerName)
+		{
+			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
+			if (sweep == null)
+			{
+				return LogAndRedirectBack(
+					$"Could not find sweepstake with uid: {sweepUid}",
+					sweepUid, campaignUid, actionName, controllerName);
+			}
+
+			var prize = await _mediator.Send(new GetSweepPrizeByPrizeUid(prizeUid));
+			if (prize == null)
+			{
+				return LogAndRedirectBack($"Could not find the prize with the uid: {prizeUid}.",
+					sweepUid, campaignUid, actionName, controllerName);
+			}
+
+			var model = new DeleteSweepPrize
+			{
+				Sweep = sweep,
+				SweepId = sweep.SweepId,
+				Prize = prize,
+				PrizeName = prize.PrizeName,
+				PrizeUid = prize.PrizeUid,
+				MonetaryValue = prize.PrizeValue,
+				PrizeDescription = prize.PrizeDescription,
+				SweepName = sweep.Name,
+				SweepUid = sweep.SweepUid,
+				CampaignUid = campaignUid,
+				ReturnAction = actionName,
+				ReturnController = controllerName,
+			};
+
+			return View(model);
+		}
+
+		[HttpPost]
+		public async Task<IActionResult> DeletePrize(
+			Guid prizeUid, 
+			Guid sweepUid, 
+			Guid campaignUid, 
+			string actionName, 
+			string controllerName,
+			DeleteSweepPrize form)
+		{
+			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
+			if (sweep == null)
+			{
+				return LogAndRedirectBack(
+					$"Could not find sweepstake with uid: {sweepUid}",
+					sweepUid, campaignUid, actionName, controllerName);
+			}
+
+			var prize = await _mediator.Send(new GetSweepPrizeByPrizeUid(prizeUid));
+			if (prize == null)
+			{
+				return LogAndRedirectBack($"Could not find the prize with the uid: {prizeUid}.",
+					sweepUid, campaignUid, actionName, controllerName);
+			}
+
+			await _mediator.Send(new DeleteSweepPrizeRequest(prizeUid));
+
+			return RedirectToAction("View",
+				new
+				{
+					sweepUid = sweepUid,
+					campaignUid = campaignUid,
+					actionName = actionName,
+					controllerName = controllerName
+				});
+		}
+
+		[HttpGet]
+		public async Task<IActionResult> EditPrize(Guid prizeUid, Guid sweepUid, Guid campaignUid, string actionName, string controllerName)
+		{
+			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
+			if (sweep == null)
+			{
+				return LogAndRedirectBack(
+					$"Could not find sweepstake with uid: {sweepUid}",
+					sweepUid, campaignUid, actionName, controllerName);
+			}
+
+			var prize = await _mediator.Send(new GetSweepPrizeByPrizeUid(prizeUid));
+			if(prize == null)
+			{
+				return LogAndRedirectBack($"Could not find the prize with the uid: {prizeUid}.",
+					sweepUid, campaignUid, actionName, controllerName);
+			}
+
+			var model = new EditSweepPrize
+			{
+				Sweep = sweep,
+				SweepId = sweep.SweepId,
+				Prize = prize,
+				PrizeName = prize.PrizeName,
+				PrizeUid = prize.PrizeUid,
+				MonetaryValue = prize.PrizeValue,
+				PrizeDescription = prize.PrizeDescription,
+				SweepName = sweep.Name,
+				SweepUid = sweep.SweepUid,
+				CampaignUid = campaignUid,
+				ReturnAction = actionName,
+				ReturnController = controllerName
+			};
+
+			return View(model);
+		}
+
+		[HttpPost]
+		public async Task<IActionResult> EditPrize(
+			Guid prizeUid, 
+			Guid sweepUid, 
+			Guid campaignUid, 
+			string actionName, 
+			string controllerName, 
+			EditSweepPrize form)
+		{
+			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
+			if (sweep == null)
+			{
+				return LogAndRedirectBack(
+					$"Could not find sweepstake with uid: {sweepUid}",
+					sweepUid, campaignUid, actionName, controllerName);
+			}
+
+			var prize = await _mediator.Send(new GetSweepPrizeByPrizeUid(prizeUid));
+			if (prize == null)
+			{
+				return LogAndRedirectBack($"Could not find the prize with the uid: {prizeUid}.",
+					sweepUid, campaignUid, actionName, controllerName);
+			}
+
+			var validationResult = _editSweepPrizeValidator.Validate(form);
+
+			if(validationResult.IsValid)
+			{
+				await _mediator.Send(new UpdateSweepPrize(sweepUid, prizeUid, form.PrizeName, form.PrizeDescription, form.MonetaryValue));
+
+				return RedirectToAction(
+					"View",
+					new
+					{
+						sweepUid = sweepUid,
+						campaignUid = campaignUid,
+						returnAction = actionName,
+						returnController = controllerName
+					});
+			}
+
+			_notificationService.Error(
+				$"There were issues saving the Sweep Prize. ${System.Environment.NewLine}Errors returned: {string.Join(", ", validationResult.Errors)}");
+
+			return View(form);
+		}
+
+
+		private IActionResult LogAndRedirectBack(string message, Guid sweepUid, Guid campaignUid, string returnAction, string returnController)
+		{
+			_logger.LogError(message);
+			_notificationService.Error(message);
+
+			return RedirectToAction(returnAction, returnController, new { sweepUid = sweepUid, campaignUid = campaignUid });
 		}
 
 		private int GetNextPosition(SweepPrizes currentPrizes)

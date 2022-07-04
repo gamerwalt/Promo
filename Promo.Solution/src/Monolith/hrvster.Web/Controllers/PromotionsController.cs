@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿using AspNetCoreHero.ToastNotification.Abstractions;
+using AutoMapper;
 using hrvster.Core.Authentication;
 using hrvster.Core.Requests;
 using hrvster.Core.Requests.ApiRequests;
@@ -21,12 +22,14 @@ namespace hrvster.Web.Controllers
 		private readonly IMediator _mediator;
 		private readonly HrvsterUser _hrvsterUser;
 		private readonly IMapper _mapper;
+		private readonly INotyfService _notificationService;
 
-		public PromotionsController(IMediator mediator, HrvsterUser hrvsterUser, IMapper mapper)
+		public PromotionsController(IMediator mediator, HrvsterUser hrvsterUser, IMapper mapper, INotyfService notificationService)
 		{
 			_mediator = mediator;
 			_hrvsterUser = hrvsterUser;
 			_mapper = mapper;
+			_notificationService = notificationService;
 		}
 
 		[HttpGet]

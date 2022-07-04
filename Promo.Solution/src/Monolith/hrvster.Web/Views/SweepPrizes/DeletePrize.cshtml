@@ -1,0 +1,52 @@
+﻿@model DeleteSweepPrize
+
+@{
+    ViewData["Title"] = $"Delete Prize {@Model.PrizeName} for {@Model.SweepName}";
+}
+<div class="row">
+    <div class="col-md-12">
+        <h4><strong>Delete the prize @Model.PrizeName</strong></h4>
+    </div>
+</div>
+<hr />
+<div class="row">
+    <div class="col-lg-6">
+        <form 
+        asp-controller="SweepPrizes" 
+        asp-action="DeletePrize"
+        asp-route-sweepUid=@Model.SweepUid
+        asp-route-campaignUid=@Model.CampaignUid
+        asp-route-prizeUid=@Model.PrizeUid
+        asp-route-returnAction=@Model.ReturnAction
+        asp-route-returnController=@Model.ReturnController
+        enctype="multipart/form-data"
+        class="form-horizontal form-material mx-2">
+            @Html.HiddenFor(m => m.SweepName)
+            @Html.HiddenFor(m => m.SweepId)
+            @Html.HiddenFor(m => m.SweepUid)
+            @Html.HiddenFor(m => m.PrizeUid)
+            @Html.HiddenFor(m => m.ReturnAction)
+            @Html.HiddenFor(m => m.ReturnController)
+            <div class="card">
+                <div class="card-header"><strong>Are you sure you want to delete @Model.PrizeName</strong></div>
+                <div class="card-body">
+                    <div class="form-group">
+                        <label class="col-md-12">Name: @Model.PrizeName</label>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-md-12">Description: @Model.PrizeDescription</label>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-md-12">Montetary Value: @Model.MonetaryValue</label>
+                    </div>
+                </div>
+                <div class="card-footer align-content-end">
+                    <div class="col-lg-12">
+                        <button class="btn btn-sm btn-danger" type="submit">Delete</button>
+                        <a class="btn btn-sm btn-link" href="javascript:history.go(-1)">Back</a>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
