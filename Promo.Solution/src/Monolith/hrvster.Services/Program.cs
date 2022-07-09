@@ -60,6 +60,7 @@ namespace hrvster.Services
 
 		private static void AddTwitterClient(IServiceCollection services)
 		{
+			services.BuildServiceProvider();
 			services.Configure<TwitterAccount>(Configuration);
 			services.Configure<TwitterAccount>(Configuration.GetSection(TwitterAccount.SectionName));
 			services.AddTransient(p => p.GetService<IOptions<TwitterAccount>>().Value);

@@ -2,7 +2,6 @@
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
-    <UserSecretsId>dotnet-hrvster.Services-8AF180E2-C086-4482-BC7C-25DE9956635B</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
@@ -18,6 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\hrvster.ApplicationServices\hrvster.ApplicationServices.csproj" />
     <ProjectReference Include="..\hrvster.Core.Handlers\hrvster.Core.Handlers.csproj" />
     <ProjectReference Include="..\hrvster.Core.Requests\hrvster.Core.Requests.csproj" />
     <ProjectReference Include="..\hrvster.Extensions\hrvster.Extensions.csproj" />
