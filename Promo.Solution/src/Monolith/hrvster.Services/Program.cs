@@ -39,16 +39,16 @@ namespace hrvster.Services
 			Host.CreateDefaultBuilder(args)
 				.UseSerilog((context, configuration) =>
 					configuration.ReadFrom.Configuration(context.Configuration)
-						.WriteTo.Console()
+						.WriteTo.Loggly()
 						.Enrich.FromLogContext()
 						.MinimumLevel.Debug(), preserveStaticLogger: true)
 				.ConfigureServices((hostContext, services) =>
 				{
 					Log.Information("Starting Host for hrvster.Services");
 
-					services.AddHostedService<HrvsterHostedServices>();
+					services.AddHostedService<HostedServices>();
 					services.AddSingleton<IService, ScheduledTweetService>();
-					services.AddSingleton<IService, TestService>();
+					services.AddSingleton<IService, TwitterHarvestingService>();
 					services.AddRepositories();
 
 					AddDatabaseAndRepositories(services);

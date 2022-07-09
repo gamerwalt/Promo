@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk.Worker">
 
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <UserSecretsId>dotnet-hrvster.Services-8AF180E2-C086-4482-BC7C-25DE9956635B</UserSecretsId>
   </PropertyGroup>
 

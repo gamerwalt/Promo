@@ -9,21 +9,21 @@ using System.Threading.Tasks;
 
 namespace hrvster.Services
 {
-	public class HrvsterHostedServices : IHostedService
+	public class HostedServices : IHostedService
 	{
-		private readonly ILogger<HrvsterHostedServices> _logger;
+		private readonly ILogger<HostedServices> _logger;
 		private readonly IHostApplicationLifetime _appLifeTime;
 		private readonly CancellationTokenSource _cancellationTokenSource;
 		private readonly IEnumerable<IService> _services;
 		private readonly ServiceContainer _serviceContainer;
 
-		public HrvsterHostedServices(
+		public HostedServices(
 			ILoggerFactory loggerFactory,
 			IHostApplicationLifetime appLifeTime,
 			IEnumerable<IService> services,
 			ServiceContainer serviceContainer)
 		{
-			_logger = loggerFactory.CreateLogger<HrvsterHostedServices>();
+			_logger = loggerFactory.CreateLogger<HostedServices>();
 			_appLifeTime = appLifeTime;
 			_cancellationTokenSource = new CancellationTokenSource();
 			_services = services;
@@ -32,6 +32,7 @@ namespace hrvster.Services
 
 		public Task StartAsync(CancellationToken cancellationToken)
 		{
+			_logger.LogInformation("Startasync started...");
 			_appLifeTime.ApplicationStarted.Register(OnStarted);
 			_appLifeTime.ApplicationStopping.Register(OnStopping);
 			_appLifeTime.ApplicationStopped.Register(OnStopped);
@@ -39,9 +40,11 @@ namespace hrvster.Services
 			return Task.CompletedTask;
 		}
 
-		private void OnStarted()
+		private async void OnStarted()
 		{
 			_logger.LogInformation("OnStarted has been called");
+
+			var tasks = new List<Task>();
 
 			foreach(var service in _services)
 			{
@@ -49,15 +52,17 @@ namespace hrvster.Services
 
 				if (serviceFound != null && serviceFound.Enabled)
 				{
-					_logger.LogInformation("Running {serviceName}...", service.GetType().FullName);
+					_logger.LogInformation("Adding {serviceName}... to List of Tasks", service.GetType().FullName);
 
-					Task.Run(async () => await service.ProcessService(_cancellationTokenSource.Token)).Wait();
+					tasks.Add(service.ProcessService(_cancellationTokenSource.Token));
 				}
 				else
 				{
 					_logger.LogInformation("{serviceName} is not enabled so we will skip it's run...", service.GetType().FullName);
 				}
 			}
+
+			await Task.WhenAll(tasks.ToArray());
 
 			_appLifeTime.StopApplication();
 		}

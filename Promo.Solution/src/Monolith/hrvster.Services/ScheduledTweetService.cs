@@ -3,6 +3,7 @@ using MediatR;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Threading.Tasks;
 
 namespace hrvster.Services
@@ -25,7 +26,7 @@ namespace hrvster.Services
 
 			var scheduledTweets = await _mediator.Send(new GetAllScheduledSweepsRuleTweetsToSendRquest(DateTime.UtcNow));
 
-			if (scheduledTweets.Count() > 0)
+			if (scheduledTweets.Any())
 			{
 				await _mediator.Send(new PublishScheduledTweetsRequest(scheduledTweets));
 			}
