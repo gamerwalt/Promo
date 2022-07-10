@@ -31,9 +31,9 @@ namespace hrvster.Core.Requests
 
 	public class GetCampaignSweepEntryRuleHandler : IRequestHandler<GetCampaignSweepEntryRule, SweepEntryRule>
 	{
-		private readonly IEntryRulesRepository _repository;
+		private readonly ISweepEntryRulesRepository _repository;
 
-		public GetCampaignSweepEntryRuleHandler(IEntryRulesRepository repository)
+		public GetCampaignSweepEntryRuleHandler(ISweepEntryRulesRepository repository)
 		{
 			_repository = repository;
 		}

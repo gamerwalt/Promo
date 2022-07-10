@@ -1,5 +1,5 @@
 ﻿using hrvster.Core.Requests.Notifications.Harvester;
-using hrvster.Infrastructure.Harvester;
+using hrvster.Infrastructure;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using System;
@@ -14,10 +14,10 @@ namespace hrvster.Core.Requests.Notifications.Handlers
 	public class SendNotificationToUser : INotificationHandler<SweepEntryRecorded>
 	{
 		private readonly ITwitterClient _twitterClient;
-		private readonly ISweepPrizeRepository _sweepPrizeRepository;
+		private readonly ISweepPrizesRepository _sweepPrizeRepository;
 		private readonly ILogger<SendNotificationToUser> _logger;
 
-		public SendNotificationToUser(ITwitterClient twitterClient, ISweepPrizeRepository sweepPrizeRepository, ILoggerFactory loggerFactory)
+		public SendNotificationToUser(ITwitterClient twitterClient, ISweepPrizesRepository sweepPrizeRepository, ILoggerFactory loggerFactory)
 		{
 			_twitterClient = twitterClient;
 			_sweepPrizeRepository = sweepPrizeRepository;

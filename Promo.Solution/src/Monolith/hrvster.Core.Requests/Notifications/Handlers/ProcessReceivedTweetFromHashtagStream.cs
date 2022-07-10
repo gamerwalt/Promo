@@ -19,7 +19,7 @@ namespace hrvster.Core.Requests.Notifications.Handlers
 	public class ProcessReceivedTweetFromHashtagStream : INotificationHandler<NewHashTagTweetReceived>
 	{
 		private readonly ICampaignRepository _campaignRepository;
-		private readonly IEntryRulesRepository _entryRulesRepository;
+		private readonly ISweepEntryRulesRepository _entryRulesRepository;
 		private readonly ISweepsRepository _sweepsRepository;
 		private readonly ISweepRulesRepository _rulesRepository;
 		private readonly IReportingRepository _reportingRepository;
@@ -28,7 +28,7 @@ namespace hrvster.Core.Requests.Notifications.Handlers
 
 		public ProcessReceivedTweetFromHashtagStream(
 			ICampaignRepository campaignRepository,
-			IEntryRulesRepository entryRulesRepository,
+			ISweepEntryRulesRepository entryRulesRepository,
 			ISweepsRepository sweepsRepository,
 			ISweepRulesRepository rulesRepository,
 			IReportingRepository reportingRepository,

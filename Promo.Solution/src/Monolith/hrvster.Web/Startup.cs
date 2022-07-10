@@ -191,14 +191,14 @@ namespace hrvster.Web
 			services.AddTransient<IWatchTypeCampaignTypesRepository, WatchTypeCampaignTypesRepository>();
 			services.AddTransient<ISweepsRepository, SweepsRepository>();
 			services.AddTransient<ISweepsEntriesRepository, SweepsEntriesRepository>();
-			services.AddTransient<IEntryRulesRepository, EntryRulesRepository>();
+			services.AddTransient<ISweepEntryRulesRepository, SweepEntryRulesRepository>();
 			services.AddTransient<IDrawRuleRepository, DrawRuleRepository>();
 			services.AddTransient<ISweepWinnersRepository, SweepWinnersRepository>();
 			services.AddTransient<ISweepPrizesRepository, SweepPrizesRepository>();
 			services.AddTransient<IReportingRepository, ReportingRepository>();
 			services.AddTransient<IBlacklistedSweepsUsersRepository, BlacklistedSweepsUsersRepository>();
 			services.AddTransient<IHarvesterRepository, HarvesterRepository>();
-			services.AddTransient<ISweepPrizeRepository, SweepPrizeRepository>();
+			services.AddTransient<ISweepPrizesRepository, SweepPrizesRepository>();
 			services.AddTransient<IWatchTypesRepository, WatchTypesRepository>();
 			services.AddTransient<IWatchTypeProvidersRepository, WatchTypeProvidersRepository>();
 			services.AddTransient<IProfilesRepository, ProfilesRepository>();

@@ -26,7 +26,7 @@ namespace hrvster.Infrastructure.Harvester
 		{
 			var blacklistedUserList = new List<BlacklistedSweepUser>();
 
-			using (var conn = new MySqlConnection(_database.GetConnectionString()))
+			using (var conn = new MySqlConnection(_database.GetHarvesterConnectionString()))
 			{
 				var command = conn.CreateCommand();
 				command.CommandText = "blacklisted_sweeps_users_get";

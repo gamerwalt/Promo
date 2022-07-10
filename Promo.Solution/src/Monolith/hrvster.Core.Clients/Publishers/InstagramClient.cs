@@ -18,5 +18,10 @@ namespace hrvster.Core.Clients.Publishers
 		{
 			throw new NotImplementedException();
 		}
+
+		public Task<string> PublishResponse(Message message, string responseToId)
+		{
+			throw new NotImplementedException();
+		}
 	}
 }

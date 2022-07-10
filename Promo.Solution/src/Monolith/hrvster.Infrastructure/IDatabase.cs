@@ -5,5 +5,7 @@
 		string GetConnectionString();
 		string GetConnectionName();
 		void DeleteTestData();
+		string GetHarvesterConnectionString();
+		string GetReportingConnectionString();
 	}
 }

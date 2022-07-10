@@ -14,21 +14,49 @@ namespace hrvster.Infrastructure.Harvester
 		Task CreateTweetUserAsync(Guid userUid, IUser user);
 		Task CreateTweetRecordAsync(Guid tweetUid, Guid harvestedUid, Guid ruleUid, Guid userUid, ITweet tweet);
 		Task<HarvestedUser> GetHarvestedUserByUserIdentifierAsync(string userIdentifier);
+		Task BeginTransaction();
+		Task CommitTransaction();
+		Task RollbackTransaction();
 	}
 
 	public class HarvesterRepository : IHarvesterRepository
 	{
 		private readonly IDatabase _database;
+		private MySqlConnection myConnection;
+		private MySqlTransaction myTransaction;
 
 		public HarvesterRepository(IDatabase database)
 		{
 			_database = database;
 		}
 
+		public async Task BeginTransaction()
+		{
+			myConnection = new MySqlConnection(_database.GetHarvesterConnectionString());
+			await myConnection.OpenAsync();
+
+			myTransaction = await myConnection.BeginTransactionAsync();
+		}
+
+		public async Task CommitTransaction()
+		{
+			await myTransaction.CommitAsync();
+			await myConnection.CloseAsync();
+		}
+
+		public async Task RollbackTransaction()
+		{
+			if (myTransaction != null)
+			{
+				await myTransaction.RollbackAsync();
+				await myConnection.CloseAsync();
+			}
+		}
+
 		public async Task CreateHarvestedRecordAsync(Guid harvestedUid, Guid ruleUid, string json)
 		{
-			using var conn = new MySqlConnection(_database.GetConnectionString());
-			var command = conn.CreateCommand();
+			var command = myConnection.CreateCommand();
+			command.Transaction = myTransaction;
 			command.CommandText = "harvested_record_create";
 			command.CommandType = CommandType.StoredProcedure;
 			command
@@ -36,14 +64,13 @@ namespace hrvster.Infrastructure.Harvester
 				.AddParameter(nameof(ruleUid), ruleUid)
 				.AddParameter("harvestedValue", json);
 
-			await conn.OpenAsync();
 			await command.ExecuteNonQueryAsync();
 		}
 
 		public async Task CreateTweetRecordAsync(Guid tweetUid, Guid harvestedUid, Guid ruleUid, Guid userUid, ITweet tweet)
 		{
-			using var conn = new MySqlConnection(_database.GetConnectionString());
-			var command = conn.CreateCommand();
+			var command = myConnection.CreateCommand();
+			command.Transaction = myTransaction;
 			command.CommandText = "tweet_upsert";
 			command.CommandType = CommandType.StoredProcedure;
 			command
@@ -55,14 +82,13 @@ namespace hrvster.Infrastructure.Harvester
 				.AddParameter("retweeted", tweet.Retweeted)
 				.AddParameter("externalCreatedAt", tweet.CreatedAt);
 
-			await conn.OpenAsync();
 			await command.ExecuteNonQueryAsync();
 		}
 
 		public async Task CreateTweetUserAsync(Guid userUid, IUser user)
 		{
-			using var conn = new MySqlConnection(_database.GetConnectionString());
-			var command = conn.CreateCommand();
+			var command = myConnection.CreateCommand();
+			command.Transaction = myTransaction;
 			command.CommandText = "tweet_user_upsert";
 			command.CommandType = CommandType.StoredProcedure;
 			command
@@ -74,7 +100,6 @@ namespace hrvster.Infrastructure.Harvester
 				.AddParameter("description", user.Description)
 				.AddParameter("screenName", user.ScreenName);
 
-			await conn.OpenAsync();
 			await command.ExecuteNonQueryAsync();
 		}
 
@@ -82,7 +107,7 @@ namespace hrvster.Infrastructure.Harvester
 		{
 			var harvestedUser = default(HarvestedUser);
 
-			using (var conn = new MySqlConnection(_database.GetConnectionString()))
+			using (var conn = new MySqlConnection(_database.GetHarvesterConnectionString()))
 			{
 				var command = conn.CreateCommand();
 				command.CommandText = "users_get_by_screen_name";

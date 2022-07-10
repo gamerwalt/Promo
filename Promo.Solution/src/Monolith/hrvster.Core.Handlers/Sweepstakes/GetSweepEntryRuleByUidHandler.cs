@@ -12,12 +12,12 @@ namespace hrvster.Core.Handlers.Sweepstakes
 	public class GetSweepEntryRuleByUidHandler : IRequestHandler<GetSweepEntryRuleByUid, EntryRule>
 	{
 		private readonly ILogger<GetSweepEntryRuleByUidHandler> _logger;
-		private readonly IEntryRulesRepository _repository;
+		private readonly ISweepEntryRulesRepository _repository;
 		private readonly IMapper _mapper;
 
 		public GetSweepEntryRuleByUidHandler(
 			ILoggerFactory loggerFactory,
-			IEntryRulesRepository repository,
+			ISweepEntryRulesRepository repository,
 			IMapper mapper)
 		{
 			_logger = loggerFactory.CreateLogger<GetSweepEntryRuleByUidHandler>();

@@ -1,5 +1,5 @@
-﻿using hrvster.Infrastructure.Harvester;
-using hrvster.Models.Harvester;
+﻿using hrvster.Infrastructure;
+using hrvster.Models;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using System;
@@ -33,9 +33,9 @@ namespace hrvster.Core.Requests.Harvester
 	public class CreateSweepPrizeRequestHandler : IRequestHandler<CreateSweepPrize, SweepPrize>
 	{
 		private readonly ILogger<CreateSweepPrizeRequestHandler> _logger;
-		private readonly ISweepPrizeRepository _repository;
+		private readonly ISweepPrizesRepository _repository;
 
-		public CreateSweepPrizeRequestHandler(ILoggerFactory loggerFactory, ISweepPrizeRepository repository)
+		public CreateSweepPrizeRequestHandler(ILoggerFactory loggerFactory, ISweepPrizesRepository repository)
 		{
 			_logger = loggerFactory.CreateLogger<CreateSweepPrizeRequestHandler>();
 			_repository = repository;
@@ -43,7 +43,7 @@ namespace hrvster.Core.Requests.Harvester
 
 		public async Task<SweepPrize> Handle(CreateSweepPrize request, CancellationToken cancellationToken)
 		{
-			await _repository.CreateSweepPrizeAsync(new SweepPrize
+			var sweepPrize = new SweepPrize
 			{
 				PrizeUid = request.SweepPrize.PrizeUid,
 				PrizePosition = request.SweepPrize.PrizePosition,
@@ -51,7 +51,8 @@ namespace hrvster.Core.Requests.Harvester
 				Enabled = request.SweepPrize.Enabled,
 				PrizeName = request.SweepPrize.PrizeName,
 				PrizeValue = request.SweepPrize.PrizeValue
-			});
+			};
+			await _repository.CreateSweepPrizeAsync(sweepPrize);
 
 			return request.SweepPrize;
 		}

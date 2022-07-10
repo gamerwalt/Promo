@@ -15,9 +15,9 @@ namespace hrvster.Core.Handlers.Sweepstakes
 	public class UpdateSweepEntryRule : AsyncRequestHandler<UpdateSweepEntryRuleRequest>
 	{
 		private readonly ILogger<UpdateSweepEntryRule> _logger;
-		private readonly IEntryRulesRepository _repository;
+		private readonly ISweepEntryRulesRepository _repository;
 
-		public UpdateSweepEntryRule(ILoggerFactory loggerFactory, IEntryRulesRepository repository)
+		public UpdateSweepEntryRule(ILoggerFactory loggerFactory, ISweepEntryRulesRepository repository)
 		{
 			_logger = loggerFactory.CreateLogger<UpdateSweepEntryRule>();
 			_repository = repository;

@@ -1,17 +1,13 @@
-using hrvster.Core.Clients.Publishers;
+using hrvster.Core.Handlers.ServiceHandlers;
+using hrvster.Core.Requests.ServiceRequests;
 using hrvster.Extensions.Configuration;
 using hrvster.Infrastructure;
-using hrvster.Models;
 using MediatR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Options;
 using Serilog;
 using System;
-using Tweetinvi;
-using Tweetinvi.Auth;
-using Tweetinvi.Models;
 
 namespace hrvster.Services
 {
@@ -49,81 +45,39 @@ namespace hrvster.Services
 					services.AddHostedService<HostedServices>();
 					services.AddSingleton<IService, ScheduledTweetService>();
 					services.AddSingleton<IService, TwitterHarvestingService>();
-					services.AddRepositories();
 
-					AddDatabaseAndRepositories(services);
+					services
+						.AddAccountRepositories()
+						.AddScheduledRepositories()
+						.AddServicesRepositories()
+						.AddSweepsRepositories()
+						.AddHarvesterAndReportingRepositories()
+						.AddBlacklistedRepository()
+						.AddTwitterClient(Configuration)
+						.AddApplicationServices()
+						.AddPublishers();
 
+					AddDatabases(services);
+					LoadServices(services);
 					AddMediator(services);
-					AddPublishers(services);
-					AddTwitterClient(services);
+
+					services.AddMediatR(typeof(GetActiveHashtagRulesRequest), typeof(GetActiveHashtagRules));
 				});
-
-		private static void AddTwitterClient(IServiceCollection services)
-		{
-			services.BuildServiceProvider();
-			services.Configure<TwitterAccount>(Configuration);
-			services.Configure<TwitterAccount>(Configuration.GetSection(TwitterAccount.SectionName));
-			services.AddTransient(p => p.GetService<IOptions<TwitterAccount>>().Value);
-
-			services.Configure<hrvster.Models.Options.FileServerOptions>(Configuration);
-			services.Configure<hrvster.Models.Options.FileServerOptions>(Configuration.GetSection(hrvster.Models.Options.FileServerOptions.SectionName));
-			services.AddTransient(p => p.GetService<IOptions<Models.Options.FileServerOptions>>().Value);
-
-			services.AddTransient<ITwitterClient, Tweetinvi.TwitterClient>(c => GenerateTwitterClient(c));
-
-			services.AddSingleton<IAuthenticationRequestStore, LocalAuthenticationRequestStore>();
-		}
-
-		private static Tweetinvi.TwitterClient GenerateTwitterClient(IServiceProvider c)
-		{
-			var twitterAccount = c.GetService<TwitterAccount>();
-			var userCredentials = new TwitterCredentials(
-				twitterAccount.ConsumerKey,
-				twitterAccount.ConsumerSecret,
-				twitterAccount.AccessToken,
-				twitterAccount.AccessTokenSecret);
-
-			var client = new Tweetinvi.TwitterClient(userCredentials);
-			client.Config.RateLimitTrackerMode = RateLimitTrackerMode.TrackAndAwait;
-
-			return client;
-		}
-
-		private static void AddPublishers(IServiceCollection services)
-		{
-			services.AddTransient<Core.Clients.Publishers.TwitterClient>();
-			services.AddTransient<FacebookClient>();
-			services.AddTransient<InstagramClient>();
-
-			services.AddTransient<Func<ExternalClientType, Core.Clients.Publishers.IExternalClient>>(sp => serviceTypeName =>
-			{
-				switch (serviceTypeName)
-				{
-					case ExternalClientType.Twitter:
-						return sp.GetService<Core.Clients.Publishers.TwitterClient>();
-					case ExternalClientType.Facebook:
-						return sp.GetService<FacebookClient>();
-					case ExternalClientType.Instagram:
-						return sp.GetService<InstagramClient>();
-					default:
-						return sp.GetService<Core.Clients.Publishers.TwitterClient>();
-				}
-			});
-		}
 
 		private static void AddMediator(IServiceCollection services)
 		{
 			services.AddMediatR(typeof(Program));
 		}
 
-		private static void AddDatabaseAndRepositories(IServiceCollection services)
+		private static void AddDatabases(IServiceCollection services)
 		{
 			services.AddSingleton<IDatabase>(c =>
 			{
-				return new MySqlDatabase("hrvster", Configuration);
+				return new MySqlDatabase(DatabaseNames.Main, Configuration, DatabaseNames.Harvester, DatabaseNames.Reporting);
 			});
-
-			LoadServices(services);
+			
+			var sp = services.BuildServiceProvider();
+			var database = sp.GetService<IDatabase>();
 		}
 
 		private static void LoadServices(IServiceCollection services)

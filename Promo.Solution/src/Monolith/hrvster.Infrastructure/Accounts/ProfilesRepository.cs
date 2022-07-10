@@ -14,6 +14,7 @@ namespace hrvster.Infrastructure.Accounts
 		Task UpsertProfileAsync(Profile profile);
 		Task<Profile> GetProfileAsync(Guid userUid, ProfileType profileType);
 		Task<IEnumerable<Profile>> GetProfilesAsync(Guid userUid);
+		Task<Profile> GetProfileByCampaignUid(Guid campaignUid, ProfileType profileType);
 	}
 
 	public class ProfilesRepository : IProfilesRepository
@@ -38,12 +39,10 @@ namespace hrvster.Infrastructure.Accounts
 					.AddParameter("profileType", profileType);
 
 				await conn.OpenAsync();
-				using (var reader = await command.ExecuteReaderAsync())
+				using var reader = await command.ExecuteReaderAsync();
+				while (await reader.ReadAsync())
 				{
-					while (await reader.ReadAsync())
-					{
-						account = CreateRecordFrom(reader);
-					}
+					account = CreateRecordFrom(reader);
 				}
 			}
 
@@ -111,12 +110,10 @@ namespace hrvster.Infrastructure.Accounts
 				command.AddParameter("userUid", userUid);
 
 				await conn.OpenAsync();
-				using (var reader = await command.ExecuteReaderAsync())
+				using var reader = await command.ExecuteReaderAsync();
+				while (await reader.ReadAsync())
 				{
-					while (await reader.ReadAsync())
-					{
-						profiles.Add(CreateRecordFrom(reader));
-					}
+					profiles.Add(CreateRecordFrom(reader));
 				}
 			}
 
@@ -132,6 +129,29 @@ namespace hrvster.Infrastructure.Accounts
 			}
 
 			return reader.GetString(fieldName);
+		}
+
+		public async Task<Profile> GetProfileByCampaignUid(Guid campaignUid, ProfileType profileType)
+		{
+			var profile = default(Profile);
+
+			using (var conn = new MySqlConnection(_database.GetConnectionString()))
+			{
+				var command = conn.CreateCommand();
+				command.CommandText = "profile_get_by_campaign_uid";
+				command.CommandType = CommandType.StoredProcedure;
+				command.AddParameter(nameof(campaignUid), campaignUid)
+					.AddParameter("profileType", profileType);
+
+				await conn.OpenAsync();
+				using var reader = await command.ExecuteReaderAsync();
+				while (await reader.ReadAsync())
+				{
+					profile = CreateRecordFrom(reader);
+				}
+			}
+
+			return profile;
 		}
 	}
 }

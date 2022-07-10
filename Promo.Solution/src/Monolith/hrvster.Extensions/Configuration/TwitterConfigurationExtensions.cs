@@ -1,44 +1,38 @@
 ﻿
 using hrvster.Models;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using System;
+using Tweetinvi;
+using Tweetinvi.Auth;
+using Tweetinvi.Models;
 
 namespace hrvster.Extensions.Configuration
 {
 	public static class TwitterConfigurationExtensions
 	{
-		//private static IServiceCollection AddTwitterClient(this IServiceCollection services, IConfiguration configuration)
-		//{
-		//	var sp = services.BuildServiceProvider();
-		//	services.Configure<TwitterAccount>(configuration);
-		//	services.Configure<TwitterAccount>(configuration.GetSection(TwitterAccount.SectionName));
-		//	services.AddTransient(p => p.GetService<IOptions<TwitterAccount>>().Value);
+		public static IServiceCollection AddTwitterClient(this IServiceCollection services, IConfiguration configuration)
+			=> services.Configure<TwitterAccount>(configuration)
+				.Configure<TwitterAccount>(configuration.GetSection(TwitterAccount.SectionName))
+				.AddTransient(p => p.GetService<IOptions<TwitterAccount>>().Value)
+				.AddTransient<ITwitterClient, TwitterClient>(c => GenerateTwitterClient(c))
+				.AddSingleton<IAuthenticationRequestStore, LocalAuthenticationRequestStore>();
+		
 
-		//	services.Configure<hrvster.Models.Options.FileServerOptions>(Configuration);
-		//	services.Configure<hrvster.Models.Options.FileServerOptions>(Configuration.GetSection(hrvster.Models.Options.FileServerOptions.SectionName));
-		//	services.AddTransient(p => p.GetService<IOptions<hrvster.Models.Options.FileServerOptions>>().Value);
+		private static TwitterClient GenerateTwitterClient(IServiceProvider c)
+		{
+			var twitterAccount = c.GetService<TwitterAccount>();
+			var userCredentials = new TwitterCredentials(
+				twitterAccount.ConsumerKey,
+				twitterAccount.ConsumerSecret,
+				twitterAccount.AccessToken,
+				twitterAccount.AccessTokenSecret);
 
-		//	services.AddTransient<ITwitterClient, Tweetinvi.TwitterClient>(c => GenerateTwitterClient(c));
+			var client = new TwitterClient(userCredentials);
+			client.Config.RateLimitTrackerMode = RateLimitTrackerMode.TrackAndAwait;
 
-		//	services.AddSingleton<IAuthenticationRequestStore, LocalAuthenticationRequestStore>();
-
-		//	return services;
-		//}
-
-		//private Tweetinvi.TwitterClient GenerateTwitterClient(IServiceProvider c)
-		//{
-		//	var twitterAccount = c.GetService<TwitterAccount>();
-		//	var userCredentials = new TwitterCredentials(
-		//		twitterAccount.ConsumerKey,
-		//		twitterAccount.ConsumerSecret,
-		//		twitterAccount.AccessToken,
-		//		twitterAccount.AccessTokenSecret);
-
-		//	var client = new Tweetinvi.TwitterClient(userCredentials);
-		//	client.Config.RateLimitTrackerMode = RateLimitTrackerMode.TrackAndAwait;
-
-		//	return client;
-		//}
+			return client;
+		}
 	}
 }

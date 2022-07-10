@@ -55,6 +55,7 @@ namespace hrvster.Services
 					_logger.LogInformation("Adding {serviceName}... to List of Tasks", service.GetType().FullName);
 
 					tasks.Add(service.ProcessService(_cancellationTokenSource.Token));
+					//Task.Run(() => service.ProcessService(_cancellationTokenSource.Token));
 				}
 				else
 				{

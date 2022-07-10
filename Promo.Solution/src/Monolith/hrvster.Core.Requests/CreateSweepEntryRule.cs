@@ -25,9 +25,9 @@ namespace hrvster.Core.Requests
 
 	public class CreateEntryRuleHandler : IRequestHandler<CreateSweepEntryRule, SweepEntryRule>
 	{
-		private readonly IEntryRulesRepository _repository;
+		private readonly ISweepEntryRulesRepository _repository;
 
-		public CreateEntryRuleHandler(IEntryRulesRepository repository)
+		public CreateEntryRuleHandler(ISweepEntryRulesRepository repository)
 		{
 			_repository = repository;
 		}

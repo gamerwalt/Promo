@@ -1,6 +1,6 @@
 ﻿using hrvster.Core.Requests.WebRequests.Sweeps;
-using hrvster.Extensions;
 using hrvster.Infrastructure;
+using hrvster.Models.Extensions;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using System;

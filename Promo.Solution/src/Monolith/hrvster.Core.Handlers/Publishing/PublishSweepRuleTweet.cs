@@ -1,8 +1,6 @@
 ﻿using hrvster.Core.Clients.Common;
 using hrvster.Core.Requests.Notifications.Publishing;
 using hrvster.Core.Requests.WebRequests.Publishing;
-using hrvster.Extensions;
-using hrvster.Infrastructure;
 using hrvster.Infrastructure.Core;
 using hrvster.Infrastructure.Extensions;
 using hrvster.Infrastructure.Scheduling;
@@ -59,7 +57,7 @@ namespace hrvster.Core.Handlers.Publishing
 				Media = request.MediaLocation
 			};
 
-			if(!request.PostNow)
+			if (!request.PostNow)
 			{
 				return await SaveScheduledTweetAsync(message, request.MustBeFollowing);
 			}
@@ -111,7 +109,7 @@ namespace hrvster.Core.Handlers.Publishing
 
 		private async Task SaveScheduledTweetImages(Guid scheduledUid, Message message)
 		{
-			foreach(var media in message.Media)
+			foreach (var media in message.Media)
 			{
 				await _repository.CreateScheduledSweepRuleImage(scheduledUid, new ScheduledSweepRuleTweetImage
 				{

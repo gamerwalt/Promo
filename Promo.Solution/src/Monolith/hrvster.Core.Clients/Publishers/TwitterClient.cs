@@ -66,6 +66,30 @@ namespace hrvster.Core.Clients.Publishers
 			return tweet?.IdStr;
 		}
 
+		public async Task<string> PublishResponse(Message message, string responseToId)
+		{
+			_logger.LogInformation("Publishing the tweet {tweet} in response to {tweetId}",
+				message.Text,
+				responseToId);
+
+			BuildTwitterClient(message.Profile.AccessToken, message.Profile.AccessTokenSecret);
+
+			var tweet = await _twitterClient.Tweets.PublishTweetAsync(new PublishTweetParameters
+			{
+				Text = message.Text,
+				InReplyToTweetId = long.Parse(responseToId)
+			});
+
+			if (tweet == null)
+			{
+				_logger.LogError("Unable to publish the tweet {message} received.", message.AsJson());
+
+				return string.Empty;
+			}
+
+			return tweet.IdStr;
+		}
+
 		private void BuildTwitterClient(string accessToken, string accessTokenSecret)
 		{
 			_twitterClient = new Tweetinvi.TwitterClient(

@@ -16,6 +16,7 @@ namespace hrvster.Infrastructure
 		Task UpdateRuleAsAddedAsync(Guid ruleUid);
 		Task<IEnumerable<Models.Rule>> GetRuleByHashTagAsync(string text);
 		Task<IEnumerable<Models.Rule>> GetSweepRuleAsync(Guid sweepUid);
+		Task<IEnumerable<Models.Rule>> GetSweepRuleAsync();
 		Task UpdateRuleExternalId(Guid ruleUid, string externalId);
 		Task DeleteAsync(Guid ruleUid);
 	}
@@ -137,6 +138,28 @@ namespace hrvster.Infrastructure
 			return rules;
 		}
 
+		public async Task<IEnumerable<Models.Rule>> GetSweepRuleAsync()
+		{
+			var rules = new List<Models.Rule>();
+
+			using (var conn = new MySqlConnection(_database.GetConnectionString()))
+			{
+				var command = conn.CreateCommand();
+				command.CommandText = "sweep_rules_get";
+				command.CommandType = CommandType.StoredProcedure;
+				command.AddParameter("currentUtc", DateTime.UtcNow);
+
+				await conn.OpenAsync();
+				using var reader = await command.ExecuteReaderAsync();
+				while (await reader.ReadAsync())
+				{
+					rules.Add(CreateRecordFrom(reader));
+				}
+			}
+
+			return rules;
+		}
+
 		public async Task UpdateRuleAsAddedAsync(Guid ruleUid)
 		{
 			using var conn = new MySqlConnection(_database.GetConnectionString());
@@ -164,7 +187,13 @@ namespace hrvster.Infrastructure
 					Description = reader.GetString("campaign_description"),
 					ActiveInd = reader.GetBoolean("campaign_active_ind"),
 					StartDate = reader.GetDateTime("campaign_start_date"),
-					EndDate = reader.GetDateTime("campaign_end_date")
+					EndDate = reader.GetDateTime("campaign_end_date"),
+					CampaignType = new CampaignType
+					{
+						CampaignTypeName = reader.GetString("campaign_type_name"),
+						CampaignTypeCode = (CampaignTypeCode)Enum.Parse(typeof(CampaignTypeCode), reader.GetString("campaign_type_code")),
+						CamapaignTypeDescription = reader.GetString("campaign_type_description")
+					}
 				},
 				Sweep = new Sweep
 				{

@@ -1,5 +1,6 @@
 ﻿using hrvster.Infrastructure.Extensions;
 using hrvster.Models;
+using hrvster.Models.Profiles;
 using MySqlConnector;
 using System;
 using System.Collections.Generic;

@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace hrvster.Extensions
+namespace hrvster.Models.Extensions
 {
 	public static class ObjectExtensions
 	{

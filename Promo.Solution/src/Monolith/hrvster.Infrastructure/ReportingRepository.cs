@@ -30,7 +30,7 @@ namespace hrvster.Infrastructure
 		{
 			var entryReport = default(SweepEntryReport);
 
-			using (var conn = new MySqlConnection(_database.GetConnectionString()))
+			using (var conn = new MySqlConnection(_database.GetReportingConnectionString()))
 			{
 				var command = conn.CreateCommand();
 				command.CommandText = "sweep_entry_report_get";
@@ -70,7 +70,7 @@ namespace hrvster.Infrastructure
 
 		public async Task UpsertSweepEntryReportAsync(SweepEntryReport sweepEntryReport)
 		{
-			using var conn = new MySqlConnection(_database.GetConnectionString());
+			using var conn = new MySqlConnection(_database.GetReportingConnectionString());
 			var command = conn.CreateCommand();
 			command.CommandText = "sweep_entry_upsert";
 			command.CommandType = CommandType.StoredProcedure;
