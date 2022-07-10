@@ -1,13 +1,16 @@
 ﻿using hrvster.Core.Requests.ServiceRequests;
 using hrvster.Core.Requests.ServiceRequests.Notifications;
 using hrvster.Infrastructure;
+using hrvster.Infrastructure.Accounts;
 using hrvster.Models;
+using hrvster.Models.Profiles;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Tweetinvi;
 
 namespace hrvster.Core.Handlers.ServiceHandlers
 {
@@ -15,24 +18,70 @@ namespace hrvster.Core.Handlers.ServiceHandlers
 	{
 		private readonly ILogger<ProcessAutoEnterSweepsFromHashtag> _logger;
 		private readonly ISweepsEntriesRepository _sweepsEntriesRepository;
+		private readonly IProfilesRepository _profilesRepository;
+		private readonly TwitterAccount _twitterAccount;
 		private readonly IMediator _mediator;
+
+		private TwitterClient _twitterClient;
 
 		public ProcessAutoEnterSweepsFromHashtag(
 			ILoggerFactory loggerFactory,
 			ISweepsEntriesRepository sweepsEntriesRepository,
+			IProfilesRepository profilesRepository,
+			TwitterAccount twitterAccount,
 			IMediator mediator)
 		{
 			_logger = loggerFactory.CreateLogger<ProcessAutoEnterSweepsFromHashtag>();
 			_sweepsEntriesRepository = sweepsEntriesRepository;
+			_profilesRepository = profilesRepository;
+			_twitterAccount = twitterAccount;
 			_mediator = mediator;
 		}
 
 		protected override async Task Handle(ProcessAutoEnterSweepsFromHashtagRequest request, CancellationToken cancellationToken)
 		{
+			var profile = await _profilesRepository.GetProfileByCampaignUid(request.Rule.Campaign.CampaignUid, ProfileType.Twitter);
+
 			if (CanEnterSweepstakes(request))
 			{
-				await EnterSweepstakesAsync(request);
+				if(await IsFollowing(profile, request))
+					await EnterSweepstakesAsync(request);
+				else
+				{
+					_logger.LogInformation("The user {screenName} is not following Profile {accountScreenName}",
+						request.Tweet.CreatedBy.ScreenName,
+						profile.ScreenName);
+
+					await _mediator.Send(new NotifyUserOfNotFollowingProfileRequest(request.Tweet, profile));
+				}
 			}
+		}
+
+		private async Task<bool> IsFollowing(Profile profile, ProcessAutoEnterSweepsFromHashtagRequest request)
+		{
+			if (profile == null)
+			{
+				_logger.LogError("Unable to retrieve the profile belonging to the campaign uid {campaignUid} and campaign name {campaignName}",
+					request.Rule.Campaign.CampaignUid,
+					request.Rule.Campaign.CampaignName);
+
+				return false;
+			}
+
+			BuildTwitterClient(profile.AccessToken, profile.AccessTokenSecret);
+
+			var followers = await _twitterClient.Users.GetFollowerIdsAsync(profile.ScreenName);
+
+			return request.Rule.MustBeFollowing && followers.Any(c => c.Equals(request.Tweet.CreatedBy.Id));
+		}
+
+		private void BuildTwitterClient(string accessToken, string accessTokenSecret)
+		{
+			_twitterClient = new TwitterClient(
+				_twitterAccount.ConsumerKey,
+				_twitterAccount.ConsumerSecret,
+				accessToken,
+				accessTokenSecret);
 		}
 
 		private async Task EnterSweepstakesAsync(ProcessAutoEnterSweepsFromHashtagRequest request)
@@ -85,7 +134,7 @@ namespace hrvster.Core.Handlers.ServiceHandlers
 			_logger.LogInformation("Tweet is in reply to main tweet? {tweetIsInReply}", tweetIsInReplyToMainTweet);
 
 			var userIsNotInBlacklistedUsers = UserIsNotInBlacklistedUsers(request);
-			_logger.LogInformation("User is in blacklisted users? {inBlacklistedUsers}", !userIsNotInBlacklistedUsers);
+			_logger.LogInformation("User is in blacklisted users? {inBlacklistedUsers}", userIsNotInBlacklistedUsers);
 
 			return userCanEnterSweeps && tweetIsInReplyToMainTweet && !userIsNotInBlacklistedUsers;
 		}
