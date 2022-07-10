@@ -17,6 +17,7 @@ namespace hrvster.Services
 
 		public static void Main(string[] args)
 		{
+			//ASPNETCORE_ENVIRONMENT=Development
 			var env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
 
 			Configuration = new ConfigurationBuilder()
@@ -35,7 +36,8 @@ namespace hrvster.Services
 			Host.CreateDefaultBuilder(args)
 				.UseSerilog((context, configuration) =>
 					configuration.ReadFrom.Configuration(context.Configuration)
-						.WriteTo.Loggly()
+						//.WriteTo.Loggly()
+						//.WriteTo.Console()
 						.Enrich.FromLogContext()
 						.MinimumLevel.Debug(), preserveStaticLogger: true)
 				.ConfigureServices((hostContext, services) =>

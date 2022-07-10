@@ -59,6 +59,12 @@ namespace hrvster.Core.Handlers.ServiceHandlers
 
 				await _mediator.Publish(new SweepEntryFromTweetRecorded(request.Rule.Campaign, request.Rule.Sweep, request.Tweet, UserIdentifierType.TwitterHandle));
 			}
+			else
+			{
+				_logger.LogWarning("Campaign {campaignName} or Sweepstakes {sweepName} are probably not running right now.",
+				request.Rule.Campaign.CampaignName,
+				request.Rule.Sweep.Name);
+			}
 		}
 
 		private bool SweepIsRunningAndNotYetDrawn(Sweep sweep)
@@ -72,13 +78,20 @@ namespace hrvster.Core.Handlers.ServiceHandlers
 
 		private bool CanEnterSweepstakes(ProcessAutoEnterSweepsFromHashtagRequest request)
 		{
-			return UserCanEnterSweepstakes(request) &&
-				TweetIsInReplyToRuleTweetId(request) &&
-				UserIsNotInBlacklistedUsers(request);
+			var userCanEnterSweeps = UserCanEnterSweepstakes(request);
+			_logger.LogInformation("User can enter sweepstakes {sweepName}? {canEnter}", request.Rule.Sweep.Name, userCanEnterSweeps);
+
+			var tweetIsInReplyToMainTweet = TweetIsInReplyToRuleTweetId(request);
+			_logger.LogInformation("Tweet is in reply to main tweet? {tweetIsInReply}", tweetIsInReplyToMainTweet);
+
+			var userIsNotInBlacklistedUsers = UserIsNotInBlacklistedUsers(request);
+			_logger.LogInformation("User is in blacklisted users? {inBlacklistedUsers}", !userIsNotInBlacklistedUsers);
+
+			return userCanEnterSweeps && tweetIsInReplyToMainTweet && !userIsNotInBlacklistedUsers;
 		}
 
 		private bool UserIsNotInBlacklistedUsers(ProcessAutoEnterSweepsFromHashtagRequest request)
-			=> !request.BlackListed.Any(c => c.Equals(request.Tweet.CreatedBy.Id));
+			=> request.BlackListed.Any(c => c.Equals(request.Tweet.CreatedBy.Id));
 
 		private bool TweetIsInReplyToRuleTweetId(ProcessAutoEnterSweepsFromHashtagRequest request)
 			=> request.Tweet.InReplyToStatusId.Equals(request.Rule.ExternalId);
@@ -86,6 +99,6 @@ namespace hrvster.Core.Handlers.ServiceHandlers
 		private bool UserCanEnterSweepstakes(ProcessAutoEnterSweepsFromHashtagRequest request)
 			=> request.SweepEntryReport == null
 				? true
-				: request.SweepEntryReport.Entries >= request.EntryRules.EntryPerUser;
+				: request.SweepEntryReport.Entries < request.EntryRules.EntryPerUser;
 	}
 }

@@ -2,6 +2,7 @@ using AspNetCoreHero.ToastNotification;
 using AspNetCoreHero.ToastNotification.Extensions;
 using FluentValidation;
 using FluentValidation.AspNetCore;
+using hrvster.ApplicationServices.Processors;
 using hrvster.Core;
 using hrvster.Core.Authentication;
 using hrvster.Core.Clients;
@@ -93,6 +94,8 @@ namespace hrvster.Web
 				config.IsDismissable = true;
 				config.Position = NotyfPosition.BottomCenter;
 			});
+
+			services.AddTransient<ITweetProcessor, TweetProcessor>();
 		}
 
 		private void AddValidators(IServiceCollection services)
