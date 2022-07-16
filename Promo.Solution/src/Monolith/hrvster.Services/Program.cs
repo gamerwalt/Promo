@@ -1,6 +1,7 @@
 using hrvster.Core.Handlers.ServiceHandlers;
 using hrvster.Core.Requests.ServiceRequests;
 using hrvster.Extensions.Configuration;
+using hrvster.Extensions.OptionsConfiguration;
 using hrvster.Infrastructure;
 using MediatR;
 using Microsoft.Extensions.Configuration;
@@ -46,7 +47,7 @@ namespace hrvster.Services
 
 					services.AddHostedService<HostedServices>();
 					services.AddSingleton<IService, ScheduledTweetService>();
-					services.AddSingleton<IService, TwitterHarvestingService>();
+					services.AddSingleton<IService, SweepstakesDrawService>();
 
 					services
 						.AddAccountRepositories()
@@ -56,20 +57,18 @@ namespace hrvster.Services
 						.AddHarvesterAndReportingRepositories()
 						.AddBlacklistedRepository()
 						.AddTwitterClient(Configuration)
-						.AddApplicationServices()
+						.AddDrawSettingConfiguration(Configuration)
+						.AddApplicationCronServices()
 						.AddPublishers();
 
 					AddDatabases(services);
 					LoadServices(services);
 					AddMediator(services);
-
-					services.AddMediatR(typeof(GetActiveHashtagRulesRequest), typeof(GetActiveHashtagRules));
 				});
 
 		private static void AddMediator(IServiceCollection services)
-		{
-			services.AddMediatR(typeof(Program));
-		}
+			=> services.AddMediatR(typeof(Program));
+		
 
 		private static void AddDatabases(IServiceCollection services)
 		{
@@ -77,9 +76,6 @@ namespace hrvster.Services
 			{
 				return new MySqlDatabase(DatabaseNames.Main, Configuration, DatabaseNames.Harvester, DatabaseNames.Reporting);
 			});
-			
-			var sp = services.BuildServiceProvider();
-			var database = sp.GetService<IDatabase>();
 		}
 
 		private static void LoadServices(IServiceCollection services)

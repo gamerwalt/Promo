@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Tweetinvi;
 using Tweetinvi.Events;
 
-namespace hrvster.ApplicationServices.Harvesters
+namespace hrvster.ApplicationServices.Harvesters.Twitter
 {
 	public interface ITwitterHarvesterService
 	{

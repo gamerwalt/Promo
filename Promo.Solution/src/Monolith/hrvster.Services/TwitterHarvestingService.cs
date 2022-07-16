@@ -1,4 +1,4 @@
-﻿using hrvster.ApplicationServices.Harvesters;
+﻿using hrvster.ApplicationServices.Harvesters.Twitter;
 using Microsoft.Extensions.Logging;
 using System.Threading;
 using System.Threading.Tasks;

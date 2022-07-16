@@ -206,6 +206,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "hrvster.Services", "Monolit
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "hrvster.ApplicationServices", "Monolith\hrvster.ApplicationServices\hrvster.ApplicationServices.csproj", "{ED1B3EC5-A0DC-4073-9606-EA51FE87BB15}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "hrvster.Twitter.Harvester", "Monolith\hrvster.Twitter.Harvester\hrvster.Twitter.Harvester.csproj", "{7E904EE8-F334-482C-A176-EEB818E6A281}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -428,6 +430,10 @@ Global
 		{ED1B3EC5-A0DC-4073-9606-EA51FE87BB15}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{ED1B3EC5-A0DC-4073-9606-EA51FE87BB15}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{ED1B3EC5-A0DC-4073-9606-EA51FE87BB15}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7E904EE8-F334-482C-A176-EEB818E6A281}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7E904EE8-F334-482C-A176-EEB818E6A281}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7E904EE8-F334-482C-A176-EEB818E6A281}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7E904EE8-F334-482C-A176-EEB818E6A281}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -510,6 +516,7 @@ Global
 		{DBEB17A2-8303-4642-8B43-99864235236F} = {71429F9B-A81B-4A12-98DD-505C0F9FDB34}
 		{F3C9C333-A60F-490E-B0C3-0D668790522C} = {71429F9B-A81B-4A12-98DD-505C0F9FDB34}
 		{ED1B3EC5-A0DC-4073-9606-EA51FE87BB15} = {71429F9B-A81B-4A12-98DD-505C0F9FDB34}
+		{7E904EE8-F334-482C-A176-EEB818E6A281} = {71429F9B-A81B-4A12-98DD-505C0F9FDB34}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {94B46B7F-1545-465E-863A-AAD0C58A8C0F}
