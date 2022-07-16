@@ -65,7 +65,6 @@ namespace hrvster.Web
 			{
 				o.Filters.Add(new AutoValidateAntiforgeryTokenAttribute());
 			}).AddSessionStateTempDataProvider();
-
 			AddValidators(services);
 
 			AddAuthentication(services);
@@ -109,19 +108,15 @@ namespace hrvster.Web
 			services.AddScoped<FacebookClient>();
 			services.AddScoped<InstagramClient>();
 
-			services.AddTransient<Func<ExternalClientType, Core.Clients.Publishers.IExternalClient>>(sp => serviceTypeName =>
+			services.AddTransient<Func<ExternalClientType, IExternalClient>>(sp => serviceTypeName =>
 			{
-				switch (serviceTypeName)
+				return serviceTypeName switch
 				{
-					case ExternalClientType.Twitter:
-						return sp.GetService<Core.Clients.Publishers.TwitterClient>();
-					case ExternalClientType.Facebook:
-						return sp.GetService<FacebookClient>();
-					case ExternalClientType.Instagram:
-						return sp.GetService<InstagramClient>();
-					default:
-						return sp.GetService<Core.Clients.Publishers.TwitterClient>();
-				}
+					ExternalClientType.Twitter => sp.GetService<Core.Clients.Publishers.TwitterClient>(),
+					ExternalClientType.Facebook => sp.GetService<FacebookClient>(),
+					ExternalClientType.Instagram => sp.GetService<InstagramClient>(),
+					_ => sp.GetService<Core.Clients.Publishers.TwitterClient>(),
+				};
 			});
 		}
 
