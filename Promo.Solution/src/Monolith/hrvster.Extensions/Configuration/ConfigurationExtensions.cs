@@ -22,6 +22,7 @@ namespace hrvster.Extensions.Configuration
 
 		public static IServiceCollection AddSweepsRepositories(this IServiceCollection services)
 			=> services
+				.AddTransient<ISweepsRepository, SweepsRepository>()
 				.AddTransient<ISweepRulesRepository, SweepRulesRepository>()
 				.AddTransient<ISweepEntryRulesRepository, SweepEntryRulesRepository>()
 				.AddTransient<ISweepPrizesRepository, SweepPrizesRepository>()

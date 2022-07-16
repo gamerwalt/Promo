@@ -101,7 +101,7 @@ namespace hrvster.Infrastructure
 			using (var conn = new MySqlConnection(_database.GetConnectionString()))
 			{
 				var command = conn.CreateCommand();
-				command.CommandText = "sweep_requiring_draw_get";
+				command.CommandText = "sweeps_requiring_draw_get";
 				command.CommandType = CommandType.StoredProcedure;
 
 				await conn.OpenAsync();

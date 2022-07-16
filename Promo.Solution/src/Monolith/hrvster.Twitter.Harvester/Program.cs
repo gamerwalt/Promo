@@ -33,6 +33,10 @@ namespace hrvster.Twitter.Harvester
 
 		public static IHostBuilder CreateHostBuilder(string[] args) =>
 			Host.CreateDefaultBuilder(args)
+				.UseSerilog((context, configuration) =>
+					configuration.ReadFrom.Configuration(context.Configuration)
+						.Enrich.FromLogContext()
+						.MinimumLevel.Debug(), preserveStaticLogger: true)
 				.ConfigureServices((hostContext, services) =>
 				{
 					services.AddHostedService<HostedService>();
@@ -40,8 +44,6 @@ namespace hrvster.Twitter.Harvester
 
 					services
 						.AddAccountRepositories()
-						.AddScheduledRepositories()
-						.AddServicesRepositories()
 						.AddSweepsRepositories()
 						.AddHarvesterAndReportingRepositories()
 						.AddBlacklistedRepository()

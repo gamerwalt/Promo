@@ -54,8 +54,6 @@ namespace hrvster.Services
 						.AddScheduledRepositories()
 						.AddServicesRepositories()
 						.AddSweepsRepositories()
-						.AddHarvesterAndReportingRepositories()
-						.AddBlacklistedRepository()
 						.AddTwitterClient(Configuration)
 						.AddDrawSettingConfiguration(Configuration)
 						.AddApplicationCronServices()
@@ -67,7 +65,8 @@ namespace hrvster.Services
 				});
 
 		private static void AddMediator(IServiceCollection services)
-			=> services.AddMediatR(typeof(Program));
+			=> services.AddMediatR(typeof(Program))
+				.AddMediatR(typeof(GetSweepstakesRequiringADrawRequest), typeof(GetSweepstakesRequiringADraw));
 		
 
 		private static void AddDatabases(IServiceCollection services)
