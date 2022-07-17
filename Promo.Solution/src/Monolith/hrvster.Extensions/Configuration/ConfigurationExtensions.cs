@@ -45,5 +45,9 @@ namespace hrvster.Extensions.Configuration
 			=> services
 				.AddTransient<IHarvesterRepository, HarvesterRepository>()
 				.AddTransient<IReportingRepository, ReportingRepository>();
+
+		public static IServiceCollection AddEmailRepository(this IServiceCollection services)
+			=> services
+				.AddTransient<IMailRepository, MailRepository>();
 	}
 }

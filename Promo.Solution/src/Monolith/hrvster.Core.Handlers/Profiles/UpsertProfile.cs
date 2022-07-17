@@ -26,7 +26,7 @@ namespace hrvster.Core.Handlers.Profiles
 			var profile = new Profile
 			{
 				ProfileUid = Guid.NewGuid(),
-				Account = new Account
+				Account = new Models.Account
 				{
 					AccountUid = request.UserUid
 				},

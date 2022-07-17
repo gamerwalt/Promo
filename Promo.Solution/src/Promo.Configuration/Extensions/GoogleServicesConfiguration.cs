@@ -1,4 +1,5 @@
 ﻿using FirebaseAdmin;
+using FirebaseAdmin.Auth;
 using Google.Apis.Auth.OAuth2;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
@@ -7,6 +8,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 using Promo.Core.Authentication.ConfigurationOptions;
+using System;
 
 namespace Promo.Configuration.Extensions
 {
@@ -39,21 +41,26 @@ namespace Promo.Configuration.Extensions
 
 		public static IServiceCollection AddFirebaseServices(this IServiceCollection services, IConfiguration configuration)
 		{
-			services.AddSingleton<FirebaseApp>(c => BuildFirebaseApp(configuration));
+			services.Configure<FirebaseConfig>(configuration);
+			services.Configure<FirebaseConfig>(configuration.GetSection(FirebaseConfig.Firebase));
+			services.AddTransient(p => p.GetService<IOptions<FirebaseConfig>>().Value);
+
+			services.AddSingleton<FirebaseApp>(c => BuildFirebaseApp(c, configuration));
+			services.AddSingleton<FirebaseAuth>(c => BuildFirebaseAuth(c, configuration));
 
 			return services;
 		}
 
-		private static FirebaseApp BuildFirebaseApp(IConfiguration configuration)
+		private static FirebaseAuth BuildFirebaseAuth(IServiceProvider c, IConfiguration configuration)
 		{
-			var firebaseConfig = new FirebaseConfig();
-			configuration.Bind(FirebaseConfig.Firebase, firebaseConfig);
+			return FirebaseAuth.GetAuth(c.GetService<FirebaseApp>());
+		}
 
-			var firebaseConfigSerialized = JsonConvert.SerializeObject(firebaseConfig);
-
+		private static FirebaseApp BuildFirebaseApp(IServiceProvider sp, IConfiguration configuration)
+		{
 			return FirebaseApp.Create(new AppOptions()
 			{
-				Credential = GoogleCredential.FromJson(firebaseConfigSerialized),
+				Credential = GoogleCredential.FromJson(JsonConvert.SerializeObject(sp.GetService<FirebaseConfig>()))
 			});
 		}
 	}

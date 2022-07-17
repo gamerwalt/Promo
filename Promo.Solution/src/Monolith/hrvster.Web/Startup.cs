@@ -99,7 +99,9 @@ namespace hrvster.Web
 			services.AddTransient<ITweetProcessor, TweetProcessor>();
 			services.AddDrawSettingConfiguration(Configuration);
 			services.AddRandomizer();
+			services.AddEmailRepository();
 		}
+
 
 		private void AddValidators(IServiceCollection services)
 		{

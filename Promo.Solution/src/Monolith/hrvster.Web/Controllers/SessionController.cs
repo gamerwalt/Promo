@@ -1,4 +1,5 @@
 ﻿using Firebase.Auth;
+using hrvster.Core.Authentication;
 using hrvster.Core.Requests.WebRequests;
 using hrvster.Web.Models;
 using MediatR;
@@ -8,10 +9,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using Promo.Core.Authentication.ConfigurationOptions;
-using System.Security.Claims;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Identity;
-using hrvster.Core.Authentication;
 
 namespace hrvster.Web.Controllers
 {
@@ -36,7 +34,7 @@ namespace hrvster.Web.Controllers
 		public ActionResult SignIn()
 		{
 			var token = HttpContext.Session.GetString("_UserToken");
-			
+
 			return token == null ? View() : RedirectToAction("Index", "Dashboard");
 		}
 
@@ -49,7 +47,7 @@ namespace hrvster.Web.Controllers
 			{
 				var link = await authProvider.SignInWithEmailAndPasswordAsync(form.Email, form.Password);
 
-				if(!string.IsNullOrWhiteSpace(link.FirebaseToken))// && link.User.IsEmailVerified)
+				if (!string.IsNullOrWhiteSpace(link.FirebaseToken))// && link.User.IsEmailVerified)
 				{
 					HttpContext.Session.SetString(SessionConstants.UserToken, link.FirebaseToken);
 					HttpContext.Session.SetString(SessionConstants.UserUid, link.User.LocalId);

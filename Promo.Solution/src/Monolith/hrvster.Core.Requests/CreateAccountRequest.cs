@@ -59,11 +59,11 @@ namespace hrvster.Core.Requests
 
 			var createdUser = await ConfigureAndCreateUser(args);
 
-			await _mediator.Publish(new AccountCreatedViaFirebase(
-				createdUser,
-				request.NewAccountRequest.Pin,
-				request.NewAccountRequest.TermsAccepted)
-			);
+			//await _mediator.Publish(new AccountCreatedViaFirebase(
+			//	createdUser,
+			//	request.NewAccountRequest.Pin,
+			//	request.NewAccountRequest.TermsAccepted)
+			//);
 		}
 
 		private async Task<UserRecord> ConfigureAndCreateUser(UserRecordArgs args)

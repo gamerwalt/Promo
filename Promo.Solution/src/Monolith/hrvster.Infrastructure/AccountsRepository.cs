@@ -22,6 +22,9 @@ namespace hrvster.Infrastructure
 		Task<List<Account>> GetAllAccounts();
 		Task<IEnumerable<Account>> GetUnverifiedAccountsAsync(CancellationToken token);
 		Task VerifyAccountEmailAsync(Guid accountUid);
+		Account GetUserByEmail(string emailAddress);
+		Account GetUserByUserName(string userName);
+		Account GetByPhoneNumber(string phoneNumber);
 	}
 
 	public class AccountsRepository : IAccountsRepository
@@ -46,7 +49,8 @@ namespace hrvster.Infrastructure
 				.AddParameter("accountUid", account.AccountUid)
 				.AddParameter("displayName", account.DisplayName)
 				.AddParameter("pin", account.Pin)
-				.AddParameter("termsAccepted", account.TermsAccepted);
+				.AddParameter("termsAccepted", account.TermsAccepted)
+				.AddParameter("verificationLink", account.VerificationLink);
 
 			await conn.OpenAsync();
 			await command.ExecuteNonQueryAsync();
@@ -255,6 +259,72 @@ namespace hrvster.Infrastructure
 
 			await conn.OpenAsync();
 			await command.ExecuteNonQueryAsync();
+		}
+
+		public Account GetUserByEmail(string emailAddress)
+		{
+			var account = default(Account);
+
+			using (var conn = new MySqlConnection(_database.GetConnectionString()))
+			{
+				var command = conn.CreateCommand();
+				command.CommandText = "account_get_by_email";
+				command.CommandType = CommandType.StoredProcedure;
+				command.AddParameter("email", emailAddress);
+
+				conn.Open();
+				using var reader = command.ExecuteReader();
+				while (reader.Read())
+				{
+					account = CreateAccountFrom(reader);
+				}
+			}
+
+			return account;
+		}
+
+		public Account GetUserByUserName(string userName)
+		{
+			var account = default(Account);
+
+			using (var conn = new MySqlConnection(_database.GetConnectionString()))
+			{
+				var command = conn.CreateCommand();
+				command.CommandText = "account_get_by_displayname";
+				command.CommandType = CommandType.StoredProcedure;
+				command.AddParameter("displayName", userName);
+
+				conn.Open();
+				using var reader = command.ExecuteReader();
+				while (reader.Read())
+				{
+					account = CreateAccountFrom(reader);
+				}
+			}
+
+			return account;
+		}
+
+		public Account GetByPhoneNumber(string phoneNumber)
+		{
+			var account = default(Account);
+
+			using (var conn = new MySqlConnection(_database.GetConnectionString()))
+			{
+				var command = conn.CreateCommand();
+				command.CommandText = "account_get_by_phonenumber";
+				command.CommandType = CommandType.StoredProcedure;
+				command.AddParameter("phoneNumber", phoneNumber);
+
+				conn.Open();
+				using var reader = command.ExecuteReader();
+				while (reader.Read())
+				{
+					account = CreateAccountFrom(reader);
+				}
+			}
+
+			return account;
 		}
 	}
 }

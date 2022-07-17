@@ -206,7 +206,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "hrvster.Services", "Monolit
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "hrvster.ApplicationServices", "Monolith\hrvster.ApplicationServices\hrvster.ApplicationServices.csproj", "{ED1B3EC5-A0DC-4073-9606-EA51FE87BB15}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "hrvster.Twitter.Harvester", "Monolith\hrvster.Twitter.Harvester\hrvster.Twitter.Harvester.csproj", "{7E904EE8-F334-482C-A176-EEB818E6A281}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "hrvster.Twitter.Harvester", "Monolith\hrvster.Twitter.Harvester\hrvster.Twitter.Harvester.csproj", "{7E904EE8-F334-482C-A176-EEB818E6A281}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Readme", "Readme", "{9352DCBF-5984-4129-874D-F765294E6B79}"
+	ProjectSection(SolutionItems) = preProject
+		Todo.txt = Todo.txt
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -517,6 +522,7 @@ Global
 		{F3C9C333-A60F-490E-B0C3-0D668790522C} = {71429F9B-A81B-4A12-98DD-505C0F9FDB34}
 		{ED1B3EC5-A0DC-4073-9606-EA51FE87BB15} = {71429F9B-A81B-4A12-98DD-505C0F9FDB34}
 		{7E904EE8-F334-482C-A176-EEB818E6A281} = {71429F9B-A81B-4A12-98DD-505C0F9FDB34}
+		{9352DCBF-5984-4129-874D-F765294E6B79} = {71429F9B-A81B-4A12-98DD-505C0F9FDB34}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {94B46B7F-1545-465E-863A-AAD0C58A8C0F}
