@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Threading.Tasks;
 using hrvster.Infrastructure.Extensions;
+using hrvster.Models.Sweepstakes;
 
 namespace hrvster.Infrastructure
 {
@@ -14,7 +15,7 @@ namespace hrvster.Infrastructure
 		Task<Sweep> GetAsync(Guid sweepUid);
 		Task<IEnumerable<Sweep>> GetAllForCampaignAsync(Guid campaignUid);
 		Task UpdateAsync(Guid sweepUid, Sweep sweep);
-		Task<IEnumerable<Sweep>> GetSweepsRequiringADrawAsync();
+		Task<IEnumerable<SweepDrawPropertiesAndRule>> GetSweepsRequiringADrawAsync();
 		Task UpdateSweepAsDrawnAsync(Guid sweepUid);
 	}
 
@@ -94,9 +95,9 @@ namespace hrvster.Infrastructure
 			return sweep;
 		}
 
-		public async Task<IEnumerable<Sweep>> GetSweepsRequiringADrawAsync()
+		public async Task<IEnumerable<SweepDrawPropertiesAndRule>> GetSweepsRequiringADrawAsync()
 		{
-			var sweeps = new List<Sweep>();
+			var sweeps = new List<SweepDrawPropertiesAndRule>();
 
 			using (var conn = new MySqlConnection(_database.GetConnectionString()))
 			{
@@ -109,12 +110,68 @@ namespace hrvster.Infrastructure
 				{
 					while (await reader.ReadAsync())
 					{
-						sweeps.Add(CreateSweepFrom(reader));
+						sweeps.Add(CreateSweepDrawRuleFrom(reader));
 					}
 				}
 			}
 
 			return sweeps;
+		}
+
+		private SweepDrawPropertiesAndRule CreateSweepDrawRuleFrom(MySqlDataReader reader)
+		{
+			return new SweepDrawPropertiesAndRule
+			{
+				Sweep = new Sweep
+				{
+					SweepId = reader.GetInt32("sweep_id"),
+					SweepUid = reader.GetGuid("sweep_uid"),
+					Name = reader.GetStringValue("sweep_name"),
+					RulesUrl = reader.GetStringValue("sweep_rule_url"),
+					StartDate = reader.GetNullableDateTimeValue("sweep_start_date").GetValueOrDefault(),
+					EndDate = reader.GetNullableDateTimeValue("sweep_end_date").GetValueOrDefault(),
+					DrawDate = reader.GetNullableDateTimeValue("sweep_draw_date").GetValueOrDefault(),
+					Drawn = reader.GetBoolean("sweep_drawn_indicator"),
+					DateDrawn = reader.GetNullableDateTimeValue("sweep_date_drawn")
+				},
+				SweepRule = new Models.Rule
+				{
+					WatchValue = reader.GetStringValue("sweep_rule_watch_value"),
+					ActiveInd = reader.GetBoolean("sweep_rule_active_indicatory"),
+					ExternalId = reader.GetLongValue("external_id"),
+					MustBeFollowing = reader.GetBoolean("must_be_following"),
+					NotifyWinners = reader.GetBoolean("notify_winners")
+				},
+				Campaign = new Campaign
+				{
+					CampaignId = reader.GetInt32("campaign_id"),
+					CampaignUid = reader.GetGuid("campaign_uid"),
+					CampaignName = reader.GetStringValue("campaign_name"),
+					Description = reader.GetStringValue("campaign_description"),
+					ActiveInd = reader.GetBoolean("campaign_active_ind"),
+					StartDate = reader.GetNullableDateTimeValue("campaign_start_date").GetValueOrDefault(),
+					EndDate = reader.GetNullableDateTimeValue("campaign_end_date").GetValueOrDefault(),
+					CampaignType = new CampaignType
+					{
+						CampaignTypeCode = (CampaignTypeCode)Enum.Parse(typeof(CampaignTypeCode), reader.GetString("campaign_type_code")),
+						CampaignTypeName = reader.GetStringValue("campaign_type_name"),
+						CamapaignTypeDescription = reader.GetStringValue("campaign_type_description")
+					}
+				},
+				DrawRule = new DrawRule
+				{
+					SweepDrawruleId = reader.GetInt32("sweep_draw_rule_id"),
+					SweepDrawRuleUid = reader.GetGuid("sweep_draw_rule_uid"),
+					WinnerCount = reader.GetInt32("winner_count"),
+					WinnerBackupCount = reader.GetInt32("winner_backup_count")
+				},
+				WatchType = new WatchType
+				{
+					WatchTypeId = reader.GetInt32("watch_type_id"),
+					WatchTypeCode = reader.GetString("watch_type_code"),
+					WatchTypeName = reader.GetString("watch_type_name")
+				}
+			};
 		}
 
 		public async Task UpdateAsync(Guid sweepUid, Sweep sweep)

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace hrvster.Core.Requests.ServiceRequests
 {
-	public class GetSweepstakesRequiringADrawRequest : IRequest<IEnumerable<SweepDrawRule>>
+	public class GetSweepstakesRequiringADrawRequest : IRequest<IEnumerable<SweepDrawPropertiesAndRule>>
 	{
 	}
 }

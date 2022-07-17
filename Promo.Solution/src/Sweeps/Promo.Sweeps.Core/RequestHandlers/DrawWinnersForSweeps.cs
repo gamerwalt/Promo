@@ -68,7 +68,7 @@ namespace Promo.Sweeps.Core.RequestHandlers
 
 		public async Task<IEnumerable<SweepWinner>> Handle(DrawWinnersForSweeps request, CancellationToken cancellationToken)
 		{
-			_logger.LogInformation("Handling {handlerName} for Sweep: {sweepName} and Campaign: {campaignName}", 
+			_logger.LogInformation("Handling {handlerName} for Sweep: {sweepName} and Campaign: {campaignName}",
 				nameof(DrawWinnersForSweepsHandler),
 				request.SweepDrawRule.SweepName,
 				request.SweepDrawRule.CampaignName);
