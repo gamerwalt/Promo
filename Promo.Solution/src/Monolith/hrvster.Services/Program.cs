@@ -57,7 +57,8 @@ namespace hrvster.Services
 						.AddTwitterClient(Configuration)
 						.AddDrawSettingConfiguration(Configuration)
 						.AddApplicationCronServices()
-						.AddPublishers();
+						.AddPublishers()
+						.AddRandomizer();
 
 					AddDatabases(services);
 					LoadServices(services);

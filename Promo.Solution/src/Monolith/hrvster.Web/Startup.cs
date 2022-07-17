@@ -17,6 +17,8 @@ using hrvster.Core.Requests.Validators;
 using hrvster.Core.Requests.WebRequests;
 using hrvster.Core.Requests.WebRequests.Validators;
 using hrvster.Core.Settings;
+using hrvster.Extensions.Configuration;
+using hrvster.Extensions.OptionsConfiguration;
 using hrvster.Infrastructure;
 using hrvster.Infrastructure.Accounts;
 using hrvster.Infrastructure.Core;
@@ -95,6 +97,8 @@ namespace hrvster.Web
 			});
 
 			services.AddTransient<ITweetProcessor, TweetProcessor>();
+			services.AddDrawSettingConfiguration(Configuration);
+			services.AddRandomizer();
 		}
 
 		private void AddValidators(IServiceCollection services)

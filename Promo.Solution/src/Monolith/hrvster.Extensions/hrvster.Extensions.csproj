@@ -15,6 +15,7 @@
   <ItemGroup>
     <ProjectReference Include="..\hrvster.ApplicationServices\hrvster.ApplicationServices.csproj" />
     <ProjectReference Include="..\hrvster.Core.Clients\hrvster.Core.Clients.csproj" />
+    <ProjectReference Include="..\hrvster.Core\hrvster.Core.csproj" />
     <ProjectReference Include="..\hrvster.Infrastructure\hrvster.Infrastructure.csproj" />
     <ProjectReference Include="..\hrvster.Models\hrvster.Models.csproj" />
   </ItemGroup>

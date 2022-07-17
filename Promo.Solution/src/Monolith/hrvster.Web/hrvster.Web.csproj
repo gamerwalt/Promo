@@ -28,6 +28,7 @@
     <ProjectReference Include="..\hrvster.Core.Handlers\hrvster.Core.Handlers.csproj" />
     <ProjectReference Include="..\hrvster.Core.Requests\hrvster.Core.Requests.csproj" />
     <ProjectReference Include="..\hrvster.Core\hrvster.Core.csproj" />
+    <ProjectReference Include="..\hrvster.Extensions\hrvster.Extensions.csproj" />
     <ProjectReference Include="..\hrvster.Infrastructure\hrvster.Infrastructure.csproj" />
   </ItemGroup>
 
