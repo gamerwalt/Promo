@@ -1,4 +1,5 @@
-﻿using hrvster.Core.Authentication;
+﻿using AspNetCoreHero.ToastNotification.Abstractions;
+using hrvster.Core.Authentication;
 using hrvster.Core.Requests;
 using hrvster.Core.Requests.WebRequests.Sweeps;
 using hrvster.Core.Settings;
@@ -17,15 +18,18 @@ namespace hrvster.Web.Controllers
 		private readonly ILogger<SweepDrawRuleController> _logger;
 		private readonly IMediator _mediator;
 		private readonly SweepConfiguration _sweepConfig;
+		private readonly INotyfService _notificationService;
 
 		public SweepDrawRuleController(
 			ILoggerFactory loggerFactory,
 			IMediator mediator,
-			SweepConfiguration sweepConfig)
+			SweepConfiguration sweepConfig,
+			INotyfService notificationService)
 		{
 			_logger = loggerFactory.CreateLogger<SweepDrawRuleController>();
 			_mediator = mediator;
 			_sweepConfig = sweepConfig;
+			_notificationService = notificationService;
 		}
 
 		[HttpGet]
@@ -36,7 +40,9 @@ namespace hrvster.Web.Controllers
 			{
 				_logger.LogError("Could not find sweepstake with uid: {sweepUid}", sweepUid);
 
-				return new NotFoundObjectResult($"Could not find sweepstake with uid: {sweepUid} ");
+				_notificationService.Warning($"Could not find sweepstake with uid: {sweepUid}.");
+
+				return RedirectToAction(actionName, controllerName);
 			}
 
 			var model = new CreateSweepDrawRule
@@ -61,7 +67,9 @@ namespace hrvster.Web.Controllers
 			{
 				_logger.LogError("Could not find sweepstake with uid: {sweepUid}", sweepUid);
 
-				return new NotFoundObjectResult($"Could not find sweepstake with uid: {sweepUid} ");
+				_notificationService.Warning($"Could not find sweepstake with uid: {sweepUid}.");
+
+				return RedirectToAction(actionName, controllerName);
 			}
 
 			var sweepDrawRule = await _mediator.Send(new GetSweepDrawRuleRequest(drawRuleUid));
@@ -69,7 +77,9 @@ namespace hrvster.Web.Controllers
 			{
 				_logger.LogError("Could not find the draw rule with uid: {sweepDrawRuleUid}", drawRuleUid);
 
-				return new NotFoundObjectResult($"Could not find the draw rule with uid: {drawRuleUid}");
+				_notificationService.Warning($"Could not find the draw rule with uid: {drawRuleUid}");
+
+				return RedirectToAction(actionName, controllerName);
 			}
 
 			var model = new UpdateSweepDrawRule
@@ -97,7 +107,9 @@ namespace hrvster.Web.Controllers
 				{
 					_logger.LogError("Could not find sweepstake with uid: {sweepUid}", sweepUid);
 
-					return new NotFoundObjectResult($"Could not find sweepstake with uid: {sweepUid} ");
+					_notificationService.Warning($"Could not find sweepstake with uid: {sweepUid}.");
+
+					return View(model);
 				}
 
 				var request = new CreateSweepDrawRuleRequest
@@ -129,7 +141,9 @@ namespace hrvster.Web.Controllers
 				{
 					_logger.LogError("Could not find sweepstake with uid: {sweepUid}", sweepUid);
 
-					return new NotFoundObjectResult($"Could not find sweepstake with uid: {sweepUid} ");
+					_notificationService.Warning($"Could not find sweepstake with uid: {sweepUid}.");
+
+					return View(form);
 				}
 
 				var sweepDrawRule = await _mediator.Send(new GetSweepDrawRuleRequest(drawRuleUid));
@@ -137,7 +151,9 @@ namespace hrvster.Web.Controllers
 				{
 					_logger.LogError("Could not find the draw rule with uid: {sweepDrawRuleUid}", drawRuleUid);
 
-					return new NotFoundObjectResult($"Could not find the draw rule with uid: {drawRuleUid}");
+					_notificationService.Warning($"Could not find the draw rule with uid: {drawRuleUid}");
+
+					return View(form);
 				}
 
 				var request = new UpdateSweepDrawRuleRequest(sweep.SweepId, sweepUid, drawRuleUid, form.WinnerCount, form.WinnerBackupCount);

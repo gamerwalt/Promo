@@ -1,10 +1,19 @@
-Add Registration
+Add Registration (Done)
+
+Fix validations site wide (Done. More likely to come)
+
+Fix deletion of Tweet
+
 Update Dashboard to show Tweets Coming in and entries per person
-Fix validations site wide
+
 Make sure we saved harvested tweets first
-Then use a service to process them in the background 
-	or throw them into a queue to be processed by another service
-Rule creator for the Sweepstake (Do we need a lawyer? or we can just wing this one)
+	Then use a service to process them in the background 
+		or throw them into a queue to be processed by another service
+
+RuleUrl creator for the Sweepstake (Do we need a lawyer? or we can just wing this one)
 	This will specifically control jurisdiction of each sweepstake and make sure that
 	Hrvster is also not on the hook for prizes but the Account holder
 
+Add Tests
+
+Involve Tobi to start the design process

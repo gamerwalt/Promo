@@ -1,4 +1,5 @@
-﻿using hrvster.Core.Authentication;
+﻿using AspNetCoreHero.ToastNotification.Abstractions;
+using hrvster.Core.Authentication;
 using hrvster.Core.Requests;
 using hrvster.Core.Requests.WebRequests.Core;
 using hrvster.Models;
@@ -20,15 +21,18 @@ namespace hrvster.Web.Controllers
 		private readonly ILogger<WatchTypeProviderController> _logger;
 		private readonly IMediator _mediator;
 		private readonly HrvsterUser _hrvsterUser;
+		private readonly INotyfService _notificationService;
 
 		public WatchTypeProviderController(
 			ILoggerFactory loggerFactory,
 			IMediator mediator,
-			HrvsterUser hrvsterUser)
+			HrvsterUser hrvsterUser,
+			INotyfService notificationService)
 		{
 			_logger = loggerFactory.CreateLogger<WatchTypeProviderController>();
 			_mediator = mediator;
 			_hrvsterUser = hrvsterUser;
+			_notificationService = notificationService;
 		}
 
 		[HttpGet]
@@ -39,7 +43,9 @@ namespace hrvster.Web.Controllers
 			{
 				_logger.LogError("Could not find sweepstake with uid: {sweepUid}", sweepUid);
 
-				return new NotFoundObjectResult($"Could not find sweepstake with uid: {sweepUid} ");
+				_notificationService.Warning($"Could not find sweepstake with uid: {sweepUid}.");
+
+				return RedirectToAction(actionName, controllerName);
 			}
 
 			var watchTypeProviders = await _mediator.Send(new GetWatchTypeProvidersRequest());
@@ -73,7 +79,9 @@ namespace hrvster.Web.Controllers
 				{
 					_logger.LogError("Could not find sweepstake with uid: {sweepUid}", sweepUid);
 
-					return new NotFoundObjectResult($"Could not find sweepstake with uid: {sweepUid} ");
+					_notificationService.Warning($"Could not find sweepstake with uid: {sweepUid}.");
+
+					return View(form);
 				}
 
 				switch(form.ProviderCode)

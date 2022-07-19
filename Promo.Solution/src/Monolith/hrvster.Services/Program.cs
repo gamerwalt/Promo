@@ -37,8 +37,6 @@ namespace hrvster.Services
 			Host.CreateDefaultBuilder(args)
 				.UseSerilog((context, configuration) =>
 					configuration.ReadFrom.Configuration(context.Configuration)
-						//.WriteTo.Loggly()
-						//.WriteTo.Console()
 						.Enrich.FromLogContext()
 						.MinimumLevel.Debug(), preserveStaticLogger: true)
 				.ConfigureServices((hostContext, services) =>
@@ -48,6 +46,7 @@ namespace hrvster.Services
 					services.AddHostedService<HostedServices>();
 					services.AddSingleton<IService, ScheduledTweetService>();
 					services.AddSingleton<IService, SweepstakesDrawService>();
+					services.AddSingleton<IService, EmailNotificationService>();
 
 					services
 						.AddAccountRepositories()

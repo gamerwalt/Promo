@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿using AspNetCoreHero.ToastNotification.Abstractions;
+using AutoMapper;
 using hrvster.Core.Authentication;
 using hrvster.Core.Requests;
 using hrvster.Core.Requests.ApiRequests;
@@ -18,12 +19,14 @@ namespace hrvster.Web.Controllers
 		private readonly IMediator _mediator;
 		private readonly HrvsterUser _hrvsterUser;
 		private readonly IMapper _mapper;
+		private readonly INotyfService _notificationService;
 
-		public SweepsController(IMediator mediator, HrvsterUser hrvsterUser, IMapper mapper)
+		public SweepsController(IMediator mediator, HrvsterUser hrvsterUser, IMapper mapper, INotyfService notificationService)
 		{
 			_mediator = mediator;
 			_hrvsterUser = hrvsterUser;
 			_mapper = mapper;
+			_notificationService = notificationService;
 		}
 
 		public IActionResult Index()
@@ -38,7 +41,8 @@ namespace hrvster.Web.Controllers
 
 			if (campaign == null)
 			{
-				ModelState.AddModelError("CustomError", "Campaign not found.");
+				_notificationService.Warning($"Could not find campaign with uid: {campaignUid}.");
+
 				return RedirectToAction("Index");
 			}
 
@@ -71,7 +75,7 @@ namespace hrvster.Web.Controllers
 
 				if(sweep == null)
 				{
-					ModelState.AddModelError("CustomError", "Unable to create sweep. Please reach out to support.");
+					_notificationService.Warning($"Unable to create sweep. Please reach out to support.");
 
 					return RedirectToAction("Create", new { campaignUid = model.Campaign.CampaignUid });
 				}

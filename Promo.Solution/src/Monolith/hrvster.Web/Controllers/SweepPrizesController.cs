@@ -319,7 +319,7 @@ namespace hrvster.Web.Controllers
 		private IActionResult LogAndRedirectBack(string message, Guid sweepUid, Guid campaignUid, string returnAction, string returnController)
 		{
 			_logger.LogError(message);
-			_notificationService.Error(message);
+			_notificationService.Warning(message);
 
 			return RedirectToAction(returnAction, returnController, new { sweepUid = sweepUid, campaignUid = campaignUid });
 		}

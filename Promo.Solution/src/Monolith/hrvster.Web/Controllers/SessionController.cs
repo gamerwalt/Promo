@@ -1,4 +1,5 @@
-﻿using Firebase.Auth;
+﻿using AspNetCoreHero.ToastNotification.Abstractions;
+using Firebase.Auth;
 using hrvster.Core.Authentication;
 using hrvster.Core.Requests.WebRequests;
 using hrvster.Web.Models;
@@ -18,14 +19,20 @@ namespace hrvster.Web.Controllers
 		private readonly ILogger<SessionController> _logger;
 		private readonly IMediator _mediator;
 		private readonly GoogleServicesOptions _googleServicesOptions;
+		private readonly INotyfService _notificationService;
 
 		FirebaseAuthProvider authProvider;
 
-		public SessionController(ILoggerFactory loggerFactory, IMediator mediator, IOptions<GoogleServicesOptions> googleServicesOptions)
+		public SessionController(
+			ILoggerFactory loggerFactory, 
+			IMediator mediator, 
+			IOptions<GoogleServicesOptions> googleServicesOptions,
+			INotyfService notificationService)
 		{
 			_logger = loggerFactory.CreateLogger<SessionController>();
 			_mediator = mediator;
 			_googleServicesOptions = googleServicesOptions.Value;
+			_notificationService = notificationService;
 
 			authProvider = new FirebaseAuthProvider(new Firebase.Auth.FirebaseConfig(_googleServicesOptions.WebApiKey));
 		}
@@ -60,7 +67,8 @@ namespace hrvster.Web.Controllers
 			catch (FirebaseAuthException ex)
 			{
 				var firebaseError = JsonConvert.DeserializeObject<FirebaseError>(ex.ResponseData);
-				ModelState.AddModelError("CustomError", "Invalid email or password.");
+
+				_notificationService.Warning("Invalid email or password.");
 
 				return View(form);
 			}
