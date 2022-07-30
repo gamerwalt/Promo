@@ -14,6 +14,8 @@ namespace hrvster.Infrastructure
 		Task<SweepEntry> GetAsync(Guid sweepEntryGuid);
 		Task CreateCampaignSweepsEntryAsync(CampaignSweepsEntry campaignSweepsEntry);
 		Task<IEnumerable<SweepEntry>> GetSweepEntriesAsync(Guid sweepUid);
+		Task<IEnumerable<HarvestedTweet>> GetHarvestedTweetsAsync(Guid userUid, Guid campaignUid);
+		Task<IEnumerable<SweepEntryChart>> GetSweepEntriesByCampaignAndUserAsync(Guid userUid, Guid campaignUid);
 	}
 
 	public class SweepsEntriesRepository : ISweepsEntriesRepository
@@ -82,6 +84,78 @@ namespace hrvster.Infrastructure
 			}
 
 			return sweepEntry;
+		}
+
+		public async Task<IEnumerable<HarvestedTweet>> GetHarvestedTweetsAsync(Guid userUid, Guid campaignUid)
+		{
+			var harvestedTweets = new List<HarvestedTweet>();
+			var fifteenMiniutes = DateTime.Now.AddMinutes(-15);
+			using (var conn = new MySqlConnection(_database.GetConnectionString()))
+			{
+				var command = conn.CreateCommand();
+				command.CommandText = "harvested_tweets_get";
+				command.CommandType = CommandType.StoredProcedure;
+				command.AddParameter("accountUid", userUid);
+				command.AddParameter("campaignUid", campaignUid);
+				command.AddParameter("previousTime", fifteenMiniutes);
+
+				await conn.OpenAsync();
+				using (var reader = await command.ExecuteReaderAsync())
+				{
+					while (await reader.ReadAsync())
+					{
+						harvestedTweets.Add(CreateHarvestedTweetFrom(reader));
+					}
+				}
+			}
+
+			return harvestedTweets;
+		}
+
+		public async Task<IEnumerable<SweepEntryChart>> GetSweepEntriesByCampaignAndUserAsync(Guid userUid, Guid campaignUid)
+		{
+			var entries = new List<SweepEntryChart>();
+
+			using (var conn = new MySqlConnection(_database.GetConnectionString()))
+			{
+				var command = conn.CreateCommand();
+				command.CommandText = "tweet_entries_get_by_campaign_and_user";
+				command.CommandType = CommandType.StoredProcedure;
+				command.AddParameter("accountUid", userUid)
+					.AddParameter("campaignUid", campaignUid);
+
+				await conn.OpenAsync();
+				using (var reader = await command.ExecuteReaderAsync())
+				{
+					while (await reader.ReadAsync())
+					{
+						entries.Add(CreateSweepEntryChar(reader));
+					}
+				}
+			}
+
+			return entries;
+		}
+
+		private SweepEntryChart CreateSweepEntryChar(MySqlDataReader reader)
+		{
+			return new SweepEntryChart
+			{
+				Count = reader.GetInt32("count"),
+				Datepart = reader.GetDateTime("the_time"),
+				SweepName = reader.GetString("sweep_name")
+			};
+		}
+
+		private HarvestedTweet CreateHarvestedTweetFrom(MySqlDataReader reader)
+		{
+			return new HarvestedTweet
+			{
+				Count = reader.GetInt32("count"),
+				Datepart = reader.GetDateTime("the_time"),
+				SweepName = reader.GetString("sweep_name"),
+				SweepUid = reader.GetGuid("sweep_uid")
+			};
 		}
 
 		public async Task<IEnumerable<SweepEntry>> GetSweepEntriesAsync(Guid sweepUid)

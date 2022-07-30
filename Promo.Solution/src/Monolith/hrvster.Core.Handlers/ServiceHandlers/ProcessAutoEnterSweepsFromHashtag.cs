@@ -72,7 +72,10 @@ namespace hrvster.Core.Handlers.ServiceHandlers
 
 			var followers = await _twitterClient.Users.GetFollowerIdsAsync(profile.ScreenName);
 
-			return request.Rule.MustBeFollowing && followers.Any(c => c.Equals(request.Tweet.CreatedBy.Id));
+			if(request.Rule.MustBeFollowing)
+				return followers.Any(c => c.Equals(request.Tweet.CreatedBy.Id));
+
+			return true;
 		}
 
 		private void BuildTwitterClient(string accessToken, string accessTokenSecret)

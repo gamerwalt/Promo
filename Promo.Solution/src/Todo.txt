@@ -1,10 +1,11 @@
 Add Registration (Done)
+Fix deletion of Tweet (Done)
 
 Fix validations site wide (Done. More likely to come)
 
-Fix deletion of Tweet
-
 Update Dashboard to show Tweets Coming in and entries per person
+
+Make sure users are verified before creating campaigns
 
 Make sure we saved harvested tweets first
 	Then use a service to process them in the background 
@@ -13,6 +14,10 @@ Make sure we saved harvested tweets first
 RuleUrl creator for the Sweepstake (Do we need a lawyer? or we can just wing this one)
 	This will specifically control jurisdiction of each sweepstake and make sure that
 	Hrvster is also not on the hook for prizes but the Account holder
+
+Add Subscription (Free for now)
+Add Terms and Conditions
+Add Privacy details
 
 Add Tests
 

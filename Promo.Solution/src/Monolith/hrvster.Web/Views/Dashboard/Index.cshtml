@@ -1,6 +1,55 @@
-﻿@using hrvster.Models.WebModels
-@model Dashboard
+﻿@model Dashboard
 @{
     ViewData["Title"] = "Dashboards";
 }
-<div><h1>Dashboard</h1></div>
+<style>
+    body{
+        background: #343E59;
+    }
+    .box {
+      background-color: #262D47;
+      padding: 25px 25px;
+      border-radius: 4px;
+    }
+</style>
+<div class="row">
+    <div class="col-md-12">
+        <hr />
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <form name="promotionForm" id="promotionForm">
+            <select asp-items="@Model.Promotions" class="form-control form-control-lg">
+                <option>Please select A Campaign</option>
+            </select>
+        </form>
+    </div>
+</div>
+<div class="row">
+    <div class="dropdown-divider"></div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-body">
+                <div id="sweepstakesTweetsLineChart"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="dropdown-divider"></div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-body">
+                <div id="sweepstakesEntriesLineChart"></div>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    @{await Html.RenderPartialAsync("_DashboardsPartial");}
+}

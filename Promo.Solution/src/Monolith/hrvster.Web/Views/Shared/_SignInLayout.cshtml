@@ -1,0 +1,45 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - hrvster.Web</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:300,400,500,600,700" />
+	<link href="~/assets/plugins/global/plugins.bundle.css" rel="stylesheet" type="text/css" />
+	<link href="~/assets/css/style.bundle.css" rel="stylesheet" type="text/css" />
+</head>
+<body data-kt-name="metronic" id="kt_body" class="app-blank bgi-size-cover bgi-position-center bgi-no-repeat">
+    <div class="container">
+        <main role="main" class="pb-3">
+            <script>
+				if ( document.documentElement ) 
+				{ 
+					const defaultThemeMode = "dark"; 
+					const name = document.body.getAttribute("data-kt-name"); 
+					let themeMode = localStorage.getItem("kt_" + ( name !== null ? name + "_" : "" ) + "theme_mode_value"); 
+		
+					if ( themeMode === null ) 
+					{ 
+						if ( defaultThemeMode === "system" ) 
+						{ 
+							themeMode = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"; 
+						} 
+						else 
+						{ 
+							themeMode = defaultThemeMode; 
+						} 
+					} 
+		
+					document.documentElement.setAttribute("data-theme", themeMode); 
+				}
+			</script>
+            @RenderBody()
+        </main>
+    </div>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+    @await Component.InvokeAsync("Notyf")
+</body>
+</html>
