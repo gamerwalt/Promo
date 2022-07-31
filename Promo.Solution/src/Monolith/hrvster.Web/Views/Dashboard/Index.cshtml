@@ -2,18 +2,57 @@
 @{
     ViewData["Title"] = "Dashboard";
 }
-<div class="row">
-    <div class="col-md-12">
-        <form name="promotionForm" id="promotionForm">
-            <select asp-items="@Model.Promotions" class="form-control form-control-lg">
-                <option>Please select A Campaign</option>
-            </select>
-        </form>
-    </div>
+<div class="row g-12 g-xl-12">
+	<div class="col-xl-12">
+        <div class="card card-xl-stretch mb-xl-6">
+            <form name="promotionForm" id="promotionForm">
+                <select asp-items="@Model.Promotions" class="form-control form-control-lg">
+                    <option>Please select A Promotion</option>
+                </select>
+            </form>
+        </div>
+	</div>
 </div>
-<div class="row">
-    <div class="dropdown-divider"></div>
+
+<div class="d-flex flex-wrap flex-stack my-5">
+	<h2 class="fs-2 fw-semibold my-2">Promotions/Campaigns</h2>
 </div>
+<div class="row g-6 g-xl-9">
+@foreach(var campaign in @Model.Campaigns)
+{
+	<div class="col-md-6 col-xl-4">
+		<!--begin::Card-->
+		<a href="#" class="card border-hover-primary">
+            <div class="card-header border-0 pt-9">
+				<div class="card-toolbar">
+					<div class="fs-3 fw-bold text-dark">@campaign.CampaignName</div>
+				</div>
+			</div>
+			<!--begin:: Card body-->
+			<div class="card-body p-9">
+				<p class="text-gray-400 fw-semibold fs-5 mt-1 mb-7">@campaign.Description</p>
+
+				<div class="d-flex flex-wrap mb-5">
+					<div class="border border-gray-300 border-dashed rounded min-w-125px py-3 px-4 me-7 mb-3">
+						<div class="fs-6 text-gray-800 fw-bold">@campaign.StartDate.ToString("MMM d, yyyy, H:mm:ss")</div>
+						<div class="fw-semibold text-gray-400">Start Date</div>
+					</div>
+					<div class="border border-gray-300 border-dashed rounded min-w-125px py-3 px-4 mb-3">
+						<div class="fs-6 text-gray-800 fw-bold">@campaign.EndDate.ToString("MMM d, yyyy, H:mm:ss")</div>
+						<div class="fw-semibold text-gray-400">End Date</div>
+					</div>
+				</div>
+			</div>
+		</a>
+	</div>
+}
+</div>
+<div class="row g-6 g-xl-9">
+	<div class="col-md-6 col-xl-4">
+		&nbsp;
+	</div>
+</div>
+
 <div class="row">
     <div class="col-md-12">
         <div class="card">

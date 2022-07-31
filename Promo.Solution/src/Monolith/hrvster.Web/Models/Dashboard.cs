@@ -8,5 +8,6 @@ namespace hrvster.Web.Models
 	{
 		public Account Account { get; set; }
 		public IEnumerable<SelectListItem> Promotions { get; set; }
+		public List<hrvster.Models.Campaign> Campaigns { get; internal set; }
 	}
 }

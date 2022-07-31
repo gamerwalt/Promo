@@ -40,7 +40,8 @@ namespace hrvster.Web.Controllers
 			var model = new Dashboard
 			{
 				Account = _mapper.Map<hrvster.Models.WebModels.Account>(account),
-				Promotions = promotions.Select(a => new SelectListItem() {  Text = a.CampaignName, Value = a.CampaignUid.ToString() })
+				Promotions = promotions.Select(a => new SelectListItem() { Text = a.CampaignName, Value = a.CampaignUid.ToString() }),
+				Campaigns = promotions
 			};
 
 			return View(model);
