@@ -48,7 +48,8 @@ namespace hrvster.Core.Requests.Notifications.Handlers
 				Parameters = new Dictionary<string, string>()
 				{
 					{ "DisplayName", notification.CreatedUser.DisplayName },
-					{ "DashboardLink", "https://app.hrvster/dashboard" }
+					{ "DashboardLink", "https://app.hrvster/dashboard" },
+					{ "VerificationLink", notification.VerificationLink }
 				},
 				Template = EmailTemplate.VerificationEmail,
 				Status = EmailStatus.New

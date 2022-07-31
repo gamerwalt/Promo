@@ -13,5 +13,16 @@ namespace hrvster.Extensions.OptionsConfiguration
 				.Configure<DrawSettingOptions>(configuration.GetSection(DrawSettingOptions.SectionName))
 				.AddTransient(s => s.GetService<IOptions<DrawSettingOptions>>().Value);
 
+		public static IServiceCollection AddMailSettings(this IServiceCollection services, IConfiguration configuration)
+			=> services
+				.Configure<MailSettingOptions>(configuration)
+				.Configure<MailSettingOptions>(configuration.GetSection("MailSettings"))
+				.AddTransient(s => s.GetService<IOptions<MailSettingOptions>>().Value);
+
+		public static IServiceCollection AddSendGrid(this IServiceCollection services, IConfiguration configuration)
+			=> services
+				.Configure<SendGridOptions>(configuration)
+				.Configure<SendGridOptions>(configuration.GetSection(SendGridOptions.SectionName))
+				.AddTransient(s => s.GetService<IOptions<SendGridOptions>>().Value);
 	}
 }

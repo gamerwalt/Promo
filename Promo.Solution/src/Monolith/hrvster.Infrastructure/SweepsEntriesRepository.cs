@@ -196,10 +196,6 @@ namespace hrvster.Infrastructure
 				{
 					SweepId = reader.GetInt32("sweep_id"),
 					SweepUid = reader.GetGuid("sweep_uid"),
-					Campaign = new Campaign
-					{
-						CampaignUid = reader.GetGuid("campaign_uid")
-					},
 					Name = reader.GetString("sweep_name"),
 					StartDate = reader.GetDateTime("start_date"),
 					EndDate = reader.GetDateTime("end_date"),

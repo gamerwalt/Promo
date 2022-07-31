@@ -53,10 +53,12 @@ namespace hrvster.Services
 						.AddScheduledRepositories()
 						.AddServicesRepositories()
 						.AddSweepsRepositories()
+						.AddEmailRepository()
 						.AddTwitterClient(Configuration)
 						.AddDrawSettingConfiguration(Configuration)
 						.AddApplicationCronServices()
 						.AddPublishers()
+						.AddSendGrid(Configuration)
 						.AddRandomizer();
 
 					AddDatabases(services);

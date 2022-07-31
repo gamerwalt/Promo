@@ -1,4 +1,5 @@
 ﻿using hrvster.ApplicationServices.Harvesters.Twitter;
+using hrvster.ApplicationServices.Mails;
 using hrvster.ApplicationServices.Processors;
 using hrvster.ApplicationServices.Sweepstakes;
 using hrvster.Core;
@@ -12,7 +13,8 @@ namespace hrvster.Extensions.Configuration
 			=> services
 				.AddTransient<ITwitterHarvesterService, TwitterHarvesterService>()
 				.AddTransient<ITweetProcessor, TweetProcessor>()
-				.AddTransient<IDrawService, DrawService>();
+				.AddTransient<IDrawService, DrawService>()
+				.AddTransient<IMailService, MailService>();
 
 		public static IServiceCollection AddRandomizer(this IServiceCollection services)
 			=> services

@@ -6,6 +6,8 @@ using MailKit.Net.Smtp;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MimeKit;
+using SendGrid;
+using SendGrid.Helpers.Mail;
 using System;
 using System.IO;
 using System.Linq;
@@ -24,17 +26,16 @@ namespace hrvster.ApplicationServices.Mails
 	{
 		private ILogger<MailService> _logger;
 		private readonly IMailRepository _mailRepository;
-		private readonly MailSettingOptions _mailSettings;
+		private readonly SendGridOptions _sendGrid;
 
 		public MailService(
 			ILogger<MailService> logger,
 			IMailRepository mailRepository,
-			IOptions<MailSettingOptions> mailSettingsOptions
-			)
+			SendGridOptions sendGrid)
 		{
 			_logger = logger;
 			_mailRepository = mailRepository;
-			_mailSettings = mailSettingsOptions.Value;
+			_sendGrid = sendGrid;
 		}
 
 		public async Task ProcessAnyUnsentEmails(CancellationToken token)
@@ -50,7 +51,7 @@ namespace hrvster.ApplicationServices.Mails
 					switch (email.Template)
 					{
 						case EmailTemplate.VerificationEmail:
-							await SendVerificationEmailAsync(new VerificationEmailRequest
+							var sendVerificationEmailResult = await SendVerificationEmailAsync(new VerificationEmailRequest
 							{
 								EmailAddress = email.EmailAddress,
 								EmailTemplate = EmailTemplate.VerificationEmail,
@@ -58,12 +59,13 @@ namespace hrvster.ApplicationServices.Mails
 								VerificationLink = email.Parameters[EmailParameters.VerificationLink]
 							});
 
-							await _mailRepository.UpdateAsSentAsync(email);
+							if(sendVerificationEmailResult)
+								await _mailRepository.UpdateAsSentAsync(email);
 
 							break;
 
 						case EmailTemplate.WelcomeEmail:
-							await SendWelcomeEmailAsync(new WelcomeEmailRequest
+							var sendWelcomeEmailResult = await SendWelcomeEmailAsync(new WelcomeEmailRequest
 							{
 								EmailAddress = email.EmailAddress,
 								EmailTemplate = EmailTemplate.WelcomeEmail,
@@ -71,7 +73,21 @@ namespace hrvster.ApplicationServices.Mails
 								DashboardLink = email.Parameters[EmailParameters.DashboardLink]
 							});
 
-							await _mailRepository.UpdateAsSentAsync(email);
+							if(sendWelcomeEmailResult)
+								await _mailRepository.UpdateAsSentAsync(email);
+
+							break;
+
+						case EmailTemplate.PasswordResetEmail:
+							var sendPasswordResetResult = await SendPasswordResetEmailLinkAsync(new PasswordResetRequest
+							{
+								EmailAddress = email.EmailAddress,
+								PasswordResetLink = email.Parameters[EmailParameters.PasswordResetLink],
+								EmailTemplate = EmailTemplate.PasswordResetEmail
+							});
+
+							if(sendPasswordResetResult)
+								await _mailRepository.UpdateAsSentAsync(email);
 
 							break;
 					}
@@ -81,25 +97,54 @@ namespace hrvster.ApplicationServices.Mails
 			_logger.LogInformation($"{nameof(ProcessAnyUnsentEmails)} processing completed.");
 		}
 
-		private async Task SendEmailAsync(MailRequest mailRequest)
+		
+
+		private async Task<bool> SendEmailAsync(MailRequest mailRequest)
 		{
-			var email = new MimeMessage();
-			email.Sender = MailboxAddress.Parse(_mailSettings.Mail);
-			email.To.Add(MailboxAddress.Parse(mailRequest.ToEmailAddress));
-			email.Subject = mailRequest.Subject;
-			var builder = new BodyBuilder();
-			builder.HtmlBody = mailRequest.Body;
-			email.Body = builder.ToMessageBody();
+			var client = new SendGridClient(_sendGrid.ApiKey);
+			var msg = MailHelper.CreateSingleEmail(
+				new EmailAddress(_sendGrid.Mail, _sendGrid.DisplayName), 
+				new EmailAddress(mailRequest.ToEmailAddress),
+				mailRequest.Subject, 
+				mailRequest.Body, 
+				mailRequest.Body);
+			
+			var response = await client.SendEmailAsync(msg);
 
-			using var smtp = new SmtpClient();
-			smtp.Connect(_mailSettings.Host, _mailSettings.Port, MailKit.Security.SecureSocketOptions.StartTls);
-			smtp.Authenticate(_mailSettings.Mail, _mailSettings.Password);
-
-			await smtp.SendAsync(email);
-			await smtp.DisconnectAsync(true);
+			return response.IsSuccessStatusCode;
 		}
 
-		private async Task SendVerificationEmailAsync(VerificationEmailRequest request)
+		private async Task<bool> SendPasswordResetEmailLinkAsync(PasswordResetRequest request)
+		{
+			var filePath = GetFilePath(request);
+
+			var streamReader = new StreamReader(filePath);
+			var mailText = streamReader.ReadToEnd();
+			streamReader.Close();
+
+			var type = request.GetType();
+
+			foreach(var f in type.GetProperties(BindingFlags.Instance | BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public))
+			{
+				mailText = mailText.Replace($"[{f.Name}]", f.GetValue(request).ToString());
+			}
+
+			return await SendEmailAsync(
+				new MailRequest
+				{
+					ToEmailAddress = request.EmailAddress,
+					Body = mailText,
+					Subject = "Reset your password!"
+				}
+			);
+		}
+
+		private static string GetFilePath(PasswordResetRequest request)
+		{
+			return Directory.GetCurrentDirectory() + $"{Path.DirectorySeparatorChar}Templates{Path.DirectorySeparatorChar}{request.EmailTemplate}.html";
+		}
+
+		private async Task<bool> SendVerificationEmailAsync(VerificationEmailRequest request)
 		{
 			var filePath = Directory.GetCurrentDirectory() + $"{Path.DirectorySeparatorChar}Templates{Path.DirectorySeparatorChar}{request.EmailTemplate}.html";
 			var streamReader = new StreamReader(filePath);
@@ -113,7 +158,7 @@ namespace hrvster.ApplicationServices.Mails
 				mailText = mailText.Replace($"[{f.Name}]", f.GetValue(request).ToString());
 			}
 
-			await SendEmailAsync(
+			return await SendEmailAsync(
 				new MailRequest
 				{
 					ToEmailAddress = request.EmailAddress,
@@ -123,7 +168,7 @@ namespace hrvster.ApplicationServices.Mails
 			);
 		}
 
-		private async Task SendWelcomeEmailAsync(WelcomeEmailRequest request)
+		private async Task<bool> SendWelcomeEmailAsync(WelcomeEmailRequest request)
 		{
 			var filePath = Directory.GetCurrentDirectory() + $"{Path.DirectorySeparatorChar}Templates{Path.DirectorySeparatorChar}{request.EmailTemplate}.html";
 			var streamReader = new StreamReader(filePath);
@@ -137,7 +182,7 @@ namespace hrvster.ApplicationServices.Mails
 				mailText = mailText.Replace($"[{f.Name}]", f.GetValue(request).ToString());
 			}
 
-			await SendEmailAsync(
+			return await SendEmailAsync(
 				new MailRequest
 				{
 					ToEmailAddress = request.EmailAddress,

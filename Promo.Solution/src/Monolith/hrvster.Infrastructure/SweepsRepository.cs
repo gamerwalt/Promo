@@ -137,7 +137,7 @@ namespace hrvster.Infrastructure
 				SweepRule = new Models.Rule
 				{
 					WatchValue = reader.GetStringValue("sweep_rule_watch_value"),
-					ActiveInd = reader.GetBoolean("sweep_rule_active_indicatory"),
+					ActiveInd = reader.GetBoolean("sweep_rule_active_indidcator"),
 					ExternalId = reader.GetLongValue("external_id"),
 					MustBeFollowing = reader.GetBoolean("must_be_following"),
 					NotifyWinners = reader.GetBoolean("notify_winners")
