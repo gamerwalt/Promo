@@ -43,6 +43,15 @@ namespace hrvster.Web.Validation
 				.NotEmpty()
 				.NotNull()
 				.WithMessage("Please supply a password before continuing.");
+
+			RuleFor(x => x.AcceptedTerms)
+				.Must(c => BeAccepted(c))
+				.WithMessage("You have to accept the terms and conditions.");
+		}
+
+		private bool BeAccepted(bool c)
+		{
+			return c;
 		}
 
 		private bool StartWithAPlus(string phone)

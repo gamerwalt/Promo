@@ -18,7 +18,8 @@
 	public enum EmailTemplate
 	{
 		WelcomeEmail,
-		VerificationEmail
+		VerificationEmail,
+		PasswordResetEmail
 	}
 
 	public enum CampaignTypeCode

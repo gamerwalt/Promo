@@ -4,7 +4,11 @@ using hrvster.Core.Requests.WebRequests.Accounts;
 using hrvster.Web.Models;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace hrvster.Web.Controllers
@@ -21,7 +25,7 @@ namespace hrvster.Web.Controllers
 		}
 
 		[HttpGet]
-		public async Task<ActionResult> Index()
+		public async Task<ActionResult> Create()
 		{
 			return View();
 		}
@@ -47,7 +51,24 @@ namespace hrvster.Web.Controllers
 				return RedirectToActionPermanent("SignIn", "Session");
 			}
 
-			return View("Index", form);
+			var errors = ModelState.Select(c => c.Value.Errors)
+				.Where(c => c.Count > 0)
+				.ToList();
+
+			_notificationService.Error(BuildMessageFromErrors(errors));
+
+			return View("Create", form);
+		}
+
+		private string BuildMessageFromErrors(List<ModelErrorCollection> errors)
+		{
+			var sb = new StringBuilder();
+			foreach(var error in errors)
+			{
+				sb.Append(error.FirstOrDefault()?.ErrorMessage);
+			}
+
+			return sb.ToString();
 		}
 	}
 }

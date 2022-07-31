@@ -1,7 +1,7 @@
 ﻿@using hrvster.Core.Requests.WebRequests
 @model SigninForm
 @{
-	Layout = "~/Views/Shared/_SignInLayout.cshtml";
+	Layout = "~/Views/Shared/_AuthenticationLayout.cshtml";
 	ViewData["Title"] = "Sign In";
 }
 <div class="d-flex flex-column flex-root">
@@ -41,7 +41,7 @@
 							</button>
 						</div>
 						<div class="text-gray-500 text-center fw-semibold fs-6">Not a Member yet?
-						<a asp-controller="Register" asp-action="Index" class="link-primary">Sign up</a></div>
+						<a asp-controller="Register" asp-action="Create" class="link-primary">Sign up</a></div>
 					</form>
 				</div>
 			</div>
