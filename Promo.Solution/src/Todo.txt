@@ -3,13 +3,9 @@ Fix deletion of Tweet (Done)
 
 Fix validations site wide (Done. More likely to come)
 
-Update Dashboard to show Tweets Coming in and entries per person
+Update Dashboard to show Tweets Coming in and entries per person (on going)
 
 Make sure users are verified before creating campaigns
-
-Make sure we saved harvested tweets first
-	Then use a service to process them in the background 
-		or throw them into a queue to be processed by another service
 
 RuleUrl creator for the Sweepstake (Do we need a lawyer? or we can just wing this one)
 	This will specifically control jurisdiction of each sweepstake and make sure that
@@ -22,3 +18,12 @@ Add Privacy details
 Add Tests
 
 Involve Tobi to start the design process
+
+
+Make sure we saved harvested tweets first
+	Then use a service to process them in the background 
+		or throw them into a queue to be processed by another service
+
+
+
+

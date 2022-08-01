@@ -3,6 +3,7 @@ using AutoMapper;
 using hrvster.Core.Authentication;
 using hrvster.Core.Requests;
 using hrvster.Core.Requests.ApiRequests;
+using hrvster.Core.Requests.WebRequests.Sweeps;
 using hrvster.Models.WebModels;
 using hrvster.Models.WebModels.Sweeps;
 using MediatR;
@@ -29,9 +30,11 @@ namespace hrvster.Web.Controllers
 			_notificationService = notificationService;
 		}
 
-		public IActionResult Index()
+		public async Task<IActionResult> Index()
 		{
-			return View();
+			var sweeps = await _mediator.Send(new GetSweepForAccountUidRequest(_hrvsterUser.UserUid));
+			
+			return View(sweeps);
 		}
 
 		[HttpGet]

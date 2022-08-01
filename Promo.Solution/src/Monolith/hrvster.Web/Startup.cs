@@ -185,7 +185,7 @@ namespace hrvster.Web
 		{
 			services.AddSingleton<IDatabase>(c =>
 			{
-				return new MySqlDatabase("hrvster", Configuration);
+				return new MySqlDatabase(DatabaseNames.Main, Configuration, DatabaseNames.Harvester, DatabaseNames.Reporting);
 			});
 
 			services.AddTransient<IAccountsRepository, AccountsRepository>();

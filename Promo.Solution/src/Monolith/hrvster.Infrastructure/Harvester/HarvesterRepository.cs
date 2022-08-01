@@ -5,6 +5,8 @@ using System.Data;
 using System.Threading.Tasks;
 using Tweetinvi.Models;
 using hrvster.Infrastructure.Extensions;
+using System.Collections;
+using System.Collections.Generic;
 
 namespace hrvster.Infrastructure.Harvester
 {
@@ -17,6 +19,7 @@ namespace hrvster.Infrastructure.Harvester
 		Task BeginTransaction();
 		Task CommitTransaction();
 		Task RollbackTransaction();
+		Task<IEnumerable<Harvested>> GetTweetsAsync(Guid ruleUid);
 	}
 
 	public class HarvesterRepository : IHarvesterRepository
@@ -135,6 +138,47 @@ namespace hrvster.Infrastructure.Harvester
 				UserId = reader.GetInt32("user_id"),
 				UserUid = reader.GetGuid("user_uid"),
 				ExternalId = reader.GetString("external_id")
+			};
+		}
+
+		public async Task<IEnumerable<Harvested>> GetTweetsAsync(Guid ruleUid)
+		{
+			var harvested = new List<Harvested>();
+
+			using (var conn = new MySqlConnection(_database.GetHarvesterConnectionString()))
+			{
+				var command = conn.CreateCommand();
+				command.CommandText = "tweets_get_harvested";
+				command.CommandType = CommandType.StoredProcedure;
+				command.AddParameter(nameof(ruleUid), ruleUid);
+
+				await conn.OpenAsync();
+				using var reader = await command.ExecuteReaderAsync();
+				while (await reader.ReadAsync())
+				{
+					harvested.Add(CreateHarvestedFrom(reader));
+				}
+			}
+
+			return harvested;
+		}
+
+		private Harvested CreateHarvestedFrom(MySqlDataReader reader)
+		{
+			return new Harvested
+			{
+				HarvestedId = reader.GetInt32("harvested_id"),
+				RuleUid = reader.GetGuid("rule_uid"),
+				HarvestedUid = reader.GetGuid("harvested_uid"),
+				ExternalTweetId = reader.GetStringValue("tweet_external_id"),
+				TweetUid = reader.GetGuid("tweet_uid"),
+				TweetText = reader.GetStringValue("tweet_text"),
+				UserUid = reader.GetGuid("user_uid"),
+				ExternalUserId = reader.GetStringValue("user_external_id"),
+				ProfileImageUrl = reader.GetStringValue("profile_image_url"),
+				Location = reader.GetStringValue("location"),
+				Description = reader.GetStringValue("description"),
+				ExternalScreenName = reader.GetStringValue("screen_name")
 			};
 		}
 	}
