@@ -14,6 +14,7 @@ namespace hrvster.Infrastructure
 		Task<Campaign> GetCampaignByUidAsync(Guid campaignUid, Guid accountUid);
 		Task UpdateCampaignAsync(Guid campaignUid, Models.Campaign campaign);
 		Task<List<Campaign>> GetAccountCampaignsAsync(Guid accountUid);
+		List<Campaign> GetAccountCampaigns(Guid userUid);
 		Task<Campaign> GetCampaignByUidAsync(Guid campaignUid);
 	}
 
@@ -42,6 +43,28 @@ namespace hrvster.Infrastructure
 
 			await conn.OpenAsync();
 			await command.ExecuteNonQueryAsync();
+		}
+
+		public List<Campaign> GetAccountCampaigns(Guid accountUid)
+		{
+			var campaigns = new List<Campaign>();
+
+			using (var conn = new MySqlConnection(_database.GetConnectionString()))
+			{
+				var command = conn.CreateCommand();
+				command.CommandText = "campaigns_get_by_account_uid";
+				command.CommandType = CommandType.StoredProcedure;
+				command.AddParameter("accountUid", accountUid);
+
+				conn.Open();
+				using var reader = command.ExecuteReader();
+				while (reader.Read())
+				{
+					campaigns.Add(CreateCampaignFrom(reader));
+				}
+			}
+
+			return campaigns;
 		}
 
 		public async Task<List<Campaign>> GetAccountCampaignsAsync(Guid accountUid)
@@ -137,7 +160,7 @@ namespace hrvster.Infrastructure
 				CampaignId = reader.GetInt32("campaign_id"),
 				CampaignUid = reader.GetGuid("campaign_uid"),
 				CampaignName = reader.GetString("campaign_name"),
-				Description = reader.GetString("campaign_description"),
+				Description = reader.GetStringValue("campaign_description"),
 				StartDate = reader.GetDateTime("start_date"),
 				EndDate = reader.GetDateTime("end_date"),
 				CreatedDate = reader.GetDateTime("created_date"),

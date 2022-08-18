@@ -1,29 +1,29 @@
 Add Registration (Done)
 Fix deletion of Tweet (Done)
+Update Dashboard to show Tweets Coming in and entries per person (Done)
 
+
+Todo This week
 Fix validations site wide (Done. More likely to come)
-
-Update Dashboard to show Tweets Coming in and entries per person (on going)
-
-Make sure users are verified before creating campaigns
+	More validations on Watch value and tweet text
+	More validations on Games dates should be between promotion start and end date
+	Make sure users are verified before creating campaigns
 
 RuleUrl creator for the Sweepstake (Do we need a lawyer? or we can just wing this one)
 	This will specifically control jurisdiction of each sweepstake and make sure that
 	Hrvster is also not on the hook for prizes but the Account holder
 
-Add Subscription (Free for now)
-Add Terms and Conditions
-Add Privacy details
-
-Add Tests
-
-Involve Tobi to start the design process
-
-
 Make sure we saved harvested tweets first
 	Then use a service to process them in the background 
 		or throw them into a queue to be processed by another service
 
+Involve Tobi to start the design process
 
+Add Subscription (Free for now)
+Add Terms and Conditions
+Add Privacy details
+
+
+Add Tests
 
 

@@ -6,17 +6,14 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - hrvster.Web</title>
-    @*<link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat"/>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"/>
-    <link rel="stylesheet" href="~/css/site.css" />*@
-
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:300,400,500,600,700" />
-
-    <link rel="stylesheet" href="~/lib/apexcharts/dist/apexcharts.css" />
-
-    <link href="~/assets/plugins/global/plugins.bundle.css" rel="stylesheet" type="text/css" />
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:300,400,500,600,700" />
+	<link href="~/assets/plugins/global/plugins.bundle.css" rel="stylesheet" type="text/css" />
 	<link href="~/assets/css/style.bundle.css" rel="stylesheet" type="text/css" />
+
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat" />
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
+	<link rel="stylesheet" href="~/css/site.css" />
+	<link rel="stylesheet" href="~/lib/apexcharts/dist/apexcharts.css" />
 </head>
 <body id="kt_body" class="header-tablet-and-mobile-fixed aside-enabled">
     <script>
@@ -121,7 +118,7 @@
 					</div>
 				</div>
 				<div class="aside-footer flex-column-auto py-5" id="kt_aside_footer">
-					<a asp-action="SignOut" asp-controller="Session" class="btn btn-custom btn-primary w-100" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-dismiss-="click" title="200+ in-house components and 3rd-party plugins">
+					<a asp-action="SignOut" asp-controller="Session" class="btn btn-custom btn-primary w-100" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-dismiss-="click" title="Sign Out">
 						<span class="btn-label">Sign Out</span>
 						<span class="svg-icon btn-icon svg-icon-2">
 							<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -202,14 +199,12 @@
 			</div>
 		</div>
     </div>
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
-
 	<script>var hostUrl = "~/assets/";</script>
+	<script src="~/lib/jquery/dist/jquery.min.js"></script>
+	<script src="~/js/site.js" asp-append-version="true"></script>
 	<script src="~/assets/plugins/global/plugins.bundle.js"></script>
 	<script src="~/assets/js/scripts.bundle.js"></script>
-    @await RenderSectionAsync("Scripts", required: false)
-    @await Component.InvokeAsync("Notyf")
+	@await RenderSectionAsync("Scripts", required: false)
+	@await Component.InvokeAsync("Notyf")
 </body>
 </html>

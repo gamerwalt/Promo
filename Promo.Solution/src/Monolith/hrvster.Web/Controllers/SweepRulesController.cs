@@ -12,12 +12,14 @@ using hrvster.Web.Models;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace hrvster.Web.Controllers
@@ -182,21 +184,21 @@ namespace hrvster.Web.Controllers
 
 				//do we have a profile with access tokens already for this provider?
 				//Todo: We should determine if we need to get the access token again
-				//var profile = await _mediator.Send(new GetUserProfile(_hrvsterUser.UserUid, ProfileType.Twitter));
-				//if (profile != null && !string.IsNullOrWhiteSpace(profile.AccessToken))
-				//{
-				//	switch (form.ProviderCode)
-				//	{
-				//		case Constants.TwitterProvider:
-				//			return RedirectToAction("CreateTweet",
-				//				new
-				//				{
-				//					sweepUid = sweepUid,
-				//					actionName = form.ReturnAction,
-				//					controllerName = form.ReturnController
-				//				});
-				//	}
-				//}
+				var profile = await _mediator.Send(new GetUserProfile(_hrvsterUser.UserUid, ProfileType.Twitter));
+				if (profile != null && !string.IsNullOrWhiteSpace(profile.AccessToken))
+				{
+					switch (form.ProviderCode)
+					{
+						case Constants.TwitterProvider:
+							return RedirectToAction("CreateTweet",
+								new
+								{
+									sweepUid = sweepUid,
+									actionName = form.ReturnAction,
+									controllerName = form.ReturnController
+								});
+					}
+				}
 
 				HttpContext.Session.SetString(SessionConstants.SweepUid, sweepUid.ToString());
 				HttpContext.Session.SetString(SessionConstants.ReturnController, form.ReturnController);
@@ -208,6 +210,11 @@ namespace hrvster.Web.Controllers
 			}
 
 			return View(form);
+		}
+
+		public async Task<IActionResult> FailedAuthValidation()
+		{
+			return RedirectToActionPermanent("Index", "Sweeps");
 		}
 
 		public async Task<IActionResult> ValidateTwitterAuth()
@@ -373,6 +380,12 @@ namespace hrvster.Web.Controllers
 				});
 			}
 
+			var errors = ModelState.Select(c => c.Value.Errors)
+				.Where(c => c.Count > 0)
+				.ToList();
+
+			_notificationService.Error(BuildMessageFromErrors(errors));
+
 			var watchTypes = await _mediator.Send(new GetWatchTypeRequest());
 
 			form.WatchTypes = watchTypes.Select(a => new SelectListItem() { Text = a.WatchTypeName, Value = a.WatchTypeId.ToString() }).ToList();
@@ -380,10 +393,15 @@ namespace hrvster.Web.Controllers
 			return View(form);
 		}
 
-		//[HttpGet]
-		//public async Task<IActionResult> Delete()
-		//{
+		private string BuildMessageFromErrors(List<ModelErrorCollection> errors)
+		{
+			var sb = new StringBuilder();
+			foreach (var error in errors)
+			{
+				sb.Append(error.FirstOrDefault()?.ErrorMessage);
+			}
 
-		//}
+			return sb.ToString();
+		}
 	}
 }

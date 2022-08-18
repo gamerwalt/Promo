@@ -3,10 +3,6 @@
     ViewData["Title"] = $"{@Model.SweepstakeName} - Create/Publish Sweep Rule Tweet";
 }
 <div><h4>Create/Publish Sweep Rule Tweet for @Model.SweepstakeName</h4></div>
-<div>
-    @Html.ValidationMessage("CustomError")
-</div>
-<hr />
 <form 
 asp-controller="SweepRules" 
 asp-action="CreateTweet" 

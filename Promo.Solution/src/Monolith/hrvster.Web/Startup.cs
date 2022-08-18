@@ -100,6 +100,8 @@ namespace hrvster.Web
 			services.AddDrawSettingConfiguration(Configuration);
 			services.AddRandomizer();
 			services.AddEmailRepository();
+
+			services.AddPromotionConfigurationOptions(Configuration);
 		}
 
 

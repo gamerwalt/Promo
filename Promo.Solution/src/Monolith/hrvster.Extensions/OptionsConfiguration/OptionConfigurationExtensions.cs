@@ -24,5 +24,13 @@ namespace hrvster.Extensions.OptionsConfiguration
 				.Configure<SendGridOptions>(configuration)
 				.Configure<SendGridOptions>(configuration.GetSection(SendGridOptions.SectionName))
 				.AddTransient(s => s.GetService<IOptions<SendGridOptions>>().Value);
+
+		public static IServiceCollection AddPromotionConfigurationOptions(
+			this IServiceCollection services,
+			IConfiguration configuration)
+				=> services
+					.Configure<PromotionConfigurationOptions>(configuration)
+					.Configure<PromotionConfigurationOptions>(configuration.GetSection(PromotionConfigurationOptions.SectionName))
+					.AddTransient(s => s.GetService<IOptions<PromotionConfigurationOptions>>().Value);
 	}
 }

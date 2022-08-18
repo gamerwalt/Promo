@@ -2,53 +2,53 @@
 @{
     ViewData["Title"] = "Create Promotion";
 }
-<div><h1>Create New Promotion</h1></div>
-<hr />
-
-<div class="col-lg-8 col-xlg-9 col-md7">
-    <div class="card">
-        <div class="card-body">
-            <form asp-controller="Promotions" asp-action="Create" class="form-horizontal form-material mx-2">
-                <div class="form-group">
-                    <label class="col-md-12">Promotion Name</label>
-                    <div class="col-md-12">
-                        <input asp-for="Name" class="form-control form-control-lg" />
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label class="col-md-12">Some Description</label>
-                    <div class="col-md-12">
-                        <textarea asp-for="Description" class="form-control form-control-lg"></textarea>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label class="col-md-12">Start Date</label>
-                    <div class="col-md-12">
-                        <input asp-for="StartDate" class="form-control form-control-lg" asp-format="{0:yyyy-MM-ddTHH:mm}" />
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label class="col-md-12">End Date</label>
-                    <div class="col-md-12">
-                        <input asp-for="EndDate" class="form-control form-control-lg" asp-format="{0:yyyy-MM-ddTHH:mm}"/>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label class="col-md-12">Promotion Type</label>
-                    <div class="col-md-12">
-                        <select asp-for="CampaignTypeUid" asp-items=@Model.CampaignTypes class="form-control form-control-lg">
-                            <option>Please select one</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <div class="col-md-12">
-                        <button class="btn btn-lg btn-primary" type="submit">Create Promotion</button>
-                    </div>
-                </div>
-            </form>
+<div class="card card-bordered">
+    <form asp-controller="Promotions" asp-action="Create" class="form-horizontal form-material mx-2">
+        <div class="card-header">
+            <h3 class="card-title">Create Promotion</h3>
         </div>
-    </div>
+        <div class="card-body">
+            <div class="form-floating mb-4">
+                <input type="text" asp-for="Name" id="Name" class="form-control" placeholder="Name" />
+                <label for="Name">Name</label>
+                <span asp-validation-for="Name"></span>
+            </div>
+            <div class="form-floating mb-4">
+                <textarea 
+                    asp-for="Description" id="Description" placeholder="Description" 
+                    class="form-control form-control-lg"
+                    style="height: 100px"></textarea>
+                <label for="Description">Description</label>
+                <span asp-validation-for="Description"></span>
+            </div>
+            <div class="separator my-4 mb-4"></div>
+            <div class="form-floating mb-4">
+                <input asp-for="StartDate" class="form-control" asp-format="{0:yyyy-MM-ddTHH:mm}" placeholder="StartDate" />
+                <label for="StartDate">StartDate</label>
+                <span asp-validation-for="StartDate"></span>
+            </div>
+            <div class="form-floating mb-4">
+                <input asp-for="EndDate" class="form-control" asp-format="{0:yyyy-MM-ddTHH:mm}" placeholder="EndDate" />
+                <label for="EndDate">EndDate</label>
+                <span asp-validation-for="EndDate"></span>
+            </div>
+            <div class="mb-4">
+                <label for="CampaignTypeUid">Promotion Type</label>
+                <select asp-for="CampaignTypeUid" asp-items=@Model.CampaignTypes class="form-select form-control-lg">
+                    <option value="@Guid.Empty">Please select promotion type</option>
+                </select>
+                <span asp-validation-for="CampaignTypeUid"></span>
+            </div>
+        </div>
+        <div class="card-footer">
+            <div class="card-toolbar">
+                <button type="submit" class="btn btn-md btn-light btn-primary">
+                    Create Promotion
+                </button>
+            </div>
+        </div>
+    </form>
 </div>
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

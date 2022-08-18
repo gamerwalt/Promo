@@ -1,0 +1,62 @@
+﻿using FluentValidation;
+using hrvster.Core.Authentication;
+using hrvster.Infrastructure;
+using hrvster.Models.Options;
+using hrvster.Web.Models;
+using System;
+using System.Linq;
+
+namespace hrvster.Web.Validation
+{
+	public class CreatePromotionValidation : AbstractValidator<CreatePromotion>
+	{
+		private readonly HrvsterUser _hrvsterUser;
+		private readonly ICampaignRepository _campaignsRepository;
+		private readonly PromotionConfigurationOptions _promotionConfigurationOptions;
+		public CreatePromotionValidation(
+			HrvsterUser hrvsterUser,
+			ICampaignRepository campaignsRepository,
+			PromotionConfigurationOptions promotionConfigurationOptions)
+		{
+			_hrvsterUser = hrvsterUser;
+			_campaignsRepository = campaignsRepository;
+			_promotionConfigurationOptions = promotionConfigurationOptions;
+
+			var minDate = DateTime.Now.AddDays(_promotionConfigurationOptions.MinDaysBeforeStart);
+
+			RuleFor(x => x.Name)
+				.NotEmpty().WithMessage("Promotion name cannot be empty.")
+				.Must(c => PromotionDoesNotExist(c))
+					.WithMessage("The promotion already exists.");
+
+			RuleFor(x => x.StartDate)
+				.NotEmpty()
+				.NotNull()
+				.Must(x => BeGreaterThanConfiguredNumberOfDays(x))
+					.WithMessage($"The promotion start date must be from {minDate.ToString("f")}");
+
+			RuleFor(x => x)
+				.Must(x => x.EndDate > x.StartDate)
+					.WithMessage(x => $"The start date {x.StartDate.ToString("f")} must come before the end date {x.EndDate.ToString("f")}.");
+
+			RuleFor(x => x.CampaignTypeUid)
+				.NotEmpty()
+				.NotNull()
+				.WithMessage("You need to supply what type of promotion this is.");
+		}
+
+		private bool BeGreaterThanConfiguredNumberOfDays(DateTime inputDate)
+		{
+			var minDate = DateTime.Now.AddDays(_promotionConfigurationOptions.MinDaysBeforeStart);
+
+			return inputDate > minDate;
+		}
+
+		private bool PromotionDoesNotExist(string promotionName)
+		{
+			var result = _campaignsRepository.GetAccountCampaigns(_hrvsterUser.UserUid);
+
+			return !result.Any(c => c.CampaignName == promotionName);
+		}
+	}
+}

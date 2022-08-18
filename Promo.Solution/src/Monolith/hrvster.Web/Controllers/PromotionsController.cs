@@ -8,10 +8,12 @@ using hrvster.Models.WebModels.Sweeps;
 using hrvster.Web.Models;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace hrvster.Web.Controllers
@@ -78,18 +80,50 @@ namespace hrvster.Web.Controllers
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> Create(CreatePromotion model)
 		{
-			var newCampaignRequest = new NewCampaignRequest
+			if(ModelState.IsValid)
 			{
-				Name = model.Name,
-				Description = model.Description,
-				CampaignTypeUid = model.CampaignTypeUid,
-				StartDate = model.StartDate,
-				EndDate = model.EndDate
-			};
+				var newCampaignRequest = new NewCampaignRequest
+				{
+					Name = model.Name,
+					Description = model.Description,
+					CampaignTypeUid = model.CampaignTypeUid,
+					StartDate = model.StartDate,
+					EndDate = model.EndDate
+				};
 
-			var promotionUid = await _mediator.Send(new CreateCampaignRequest(newCampaignRequest, _hrvsterUser.UserUid));
+				var promotionUid = await _mediator.Send(new CreateCampaignRequest(newCampaignRequest, _hrvsterUser.UserUid));
 
-			return RedirectToAction("View", new { campaignUid = promotionUid });
+				return RedirectToAction("View", new { campaignUid = promotionUid });
+			}
+
+			var errors = ModelState.Select(c => c.Value.Errors)
+				.Where(c => c.Count > 0)
+				.ToList();
+
+			_notificationService.Error(BuildMessageFromErrors(errors));
+
+			var campaignTypes = await _mediator.Send(new GetCampaignTypesRequest());
+
+			model.CampaignTypes = campaignTypes
+				.Where(a => a.IsActive)
+				.Select(a => new SelectListItem()
+				{
+					Text = a.CampaignTypeName,
+					Value = a.CampaignTypeUid.ToString()
+				}).ToList();
+
+			return View(model);
+		}
+
+		private string BuildMessageFromErrors(List<ModelErrorCollection> errors)
+		{
+			var sb = new StringBuilder();
+			foreach (var error in errors)
+			{
+				sb.Append(error.FirstOrDefault()?.ErrorMessage);
+			}
+
+			return sb.ToString();
 		}
 	}
 }
