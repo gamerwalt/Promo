@@ -56,6 +56,11 @@ namespace hrvster.Web.Controllers
 
 				if (!string.IsNullOrWhiteSpace(link.FirebaseToken))// && link.User.IsEmailVerified)
 				{
+					if(!link.User.IsEmailVerified)
+					{
+						return RedirectToAction("Index", "VerifyEmail");
+					}
+
 					HttpContext.Session.SetString(SessionConstants.UserToken, link.FirebaseToken);
 					HttpContext.Session.SetString(SessionConstants.UserUid, link.User.LocalId);
 					HttpContext.Session.SetString(SessionConstants.UserEmail, link.User.Email);
