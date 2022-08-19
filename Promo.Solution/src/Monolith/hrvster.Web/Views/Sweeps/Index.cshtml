@@ -3,45 +3,84 @@
 @{
     ViewData["Title"] = "Sweepstakes";
 }
-<div id="kt_project_users_card_pane" class="tab-pane fade show active">
-	<div class="row g-6 g-xl-9">
-		@foreach(var item in @Model.SweepDetails)
-		{
-			<div class="col-md-6 col-xxl-4">
-				<div class="card">
-					<div class="card-body d-flex flex-center flex-column pt-12 p-9">
-						<div class="symbol symbol-65px symbol-circle mb-5">
-							<div class="symbol-label fs-2 fw-semibold text-success">@item.Sweepstake.Name[0]</div>
-						</div>
-						<a asp-controller="Sweeps" asp-action="View" asp-route-sweepUid=@item.Sweepstake.SweepUid
-							class="fs-4 text-gray-800 text-hover-primary fw-bold mb-0">@item.Sweepstake.Name</a>
-						<div class="fw-semibold text-gray-400 mb-6">Promotion: @item.Sweepstake.Campaign?.CampaignName</div>
-						<div class="d-flex flex-center flex-wrap">
-							<a asp-controller="TweetsHarvested" asp-action="View" asp-route-sweepUid=@item.Sweepstake.SweepUid
-								class="border border-gray-300 border-dashed rounded min-w-80px py-3 px-4 mx-2 mb-3 ">
-								<div class="fs-6 fw-bold text-gray-700">@item.TweetsHarvested?.Count</div>
-								<div class="fw-semibold text-gray-400">Harvested</div>
-							</a>
-							<a asp-controller="SweepEntries" asp-action="View" asp-route-sweepUid=@item.Sweepstake.SweepUid
-								class="border border-gray-300 border-dashed rounded min-w-80px py-3 px-4 mx-2 mb-3">
-								<div class="fs-6 fw-bold text-gray-700 pulse">@item.SweepEntries?.Count</div>
-								<div class="fw-semibold text-gray-400">Entries</div>
-							</a>
-							<div class="border border-gray-300 border-dashed rounded min-w-80px py-3 px-4 mx-2 mb-3">
-								<div class="symbol-group symbol-hover my-1">
-								@foreach(var tweet in item.TweetsHarvested.DistinctBy(c => c.ExternalUserId).Take(10))
-								{
-									var url = $"https://twitter.com/{@tweet.ScreenName}";
-									<a target="_blank" href=@url class="symbol symbol-35px symbol-circle" data-bs-toggle="tooltip" title="@tweet.ScreenName">
-										<img alt="Pic" src="@tweet.ProfileImageUrl" />
-									</a>
-								}
-							</div>
-							</div>
-						</div>
-					</div>
-				</div>
+<div class="card card-flush mt-6 mt-xl-9">
+	<div class="card-header mt-5">
+		<div class="card-title flex-column">
+			<h3 class="fw-bold mb-1">Sweepstakes</h3>
+			<div class="fs-6 text-gray-400">@Model.SweepDetails.Count() sweepstake(s) so far</div>
+		</div>
+		<div class="card-toolbar my-1">
+			<div class="me-6 my-1">
+				<a asp-action="Create" class="btn btn-sm btn-primary me-3">Add Sweepstake</a>
 			</div>
-		}
+		</div>
+	</div>
+	<div class="card-body pt-0">
+		<div class="table-responsive">
+			<table id="kt_profile_overview_table" class="table table-row-bordered table-row-dashed gy-4 align-middle fw-bold">
+				<thead class="fs-7 text-gray-400 text-uppercase">
+					<tr>
+						<th class="min-w-250px">Name</th>
+						<th class="min-w-150px">Harvested</th>
+						<th class="min-w-150px">Entries</th>
+						<th class="min-w-90px">User Entries</th>
+						<th class="min-w-90px">Status</th>
+						<th class="min-w-50px text-end">Details</th>
+					</tr>
+				</thead>
+				<tbody class="fs-6">
+					@foreach (var item in @Model.SweepDetails)
+					{
+						<tr>
+							<td>
+								<div class="d-flex align-items-center">
+									<div class="me-5 position-relative">
+										<div class="symbol symbol-35px symbol-circle">
+											<div class="symbol-label fs-2 fw-semibold text-success">@item.Sweepstake.Name[0]</div>
+										</div>
+									</div>
+									<div class="d-flex flex-column justify-content-center">
+										<a asp-action="View" asp-route-sweepUid=@item.Sweepstake.SweepUid
+									   class="fs-6 text-gray-800 text-hover-primary">@item.Sweepstake.Name</a>
+										<div class="fs-8 fw-semibold text-gray-400">@item.Sweepstake.Campaign.CampaignName</div>
+									</div>
+								</div>
+							</td>
+							<td>@item.TweetsHarvested.Count</td>
+							<td>@item.SweepEntries.Count</td>
+							<td>
+								<div class="symbol-group symbol-hover my-1">
+									@foreach (var tweet in item.TweetsHarvested.DistinctBy(c => c.ExternalUserId).Take(15))
+									{
+										var url = $"https://twitter.com/{@tweet.ScreenName}";
+										<a target="_blank" href=@url class="symbol symbol-35px symbol-circle" data-bs-toggle="tooltip" title="@tweet.ScreenName">
+											<img alt="Pic" src="@tweet.ProfileImageUrl" />
+										</a>
+									}
+								</div>
+							</td>
+							<td>
+								<span class="badge badge-light-@(@item.Sweepstake.IsActive() ? "success" : "danger") 
+								fw-bold px-4 py-3" data-bs-toggle="tooltip" data-bs-placement="top"
+								  title="From @item.Sweepstake.StartDate.ToString("f") To @item.Sweepstake.EndDate.ToString("f")">
+									@if (item.Sweepstake.IsActive())
+									{
+										<span>Active</span>
+									}
+									else
+									{
+										<span>InActive</span>
+									}
+								</span>
+							</td>
+							<td class="text-end">
+								<a asp-action="View" asp-route-sweepUid=@item.Sweepstake.SweepUid
+							   class="btn btn-light btn-sm">View</a>
+							</td>
+						</tr>
+					}
+				</tbody>
+			</table>
+		</div>
 	</div>
 </div>

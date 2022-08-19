@@ -48,8 +48,8 @@
 							<td>@item.StartDate.ToString("f")</td>
 							<td>@item.EndDate.ToString("f")</td>
 							<td>
-								<span class="badge badge-light-@(@item.ActiveInd ? "success" : "danger") fw-bold px-4 py-3">
-									@if(item.ActiveInd)
+								<span class="badge badge-light-@(@item.IsActive() ? "success" : "danger") fw-bold px-4 py-3">
+									@if (item.IsActive())
 									{
 										<span>Active</span>
 									}

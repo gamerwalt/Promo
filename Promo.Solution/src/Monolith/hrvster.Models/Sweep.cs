@@ -17,5 +17,11 @@ namespace hrvster.Models
 		public DateTime? DateDrawn { get; set; }
 		public DateTime CreatedDate { get; set; }
         public DateTime? UpdatedDate { get; set; }
-    }
+
+		public bool IsActive()
+		{
+			return DateTime.Now >= StartDate && DateTime.Now <= EndDate;
+		}
+
+	}
 }

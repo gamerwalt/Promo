@@ -5,6 +5,7 @@ Update Dashboard to show Tweets Coming in and entries per person (Done)
 Friday
 Make sure users are verified before logging in (done)
 Validate Creation of Promotion
+Change Sweepstakes index page to table
 
 Todo
 Fix validations site wide (Done. More likely to come)
