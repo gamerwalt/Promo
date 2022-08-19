@@ -55,7 +55,9 @@ namespace hrvster.ApplicationServices.Mails
 							{
 								EmailAddress = email.EmailAddress,
 								EmailTemplate = EmailTemplate.VerificationEmail,
-								DisplayName = email.Parameters[EmailParameters.DisplayName],
+								DisplayName = email.Parameters.ContainsKey(EmailParameters.DisplayName) 
+									? email.Parameters[EmailParameters.DisplayName] 
+									: String.Empty,
 								VerificationLink = email.Parameters[EmailParameters.VerificationLink]
 							});
 
