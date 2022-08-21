@@ -4,6 +4,7 @@ using hrvster.Core.Authentication;
 using hrvster.Core.Requests;
 using hrvster.Core.Requests.ApiRequests;
 using hrvster.Core.Requests.WebRequests.Sweeps;
+using hrvster.Extensions.ModelExtensions;
 using hrvster.Models.Options;
 using hrvster.Models.WebModels;
 using hrvster.Models.WebModels.Sweeps;

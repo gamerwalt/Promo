@@ -14,10 +14,5 @@ namespace hrvster.Models
         public DateTime EndDate { get; set; }
         public DateTime CreatedDate { get; set; }
         public bool ActiveInd { get; set; }
-
-		public bool IsActive()
-		{
-			return DateTime.UtcNow >= StartDate && DateTime.UtcNow <= EndDate;
-		}
 	}
 }

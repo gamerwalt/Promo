@@ -17,9 +17,5 @@ namespace hrvster.Models.WebModels
 		public DateTime CreatedDate { get; set; }
 		public bool ActiveInd { get; set; }
 		public IEnumerable<Sweepstake> Sweepstakes { get; set; }
-		public bool IsActive()
-		{
-			return DateTime.UtcNow >= StartDate && DateTime.UtcNow <= EndDate;
-		}
 	}
 }
