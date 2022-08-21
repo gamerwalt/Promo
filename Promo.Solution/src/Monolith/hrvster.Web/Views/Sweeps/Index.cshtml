@@ -1,4 +1,5 @@
-﻿@using hrvster.Models.Sweepstakes
+﻿@using hrvster.Extensions.ModelExtensions
+@using hrvster.Models.Sweepstakes
 @model SweepstakeDetails
 @{
     ViewData["Title"] = "Sweepstakes";
@@ -60,18 +61,36 @@
 								</div>
 							</td>
 							<td>
-								<span class="badge badge-light-@(@item.Sweepstake.IsActive() ? "success" : "danger") 
-								fw-bold px-4 py-3" data-bs-toggle="tooltip" data-bs-placement="top"
-								  title="From @item.Sweepstake.StartDate.ToString("f") To @item.Sweepstake.EndDate.ToString("f")">
-									@if (item.Sweepstake.IsActive())
-									{
-										<span>Active</span>
-									}
-									else
-									{
-										<span>InActive</span>
-									}
-								</span>
+								@if(item.Sweepstake.IsActive())
+								{
+									<span class="badge badge-light-success fw-bold px-4 py-3" 
+										data-bs-toggle="tooltip" 
+										data-bs-placement="top"
+										title="From @item.Sweepstake.StartDate.ToString("f") To @item.Sweepstake.EndDate.ToString("f")"
+									>
+										Active
+									</span>
+								}
+								else if(item.Sweepstake.WillBeActiveInTheFuture())
+								{
+									<span class="badge badge-light-info fw-bold px-4 py-3"
+										data-bs-toggle="tooltip"
+										data-bs-placement="top"
+										title="From @item.Sweepstake.StartDate.ToString("f") To @item.Sweepstake.EndDate.ToString("f")"
+									>
+										Will Be Active
+									</span>
+								}
+								else
+								{
+									<span class="badge badge-light-danger fw-bold px-4 py-3"
+										data-bs-toggle="tooltip"
+										data-bs-placement="top"
+										title="From @item.Sweepstake.StartDate.ToString("f") To @item.Sweepstake.EndDate.ToString("f")"
+									>
+											InActive
+									</span>
+								}
 							</td>
 							<td class="text-end">
 								<a asp-action="View" asp-route-sweepUid=@item.Sweepstake.SweepUid
