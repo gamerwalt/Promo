@@ -102,6 +102,7 @@ namespace hrvster.Web
 			services.AddEmailRepository();
 
 			services.AddPromotionConfigurationOptions(Configuration);
+			services.AddNotificationConfigurationOptions(Configuration);
 		}
 
 

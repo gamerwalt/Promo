@@ -32,5 +32,13 @@ namespace hrvster.Extensions.OptionsConfiguration
 					.Configure<PromotionConfigurationOptions>(configuration)
 					.Configure<PromotionConfigurationOptions>(configuration.GetSection(PromotionConfigurationOptions.SectionName))
 					.AddTransient(s => s.GetService<IOptions<PromotionConfigurationOptions>>().Value);
+
+		public static IServiceCollection AddNotificationConfigurationOptions(
+			this IServiceCollection services,
+			IConfiguration configuration)
+				=> services
+					.Configure<NotificationServiceOptions>(configuration)
+					.Configure<NotificationServiceOptions>(configuration.GetSection(NotificationServiceOptions.SectionName))
+					.AddTransient(s => s.GetService<IOptions<NotificationServiceOptions>>().Value);
 	}
 }

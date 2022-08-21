@@ -17,6 +17,7 @@ namespace hrvster.Infrastructure
 		List<Campaign> GetAccountCampaigns(Guid userUid);
 		Task<Campaign> GetCampaignByUidAsync(Guid campaignUid);
 		Task UpdateCampaignAsync(Guid campaignUid, string campaignName, string description, Guid campaignTypeUid, DateTime startDate, DateTime endDate);
+		Campaign GetCampaignByUid(Guid campaignUid, Guid userUid);
 	}
 
 	public class CampaignRepository : ICampaignRepository
@@ -88,6 +89,29 @@ namespace hrvster.Infrastructure
 			}
 
 			return campaigns;
+		}
+
+		public Campaign GetCampaignByUid(Guid campaignUid, Guid accountUid)
+		{
+			var campaign = default(Campaign);
+
+			using (var conn = new MySqlConnection(_database.GetConnectionString()))
+			{
+				var command = conn.CreateCommand();
+				command.CommandText = "campaign_get_by_uid";
+				command.CommandType = CommandType.StoredProcedure;
+				command.AddParameter(nameof(campaignUid), campaignUid);
+				command.AddParameter(nameof(accountUid), accountUid);
+
+				conn.Open();
+				using var reader = command.ExecuteReader();
+				while (reader.Read())
+				{
+					campaign = CreateCampaignFrom(reader);
+				}
+			}
+
+			return campaign;
 		}
 
 		public async Task<Campaign> GetCampaignByUidAsync(Guid campaignUid, Guid accountUid)

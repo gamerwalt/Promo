@@ -18,6 +18,7 @@ namespace hrvster.Infrastructure
 		Task<IEnumerable<SweepDrawPropertiesAndRule>> GetSweepsRequiringADrawAsync();
 		Task UpdateSweepAsDrawnAsync(Guid sweepUid);
 		Task<IEnumerable<Sweep>> GetAllForAccountAsync(Guid accountUid);
+		IEnumerable<Sweep> GetAllForAccount(Guid accountUid);
 	}
 
 	public class SweepsRepository : ISweepsRepository
@@ -281,6 +282,28 @@ namespace hrvster.Infrastructure
 			return reader.GetDateTime(fieldName);
 		}
 
-		
+		public IEnumerable<Sweep> GetAllForAccount(Guid accountUid)
+		{
+			var sweeps = new List<Sweep>();
+
+			using (var conn = new MySqlConnection(_database.GetConnectionString()))
+			{
+				var command = conn.CreateCommand();
+				command.CommandText = "sweeps_get_by_accountUid";
+				command.CommandType = CommandType.StoredProcedure;
+				command.AddParameter(nameof(accountUid), accountUid);
+
+				conn.Open();
+				using (var reader = command.ExecuteReader())
+				{
+					while (reader.Read())
+					{
+						sweeps.Add(CreateSweepFrom(reader));
+					}
+				}
+			}
+
+			return sweeps;
+		}
 	}
 }

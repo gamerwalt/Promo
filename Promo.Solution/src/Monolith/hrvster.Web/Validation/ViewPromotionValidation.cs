@@ -43,15 +43,15 @@ namespace hrvster.Web.Validation
 					.WithMessage($"The promotion start date must be from {minDate.ToString("f")}");
 
 			RuleFor(viewPromotion => viewPromotion.UpdatePromotion)
-				.Must(updatePromotion => updatePromotion.EndDate > updatePromotion.StartDate)
+				.Must(updatePromotion => updatePromotion.EndDate.ToUniversalTime() > updatePromotion.StartDate.ToUniversalTime())
 					.WithMessage(viewPromotion => $"The start date {viewPromotion.UpdatePromotion.StartDate.ToString("f")} must come before the end date {viewPromotion.UpdatePromotion.EndDate.ToString("f")}.");
 		}
 
 		private bool BeGreaterThanConfiguredNumberOfDays(DateTime inputDate)
 		{
-			var minDate = DateTime.Now.AddDays(_promotionConfigurationOptions.MinDaysBeforeStart);
+			var minDate = DateTime.Now.ToUniversalTime().AddDays(_promotionConfigurationOptions.MinDaysBeforeStart);
 
-			return inputDate > minDate;
+			return inputDate.ToUniversalTime() > minDate;
 		}
 
 		private bool PromotionDoesNotExist(ViewPromotion viewPromotionName, string promotionName)

@@ -4,6 +4,7 @@ using hrvster.Core.Authentication;
 using hrvster.Core.Requests;
 using hrvster.Core.Requests.ApiRequests;
 using hrvster.Core.Requests.WebRequests.Promotions;
+using hrvster.Extensions.ModelExtensions;
 using hrvster.Models;
 using hrvster.Models.WebModels;
 using hrvster.Models.WebModels.Sweeps;
@@ -124,11 +125,7 @@ namespace hrvster.Web.Controllers
 
 			GetPromotionDetails(form, campaign, sweeps, campaignTypes);
 
-			var errors = ModelState.Select(c => c.Value.Errors)
-				.Where(c => c.Count > 0)
-				.ToList();
-
-			_notificationService.Error(BuildMessageFromErrors(errors));
+			_notificationService.Error(ModelState.BuildMessageFromErrors());
 
 			return View("View", form);
 		}
@@ -190,11 +187,7 @@ namespace hrvster.Web.Controllers
 				return RedirectToAction("View", new { campaignUid = promotionUid });
 			}
 
-			var errors = ModelState.Select(c => c.Value.Errors)
-				.Where(c => c.Count > 0)
-				.ToList();
-
-			_notificationService.Error(BuildMessageFromErrors(errors));
+			_notificationService.Error(ModelState.BuildMessageFromErrors("Update Promotion ", string.Empty));
 
 			var campaignTypes = await _mediator.Send(new GetCampaignTypesRequest());
 
@@ -207,17 +200,6 @@ namespace hrvster.Web.Controllers
 				}).ToList();
 
 			return View(model);
-		}
-
-		private string BuildMessageFromErrors(List<ModelErrorCollection> errors)
-		{
-			var sb = new StringBuilder();
-			foreach (var error in errors)
-			{
-				sb.Append(error.FirstOrDefault()?.ErrorMessage?.Replace("Update Promotion ", ""));
-			}
-
-			return sb.ToString();
 		}
 	}
 }
