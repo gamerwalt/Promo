@@ -180,20 +180,26 @@ namespace hrvster.Web.Controllers
 		}
 
 		[HttpPost]
-		public async Task<IActionResult> SelectProvider(Guid sweepUid, SelectWatchTypeProvider form)
+		public async Task<IActionResult> SelectProvider(
+			Guid sweepUid, 
+			string actionName, 
+			string controllerName,
+			SelectWatchTypeProvider form)
 		{
+			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
+			if (sweep == null)
+			{
+				_logger.LogError("Could not find sweepstake with uid: {sweepUid}", sweepUid);
+
+				_notificationService.Warning($"Could not find sweepstake with uid: {sweepUid}.", _notificationServiceOptions.DismissInSeconds);
+
+				return RedirectToAction(actionName, controllerName);
+			}
+
+			var watchTypeProviders = await _mediator.Send(new GetWatchTypeProvidersRequest());
+
 			if (ModelState.IsValid)
 			{
-				var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
-				if (sweep == null)
-				{
-					_logger.LogError("Could not find sweepstake with uid: {sweepUid}", sweepUid);
-
-					_notificationService.Warning($"Could not find sweepstake with uid: {sweepUid}.", _notificationServiceOptions.DismissInSeconds);
-
-					return View(form);
-				}
-
 				//do we have a profile with access tokens already for this provider?
 				//Todo: We should determine if we need to get the access token again
 				var profile = await _mediator.Send(new GetUserProfile(_hrvsterUser.UserUid, ProfileType.Twitter));
@@ -220,6 +226,20 @@ namespace hrvster.Web.Controllers
 
 				return new RedirectResult(authorizationUrl);
 			}
+
+			form.Providers = watchTypeProviders
+				.Where(a => a.ActiveInd)
+				.Select(a => new SelectListItem()
+				{
+					Text = a.WatchTypeProviderName,
+					Value = a.WatchTypeProviderCode
+				});
+			form.Sweep = sweep;
+			form.Campaign = sweep.Campaign;
+			form.ReturnAction = actionName;
+			form.ReturnController = controllerName;
+
+			_notificationService.Error(ModelState.BuildMessageFromErrors(), _notificationServiceOptions.DismissInSeconds);
 
 			return View(form);
 		}

@@ -40,7 +40,9 @@
                                     @foreach(var rule in @Model.Rules)
                                     {
                                         <tr>
-                                            <th scope="row">@rule.WatchType.ToString()</th>
+                                            <td scope="row">
+                                                @rule.WatchType.ToString()
+                                            </td>
                                             <td>@rule.WatchValue</td>
                                             <td>
                                                 @if(@rule.ExternalId == "0")

@@ -22,15 +22,17 @@ namespace hrvster.Extensions.ModelExtensions
 			{
 				if(string.IsNullOrWhiteSpace(messageReplace))
 				{
-					sb.Append("<br/>");
-					sb.Append("<br/>");
 					sb.Append(error.FirstOrDefault()?.ErrorMessage);
 				}
 				else
 				{
-					sb.Append("<br/>");
-					sb.Append("<br/>");
 					sb.Append(error.FirstOrDefault()?.ErrorMessage?.Replace(messageReplace, replaceWith));
+				}
+
+				if(errors.Count > 1)
+				{
+					sb.Append("<br/>");
+					sb.Append("<br/>");
 				}
 			}
 
