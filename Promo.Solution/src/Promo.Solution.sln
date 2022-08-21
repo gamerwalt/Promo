@@ -209,9 +209,6 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "hrvster.Twitter.Harvester", "Monolith\hrvster.Twitter.Harvester\hrvster.Twitter.Harvester.csproj", "{7E904EE8-F334-482C-A176-EEB818E6A281}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Readme", "Readme", "{9352DCBF-5984-4129-874D-F765294E6B79}"
-	ProjectSection(SolutionItems) = preProject
-		Todo.txt = Todo.txt
-	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

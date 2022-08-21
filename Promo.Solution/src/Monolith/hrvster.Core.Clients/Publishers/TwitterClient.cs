@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Tweetinvi.Models;
 using Tweetinvi.Parameters;
 
 namespace hrvster.Core.Clients.Publishers
@@ -49,13 +50,24 @@ namespace hrvster.Core.Clients.Publishers
 			BuildTwitterClient(message.Profile.AccessToken, message.Profile.AccessTokenSecret);
 
 			var mediaIds = await UploadMedia(message);
+			var tweet = default(ITweet);
 
-			var tweet = await _twitterClient.Tweets.PublishTweetAsync(new PublishTweetParameters
+			if(mediaIds.Count == 0)
 			{
-				Text = message.Text,
-				MediaIds = message.Media.Any() ? mediaIds : null,
-			});
-
+				tweet = await _twitterClient.Tweets.PublishTweetAsync(new PublishTweetParameters
+				{
+					Text = message.Text
+				});
+			}
+			else
+			{
+				tweet = await _twitterClient.Tweets.PublishTweetAsync(new PublishTweetParameters
+				{
+					Text = message.Text,
+					MediaIds = mediaIds
+				});
+			}
+			
 			if (tweet == null)
 			{
 				_logger.LogError("Unable to publish the tweet {message} received.", message.AsJson());
@@ -107,24 +119,28 @@ namespace hrvster.Core.Clients.Publishers
 			}
 
 			var mediaIds = new List<long>();
-			foreach (var path in message.Media)
+
+			if (message.Media != null)
 			{
-				_logger.LogInformation("Uploading {path} for the profile with uid {profileUid}",
-					path,
-					message.Profile.ProfileUid);
-
-				var bytes = File.ReadAllBytes(path);
-				var uploadedImage = await _twitterClient.Upload.UploadTweetImageAsync(bytes);
-
-				if (uploadedImage == null)
+				foreach (var path in message.Media)
 				{
-					_logger.LogError("Was unable to upload the media {path} for the profile with uid {profileUid}",
+					_logger.LogInformation("Uploading {path} for the profile with uid {profileUid}",
 						path,
 						message.Profile.ProfileUid);
-				}
-				else
-				{
-					mediaIds.Add(uploadedImage.Id.GetValueOrDefault());
+
+					var bytes = File.ReadAllBytes(path);
+					var uploadedImage = await _twitterClient.Upload.UploadTweetImageAsync(bytes);
+
+					if (uploadedImage == null)
+					{
+						_logger.LogError("Was unable to upload the media {path} for the profile with uid {profileUid}",
+							path,
+							message.Profile.ProfileUid);
+					}
+					else
+					{
+						mediaIds.Add(uploadedImage.Id.GetValueOrDefault());
+					}
 				}
 			}
 

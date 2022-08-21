@@ -11,4 +11,21 @@ $(document).ready(function () {
             $('#scheduleDiv').hide();
         }
     });
+
+    $('#immediateRadioDiv').click(function () {
+        $('#scheduleDiv').hide();
+
+        $('[name="PostNow"]').removeAttr('checked');
+
+        var value = "true";
+        $("input[name=PostNow][value=" + value + "]").attr('checked', 'checked');
+    });
+
+    $('#scheduleRadioDiv').click(function () {
+        $('#scheduleDiv').show();
+        $('[name="PostNow"]').removeAttr('checked');
+
+        var value = "false";
+        $("input[name=PostNow][value=" + value + "]").attr('checked', 'checked');
+    })
 });

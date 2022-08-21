@@ -2,149 +2,191 @@
 @{
     ViewData["Title"] = $"{@Model.SweepstakeName} - Create/Publish Sweep Rule Tweet";
 }
-<div><h4>Create/Publish Sweep Rule Tweet for @Model.SweepstakeName</h4></div>
-<form 
-asp-controller="SweepRules" 
-asp-action="CreateTweet" 
-asp-route-sweepUid=@Model.SweepstakeUid
-asp-route-returnAction=@Model.ReturnAction
-asp-route-returnController=@Model.ReturnController
-enctype="multipart/form-data"
-class="form-horizontal form-material mx-2">
-    @Html.HiddenFor(m => m.SweepstakeUid)
-    @Html.HiddenFor(m => m.ReturnAction)
-    @Html.HiddenFor(m => m.ReturnController)
-    <div class="row">
-        <div class="col-md-6">
-            <div class="form-group">
-                <div class="form-group">
-                    <label><strong>Watch Type:</strong></label>
-                    <div class="col-md-12">
-                        <select 
-                        asp-for="WatchTypeId" 
-                        asp-items=@Model.WatchTypes class="form-control form-control-lg">
-                            <option>Please select one</option>
+<div class="card card-bordered">
+    <form 
+        asp-controller="SweepRules" 
+        asp-action="CreateTweet" 
+        asp-route-sweepUid=@Model.SweepstakeUid
+        asp-route-returnAction=@Model.ReturnAction
+        asp-route-returnController=@Model.ReturnController
+        enctype="multipart/form-data"
+        class="form-horizontal form-material mx-2">
+        @Html.HiddenFor(m => m.SweepstakeUid)
+        @Html.HiddenFor(m => m.ReturnAction)
+        @Html.HiddenFor(m => m.ReturnController)
+        <div class="card-header">
+            <h3 class="card-title">Create/Publish Tweet for @Model.SweepstakeName</h3>
+        </div>
+        <div class="card-body">
+            <div class="d-flex flex-column flex-lg-row">
+                <div class="flex-lg-row-fluid me-lg-15 order-2 order-lg-1 mb-10 mb-lg-0">
+                    <div class="fv-row mb-8">
+                        <label class="required d-flex align-items-center fs-6 fw-semibold form-label mb-2">
+                            Watch Type
+                        </label>
+                        <select asp-for="WatchTypeId"
+                                asp-items=@Model.WatchTypes class="form-select form-control-lg">
+                            <option value="0">Please select one</option>
                         </select>
                         <span asp-validation-for="WatchTypeId"></span>
                     </div>
+                    <div class="fv-row mb-8">
+                        <label class="required d-flex align-items-center fs-6 fw-semibold form-label mb-2">
+                            Watch Value
+                        </label>
+                        <div class="col-md-6">
+                            <input class="form-control form-control-lg"
+                                   id="WatchValue"
+                                   asp-for="WatchValue" />
+                            <span asp-validation-for="WatchValue"></span>
+                        </div>
+                    </div>
+                    <div class="fv-row mb-8">
+                        <label class="required d-flex align-items-center fs-6 fw-semibold form-label mb-2">
+                            Tweet (Max 140)
+                        </label>
+                        <textarea name="TweetText"
+                                  class="form-control form-control-lg"
+                                  id="TweetText"
+                                  asp-for="TweetText" rows="5" cols="70"></textarea>
+                        <span asp-validation-for="TweetText"></span>
+                    </div>
+                    <div class="fv-row mb-8">
+                        <label class="required d-flex align-items-center fs-6 fw-semibold form-label mb-2">
+                            Immediate / Scheduled
+                        </label>
+                        <div data-kt-buttons="true" class="w-lg-50">
+                            <label class="btn btn-outline btn-outline-dashed btn-active-light-primary d-flex flex-stack text-start p-6 mb-5">
+                                <div class="d-flex align-items-center me-2" id="immediateRadioDiv">
+                                    <div class="form-check form-check-custom form-check-solid form-check-primary me-6">
+                                        <input class="form-check-input" asp-for="PostNow" id="PostNow" name="PostNow" type="radio" value="true" />
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <h2 class="d-flex align-items-center fs-3 fw-bold flex-wrap">
+                                            Immediate
+                                        </h2>
+                                        <div class="fw-semibold opacity-50">
+                                            Tweet goes out immediately
+                                        </div>
+                                    </div>
+                                </div>
+                            </label>
+                            <label class="btn btn-outline btn-outline-dashed btn-active-light-primary d-flex flex-stack text-start p-6 mb-5 active">
+                                <div class="d-flex align-items-center me-2" id="scheduleRadioDiv">
+                                    <div class="form-check form-check-custom form-check-solid form-check-primary me-6">
+                                        <input class="form-check-input" type="radio" asp-for="PostNow" id="PostNow" name="PostNow" checked="checked" value="false" />
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <h2 class="d-flex align-items-center fs-3 fw-bold flex-wrap">
+                                            Scheduled
+                                            <span class="badge badge-light-success ms-2 fs-7">Most Recommended</span>
+                                        </h2>
+                                        <div class="fw-semibold opacity-50">
+                                            Tweet goes out at scheduled time
+                                        </div>
+                                    </div>
+                                </div>
+                            </label>
+                        </div>
+                        <div class="col-md-12" id="scheduleDiv">
+                            <div class="fv-row mb-8 w-lg-400px">
+                                <label class="required d-flex align-items-center fs-6 fw-semibold form-label mb-2">
+                                    Date
+                                </label>
+                                <input asp-for="ScheduledDate" class="form-control form-control-lg" asp-format="{0:yyyy-MM-ddTHH:mm}" />
+                                <span asp-validation-for="ScheduledDate"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="fv-row mb-8 w-lg-500px">
+                        <label class="d-flex align-items-center fs-6 fw-semibold form-label mb-2">
+                            Picture 1
+                        </label>
+                        <input class="form-control"
+                               id="Media1"
+                               asp-for="Media1"
+                               type="file" />
+                        <span asp-validation-for="Media1"></span>
+                    </div>
+                    <div class="fv-row mb-8 w-lg-500px">
+                        <label class="d-flex align-items-center fs-6 fw-semibold form-label mb-2">
+                            Picture 2
+                        </label>
+                        <input class="form-control"
+                               id="Media2"
+                               asp-for="Media2"
+                               type="file" />
+                        <span asp-validation-for="Media2"></span>
+                    </div>
+                    <div class="fv-row mb-8 w-lg-500px">
+                        <label class="d-flex align-items-center fs-6 fw-semibold form-label mb-2">
+                            Picture 3
+                        </label>
+                        <input class="form-control"
+                               id="Media3"
+                               asp-for="Media3"
+                               type="file" />
+                        <span asp-validation-for="Media3"></span>
+                    </div>
+                    <div class="fv-row mb-8 w-lg-500px">
+                        <label class="d-flex align-items-center fs-6 fw-semibold form-label mb-2">
+                            Picture 4
+                        </label>
+                        <input class="form-control"
+                               id="Media4"
+                               asp-for="Media4"
+                               type="file" />
+                        <span asp-validation-for="Media4"></span>
+                    </div>
                 </div>
-            </div>
-            <div class="form-group">
-                <label class="col-md-12">Watch Value:</label>
-                <div class="col-md-6">
-                    <input 
-                        class="form-control form-control-lg" 
-                        id="WatchValue" 
-                        asp-for="WatchValue"/>
-                    <span asp-validation-for="WatchValue"></span>
-                </div>
-            </div>
-            <div class="form-group">
-                <label class="col-md-12">Tweet:</label>
-                <div class="col-md-12">
-                    <textarea name="TweetText" 
-                        class="form-control form-control-lg" 
-                        id="TweetText" 
-                        asp-for="TweetText" rows="5" cols="70"></textarea>
-                    <span asp-validation-for="TweetText"></span>
-                </div>
-            </div>
-            <div class="col-md-12">
-                <div class="form-group">
-                    <label><strong>Immediate/Schedule:</strong></label>
-                    <br />
-                    <label>
-                        <input type="radio" asp-for="PostNow" id="PostNow" name="PostNow" checked value="True">
-                        Immediate
-                    </label>
-                    <br />
-                    <label>
-                        <input type="radio" asp-for="PostNow" id="PostNow" name="PostNow" value="False" />
-                        Scheduled
-                    </label>
-                    <div class="col-md-12" id="scheduleDiv">
-                        <div class="form-group">
-                            <label><strong>Date</strong></label>
-                            <input asp-for="ScheduledDate" class="form-control form-control-lg" asp-format="{0:yyyy-MM-ddTHH:mm}" />
+                <div class="flex-column flex-lg-row-auto w-100 w-lg-250px w-xl-300px mb-10 order-1 order-lg-2">
+                    <div class="card card-flush pt-3 mb-0" data-kt-sticky="true" data-kt-sticky-offset="{default: false, lg: '200px'}" data-kt-sticky-width="{lg: '250px', xl: '300px'}" data-kt-sticky-left="auto" data-kt-sticky-top="150px" data-kt-sticky-animation="false" data-kt-sticky-zindex="95">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <h2>Sweepstake Details</h2>
+                            </div>
+                        </div>
+                        <div class="card-body pt-0 fs-6">
+                            <div class="mb-7">
+                                <div class="d-flex align-items-center mb-1">
+                                    <a asp-action="View"
+                                       asp-controller="Sweeps"
+                                       asp-route-campaignUid="@Model.SweepstakeUid"
+                                       class="fw-bold text-gray-800 text-hover-primary me-2">
+                                        @Model.SweepstakeName
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="separator separator-dashed mb-7"></div>
+                            <div class="mb-7">
+                                <h5 class="mb-3">Dates</h5>
+                                <div class="mb-0">
+                                    <span class="badge badge-light-info me-2">Start Date: @Model.SweepstakeStartDate.ToString("f")</span>
+                                    <span class="badge badge-light-info me-2">End Date: @Model.SweepstakeEndDate.ToString("f")</span>
+                                    <span class="badge badge-light-info me-2">Draw Date: @Model.SweepstakeDrawDate.GetValueOrDefault().ToString("f")</span>
+                                </div>
+                            </div>
+                            <div class="separator separator-dashed mb-7"></div>
+                            <div class="mb-0">
+                                <a class="btn btn-primary"
+                                   asp-action="View" asp-controller="Sweeps" asp-route-campaignUid="@Model.SweepstakeUid">
+                                    Update
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="col-md-12">
-                <div class="form-group">
-                    <label><strong>Must be following?</strong></label>
-                    <br />
-                    <label>
-                        <input type="radio" asp-for="MustBeFollowing" id="MustBeFollowing" name="MustBeFollowing" checked value="True">
-                        Yes
-                    </label>
-                    <label>
-                        <input type="radio" asp-for="MustBeFollowing" id="MustBeFollowing" name="MustBeFollowing" value="False">
-                        No
-                    </label>
-                </div>
-            </div>
-            <div class="col-md-12">
-                <div class="form-group">
-                    <label><strong>Media 1</strong></label>
-                    <div class="col-md-12">
-                        <input 
-                            class="form-control" 
-                            id="Media1" 
-                            asp-for="Media1"
-                            type="file" />
-                        <span asp-validation-for="Media1"></span>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-12">
-                <div class="form-group">
-                    <label><strong>Media 2</strong></label>
-                    <div class="col-md-12">
-                        <input 
-                            class="form-control" 
-                            id="Media1" 
-                            asp-for="Media2"
-                            type="file" />
-                        <span asp-validation-for="Media2"></span>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-12">
-                <div class="form-group">
-                    <label><strong>Media 3</strong></label>
-                    <div class="col-md-12">
-                        <input 
-                            class="form-control" 
-                            id="Media1" 
-                            asp-for="Media3"
-                            type="file" />
-                        <span asp-validation-for="Media3"></span>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-12">
-                <div class="form-group">
-                    <label><strong>Media 4</strong></label>
-                    <div class="col-md-12">
-                        <input 
-                            class="form-control" 
-                            id="Media1" 
-                            asp-for="Media4"
-                            type="file" />
-                        <span asp-validation-for="Media4"></span>
-                    </div>
-                </div>
-            </div>
-            <hr />
-            <div class="form-group">
-                <div class="col-md-12">
-                    <button class="btn btn-lg btn-primary" type="submit">Create</button>
-                </div>
+        </div>
+        <div class="card-footer">
+            <div class="card-toolbar">
+                <button type="submit" class="btn btn-md btn-light btn-primary">
+                    Create
+                </button>
             </div>
         </div>
-    </div>
-</form>
+    </form>
+</div>
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
 }

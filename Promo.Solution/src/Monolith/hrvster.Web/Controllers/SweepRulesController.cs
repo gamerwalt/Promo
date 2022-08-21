@@ -10,6 +10,7 @@ using hrvster.Core.Requests.WebRequests.Publishing;
 using hrvster.Extensions.ModelExtensions;
 using hrvster.Models;
 using hrvster.Models.Options;
+using hrvster.Models.WebModels.Sweeps;
 using hrvster.Web.Models;
 using MediatR;
 using Microsoft.AspNetCore.Http;
@@ -38,6 +39,7 @@ namespace hrvster.Web.Controllers
 		private readonly IMapper _mapper;
 		private readonly INotyfService _notificationService;
 		private readonly NotificationServiceOptions _notificationServiceOptions;
+		private readonly SweepstakeConfiguration _sweepstakeConfiguration;
 
 		public SweepRulesController(
 			ILoggerFactory loggerFactory,
@@ -47,7 +49,8 @@ namespace hrvster.Web.Controllers
 			HrvsterUser hrvsterUser,
 			IMapper mapper,
 			INotyfService notificationService,
-			NotificationServiceOptions notificationServiceOptions)
+			NotificationServiceOptions notificationServiceOptions,
+			SweepstakeConfiguration sweepstakeConfiguration)
 		{
 			_logger = loggerFactory.CreateLogger<SweepRulesController>();
 			_mediator = mediator;
@@ -57,6 +60,7 @@ namespace hrvster.Web.Controllers
 			_mapper = mapper;
 			_notificationService = notificationService;
 			_notificationServiceOptions = notificationServiceOptions;
+			_sweepstakeConfiguration = sweepstakeConfiguration;
 		}
 
 		public async Task<IActionResult> View(Guid sweepUid)
@@ -279,9 +283,12 @@ namespace hrvster.Web.Controllers
 				SweepstakeId = sweep.SweepId,
 				SweepstakeUid = sweep.SweepUid,
 				SweepstakeName = sweep.Name,
+				SweepstakeStartDate = sweep.StartDate,
+				SweepstakeEndDate = sweep.EndDate,
+				SweepstakeDrawDate = sweep.DrawDate,
 				ReturnAction = actionName ?? HttpContext.Request.RouteValues["action"].ToString(),
 				ReturnController = controllerName ?? HttpContext.Request.RouteValues["controller"].ToString(),
-				ScheduledDate = sweep.StartDate.AddHours(-1)
+				ScheduledDate = sweep.StartDate.AddMinutes(-_sweepstakeConfiguration.TweetScheduleDefaultMinutes)
 			};
 
 			return View(model);
@@ -290,63 +297,18 @@ namespace hrvster.Web.Controllers
 		[HttpPost]
 		public async Task<IActionResult> CreateTweet(Guid sweepUid, string returnAction, string returnController, CreateSweepRuleTweet form)
 		{
+			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
+			if (sweep == null)
+			{
+				_logger.LogError("Could not find sweepstake with uid: {sweepUid}", sweepUid);
+
+				_notificationService.Warning($"Could not find sweepstake with uid: {sweepUid}.", _notificationServiceOptions.DismissInSeconds);
+
+				return RedirectToAction(returnAction, returnController);
+			}
+
 			if (ModelState.IsValid)
 			{
-				var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
-				if (sweep == null)
-				{
-					_logger.LogError("Could not find sweepstake with uid: {sweepUid}", sweepUid);
-
-					_notificationService.Warning($"Could not find sweepstake with uid: {sweepUid}.", _notificationServiceOptions.DismissInSeconds);
-
-					return View(form);
-				}
-				
-				var extension = string.Empty;
-				if (form.Media1 != null)
-				{
-					extension = Path.GetExtension(form.Media1.FileName);
-					if (!AllowedExtensions.Contains(extension))
-					{
-						_notificationService.Warning($"Media 1's extension is not allowed.", _notificationServiceOptions.DismissInSeconds);
-
-						return View(form);
-					}
-				}
-				
-				if (form.Media2 != null)
-				{
-					extension = Path.GetExtension(form.Media2.FileName);
-					if (!AllowedExtensions.Contains(extension))
-					{
-						_notificationService.Warning($"Media 2's extension is not allowed.", _notificationServiceOptions.DismissInSeconds);
-
-						return View(form);
-					}
-				}
-				
-				if(form.Media3 != null)
-				{
-					extension = Path.GetExtension(form.Media3.FileName);
-					if (!AllowedExtensions.Contains(extension))
-					{
-						_notificationService.Warning($"Media 3's extension is not allowed.", _notificationServiceOptions.DismissInSeconds);
-
-						return View(form);
-					}
-				}
-				
-				if(form.Media4 != null)
-				{
-					extension = Path.GetExtension(form.Media3.FileName);
-					if (!AllowedExtensions.Contains(extension))
-					{
-						_notificationService.Warning($"Media 4's extension is not allowed.", _notificationServiceOptions.DismissInSeconds);
-
-						return View(form);
-					}
-				}
-
 				//upload files
 				var media = new List<IFormFile>();
 				var mediaLocation = default(IEnumerable<string>);
@@ -388,15 +350,18 @@ namespace hrvster.Web.Controllers
 				});
 			}
 
-			var errors = ModelState.Select(c => c.Value.Errors)
-				.Where(c => c.Count > 0)
-				.ToList();
-
 			_notificationService.Error(ModelState.BuildMessageFromErrors(), _notificationServiceOptions.DismissInSeconds);
 
 			var watchTypes = await _mediator.Send(new GetWatchTypeRequest());
 
 			form.WatchTypes = watchTypes.Select(a => new SelectListItem() { Text = a.WatchTypeName, Value = a.WatchTypeId.ToString() }).ToList();
+
+			form.SweepstakeId = sweep.SweepId;
+			form.SweepstakeUid = sweep.SweepUid;
+			form.SweepstakeName = sweep.Name;
+			form.SweepstakeStartDate = sweep.StartDate;
+			form.SweepstakeEndDate = sweep.EndDate;
+			form.SweepstakeDrawDate = sweep.DrawDate;
 
 			return View(form);
 		}
