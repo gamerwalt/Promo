@@ -109,12 +109,15 @@ namespace hrvster.Core.Handlers.Publishing
 
 		private async Task SaveScheduledTweetImages(Guid scheduledUid, Message message)
 		{
-			foreach (var media in message.Media)
+			if(message.Media != null)
 			{
-				await _repository.CreateScheduledSweepRuleImage(scheduledUid, new ScheduledSweepRuleTweetImage
+				foreach (var media in message.Media)
 				{
-					ImageLocation = media
-				});
+					await _repository.CreateScheduledSweepRuleImage(scheduledUid, new ScheduledSweepRuleTweetImage
+					{
+						ImageLocation = media
+					});
+				}
 			}
 		}
 
