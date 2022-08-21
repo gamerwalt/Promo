@@ -69,7 +69,6 @@ namespace hrvster.Web.Controllers
 		}
 
 		[HttpPost]
-		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> Select(Guid sweepUid, SelectWatchTypeProvider form)
 		{
 			if(ModelState.IsValid)

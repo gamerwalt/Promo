@@ -3,6 +3,8 @@ using AutoMapper;
 using hrvster.Core.Authentication;
 using hrvster.Core.Requests;
 using hrvster.Core.Requests.ApiRequests;
+using hrvster.Core.Requests.WebRequests.Promotions;
+using hrvster.Models;
 using hrvster.Models.WebModels;
 using hrvster.Models.WebModels.Sweeps;
 using hrvster.Web.Models;
@@ -15,6 +17,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Tweetinvi.Models.V2;
 
 namespace hrvster.Web.Controllers
 {
@@ -47,12 +50,104 @@ namespace hrvster.Web.Controllers
 		public async Task<IActionResult> View(Guid campaignUid)
 		{
 			var campaign = await _mediator.Send(new GetCampaign(campaignUid));
+
+			if(campaign == null)
+			{
+				_notificationService.Error("Promotion not found.", 10);
+
+				return RedirectToAction("Index");
+			}
+
 			var sweeps = await _mediator.Send(new GetSweepsForCampaignUid(campaignUid, _hrvsterUser.UserUid));
+			var campaignTypes = await _mediator.Send(new GetCampaignTypesRequest());
 
-			var promotion = _mapper.Map<Promotion>(campaign);
-			promotion.Sweepstakes = _mapper.Map<IEnumerable<Sweepstake>>(sweeps);
+			var viewPromotion = new ViewPromotion
+			{
+				CampaignName = campaign.CampaignName,
+				Description = campaign.Description,
+				CampaignUid = campaign.CampaignUid,
+				Sweepstakes = _mapper.Map<List<Sweepstake>>(sweeps),
+				StartDate = campaign.StartDate,
+				EndDate = campaign.EndDate,
+				UpdatePromotion = new UpdatePromotion
+				{
+					CampaignUid = campaign.CampaignUid,
+					CampaignName = campaign.CampaignName,
+					Description = campaign.Description,
+					StartDate = campaign.StartDate,
+					EndDate = campaign.EndDate,
+					CampaignTypeUid = campaign.CampaignType.CampaignTypeUid,
+					CampaignTypes = campaignTypes
+					.Where(a => a.IsActive)
+					.Select(a => new SelectListItem()
+					{
+						Text = a.CampaignTypeName,
+						Value = a.CampaignTypeUid.ToString()
+					}).ToList(),
+				}
+			};
 
-			return View(promotion);
+			return View(viewPromotion);
+		}
+
+		[HttpPost]
+		public async Task<IActionResult> Update([FromQuery] Guid campaignUid, ViewPromotion form)
+		{
+			var campaign = await _mediator.Send(new GetCampaign(campaignUid));
+
+			if (campaign == null)
+			{
+				_notificationService.Error("Promotion not found.", 10);
+
+				return RedirectToAction("View");
+			}
+
+			var sweeps = await _mediator.Send(new GetSweepsForCampaignUid(campaignUid, _hrvsterUser.UserUid));
+			var campaignTypes = await _mediator.Send(new GetCampaignTypesRequest());
+
+			if (ModelState.IsValid)
+			{
+				await _mediator.Send(new UpdatePromotionRequest(
+					campaignUid,
+					form.UpdatePromotion.CampaignName,
+					form.UpdatePromotion.Description,
+					form.UpdatePromotion.CampaignTypeUid,
+					form.UpdatePromotion.StartDate,
+					form.UpdatePromotion.EndDate));
+
+				_notificationService.Success("Promotion updated.");
+
+				GetPromotionDetails(form, campaign, sweeps, campaignTypes);
+
+				return View("View", form);
+			}
+
+			GetPromotionDetails(form, campaign, sweeps, campaignTypes);
+
+			var errors = ModelState.Select(c => c.Value.Errors)
+				.Where(c => c.Count > 0)
+				.ToList();
+
+			_notificationService.Error(BuildMessageFromErrors(errors));
+
+			return View("View", form);
+		}
+
+		private void GetPromotionDetails(ViewPromotion form, Campaign campaign, IEnumerable<Sweep> sweeps, IEnumerable<CampaignType> campaignTypes)
+		{
+			form.CampaignName = campaign.CampaignName;
+			form.Description = campaign.Description;
+			form.CampaignUid = campaign.CampaignUid;
+			form.Sweepstakes = _mapper.Map<List<Sweepstake>>(sweeps);
+			form.StartDate = campaign.StartDate;
+			form.EndDate = campaign.EndDate;
+			form.UpdatePromotion.CampaignTypes = campaignTypes
+					.Where(a => a.IsActive)
+					.Select(a => new SelectListItem()
+					{
+						Text = a.CampaignTypeName,
+						Value = a.CampaignTypeUid.ToString()
+					}).ToList();
 		}
 
 		[HttpGet]
@@ -77,7 +172,6 @@ namespace hrvster.Web.Controllers
 		}
 
 		[HttpPost]
-		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> Create(CreatePromotion model)
 		{
 			if(ModelState.IsValid)
@@ -120,7 +214,7 @@ namespace hrvster.Web.Controllers
 			var sb = new StringBuilder();
 			foreach (var error in errors)
 			{
-				sb.Append(error.FirstOrDefault()?.ErrorMessage);
+				sb.Append(error.FirstOrDefault()?.ErrorMessage?.Replace("Update Promotion ", ""));
 			}
 
 			return sb.ToString();

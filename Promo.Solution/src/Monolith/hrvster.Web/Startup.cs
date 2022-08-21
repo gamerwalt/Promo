@@ -16,7 +16,6 @@ using hrvster.Core.Requests.Notifications.Harvester;
 using hrvster.Core.Requests.Validators;
 using hrvster.Core.Requests.WebRequests;
 using hrvster.Core.Requests.WebRequests.Validators;
-using hrvster.Core.Settings;
 using hrvster.Extensions.Configuration;
 using hrvster.Extensions.OptionsConfiguration;
 using hrvster.Infrastructure;
@@ -25,6 +24,7 @@ using hrvster.Infrastructure.Core;
 using hrvster.Infrastructure.Harvester;
 using hrvster.Infrastructure.Scheduling;
 using hrvster.Models;
+using hrvster.Models.Options;
 using hrvster.Web.Models;
 using hrvster.Web.Validation;
 using MediatR;
@@ -220,9 +220,9 @@ namespace hrvster.Web
 
 		private void ConfigureSweeepstakes(IServiceCollection services)
 		{
-			services.Configure<SweepConfiguration>(Configuration);
-			services.Configure<SweepConfiguration>(Configuration.GetSection(SweepConfiguration.SectionName));
-			services.AddTransient(p => p.GetService<IOptions<SweepConfiguration>>().Value);
+			services.Configure<SweepstakeConfiguration>(Configuration);
+			services.Configure<SweepstakeConfiguration>(Configuration.GetSection(SweepstakeConfiguration.SectionName));
+			services.AddTransient(p => p.GetService<IOptions<SweepstakeConfiguration>>().Value);
 		}
 
 		private void AddTwitterClient(IServiceCollection services)

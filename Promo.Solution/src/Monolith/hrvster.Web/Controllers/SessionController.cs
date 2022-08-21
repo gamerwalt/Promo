@@ -47,7 +47,6 @@ namespace hrvster.Web.Controllers
 
 		// POST: SessionController/Create
 		[HttpPost]
-		[ValidateAntiForgeryToken]
 		public async Task<ActionResult> SignIn(SigninForm form)
 		{
 			try

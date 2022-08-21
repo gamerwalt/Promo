@@ -25,7 +25,6 @@ using System.Threading.Tasks;
 namespace hrvster.Web.Controllers
 {
 	[FirebaseAuthorize]
-	[AutoValidateAntiforgeryToken]
 	public class SweepRulesController : Controller
 	{
 		private string[] AllowedExtensions = {".jpeg", ".jpg", ".png", ".gif"};

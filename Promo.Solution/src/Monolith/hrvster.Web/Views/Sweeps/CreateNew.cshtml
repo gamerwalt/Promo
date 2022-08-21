@@ -1,0 +1,53 @@
+﻿@model CreateNewSweep
+@{
+    ViewData["Title"] = $"Create New Sweepstake/Raffle";
+}
+<div class="card card-bordered">
+    <form asp-controller="Promotions" asp-action="Create" class="form-horizontal form-material mx-2">
+        <div class="card-header">
+            <h3 class="card-title">Create Promotion</h3>
+        </div>
+        <div class="card-body">
+            <div class="form-floating mb-4">
+                <input type="text" asp-for="Name" id="Name" class="form-control" placeholder="Name" />
+                <label for="Name">Name</label>
+                <span asp-validation-for="Name"></span>
+            </div>
+            <div class="separator my-4 mb-4"></div>
+            <div class="form-floating mb-4">
+                <input asp-for="StartDate" class="form-control" asp-format="{0:yyyy-MM-ddTHH:mm}" placeholder="StartDate" />
+                <label for="StartDate">StartDate</label>
+                <span asp-validation-for="StartDate"></span>
+            </div>
+            <div class="form-floating mb-4">
+                <input asp-for="EndDate" class="form-control" asp-format="{0:yyyy-MM-ddTHH:mm}" placeholder="EndDate" />
+                <label for="EndDate">EndDate</label>
+                <span asp-validation-for="EndDate"></span>
+            </div>
+            <div class="form-floating mb-4">
+                <input asp-for="DrawDate" class="form-control" asp-format="{0:yyyy-MM-ddTHH:mm}" placeholder="DrawDate" />
+                <label for="DrawDate">DrawDate</label>
+                <span asp-validation-for="DrawDate"></span>
+            </div>
+            <div class="mb-4">
+                <label for="CampaignTypeUid">Promotion</label>
+                <select asp-for="Campaign.CampaignUid" asp-items=@Model.Promotions class="form-select form-control-lg">
+                    <option value="@Guid.Empty">Please select promotion</option>
+                </select>
+                <span asp-validation-for="Campaign.CampaignUid"></span>
+            </div>
+        </div>
+        <div class="card-footer">
+            <div class="card-toolbar">
+                <button type="submit" class="btn btn-md btn-light btn-primary">
+                    Create Promotion
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    }

@@ -16,6 +16,7 @@ namespace hrvster.Infrastructure
 		Task<List<Campaign>> GetAccountCampaignsAsync(Guid accountUid);
 		List<Campaign> GetAccountCampaigns(Guid userUid);
 		Task<Campaign> GetCampaignByUidAsync(Guid campaignUid);
+		Task UpdateCampaignAsync(Guid campaignUid, string campaignName, string description, Guid campaignTypeUid, DateTime startDate, DateTime endDate);
 	}
 
 	public class CampaignRepository : ICampaignRepository
@@ -148,6 +149,25 @@ namespace hrvster.Infrastructure
 				.AddParameter("endDate", campaign.EndDate)
 				.AddParameter("activeInd", campaign.ActiveInd)
 				.AddParameter("campaignTypeUid", campaign.CampaignType?.CampaignTypeUid);
+
+			await conn.OpenAsync();
+			await command.ExecuteNonQueryAsync();
+		}
+
+		public async Task UpdateCampaignAsync(Guid campaignUid, string campaignName, string description, Guid campaignTypeUid, DateTime startDate, DateTime endDate)
+		{
+			using var conn = new MySqlConnection(_database.GetConnectionString());
+			var command = conn.CreateCommand();
+			command.CommandText = "campaign_update_via_uid";
+			command.CommandType = CommandType.StoredProcedure;
+			command
+				.AddParameter("campaignUid", campaignUid)
+				.AddParameter("campaignName", campaignName)
+				.AddParameter("campaignDescription", description)
+				.AddParameter("startDate", startDate)
+				.AddParameter("endDate", endDate)
+				.AddParameter("activeInd", true)
+				.AddParameter("campaignTypeUid", campaignTypeUid);
 
 			await conn.OpenAsync();
 			await command.ExecuteNonQueryAsync();

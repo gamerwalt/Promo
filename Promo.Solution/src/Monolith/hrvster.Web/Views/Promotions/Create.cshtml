@@ -23,12 +23,12 @@
             </div>
             <div class="separator my-4 mb-4"></div>
             <div class="form-floating mb-4">
-                <input asp-for="StartDate" class="form-control" asp-format="{0:yyyy-MM-ddTHH:mm}" placeholder="StartDate" />
+                <input asp-for="StartDate" class="form-control" asp-format="{0:yyyy-MM-ddTHH:mm:ss}" placeholder="StartDate" />
                 <label for="StartDate">StartDate</label>
                 <span asp-validation-for="StartDate"></span>
             </div>
             <div class="form-floating mb-4">
-                <input asp-for="EndDate" class="form-control" asp-format="{0:yyyy-MM-ddTHH:mm}" placeholder="EndDate" />
+                <input asp-for="EndDate" class="form-control" asp-format="{0:yyyy-MM-ddTHH:mm:ss}" placeholder="EndDate" />
                 <label for="EndDate">EndDate</label>
                 <span asp-validation-for="EndDate"></span>
             </div>

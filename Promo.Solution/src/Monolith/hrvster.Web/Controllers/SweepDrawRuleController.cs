@@ -2,7 +2,7 @@
 using hrvster.Core.Authentication;
 using hrvster.Core.Requests;
 using hrvster.Core.Requests.WebRequests.Sweeps;
-using hrvster.Core.Settings;
+using hrvster.Models.Options;
 using hrvster.Web.Models;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -17,13 +17,13 @@ namespace hrvster.Web.Controllers
 	{
 		private readonly ILogger<SweepDrawRuleController> _logger;
 		private readonly IMediator _mediator;
-		private readonly SweepConfiguration _sweepConfig;
+		private readonly SweepstakeConfiguration _sweepConfig;
 		private readonly INotyfService _notificationService;
 
 		public SweepDrawRuleController(
 			ILoggerFactory loggerFactory,
 			IMediator mediator,
-			SweepConfiguration sweepConfig,
+			SweepstakeConfiguration sweepConfig,
 			INotyfService notificationService)
 		{
 			_logger = loggerFactory.CreateLogger<SweepDrawRuleController>();

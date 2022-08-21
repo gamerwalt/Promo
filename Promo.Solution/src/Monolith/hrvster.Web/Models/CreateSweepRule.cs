@@ -17,6 +17,6 @@ namespace hrvster.Web.Models
 		public bool Active { get; set; }
 		public string ReturnAction { get; set; }
 		public string ReturnController { get; set; }
-		public Campaign Campaign { get; set; }
+		public hrvster.Models.Campaign Campaign { get; set; }
 	}
 }

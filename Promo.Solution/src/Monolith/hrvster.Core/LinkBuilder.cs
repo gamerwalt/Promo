@@ -1,7 +1,7 @@
 ﻿using hrvster.Core.Authentication;
-using hrvster.Core.Settings;
 using hrvster.Infrastructure;
 using hrvster.Infrastructure.Accounts;
+using hrvster.Models.Options;
 using System;
 using System.Threading.Tasks;
 

@@ -4,11 +4,15 @@ using hrvster.Core.Authentication;
 using hrvster.Core.Requests;
 using hrvster.Core.Requests.ApiRequests;
 using hrvster.Core.Requests.WebRequests.Sweeps;
+using hrvster.Models.Options;
 using hrvster.Models.WebModels;
 using hrvster.Models.WebModels.Sweeps;
+using hrvster.Web.Models;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using CreateSweep = hrvster.Web.Models.CreateSweep;
 
@@ -21,13 +25,20 @@ namespace hrvster.Web.Controllers
 		private readonly HrvsterUser _hrvsterUser;
 		private readonly IMapper _mapper;
 		private readonly INotyfService _notificationService;
+		private readonly SweepstakeConfiguration _sweepstakeConfiguration;
 
-		public SweepsController(IMediator mediator, HrvsterUser hrvsterUser, IMapper mapper, INotyfService notificationService)
+		public SweepsController(
+			IMediator mediator, 
+			HrvsterUser hrvsterUser, 
+			IMapper mapper, 
+			INotyfService notificationService,
+			SweepstakeConfiguration sweepstakeConfiguration)
 		{
 			_mediator = mediator;
 			_hrvsterUser = hrvsterUser;
 			_mapper = mapper;
 			_notificationService = notificationService;
+			_sweepstakeConfiguration = sweepstakeConfiguration;
 		}
 
 		public async Task<IActionResult> Index()
@@ -35,6 +46,33 @@ namespace hrvster.Web.Controllers
 			var sweeps = await _mediator.Send(new GetSweepForAccountUidRequest(_hrvsterUser.UserUid));
 			
 			return View(sweeps);
+		}
+
+		[HttpGet]
+		public async Task<IActionResult> CreateNew()
+		{
+			var promotions = await _mediator.Send(new GetAllCampaignsForAccount(_hrvsterUser.UserUid));
+
+			if(!promotions.Any(c => c.IsActive()))
+			{
+				_notificationService.Error("None of your promotions are active. We need 1 active promotion to continue.");
+
+				return RedirectToAction("Index");
+			}
+
+			var startDate = DateTime.Now;
+			var endDate = startDate.AddDays(_sweepstakeConfiguration.EndDateDaysAfterStartDate);
+			var drawDate = endDate.AddDays(_sweepstakeConfiguration.DrawDateDaysAfterEndDate);
+
+			var model = new CreateNewSweep
+			{
+				Promotions = promotions.Select(a => new SelectListItem() { Text = a.CampaignName, Value = a.CampaignUid.ToString() }),
+				StartDate = startDate,
+				EndDate = endDate,
+				DrawDate = drawDate
+			};
+
+			return View(model);
 		}
 
 		[HttpGet]

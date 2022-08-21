@@ -1,6 +1,6 @@
-﻿namespace hrvster.Core.Settings
+﻿namespace hrvster.Models.Options
 {
-	public class SweepConfiguration
+	public class SweepstakeConfiguration
 	{
 		public const string SectionName = "SweepstakeConfigurationOptions";
 
@@ -10,5 +10,8 @@
 		//Draw Rule Defaults
 		public int WinnerCount { get; set; } = 0;
 		public int WinnerBackupCount { get; set; } = 0;
+
+		public int EndDateDaysAfterStartDate { get; set; }
+		public int DrawDateDaysAfterEndDate { get; set; }
 	}
 }

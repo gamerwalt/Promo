@@ -8,7 +8,7 @@ namespace hrvster.Web.Models
 	{
 		public IEnumerable<SelectListItem> Providers { get; set; }
 		public string ProviderCode { get; set; }
-		public Campaign Campaign { get; set; }
+		public hrvster.Models.Campaign Campaign { get; set; }
 		public Sweep Sweep { get; set; }
 		public string ReturnController { get; set; }
 		public string ReturnAction { get; set; }

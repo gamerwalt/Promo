@@ -1,4 +1,4 @@
-﻿namespace hrvster.Core.Settings
+﻿namespace hrvster.Models.Options
 {
 	public class Services
 	{
