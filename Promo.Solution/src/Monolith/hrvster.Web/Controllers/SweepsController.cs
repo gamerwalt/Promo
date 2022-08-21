@@ -58,8 +58,10 @@ namespace hrvster.Web.Controllers
 		public async Task<IActionResult> CreateNew()
 		{
 			var promotions = await _mediator.Send(new GetAllCampaignsForAccount(_hrvsterUser.UserUid));
+			var anyActivePromotions = promotions.Any(c => c.IsActive());
+			var anyWillBeInProgress = promotions.Any(c => c.WillBeInProgress());
 
-			if (!promotions.Any(c => c.IsActive()))
+			if (anyActivePromotions && !anyWillBeInProgress)
 			{
 				_notificationService.Error(
 					"None of your promotions are active. We need 1 active promotion to continue.",

@@ -7,7 +7,9 @@ using hrvster.Core.Requests.Notifications;
 using hrvster.Core.Requests.WebRequests.Core;
 using hrvster.Core.Requests.WebRequests.Files;
 using hrvster.Core.Requests.WebRequests.Publishing;
+using hrvster.Extensions.ModelExtensions;
 using hrvster.Models;
+using hrvster.Models.Options;
 using hrvster.Web.Models;
 using MediatR;
 using Microsoft.AspNetCore.Http;
@@ -35,6 +37,7 @@ namespace hrvster.Web.Controllers
 		private readonly HrvsterUser _hrvsterUser;
 		private readonly IMapper _mapper;
 		private readonly INotyfService _notificationService;
+		private readonly NotificationServiceOptions _notificationServiceOptions;
 
 		public SweepRulesController(
 			ILoggerFactory loggerFactory,
@@ -43,7 +46,8 @@ namespace hrvster.Web.Controllers
 			Func<ExternalClientType, Core.Clients.Publishers.IExternalClient> publisherResolver,
 			HrvsterUser hrvsterUser,
 			IMapper mapper,
-			INotyfService notificationService)
+			INotyfService notificationService,
+			NotificationServiceOptions notificationServiceOptions)
 		{
 			_logger = loggerFactory.CreateLogger<SweepRulesController>();
 			_mediator = mediator;
@@ -52,6 +56,7 @@ namespace hrvster.Web.Controllers
 			_hrvsterUser = hrvsterUser;
 			_mapper = mapper;
 			_notificationService = notificationService;
+			_notificationServiceOptions = notificationServiceOptions;
 		}
 
 		public async Task<IActionResult> View(Guid sweepUid)
@@ -69,7 +74,9 @@ namespace hrvster.Web.Controllers
 			{
 				_logger.LogError("Could not find sweepstake with uid: {sweepUid}", sweepUid);
 
-				_notificationService.Warning($"Could not find sweepstake with uid: {sweepUid}.");
+				_notificationService.Warning(
+					$"Could not find sweepstake with uid: {sweepUid}.",
+					_notificationServiceOptions.DismissInSeconds);
 
 				return RedirectToAction(actionName, controllerName);
 			}
@@ -79,7 +86,9 @@ namespace hrvster.Web.Controllers
 			{
 				_logger.LogError("Could not find the rule with uid: {ruleUid}", ruleUid);
 
-				_notificationService.Warning($"Could not find rule with uid: {ruleUid} ");
+				_notificationService.Warning(
+					$"Could not find rule with uid: {ruleUid} ",
+					_notificationServiceOptions.DismissInSeconds);
 
 				return RedirectToAction(actionName, controllerName);
 			}
@@ -105,7 +114,7 @@ namespace hrvster.Web.Controllers
 			{
 				_logger.LogError("Could not find sweepstake with uid: {sweepUid}", sweepUid);
 
-				_notificationService.Warning($"Could not find sweepstake with uid: {sweepUid}.");
+				_notificationService.Warning($"Could not find sweepstake with uid: {sweepUid}.", _notificationServiceOptions.DismissInSeconds);
 
 				return View(form);
 			}
@@ -115,7 +124,7 @@ namespace hrvster.Web.Controllers
 			{
 				_logger.LogError("Could not find the rule with uid: {ruleUid}", ruleUid);
 
-				_notificationService.Warning($"Could not find rule with uid: {ruleUid} ");
+				_notificationService.Warning($"Could not find rule with uid: {ruleUid} ", _notificationServiceOptions.DismissInSeconds);
 
 				return View(form);
 			}
@@ -141,7 +150,7 @@ namespace hrvster.Web.Controllers
 			{
 				_logger.LogError("Could not find sweepstake with uid: {sweepUid}", sweepUid);
 
-				_notificationService.Warning($"Could not find sweepstake with uid: {sweepUid}.");
+				_notificationService.Warning($"Could not find sweepstake with uid: {sweepUid}.", _notificationServiceOptions.DismissInSeconds);
 
 				return RedirectToAction(actionName, controllerName);
 			}
@@ -176,7 +185,7 @@ namespace hrvster.Web.Controllers
 				{
 					_logger.LogError("Could not find sweepstake with uid: {sweepUid}", sweepUid);
 
-					_notificationService.Warning($"Could not find sweepstake with uid: {sweepUid}.");
+					_notificationService.Warning($"Could not find sweepstake with uid: {sweepUid}.", _notificationServiceOptions.DismissInSeconds);
 
 					return View(form);
 				}
@@ -211,7 +220,7 @@ namespace hrvster.Web.Controllers
 			return View(form);
 		}
 
-		public async Task<IActionResult> FailedAuthValidation()
+		public IActionResult FailedAuthValidation()
 		{
 			return RedirectToActionPermanent("Index", "Sweeps");
 		}
@@ -257,7 +266,7 @@ namespace hrvster.Web.Controllers
 			{
 				_logger.LogError("Could not find sweepstake with uid: {sweepUid}", sweepUid);
 
-				_notificationService.Warning($"Could not find sweepstake with uid: {sweepUid}.");
+				_notificationService.Warning($"Could not find sweepstake with uid: {sweepUid}.", _notificationServiceOptions.DismissInSeconds);
 
 				return RedirectToAction(actionName, controllerName);
 			}
@@ -288,7 +297,7 @@ namespace hrvster.Web.Controllers
 				{
 					_logger.LogError("Could not find sweepstake with uid: {sweepUid}", sweepUid);
 
-					_notificationService.Warning($"Could not find sweepstake with uid: {sweepUid}.");
+					_notificationService.Warning($"Could not find sweepstake with uid: {sweepUid}.", _notificationServiceOptions.DismissInSeconds);
 
 					return View(form);
 				}
@@ -299,7 +308,7 @@ namespace hrvster.Web.Controllers
 					extension = Path.GetExtension(form.Media1.FileName);
 					if (!AllowedExtensions.Contains(extension))
 					{
-						_notificationService.Warning($"Media 1's extension is not allowed.");
+						_notificationService.Warning($"Media 1's extension is not allowed.", _notificationServiceOptions.DismissInSeconds);
 
 						return View(form);
 					}
@@ -310,7 +319,7 @@ namespace hrvster.Web.Controllers
 					extension = Path.GetExtension(form.Media2.FileName);
 					if (!AllowedExtensions.Contains(extension))
 					{
-						_notificationService.Warning($"Media 2's extension is not allowed.");
+						_notificationService.Warning($"Media 2's extension is not allowed.", _notificationServiceOptions.DismissInSeconds);
 
 						return View(form);
 					}
@@ -321,7 +330,7 @@ namespace hrvster.Web.Controllers
 					extension = Path.GetExtension(form.Media3.FileName);
 					if (!AllowedExtensions.Contains(extension))
 					{
-						_notificationService.Warning($"Media 3's extension is not allowed.");
+						_notificationService.Warning($"Media 3's extension is not allowed.", _notificationServiceOptions.DismissInSeconds);
 
 						return View(form);
 					}
@@ -332,7 +341,7 @@ namespace hrvster.Web.Controllers
 					extension = Path.GetExtension(form.Media3.FileName);
 					if (!AllowedExtensions.Contains(extension))
 					{
-						_notificationService.Warning($"Media 4's extension is not allowed.");
+						_notificationService.Warning($"Media 4's extension is not allowed.", _notificationServiceOptions.DismissInSeconds);
 
 						return View(form);
 					}
@@ -383,24 +392,13 @@ namespace hrvster.Web.Controllers
 				.Where(c => c.Count > 0)
 				.ToList();
 
-			_notificationService.Error(BuildMessageFromErrors(errors));
+			_notificationService.Error(ModelState.BuildMessageFromErrors(), _notificationServiceOptions.DismissInSeconds);
 
 			var watchTypes = await _mediator.Send(new GetWatchTypeRequest());
 
 			form.WatchTypes = watchTypes.Select(a => new SelectListItem() { Text = a.WatchTypeName, Value = a.WatchTypeId.ToString() }).ToList();
 
 			return View(form);
-		}
-
-		private string BuildMessageFromErrors(List<ModelErrorCollection> errors)
-		{
-			var sb = new StringBuilder();
-			foreach (var error in errors)
-			{
-				sb.Append(error.FirstOrDefault()?.ErrorMessage);
-			}
-
-			return sb.ToString();
 		}
 	}
 }
