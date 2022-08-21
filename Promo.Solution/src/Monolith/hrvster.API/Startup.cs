@@ -56,11 +56,10 @@ namespace hrvster.API
 			var handlerAssembly = typeof(GetAccountRequest).GetTypeInfo().Assembly;
 			var notificationAssembly = typeof(AccountCreatedViaFirebase).GetTypeInfo().Assembly;
 			var notificationHandlerAssembly = typeof(StoreAccountInDatabase).GetTypeInfo().Assembly;
-			var validatorAssembly = typeof(CreateSweepValidator).GetTypeInfo().Assembly;
 			var harvsterHandlerAssembly = typeof(NewHashTagTweetReceived).GetTypeInfo().Assembly;
 
 			services.AddMediatR(new[] { handlerAssembly, notificationAssembly, notificationHandlerAssembly, harvsterHandlerAssembly });
-			services.AddFluentValidation(new[] { handlerAssembly, validatorAssembly });
+			services.AddFluentValidation(new[] { handlerAssembly });
 
 			AddTwitterClient(services);
 		}

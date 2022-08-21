@@ -19,7 +19,12 @@ namespace hrvster.Web.Models
 
 		public bool IsActive()
 		{
-			return DateTime.UtcNow >= StartDate && DateTime.UtcNow <= EndDate;
+			return DateTime.UtcNow >= StartDate.ToUniversalTime() && DateTime.UtcNow <= EndDate.ToUniversalTime();
+		}
+
+		public bool WillBeInProgress()
+		{
+			return DateTime.UtcNow < StartDate.ToUniversalTime();
 		}
 	}
 }

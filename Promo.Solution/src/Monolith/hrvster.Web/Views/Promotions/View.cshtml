@@ -15,6 +15,10 @@
 							{
 								<span class="badge badge-light-success me-auto">In Progress</span>
 							}
+							else if (@Model.WillBeInProgress())
+							{
+								<span class="badge badge-light-success me-auto">Future Progress</span>
+							}
 							else
 							{
 								<span class="badge badge-light-danger me-auto">InActive</span>

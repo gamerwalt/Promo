@@ -32,9 +32,9 @@ namespace hrvster.Web.Controllers
 		private readonly NotificationServiceOptions _notificationConfiguration;
 
 		public SweepsController(
-			IMediator mediator, 
-			HrvsterUser hrvsterUser, 
-			IMapper mapper, 
+			IMediator mediator,
+			HrvsterUser hrvsterUser,
+			IMapper mapper,
 			INotyfService notificationService,
 			SweepstakeConfiguration sweepstakeConfiguration,
 			NotificationServiceOptions notificationConfiguration)
@@ -50,7 +50,7 @@ namespace hrvster.Web.Controllers
 		public async Task<IActionResult> Index()
 		{
 			var sweeps = await _mediator.Send(new GetSweepForAccountUidRequest(_hrvsterUser.UserUid));
-			
+
 			return View(sweeps);
 		}
 
@@ -92,7 +92,7 @@ namespace hrvster.Web.Controllers
 				await _mediator.Send(new CreateSweepRequest(form.Name, form.StartDate, form.EndDate, form.DrawDate, form.Campaign.CampaignUid, _hrvsterUser.UserUid));
 
 				_notificationService.Success(
-					"Sweepstake created successfully.", 
+					"Sweepstake created successfully.",
 					_notificationConfiguration.DismissInSeconds);
 
 				return RedirectToAction("Index");
@@ -125,6 +125,13 @@ namespace hrvster.Web.Controllers
 				return RedirectToAction("Index");
 			}
 
+			if (!campaign.IsActive() && !campaign.WillBeInProgress())
+			{
+				_notificationService.Warning("Promotion is not active.", _notificationConfiguration.DismissInSeconds);
+
+				return RedirectToAction("View", "Promotions", new { campaignUid = campaignUid });
+			}
+
 			var createSweep = new CreateSweep();
 			createSweep.Campaign = campaign;
 			createSweep.StartDate = campaign.StartDate.AddDays(1);
@@ -136,18 +143,36 @@ namespace hrvster.Web.Controllers
 		}
 
 		[HttpPost]
-		public async Task<IActionResult> Create(Guid campaignUid, CreateSweep model)
+		public async Task<IActionResult> Create([FromQuery] Guid campaignUid, CreateSweep form)
 		{
-			if(ModelState.IsValid)
+			var campaign = await _mediator.Send(new GetCampaign(campaignUid));
+
+			if(campaign == null)
+			{
+				_notificationService.Warning(
+					$"Could not find campaign with uid: {campaignUid}.",
+					_notificationConfiguration.DismissInSeconds);
+
+				return RedirectToAction("Index");
+			}
+
+			if(!campaign.IsActive() && !campaign.WillBeInProgress())
+			{
+				_notificationService.Warning("Promotion is not active.", _notificationConfiguration.DismissInSeconds);
+
+				return RedirectToAction("View", "Promotions", new { campaignUid = campaignUid });
+			}
+
+			if (ModelState.IsValid)
 			{
 				var request = new NewSweepRequest()
 				{
 					AccountUid = _hrvsterUser.UserUid,
-					CampaignUid = model.Campaign.CampaignUid,
-					Name = model.Name,
-					StartDate = model.StartDate,
-					EndDate = model.EndDate,
-					DrawDate = model.DrawDate
+					CampaignUid = form.Campaign.CampaignUid,
+					Name = form.Name,
+					StartDate = form.StartDate,
+					EndDate = form.EndDate,
+					DrawDate = form.DrawDate
 				};
 				
 				var sweep = await _mediator.Send(new Core.Requests.CreateSweep(request));
@@ -158,13 +183,17 @@ namespace hrvster.Web.Controllers
 						$"Unable to create sweep. Please reach out to support.",
 						_notificationConfiguration.DismissInSeconds);
 
-					return RedirectToAction("Create", new { campaignUid = model.Campaign.CampaignUid });
+					return RedirectToAction("Create", new { campaignUid = form.Campaign.CampaignUid });
 				}
 
 				return RedirectToAction("View", new { sweepUid = sweep.SweepUid });
 			}
 
-			return View(model);
+			_notificationService.Error(ModelState.BuildMessageFromErrors());
+
+			form.Campaign = campaign;
+
+			return View(form);
 		}
 
 		[HttpGet]
