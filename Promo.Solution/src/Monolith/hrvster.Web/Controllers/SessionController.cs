@@ -38,16 +38,25 @@ namespace hrvster.Web.Controllers
 		}
 
 		[HttpGet]
-		public ActionResult SignIn()
+		public async Task<IActionResult> Denied(string returnUrl)
+		{
+			return RedirectToAction("SignIn", new { returnUrl = returnUrl });
+		}
+
+		[HttpGet]
+		public ActionResult SignIn(string returnUrl)
 		{
 			var token = HttpContext.Session.GetString("_UserToken");
 
-			return token == null ? View() : RedirectToAction("Index", "Dashboard");
+			return token == null ? View() :
+				string.IsNullOrWhiteSpace(returnUrl) ?
+					RedirectToAction("Index", "Dashboard") :
+					Redirect(returnUrl);
 		}
 
 		// POST: SessionController/Create
 		[HttpPost]
-		public async Task<ActionResult> SignIn(SigninForm form)
+		public async Task<ActionResult> SignIn(SigninForm form, string returnUrl)
 		{
 			try
 			{
@@ -65,7 +74,10 @@ namespace hrvster.Web.Controllers
 					HttpContext.Session.SetString(SessionConstants.UserEmail, link.User.Email);
 					HttpContext.Session.SetString(SessionConstants.UserDisplayName, link.User.DisplayName);
 
-					return RedirectToAction(actionName: "Index", controllerName: "Dashboard");
+					if (string.IsNullOrWhiteSpace(returnUrl))
+						return RedirectToAction(actionName: "Index", controllerName: "Dashboard");
+					else
+						return Redirect(returnUrl);
 				}
 			}
 			catch (FirebaseAuthException ex)

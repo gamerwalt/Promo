@@ -24,7 +24,9 @@ namespace hrvster.Core.Authentication
 			var token = context.HttpContext.Session.GetString(SessionConstants.UserToken);
 
 			if (string.IsNullOrWhiteSpace(token))
-				context.Result = new UnauthorizedResult();
+			{
+				context.Result = new ForbidResult();
+			}
 			else
 			{
 				User.UserUid = Guid.Parse(context.HttpContext.Session.GetString(SessionConstants.UserUid));

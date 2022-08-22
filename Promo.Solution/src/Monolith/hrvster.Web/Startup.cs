@@ -44,6 +44,7 @@ using Serilog;
 using System;
 using System.Net;
 using System.Reflection;
+using System.Security.Policy;
 using Tweetinvi;
 using Tweetinvi.Auth;
 using Tweetinvi.Models;
@@ -153,8 +154,10 @@ namespace hrvster.Web
 				{
 					o.ExpireTimeSpan = TimeSpan.FromMinutes(30);
 					o.SlidingExpiration = true;
-					o.AccessDeniedPath = "/Denied";
+					o.AccessDeniedPath = "/Session/Denied";
+					o.ForwardForbid = o.AccessDeniedPath;
 					o.LoginPath = "/Session/SignIn";
+					o.ReturnUrlParameter = "returnUrl";
 				});
 
 			services.AddSession(options =>
@@ -290,7 +293,14 @@ namespace hrvster.Web
 
 				if (response.StatusCode == (int)HttpStatusCode.Unauthorized ||
 					response.StatusCode == (int)HttpStatusCode.Forbidden)
-					response.Redirect("/Session/SignIn");
+				{
+					var url = context.HttpContext.Request.Path + context.HttpContext.Request.QueryString;
+					if (string.IsNullOrWhiteSpace(url) || url.Equals("/"))
+						response.Redirect("/Session/SignIn");
+					else
+						response.Redirect($"/Session/SignIn?returnUrl={url}");
+				}
+					
 			});
 
 			app.UseEndpoints(endpoints =>
