@@ -7,6 +7,7 @@ using hrvster.Core.Requests.Notifications;
 using hrvster.Core.Requests.WebRequests.Core;
 using hrvster.Core.Requests.WebRequests.Files;
 using hrvster.Core.Requests.WebRequests.Publishing;
+using hrvster.Core.Requests.WebRequests.Sweeps;
 using hrvster.Extensions.ModelExtensions;
 using hrvster.Models;
 using hrvster.Models.Options;
@@ -384,24 +385,6 @@ namespace hrvster.Web.Controllers
 			form.SweepstakeDrawDate = sweep.DrawDate;
 
 			return View(form);
-		}
-
-		[HttpGet]
-		public async Task<IActionResult> Update(Guid sweepUid, Guid ruleUid, string controllerName, string actionName)
-		{
-			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
-			if(sweep == null)
-			{
-				_notificationService.Error($"Unable to find the sweepstake with uid {sweepUid}", _notificationServiceOptions.DismissInSeconds);
-
-				return RedirectToAction(actionName, controllerName, new
-				{
-					sweepUid = sweepUid,
-					ruleUid = ruleUid,
-				});
-			}
-
-			return View();
 		}
 	}
 }

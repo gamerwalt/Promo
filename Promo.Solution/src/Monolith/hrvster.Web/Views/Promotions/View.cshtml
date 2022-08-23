@@ -88,54 +88,54 @@
 							@Html.HiddenFor(m => m.UpdatePromotion.CampaignUid)
 							<div class="card">
 								<div class="card-body">
-										<div class="fv-row mb-8">
-											<label class="required d-flex align-items-center fs-6 fw-semibold form-label mb-2">
-												Promotion Name
-											</label>
-											<input type="text" 
-												class="form-control form-control-solid"
-											   placeholder="@Model.UpdatePromotion.CampaignName"
-											   value="@Model.UpdatePromotion.CampaignName"
-											   asp-for="@Model.UpdatePromotion.CampaignName" />
+									<div class="fv-row mb-8">
+										<label class="required d-flex align-items-center fs-6 fw-semibold form-label mb-2">
+											Promotion Name
+										</label>
+										<input type="text" 
+											class="form-control form-control-solid"
+											placeholder="@Model.UpdatePromotion.CampaignName"
+											value="@Model.UpdatePromotion.CampaignName"
+											asp-for="@Model.UpdatePromotion.CampaignName" />
 										<span asp-validation-for="@Model.UpdatePromotion.CampaignName"></span>
-										</div>
-										<div class="fv-row mb-8">
-											<label class="d-flex align-items-center fs-6 fw-semibold form-label mb-2">
-												Description
-											</label>
-											<textarea asp-for="@Model.UpdatePromotion.Description"
-											class="form-control form-control-solid" rows="3">@Model.UpdatePromotion.Description</textarea>
-											<span asp-validation-for="Description"></span>
-										</div>
-										<div class="fv-row mb-8">
-											<label class="d-flex align-items-center fs-6 fw-semibold form-label mb-2">
-												Promotion Type
-											</label>
-										<select asp-for="@Model.UpdatePromotion.CampaignTypeUid" asp-items=@Model.UpdatePromotion.CampaignTypes class="form-select form-control-lg">
-												<option value="@Guid.Empty">Please select promotion type</option>
-											</select>
-										<span asp-validation-for="@Model.UpdatePromotion.CampaignTypeUid"></span>
-										</div>
-										<div class="fv-row mb-6 w-lg-250px">
-											<label class="required d-flex align-items-center fs-6 fw-semibold form-label mb-2">
-												Start Date
-											</label>
-											<input class="form-control form-control-solid"
-											   value="@Model.UpdatePromotion.StartDate.ToString("yyyy-MM-ddThh:mm:ss")"
-											   asp-for="@Model.UpdatePromotion.StartDate"
-													asp-format="{0:yyyy-MM-ddThh:mm:ss}" />
-											<span asp-validation-for="StartDate"></span>
-										</div>
-										<div class="fv-row mb-6 w-lg-250px">
-											<label class="required d-flex align-items-center fs-6 fw-semibold form-label mb-2">
-												End Date
-											</label>
-											<input class="form-control form-control-solid"
-											   value="@Model.UpdatePromotion.EndDate.ToString("yyyy-MM-ddThh:mm:ss")"
-											   asp-for="@Model.UpdatePromotion.EndDate"
-												   asp-format="{0:yyyy-MM-ddThh:mm:ss}" />
-											<span asp-validation-for="EndDate"></span>
-										</div>
+									</div>
+									<div class="fv-row mb-8">
+										<label class="d-flex align-items-center fs-6 fw-semibold form-label mb-2">
+											Description
+										</label>
+										<textarea asp-for="@Model.UpdatePromotion.Description"
+										class="form-control form-control-solid" rows="3">@Model.UpdatePromotion.Description</textarea>
+										<span asp-validation-for="Description"></span>
+									</div>
+									<div class="fv-row mb-8">
+										<label class="d-flex align-items-center fs-6 fw-semibold form-label mb-2">
+											Promotion Type
+										</label>
+									<select asp-for="@Model.UpdatePromotion.CampaignTypeUid" asp-items=@Model.UpdatePromotion.CampaignTypes class="form-select form-control-lg">
+											<option value="@Guid.Empty">Please select promotion type</option>
+										</select>
+									<span asp-validation-for="@Model.UpdatePromotion.CampaignTypeUid"></span>
+									</div>
+									<div class="fv-row mb-6 w-lg-250px">
+										<label class="required d-flex align-items-center fs-6 fw-semibold form-label mb-2">
+											Start Date
+										</label>
+										<input class="form-control form-control-solid"
+											value="@Model.UpdatePromotion.StartDate.ToString("yyyy-MM-ddThh:mm:ss")"
+											asp-for="@Model.UpdatePromotion.StartDate"
+												asp-format="{0:yyyy-MM-ddThh:mm:ss}" />
+										<span asp-validation-for="StartDate"></span>
+									</div>
+									<div class="fv-row mb-6 w-lg-250px">
+										<label class="required d-flex align-items-center fs-6 fw-semibold form-label mb-2">
+											End Date
+										</label>
+										<input class="form-control form-control-solid"
+											value="@Model.UpdatePromotion.EndDate.ToString("yyyy-MM-ddThh:mm:ss")"
+											asp-for="@Model.UpdatePromotion.EndDate"
+												asp-format="{0:yyyy-MM-ddThh:mm:ss}" />
+										<span asp-validation-for="EndDate"></span>
+									</div>
 								</div>
 								<div class="card-footer">
 									<button type="submit" class="btn btn-lg btn-primary">Update</button>
