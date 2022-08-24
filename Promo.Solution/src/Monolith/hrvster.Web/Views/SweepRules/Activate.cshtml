@@ -1,0 +1,43 @@
+﻿@using hrvster.Core
+@inject LinkBuilder linkBuilder
+
+@model ActivateSweepRule
+
+@{
+    ViewData["Title"] = $"Activate Rule";
+}
+<form 
+    asp-controller="SweepRules" 
+    asp-action="Activate" 
+    asp-route-ruleUid=@Model.Rule.RuleUid
+    asp-route-sweepUid=@Model.SweepstakeUid
+    asp-route-returnAction=@Model.ReturnAction
+    asp-route-returnController=@Model.ReturnController
+    enctype="multipart/form-data"
+    class="form-horizontal form-material mx-2">
+    <div class="card card-bordered">
+        <div class="card-header">
+            <h3 class="card-title">
+                Activate Sweepstake Tweet Rule for @Model.SweepstakeName
+            </h3>
+        </div>
+        <div class="card-body">
+            <p><strong>Hashtag</strong>: @Model.Rule.WatchValue</p>
+            <p>
+                <strong>External Id</strong>:
+                @if (@Model.Rule.ExternalId == "0")
+                {
+                    <span>Tweet is Scheduled</span>
+                }
+                else
+                {
+                    <a href="@linkBuilder.BuildTwitterLink(@Model.Rule.ExternalId).Result" target="_blank">@Model.Rule.ExternalId</a>
+                }
+            </p>
+        </div>
+        <div class="card-footer">
+            <button class="btn btn-lg btn-success" type="submit">Activate</button>
+            <a class="btn btn-lg btn-color-gray-800" asp-action="View" asp-controller="SweepRules" asp-route-sweepUid="@Model.SweepstakeUid" >Cancel</a>
+        </div>
+    </div>
+</form>

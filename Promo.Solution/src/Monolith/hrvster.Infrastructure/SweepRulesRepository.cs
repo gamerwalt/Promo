@@ -19,6 +19,8 @@ namespace hrvster.Infrastructure
 		Task<IEnumerable<Models.Rule>> GetSweepRuleAsync();
 		Task UpdateRuleExternalId(Guid ruleUid, string externalId);
 		Task DeleteAsync(Guid ruleUid);
+		Task DeactivateAsync(Guid sweepUid, Guid ruleUid);
+		Task ActivateAsync(Guid sweepUid, Guid ruleUid);
 	}
 
 	public class SweepRulesRepository : ISweepRulesRepository
@@ -268,6 +270,30 @@ namespace hrvster.Infrastructure
 			using var conn = new MySqlConnection(_database.GetConnectionString());
 			var command = conn.CreateCommand();
 			command.CommandText = "sweep_rule_delete";
+			command.CommandType = CommandType.StoredProcedure;
+			command.AddParameter("ruleUid", ruleUid);
+
+			await conn.OpenAsync();
+			await command.ExecuteNonQueryAsync();
+		}
+
+		public async Task DeactivateAsync(Guid sweepUid, Guid ruleUid)
+		{
+			using var conn = new MySqlConnection(_database.GetConnectionString());
+			var command = conn.CreateCommand();
+			command.CommandText = "sweep_rule_deactivate";
+			command.CommandType = CommandType.StoredProcedure;
+			command.AddParameter("ruleUid", ruleUid);
+
+			await conn.OpenAsync();
+			await command.ExecuteNonQueryAsync();
+		}
+
+		public async Task ActivateAsync(Guid sweepUid, Guid ruleUid)
+		{
+			using var conn = new MySqlConnection(_database.GetConnectionString());
+			var command = conn.CreateCommand();
+			command.CommandText = "sweep_rule_activate";
 			command.CommandType = CommandType.StoredProcedure;
 			command.AddParameter("ruleUid", ruleUid);
 

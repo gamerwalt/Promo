@@ -72,6 +72,225 @@ namespace hrvster.Web.Controllers
 		}
 
 		[HttpGet]
+		public async Task<IActionResult> Activate(
+			Guid sweepUid,
+			Guid ruleUid,
+			string actionName,
+			string controllerName)
+		{
+			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
+			if (sweep == null)
+			{
+				_logger.LogError("Could not find sweepstake with uid: {sweepUid}", sweepUid);
+
+				_notificationService.Warning(
+					$"Could not find sweepstake with uid: {sweepUid}.",
+					_notificationServiceOptions.DismissInSeconds);
+
+				return RedirectToAction(actionName, controllerName);
+			}
+
+			var rule = await _mediator.Send(new GetRule(ruleUid));
+			if (rule == null)
+			{
+				_logger.LogError("Could not find the rule with uid: {ruleUid}", ruleUid);
+
+				_notificationService.Warning(
+					$"Could not find rule with uid: {ruleUid} ",
+					_notificationServiceOptions.DismissInSeconds);
+
+				return RedirectToAction(actionName, controllerName);
+			}
+
+			var entriesExists = await _mediator.Send(new EntriesExistsForSweepsRequest(sweepUid));
+
+			if (entriesExists)
+			{
+				_logger.LogWarning("Sweep entries exists for sweepstakes with uid: {sweepUid} and name {sweepName} and rule for {watchValue}.",
+					sweep.SweepUid,
+					sweep.Name,
+					rule.WatchValue);
+
+				_notificationService.Error($"Sweep entries exists for sweepstakes {sweep.Name} and rule for {rule.WatchValue}.", _notificationServiceOptions.DismissInSeconds);
+
+				return RedirectToAction(actionName ?? "View", controllerName ?? "SweepRules", new { sweepUid = sweepUid });
+			}
+
+			var model = new ActivateSweepRule
+			{
+				SweepstakeId = sweep.SweepId,
+				SweepstakeName = sweep.Name,
+				SweepstakeUid = sweep.SweepUid,
+				ReturnAction = actionName,
+				ReturnController = controllerName,
+				Rule = _mapper.Map<hrvster.Models.WebModels.Sweeps.Rule>(rule)
+			};
+
+			return View(model);
+		}
+
+		[HttpPost]
+		public async Task<IActionResult> Activate(
+			Guid sweepUid, Guid ruleUid, string actionName, string controllerName, ActivateSweepRule form)
+		{
+			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
+			if (sweep == null)
+			{
+				_logger.LogError("Could not find sweepstake with uid: {sweepUid}", sweepUid);
+
+				_notificationService.Warning(
+					$"Could not find sweepstake with uid: {sweepUid}.",
+					_notificationServiceOptions.DismissInSeconds);
+
+				return RedirectToAction(actionName, controllerName);
+			}
+
+			var rule = await _mediator.Send(new GetRule(ruleUid));
+			if (rule == null)
+			{
+				_logger.LogError("Could not find the rule with uid: {ruleUid}", ruleUid);
+
+				_notificationService.Warning(
+					$"Could not find rule with uid: {ruleUid} ",
+					_notificationServiceOptions.DismissInSeconds);
+
+				return RedirectToAction(actionName, controllerName);
+			}
+
+			var entriesExists = await _mediator.Send(new EntriesExistsForSweepsRequest(sweepUid));
+
+			if (entriesExists)
+			{
+				_logger.LogWarning("Sweep entries exists for sweepstakes with uid: {sweepUid} and name {sweepName} and rule for {watchValue}.",
+					sweep.SweepUid,
+					sweep.Name,
+					rule.WatchValue);
+
+				_notificationService.Error($"Sweep entries exists for sweepstakes {sweep.Name} and rule for {rule.WatchValue}.", _notificationServiceOptions.DismissInSeconds);
+
+				return RedirectToAction(actionName ?? "View", controllerName ?? "SweepRules", new { sweepUid = sweepUid });
+			}
+
+			if (ModelState.IsValid)
+			{
+				await _mediator.Send(new ActivateSweepRuleRequest(sweepUid, ruleUid));
+
+				_notificationService.Success($"Rule {rule.WatchValue} for sweepstake {sweep.Name} deactivated successfully.");
+			}
+
+			return RedirectToAction(actionName ?? "View", controllerName ?? "SweepRules", new { sweepUid = sweepUid });
+		}
+
+		[HttpGet]
+		public async Task<IActionResult> Deactivate(
+			Guid sweepUid, 
+			Guid ruleUid, 
+			string actionName, 
+			string controllerName)
+		{
+			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
+			if (sweep == null)
+			{
+				_logger.LogError("Could not find sweepstake with uid: {sweepUid}", sweepUid);
+
+				_notificationService.Warning(
+					$"Could not find sweepstake with uid: {sweepUid}.",
+					_notificationServiceOptions.DismissInSeconds);
+
+				return RedirectToAction(actionName, controllerName);
+			}
+
+			var rule = await _mediator.Send(new GetRule(ruleUid));
+			if (rule == null)
+			{
+				_logger.LogError("Could not find the rule with uid: {ruleUid}", ruleUid);
+
+				_notificationService.Warning(
+					$"Could not find rule with uid: {ruleUid} ",
+					_notificationServiceOptions.DismissInSeconds);
+
+				return RedirectToAction(actionName, controllerName);
+			}
+
+			var entriesExists = await _mediator.Send(new EntriesExistsForSweepsRequest(sweepUid));
+
+			if (entriesExists)
+			{
+				_logger.LogWarning("Sweep entries exists for sweepstakes with uid: {sweepUid} and name {sweepName} and rule for {watchValue}.",
+					sweep.SweepUid,
+					sweep.Name,
+					rule.WatchValue);
+
+				_notificationService.Error($"Sweep entries exists for sweepstakes {sweep.Name} and rule for {rule.WatchValue}.", _notificationServiceOptions.DismissInSeconds);
+
+				return RedirectToAction(actionName ?? "View", controllerName ?? "SweepRules", new {sweepUid = sweepUid});
+			}
+
+			var model = new DeactivateSweepRule
+			{
+				SweepstakeId = sweep.SweepId,
+				SweepstakeName = sweep.Name,
+				SweepstakeUid = sweep.SweepUid,
+				ReturnAction = actionName,
+				ReturnController = controllerName,
+				Rule = _mapper.Map<hrvster.Models.WebModels.Sweeps.Rule>(rule)
+			};
+
+			return View(model);
+		}
+
+		[HttpPost]
+		public async Task<IActionResult> Deactivate(Guid sweepUid, Guid ruleUid, string actionName, string controllerName, DeactivateSweepRule form)
+		{
+			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
+			if (sweep == null)
+			{
+				_logger.LogError("Could not find sweepstake with uid: {sweepUid}", sweepUid);
+
+				_notificationService.Warning(
+					$"Could not find sweepstake with uid: {sweepUid}.",
+					_notificationServiceOptions.DismissInSeconds);
+
+				return RedirectToAction(actionName, controllerName);
+			}
+
+			var rule = await _mediator.Send(new GetRule(ruleUid));
+			if (rule == null)
+			{
+				_logger.LogError("Could not find the rule with uid: {ruleUid}", ruleUid);
+
+				_notificationService.Warning(
+					$"Could not find rule with uid: {ruleUid} ",
+					_notificationServiceOptions.DismissInSeconds);
+
+				return RedirectToAction(actionName, controllerName);
+			}
+
+			var entriesExists = await _mediator.Send(new EntriesExistsForSweepsRequest(sweepUid));
+
+			if (entriesExists)
+			{
+				_logger.LogWarning("Sweep entries exists for sweepstakes with uid: {sweepUid} and name {sweepName} and rule for {watchValue}.",
+					sweep.SweepUid,
+					sweep.Name,
+					rule.WatchValue);
+
+				_notificationService.Error($"Sweep entries exists for sweepstakes {sweep.Name} and rule for {rule.WatchValue}.", _notificationServiceOptions.DismissInSeconds);
+
+				return RedirectToAction(actionName ?? "View", controllerName ?? "SweepRules", new { sweepUid = sweepUid });
+			}
+
+			if(ModelState.IsValid)
+			{
+				await _mediator.Send(new DeactivateSweepRuleRequest(sweepUid, ruleUid));
+
+				_notificationService.Success($"Rule {rule.WatchValue} for sweepstake {sweep.Name} deactivated successfully.");
+			}
+
+			return RedirectToAction(actionName ?? "View", controllerName ?? "SweepRules", new { sweepUid = sweepUid });
+		}
+
+		[HttpGet]
 		public async Task<IActionResult> DeleteRule(Guid sweepUid, Guid ruleUid, string actionName, string controllerName)
 		{
 			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
@@ -96,6 +315,20 @@ namespace hrvster.Web.Controllers
 					_notificationServiceOptions.DismissInSeconds);
 
 				return RedirectToAction(actionName, controllerName);
+			}
+
+			var entriesExists = await _mediator.Send(new EntriesExistsForSweepsRequest(sweepUid));
+
+			if (entriesExists)
+			{
+				_logger.LogWarning("Sweep entries exists for sweepstakes with uid: {sweepUid} and name {sweepName} and rule for {watchValue}.",
+					sweep.SweepUid,
+					sweep.Name,
+					rule.WatchValue);
+
+				_notificationService.Error($"Sweep entries exists for sweepstakes {sweep.Name} and rule for {rule.WatchValue}.", _notificationServiceOptions.DismissInSeconds);
+
+				return RedirectToAction(actionName ?? "View", controllerName ?? "SweepRules", new { sweepUid = sweepUid });
 			}
 
 			var model = new DeleteSweepRule
@@ -132,6 +365,20 @@ namespace hrvster.Web.Controllers
 				_notificationService.Warning($"Could not find rule with uid: {ruleUid} ", _notificationServiceOptions.DismissInSeconds);
 
 				return View(form);
+			}
+
+			var entriesExists = await _mediator.Send(new EntriesExistsForSweepsRequest(sweepUid));
+
+			if (entriesExists)
+			{
+				_logger.LogWarning("Sweep entries exists for sweepstakes with uid: {sweepUid} and name {sweepName} and rule for {watchValue}.",
+					sweep.SweepUid,
+					sweep.Name,
+					rule.WatchValue);
+
+				_notificationService.Error($"Sweep entries exists for sweepstakes {sweep.Name} and rule for {rule.WatchValue}.", _notificationServiceOptions.DismissInSeconds);
+
+				return RedirectToAction(returnAction ?? "View", returnController ?? "SweepRules", new { sweepUid = sweepUid });
 			}
 
 			if (ModelState.IsValid)

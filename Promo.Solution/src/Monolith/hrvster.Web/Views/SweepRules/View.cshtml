@@ -110,7 +110,6 @@
                                                             asp-route-ruleUid="@rule.RuleUid"
                                                             asp-route-actionName=@ViewContext.RouteData.Values["action"]
                                                             asp-route-controllerName=@ViewContext.RouteData.Values["controller"]
-                                                            target="_blank"
                                                             class="menu-link flex-stack px-3">
                                                             Delete
                                                         </a>
@@ -120,13 +119,12 @@
                                                 {
                                                     <div class="menu-item px-3">
                                                         <a 
-                                                            asp-action="DelteScheduledRule" 
+                                                            asp-action="DeleteScheduledRule" 
                                                             asp-controller="ScheduledSweepRule"
                                                             asp-route-sweepUid="@Model.Sweepstake.SweepUid"
                                                             asp-route-ruleUid="@rule.RuleUid"
                                                             asp-route-actionName=@ViewContext.RouteData.Values["action"]
                                                             asp-route-controllerName=@ViewContext.RouteData.Values["controller"]
-                                                            target="_blank"
                                                             class="menu-link flex-stack px-3">
                                                             Delete Scheduled
                                                         </a>
@@ -138,7 +136,10 @@
                                                         <a 
                                                             asp-action="Deactivate" 
                                                             asp-controller="SweepRules"
-                                                                asp-route-sweepUid="@rule.RuleUid" 
+                                                            asp-route-sweepUid="@Model.Sweepstake.SweepUid"
+                                                            asp-route-ruleUid="@rule.RuleUid"
+                                                            asp-route-actionName=@ViewContext.RouteData.Values["action"]
+                                                            asp-route-controllerName=@ViewContext.RouteData.Values["controller"]
                                                                 class="menu-link flex-stack px-3">
                                                             Deactivate
                                                         </a>
@@ -147,13 +148,19 @@
                                                 else
                                                 {
                                                     <div class="menu-item px-3">
-                                                        <a asp-action="Activate" asp-controller="SweepRules"
-                                                        asp-route-sweepUid="@rule.RuleUid" class="menu-link flex-stack px-3">
+                                                        <a 
+                                                            asp-action="Activate" 
+                                                            asp-controller="SweepRules"
+                                                            asp-route-sweepUid="@Model.Sweepstake.SweepUid"
+                                                            asp-route-ruleUid="@rule.RuleUid"
+                                                            asp-route-actionName=@ViewContext.RouteData.Values["action"]
+                                                            asp-route-controllerName=@ViewContext.RouteData.Values["controller"]
+                                                            class="menu-link flex-stack px-3">
                                                             Activate
                                                         </a>
                                                     </div>
                                                 }
-                                            </div
+                                            </div>
                                         </div>
                                     </td>
                                 </tr>
