@@ -1,0 +1,125 @@
+﻿@using hrvster.Core
+@model ViewSweepEntries
+@inject LinkBuilder linkBuilder
+@{
+    ViewData["Title"] = $"View Sweep Rule Entries for {Model.Sweepstake.Name}";
+}
+<div class="card card-bordered">
+    <div class="card-header">
+        <h3 class="card-title">
+            Entries for @Model.Sweepstake.Name and Rule Watch Value: @Model.Rule.WatchValue
+        </h3>
+    </div>
+    <div class="card-body">
+        <div class="d-flex flex-column flex-lg-row">
+            <div class="flex-lg-row-fluid me-lg-15 order-2 order-lg-1 mb-10 mb-lg-0">
+				<div class="table-responsive">
+					<table class="table table-striped gy-2 gs-2">
+						<thead>
+							<tr class="fw-semibold fs-6 text-gray-800 border-bottom-2 border-gray-200">
+								<th>User Screen Name</th>
+								<th>Identifier Type</th>
+								<th>Entry Date</th>
+							</tr>
+						</thead>
+						<tbody>
+							@if(Model.SweepEntries.Count() >= 1)
+							{
+								@foreach(var entry in Model.SweepEntries)
+								{
+									<tr>
+										<td>@entry.UserIdentifier</td>
+										<td>@entry.UserIdentifierType</td>
+										<td>@entry.CreatedDate.ToString("f")</td>
+									</tr>
+								}
+							}
+							else
+							{
+								<tr>
+									<td colspan="3" rowspan="1">
+										<h3 class="align-items-center">There are currently no entries in the system</h3>
+									</td>
+								</tr>
+							}
+						</tbody>
+					</table>
+				</div>
+            </div>
+            <div class="flex-column flex-lg-row-auto w-100 w-lg-250px w-xl-300px mb-10 order-1 order-lg-2">
+				<div class="card card-flush pt-3 mb-0" data-kt-sticky="true" data-kt-sticky-name="sweep-summary" 
+                    data-kt-sticky-offset="{default: false, lg: '200px'}" 
+                    data-kt-sticky-width="{lg: '250px', xl: '300px'}" data-kt-sticky-left="auto" data-kt-sticky-top="150px" 
+                    data-kt-sticky-animation="false" data-kt-sticky-zindex="95">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <h2>Sweepstake Details</h2>
+                        </div>
+                    </div>
+                    <div class="card-body pt-0 fs-6">
+						<div class="mb-7">
+							<div class="d-flex align-items-center mb-1">
+								<a 
+									asp-action="View" 
+									asp-controller="Sweeps"
+									asp-route-campaignUid="@Model.Sweepstake.SweepUid"
+									class="fw-bold text-gray-800 text-hover-primary me-2">
+									@Model.Sweepstake.Name
+								</a>
+							</div>
+						</div>
+						<div class="separator separator-dashed mb-7"></div>
+						<div class="mb-7">
+							<h5 class="mb-3">Dates</h5>
+							<div class="mb-0">
+								<span class="badge badge-light-primary me-2 fs-6">Start Date: @Model.Sweepstake.StartDate.ToString("f")</span>
+								<span class="badge badge-light-primary me-2 fs-6">End Date: @Model.Sweepstake.EndDate.ToString("f")</span>
+								<span class="badge badge-light-primary me-2 fs-6">End Date: @Model.Sweepstake.DrawDate.GetValueOrDefault().ToString("f")</span>
+							</div>
+						</div>
+						<div class="separator separator-dashed mb-7"></div>
+						<div class="mb-10">
+							<h5 class="mb-3">Promotion</h5>
+							<div class="mb-0">
+								<div class="fw-semibold text-gray-600 d-flex align-items-center">
+									@Model.Sweepstake.Campaign.CampaignName
+									@*<img src="~/assets/media/svg/card-logos/mastercard.svg" class="w-35px ms-2" alt="">*@
+								</div>
+							</div>
+						</div>
+						<div class="mb-0">
+							<a class="btn btn-primary"
+								asp-action="View" asp-controller="Sweeps" asp-route-campaignUid="@Model.Sweepstake.SweepUid">
+								View
+							</a>
+						</div>
+					</div>
+                </div>
+				<div class="card">
+					<div class="card-header">
+						<h2>Rule Details</h2>
+					</div>
+					<div class="card-body">
+						<div class="mb-7">
+							<div class="d-flex align-items-center mb-1">
+								<a asp-action="View"
+								   asp-controller="Sweeps"
+								   asp-route-campaignUid="@Model.Sweepstake.SweepUid"
+								   class="fw-bold text-gray-800 text-hover-primary me-2">
+									@Model.Rule.WatchValue
+								</a>
+							</div>
+						</div>
+						<div class="separator separator-dashed mb-7"></div>
+						<div class="mb-7">
+							<h5 class="mb-3">Links</h5>
+							<div class="mb-0">
+								Tweet link: <a href="@linkBuilder.BuildTwitterLink(Model.Rule.ExternalId.ToString()).Result" target="_blank"> @Model.Rule.ExternalId.ToString()</a>
+							</div>
+						</div>
+					</div>
+				</div>
+            </div>
+        </div>
+    </div>
+</div>
