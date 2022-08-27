@@ -2,33 +2,34 @@
 @{
     ViewData["Title"] = $"{@Model.SweepstakeName} - Create Sweep Entry Rule";
 }
-<div><h1>Create Sweep Entry Rule for @Model.SweepstakeName</h1></div>
-<hr />
-<div class="row">
-    <div class="col-md-12">
-        <div class="card">
-            <div class="card-body">
-                <form asp-controller="SweepEntryRule" asp-action="Create" asp-route-sweepUid=@Model.SweepstakeUid class="form-horizontal form-material mx-2">
-                @Html.HiddenFor(m => m.SweepstakeId)
-                @Html.HiddenFor(m => m.SweepstakeName)
-                @Html.HiddenFor(m => m.SweepstakeUid)
-                @Html.HiddenFor(m => m.ReturnAction)
-                @Html.HiddenFor(m => m.ReturnController)
-                <div class="form-group">
-                    <label class="col-md-12">Entry Per User</label>
-                    <div class="col-md-12">
-                        <input asp-for="EntryPerUser" class="form-control form-control-lg" />
-                    </div>
-                </div>
-                <hr />
-                <div class="form-group">
-                    <div class="col-md-12">
-                        <button class="btn btn-lg btn-primary me-3" type="submit">Save</button>
-                            <a class="btn btn-light btn-default" href="javascript:history.go(-1)">Back</a>
-                    </div>
-                </div>
-            </form>
+<div class="card card-bordered">
+    <form 
+        asp-controller="SweepEntryRule" 
+        asp-action="Create" asp-route-sweepUid="@Model.SweepstakeName"
+		class="form-horizontal form-material mx-2">
+        @Html.HiddenFor(m => m.SweepstakeId)
+        @Html.HiddenFor(m => m.SweepstakeName)
+        @Html.HiddenFor(m => m.SweepstakeUid)
+        @Html.HiddenFor(m => m.ReturnAction)
+        @Html.HiddenFor(m => m.ReturnController)
+        <div class="card-header">
+            <h3 class="card-title">
+                Create Sweep Entry Rule for @Model.SweepstakeName
+            </h3>
+        </div>
+        <div class="card-body">
+            <div class="fv-row mb-8 w-lg-250px">
+                <label class="required d-flex align-items-center fs-6 fw-semibold form-label mb-2">
+                    Sweepstakes Entry Per User
+                </label>
+                <input type="text" asp-for="EntryPerUser" id="EntryPerUser" 
+                class="form-control" placeholder="Name" />
+                <span asp-validation-for="EntryPerUser"></span>
             </div>
         </div>
-    </div>
+        <div class="card-footer">
+            <button class="btn btn-lg btn-primary me-3" type="submit">Save</button>
+            <a class="btn btn-light btn-default" href="javascript:history.go(-1)">Back</a>
+        </div>
+    </form>
 </div>

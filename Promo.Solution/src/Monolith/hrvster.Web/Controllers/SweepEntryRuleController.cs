@@ -2,6 +2,7 @@
 using hrvster.Core.Authentication;
 using hrvster.Core.Requests;
 using hrvster.Core.Requests.WebRequests.Sweeps;
+using hrvster.Core.Validators.Sweepstakes;
 using hrvster.Models.Options;
 using hrvster.Web.Models;
 using MediatR;
@@ -19,17 +20,20 @@ namespace hrvster.Web.Controllers
 		private readonly IMediator _mediator;
 		private readonly SweepstakeConfiguration _sweepConfig;
 		private readonly INotyfService _notificationService;
+		private readonly ISweepRuleUpdateValidator _sweepRuleValidator;
 
 		public SweepEntryRuleController(
 			ILoggerFactory loggerFactory,
 			IMediator mediator,
 			SweepstakeConfiguration sweepConfig,
-			INotyfService notificationService)
+			INotyfService notificationService,
+			ISweepRuleUpdateValidator sweepRuleValidator)
 		{
 			_logger = loggerFactory.CreateLogger<SweepEntryRuleController>();
 			_mediator = mediator;
 			_sweepConfig = sweepConfig;
 			_notificationService = notificationService;
+			_sweepRuleValidator = sweepRuleValidator;
 		}
 
 		[HttpGet]
@@ -42,7 +46,7 @@ namespace hrvster.Web.Controllers
 
 				_notificationService.Warning($"Could not find sweepstake with uid: {sweepUid}.");
 
-				return RedirectToAction(actionName, controllerName);
+				return RedirectToAction("View", "SweepRules", new { sweepUid = sweepUid });
 			}
 
 			var model = new Models.CreateSweepEntryRule
@@ -101,7 +105,7 @@ namespace hrvster.Web.Controllers
 
 				_notificationService.Warning($"Could not find sweepstake with uid: {sweepUid}.");
 
-				return RedirectToAction(actionName, controllerName);
+				return RedirectToAction("View", "SweepRules", new { sweepUid = sweepUid });
 			}
 			var sweepEntryRule = await _mediator.Send(new GetSweepEntryRuleByUid(entryRuleUid));
 			if(sweepEntryRule == null)
@@ -110,7 +114,18 @@ namespace hrvster.Web.Controllers
 
 				_notificationService.Warning($"Could not find the sweep entry rule with uid: {entryRuleUid}.");
 
-				return RedirectToAction(actionName, controllerName);
+				return RedirectToAction("View", "SweepRules", new { sweepUid = sweepUid });
+			}
+
+			var canUpdate = await _sweepRuleValidator.CanUpdateAsync(sweep, sweepEntryRule);
+
+			if(canUpdate.HasError)
+			{
+				_logger.LogWarning("Cannot update this sweep entry rule. Reason {message}", canUpdate.Message);
+
+				_notificationService.Warning($"Cannot update this sweep entry rule. Reason {canUpdate.Message}");
+
+				return RedirectToAction("View", "SweepRules", new { sweepUid = sweepUid });
 			}
 
 			var model = new UpdateSweepEntryRule
@@ -149,6 +164,17 @@ namespace hrvster.Web.Controllers
 					_notificationService.Warning($"Could not find Entry rule with uid: {entryRuleUid}.");
 
 					return View(form);
+				}
+
+				var canUpdate = await _sweepRuleValidator.CanUpdateAsync(sweep, sweepEntryRule);
+
+				if (canUpdate.HasError)
+				{
+					_logger.LogWarning("Cannot update this sweep entry rule. Reason {message}", canUpdate.Message);
+
+					_notificationService.Warning($"Cannot update this sweep entry rule. Reason {canUpdate.Message}");
+
+					return RedirectToAction("View", "Sweep", new {sweepUid = sweepUid});
 				}
 
 				var request = new UpdateSweepEntryRuleRequest

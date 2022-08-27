@@ -104,6 +104,9 @@ namespace hrvster.Web
 
 			services.AddPromotionConfigurationOptions(Configuration);
 			services.AddNotificationConfigurationOptions(Configuration);
+
+			//Update Validators
+			services.AddUpdateValidators();
 		}
 
 

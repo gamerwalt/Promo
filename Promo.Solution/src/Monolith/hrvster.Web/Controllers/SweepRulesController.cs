@@ -68,6 +68,18 @@ namespace hrvster.Web.Controllers
 		{
 			var sweepRule = await _mediator.Send(new GetSweepRules(sweepUid));
 
+			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
+			if (sweep == null)
+			{
+				_logger.LogError("Could not find sweepstake with uid: {sweepUid}", sweepUid);
+
+				_notificationService.Warning(
+					$"Could not find sweepstake with uid: {sweepUid}.",
+					_notificationServiceOptions.DismissInSeconds);
+
+				return RedirectToAction("Index", "Dashboard");
+			}
+
 			return View(sweepRule);
 		}
 
