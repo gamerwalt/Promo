@@ -40,7 +40,7 @@
                                     <td>
                                         @if(@rule.ExternalId == "0")
                                         {
-                                            <a asp-action="ViewSweepRule" asp-controller="ScheduledTweets" 
+                                            <a asp-action="View" asp-controller="ScheduledTweets"
                                                 asp-route-ruleUid="@rule.RuleUid"
                                                 asp-route-sweepUid="@Model.Sweepstake.SweepUid"
                                                 target="_blank">
@@ -88,8 +88,8 @@
                                                 {
                                                     <div class="menu-item px-3">
                                                         <a 
-                                                            asp-action="View" 
-                                                            asp-controller="ScheduledSweepRule"
+                                                            asp-action="View"
+                                                            asp-controller="ScheduledTweets"
                                                             asp-route-sweepUid="@Model.Sweepstake.SweepUid"
                                                             asp-route-ruleUid="@rule.RuleUid"
                                                             asp-route-actionName=@ViewContext.RouteData.Values["action"]
@@ -135,7 +135,7 @@
                                                     <div class="menu-item px-3">
                                                         <a 
                                                             asp-action="DeleteScheduledRule" 
-                                                            asp-controller="ScheduledSweepRule"
+                                                            asp-controller="ScheduledTweets"
                                                             asp-route-sweepUid="@Model.Sweepstake.SweepUid"
                                                             asp-route-ruleUid="@rule.RuleUid"
                                                             asp-route-actionName=@ViewContext.RouteData.Values["action"]

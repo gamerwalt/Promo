@@ -566,8 +566,8 @@ namespace hrvster.Web.Controllers
 				SweepstakeStartDate = sweep.StartDate,
 				SweepstakeEndDate = sweep.EndDate,
 				SweepstakeDrawDate = sweep.DrawDate,
-				ReturnAction = actionName ?? HttpContext.Request.RouteValues["action"].ToString(),
-				ReturnController = controllerName ?? HttpContext.Request.RouteValues["controller"].ToString(),
+				ActionName = actionName,
+				ControllerName = controllerName,
 				ScheduledDate = sweep.StartDate.AddMinutes(-_sweepstakeConfiguration.TweetScheduleDefaultMinutes)
 			};
 
@@ -575,7 +575,7 @@ namespace hrvster.Web.Controllers
 		}
 
 		[HttpPost]
-		public async Task<IActionResult> CreateTweet(Guid sweepUid, string returnAction, string returnController, CreateSweepRuleTweet form)
+		public async Task<IActionResult> CreateTweet(Guid sweepUid, string actionName, string controllerName, CreateSweepRuleTweet form)
 		{
 			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
 			if (sweep == null)
@@ -584,7 +584,7 @@ namespace hrvster.Web.Controllers
 
 				_notificationService.Warning($"Could not find sweepstake with uid: {sweepUid}.", _notificationServiceOptions.DismissInSeconds);
 
-				return RedirectToAction(returnAction, returnController);
+				return RedirectToAction(actionName, controllerName);
 			}
 
 			if (ModelState.IsValid)
@@ -618,16 +618,10 @@ namespace hrvster.Web.Controllers
 						form.ScheduledDate,
 						form.MustBeFollowing,
 						mediaLocation));
-				
-				if(string.IsNullOrWhiteSpace(returnAction))
-				{
-					return View(form);
-				}
+				var word = form.PostNow ? "created" : "scheduled";
+				_notificationService.Success($"Tweet {word} successfully.", _notificationServiceOptions.DismissInSeconds);
 
-				return RedirectToAction(returnAction, returnController, new
-				{
-					sweepUid = sweepUid
-				});
+				return RedirectToAction(actionName ?? "View", controllerName ?? "SweepRules", new { sweepUid = sweepUid });
 			}
 
 			_notificationService.Error(ModelState.BuildMessageFromErrors(), _notificationServiceOptions.DismissInSeconds);

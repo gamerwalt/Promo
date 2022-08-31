@@ -1,0 +1,152 @@
+﻿@model DeleteScheduledSweepRuleTweet
+@{
+    ViewData["Title"] = "View Sweep Scheduled Tweet Rule";
+}
+<div class="card card-bordered">
+    <div class="card-header">
+        <h3 class="card-title">
+            Scheduled Tweet for Sweepstake @Model.Rule.WatchValue
+        </h3>
+    </div>
+    <div class="card-body">
+        <div class="d-flex flex-column flex-lg-row">
+            <div class="flex-lg-row-fluid me-lg-15 order-2 order-lg-1 mb-10 mb-lg-0">
+				<form asp-action="DeleteScheduledRule" 
+					asp-route-scheduledUid="@Model.ScheduledUid"
+					asp-route-sweepUid="@Model.Sweepstake.SweepUid"
+					asp-route-ruleUid="@Model.Rule.RuleUid"
+					asp-route-actionName="@Model.ActionName"
+					asp-route-controllerName="@Model.ControllerName"
+					enctype="multipart/form-data">
+					@Html.HiddenFor(x => x.ScheduledUid)
+					@Html.HiddenFor(x => x.Sweepstake)
+					@Html.HiddenFor(x => x.ActionName)
+					@Html.HiddenFor(x => x.ControllerName)
+					<input type="hidden" name="RuleId" id="RuleId" value="@Model.RuleId" />
+					<div class="card">
+						<div class="card-body">
+							<div class="fv-row mb-8 w-lg-400px">
+								<label class="d-flex align-items-center fs-6 fw-semibold form-label mb-2">
+									Current Status
+								</label>
+								<label class="fs-6 fw-semibold">@Model.Status</label>
+							</div>
+							<div class="fv-row mb-8 w-lg-400px">
+								<label class="d-flex align-items-center fs-6 fw-semibold form-label mb-2">
+									Watch Value
+								</label>
+								<label class="fs-6 fw-semibold">@Model.Rule.WatchValue</label>
+							</div>
+							<div class="fv-row mb-8 w-lg-400px">
+								<label class="required d-flex align-items-center fs-6 fw-semibold form-label mb-2">
+									Scheduled Time
+								</label>
+								<label class="fs-6 fw-semibold">@Model.ScheduledTime.ToString("f")</label>
+							</div>
+							<div class="fv-row mb-8">
+								<label class="required d-flex align-items-center fs-6 fw-semibold form-label mb-2">
+									Tweet
+								</label>
+								<label class="fs-6 fw-semibold">@Model.Text</label>
+							</div>
+							<div class="fv-row mb-8 w-lg-500px">
+								<label class="d-flex align-items-center fs-6 fw-semibold form-label mb-2">
+									Pictures
+								</label>
+								@if(Model.Images.Count >= 1 && Model.Images?[0] != null)
+								{
+									<img src="~/@Model.Images[0]" width="80px" alt="Media1" />
+									<input type="hidden" name="PreviousMediaId1" id="PreviousMediaId1" value="@Model.PreviousMediaId1" />
+								}
+								@if (Model.Images.Count >= 2 && Model.Images?[1] != null)
+								{
+									<img src="~/@Model.Images[1]" width="80px" alt="Media1" />
+									<input type="hidden" name="PreviousMediaId2" id="PreviousMediaId2" value="@Model.PreviousMediaId2" />
+								}
+								@if (Model.Images.Count >= 3 && Model.Images?[2] != null)
+								{
+									<img src="~/@Model.Images[2]" width="80px" alt="Media1" />
+									<input type="hidden" name="PreviousMediaId3" id="PreviousMediaId3" value="@Model.PreviousMediaId3" />
+								}
+								@if (Model.Images.Count >= 4 && Model.Images?[3] != null)
+								{
+									<img src="~/@Model.Images[3]" width="80px" alt="Media1" />
+									<input type="hidden" name="PreviousMediaId4" id="PreviousMediaId4" value="@Model.PreviousMediaId4" />
+								}
+							</div>
+						</div>
+						<div class="card-footer">
+							<button class="btn btn-lg btn-primary me-3" type="submit">Delete</button>
+							<a class="btn btn-sm btn-link" href="javascript:history.go(-1)">Cancel</a>
+						</div>
+					</div>
+				</form>
+            </div>
+            <div class="flex-column flex-lg-row-auto w-100 w-lg-250px w-xl-300px mb-10 order-1 order-lg-2">
+				<div class="card card-flush pt-3 mb-0" data-kt-sticky="true" data-kt-sticky-name="sweep-summary" 
+                    data-kt-sticky-offset="{default: false, lg: '200px'}" 
+                    data-kt-sticky-width="{lg: '250px', xl: '300px'}" data-kt-sticky-left="auto" data-kt-sticky-top="150px" 
+                    data-kt-sticky-animation="false" data-kt-sticky-zindex="95">
+					<div class="card-header">
+						<div class="card-title">
+							<h2>Sweepstake Details</h2>
+						</div>
+					</div>
+					<div class="card-body pt-0 fs-6">
+						<div class="mb-7">
+							<div class="d-flex align-items-center mb-1">
+								<a 
+									asp-action="View" 
+									asp-controller="Sweeps"
+									asp-route-campaignUid="@Model.Sweepstake.SweepUid"
+									class="fw-bold text-gray-800 text-hover-primary me-2">
+									@Model.Sweepstake.Name
+								</a>
+							</div>
+						</div>
+						<div class="separator separator-dashed mb-7"></div>
+						<div class="mb-7">
+							<h5 class="mb-3">Dates</h5>
+							<div class="mb-0">
+								<span class="badge badge-light-info me-2 fs-6">Start Date: @Model.Sweepstake.StartDate.ToString("f")</span>
+								<span class="badge badge-light-info me-2 fs-6">End Date: @Model.Sweepstake.EndDate.ToString("f")</span>
+                                <span class="badge badge-light-info me-2 fs-6">End Date: @Model.Sweepstake.DrawDate.GetValueOrDefault().ToString("f")</span>
+							</div>
+						</div>
+						<div class="separator separator-dashed mb-7"></div>
+						<div class="mb-10">
+							<h5 class="mb-3">Rule Watch Value</h5>
+							<div class="mb-0">
+								<div class="fw-semibold text-gray-600 d-flex align-items-center">
+									@Model.Rule.WatchValue
+									@*<img src="~/assets/media/svg/card-logos/mastercard.svg" class="w-35px ms-2" alt="">*@
+								</div>
+							</div>
+							<h5 class="mb-3">Rule Following</h5>
+							<div class="mb-0">
+								<div class="fw-semibold text-gray-600 d-flex align-items-center">
+									@Model.Rule.MustBeFollowing
+								</div>
+							</div>
+						</div>
+						<div class="separator separator-dashed mb-7"></div>
+						<div class="mb-10">
+							<h5 class="mb-3">Promotion Name</h5>
+							<div class="mb-0">
+								<div class="fw-semibold text-gray-600 d-flex align-items-center">
+									@Model.Sweepstake.Campaign.CampaignName
+								</div>
+							</div>
+						</div>
+						<div class="mb-0">
+							<a class="btn btn-primary"
+								asp-action="View" asp-controller="Sweeps" asp-route-campaignUid="@Model.Sweepstake.SweepUid">
+								View
+							</a>
+						</div>
+					</div>
+				</div>
+			</div>
+        </div>
+    </div>
+</div>

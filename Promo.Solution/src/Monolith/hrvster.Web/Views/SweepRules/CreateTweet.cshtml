@@ -7,13 +7,13 @@
         asp-controller="SweepRules" 
         asp-action="CreateTweet" 
         asp-route-sweepUid=@Model.SweepstakeUid
-        asp-route-returnAction=@Model.ReturnAction
-        asp-route-returnController=@Model.ReturnController
+        asp-route-returnAction=@Model.ActionName
+        asp-route-returnController=@Model.ControllerName
         enctype="multipart/form-data"
         class="form-horizontal form-material mx-2">
         @Html.HiddenFor(m => m.SweepstakeUid)
-        @Html.HiddenFor(m => m.ReturnAction)
-        @Html.HiddenFor(m => m.ReturnController)
+        @Html.HiddenFor(m => m.ActionName)
+        @Html.HiddenFor(m => m.ControllerName)
         <div class="card-header">
             <h3 class="card-title">Create/Publish Tweet for @Model.SweepstakeName</h3>
         </div>

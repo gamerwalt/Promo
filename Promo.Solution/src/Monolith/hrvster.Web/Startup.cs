@@ -216,6 +216,7 @@ namespace hrvster.Web
 			services.AddTransient<IWatchTypeProvidersRepository, WatchTypeProvidersRepository>();
 			services.AddTransient<IProfilesRepository, ProfilesRepository>();
 			services.AddTransient<ISweepTweetSchedulerRepository, SweepTweetSchedulerRepository>();
+			services.AddTransient<IScheduledSweepRuleTweetsRepository, ScheduledSweepRuleTweetsRepository>();
 		}
 
 		private void AddServicesOptions(IServiceCollection services)

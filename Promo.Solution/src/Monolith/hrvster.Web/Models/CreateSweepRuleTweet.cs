@@ -14,8 +14,8 @@ namespace hrvster.Web.Models
 		public int SweepstakeId { get; set; }
 		public Guid SweepstakeUid { get; set; }
 		public string SweepstakeName { get; set; }
-		public string ReturnAction { get; set; }
-		public string ReturnController { get; set; }
+		public string ActionName { get; set; }
+		public string ControllerName { get; set; }
 		public IFormFile Media1 { get; set; }
 		public IFormFile Media2 { get; set; }
 		public IFormFile Media3 { get; set; }

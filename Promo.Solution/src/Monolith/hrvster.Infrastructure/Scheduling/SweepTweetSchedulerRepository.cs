@@ -8,6 +8,7 @@ using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Tweetinvi.Models;
 
 namespace hrvster.Infrastructure.Scheduling
 {
@@ -19,6 +20,10 @@ namespace hrvster.Infrastructure.Scheduling
 		Task CreateRuleAsync(Models.Rule rule);
 		Task CreateScheduledSweepRuleTweetAsync(ScheduledSweepRuleTweet scheduledSweepRuleTweet);
 		Task CreateScheduledSweepRuleImage(Guid scheduledUid, ScheduledSweepRuleTweetImage image);
+		Task UpdateScheduledTweetAsync(Guid scheduledUid, DateTime scheduledTime, string text);
+		Task UpdateScheduledTweetImageAsync(int scheduledImageId, string location);
+		Task DeleteScheduledSweepRuleTweetAsync(Guid scheduledUid);
+		Task DeleteRuleAsync(Guid ruleUid);
 	}
 
 	public class SweepTweetSchedulerRepository : ISweepTweetSchedulerRepository
@@ -103,7 +108,54 @@ namespace hrvster.Infrastructure.Scheduling
 				.AddParameter("scheduledUid", scheduledUid)
 				.AddParameter("imageLocation", image.ImageLocation);
 
-			//await myConnection.OpenAsync();
+			await command.ExecuteNonQueryAsync();
+		}
+
+		public async Task UpdateScheduledTweetAsync(Guid scheduledUid, DateTime scheduledTime, string text)
+		{
+			var command = myConnection.CreateCommand();
+			command.Transaction = myTransaction;
+			command.CommandText = "scheduled_sweep_rule_tweet_update";
+			command.CommandType = CommandType.StoredProcedure;
+			command.AddParameter("scheduledUid", scheduledUid)
+				.AddParameter("scheduledTime", scheduledTime)
+				.AddParameter("scheduledTimeUtc", scheduledTime.ToUniversalTime())
+				.AddParameter("tweetText", text);
+
+			await command.ExecuteNonQueryAsync();
+		}
+
+		public async Task UpdateScheduledTweetImageAsync(int scheduledImageId, string location)
+		{
+			var command = myConnection.CreateCommand();
+			command.Transaction = myTransaction;
+			command.CommandText = "scheduled_sweep_rule_tweet_image_update";
+			command.CommandType = CommandType.StoredProcedure;
+			command.AddParameter("scheduledImageId", scheduledImageId)
+				.AddParameter("imageLocation", location);
+
+			await command.ExecuteNonQueryAsync();
+		}
+
+		public async Task DeleteScheduledSweepRuleTweetAsync(Guid scheduledUid)
+		{
+			var command = myConnection.CreateCommand();
+			command.Transaction = myTransaction;
+			command.CommandText = "scheduled_sweep_rule_tweet_delete";
+			command.CommandType = CommandType.StoredProcedure;
+			command.AddParameter("scheduledUid", scheduledUid);
+
+			await command.ExecuteNonQueryAsync();
+		}
+
+		public async Task DeleteRuleAsync(Guid ruleUid)
+		{
+			var command = myConnection.CreateCommand();
+			command.Transaction = myTransaction;
+			command.CommandText = "sweep_rule_delete";
+			command.CommandType = CommandType.StoredProcedure;
+			command.AddParameter("ruleUid", ruleUid);
+
 			await command.ExecuteNonQueryAsync();
 		}
 	}

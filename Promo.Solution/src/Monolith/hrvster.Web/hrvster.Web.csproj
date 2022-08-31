@@ -1370,4 +1370,8 @@
     <ProjectReference Include="..\hrvster.Infrastructure\hrvster.Infrastructure.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="wwwroot\tempImages\" />
+  </ItemGroup>
+
 </Project>

@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Threading.Tasks;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace hrvster.Infrastructure.Scheduling
 {
@@ -15,6 +16,7 @@ namespace hrvster.Infrastructure.Scheduling
 		Task<List<ScheduledSweepRuleTweet>> GetAllToSendAsync(DateTime utcNow);
 		Task<List<ScheduledSweepRuleTweetImage>> GetAllImagesAsync(int scheduledId);
 		Task UpdateStatus(ScheduledSweepRuleTweet scheduledTweet, ScheduledStatus status);
+		Task<ScheduledSweepRuleTweet> GetScheduledTweetAsync(int ruleId);
 	}
 
 	public class ScheduledSweepRuleTweetsRepository : IScheduledSweepRuleTweetsRepository
@@ -52,7 +54,9 @@ namespace hrvster.Infrastructure.Scheduling
 		{
 			return new ScheduledSweepRuleTweetImage
 			{
-				ImageLocation = reader.GetString("image_location")
+				ImageLocation = reader.GetString("image_location"),
+				ScheduledImageId = reader.GetInt32("scheduled_image_id"),
+				ScheduledSweepRuleTweetId = reader.GetInt32("scheduled_id"),
 			};
 		}
 
@@ -114,6 +118,28 @@ namespace hrvster.Infrastructure.Scheduling
 
 			await conn.OpenAsync();
 			await command.ExecuteNonQueryAsync();
+		}
+
+		public async Task<ScheduledSweepRuleTweet> GetScheduledTweetAsync(int ruleId)
+		{
+			var scheduledSweepRuleTweet = new ScheduledSweepRuleTweet();
+
+			using (var conn = new MySqlConnection(_database.GetConnectionString()))
+			{
+				var command = conn.CreateCommand();
+				command.CommandText = "scheduled_tweet_get_by_rule_id";
+				command.CommandType = CommandType.StoredProcedure;
+				command.AddParameter(nameof(ruleId), ruleId);
+
+				await conn.OpenAsync();
+				using var reader = await command.ExecuteReaderAsync();
+				while (await reader.ReadAsync())
+				{
+					scheduledSweepRuleTweet = CreateRecordFrom(reader);
+				}
+			}
+
+			return scheduledSweepRuleTweet;
 		}
 	}
 }
