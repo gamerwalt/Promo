@@ -19,6 +19,7 @@ namespace hrvster.Web.Controllers
 	{
 		private readonly ILogger<SweepPrizesController> _logger;
 		private readonly IMediator _mediator;
+		private readonly IMapper _mapper;
 		private readonly INotyfService _notificationService;
 		private readonly IValidator<CreateSweepPrize> _createSweepPrizeValidator;
 		private readonly IValidator<EditSweepPrize> _editSweepPrizeValidator;
@@ -26,12 +27,14 @@ namespace hrvster.Web.Controllers
 		public SweepPrizesController(
 			ILoggerFactory loggerFactory,
 			IMediator mediator,
+			IMapper mapper,
 			INotyfService notificationService,
 			IValidator<CreateSweepPrize> createSweepPrizeValidator,
 			IValidator<EditSweepPrize> editSweepPrizeValidator)
 		{
 			_logger = loggerFactory.CreateLogger<SweepPrizesController>();
 			_mediator = mediator;
+			_mapper = mapper;
 			_notificationService = notificationService;
 			_createSweepPrizeValidator = createSweepPrizeValidator;
 			_editSweepPrizeValidator = editSweepPrizeValidator;
@@ -180,7 +183,7 @@ namespace hrvster.Web.Controllers
 			{
 				Sweep = sweep,
 				SweepId = sweep.SweepId,
-				Prize = prize,
+				Prize = _mapper.Map<Prize>(prize),
 				PrizeName = prize.PrizeName,
 				PrizeUid = prize.PrizeUid,
 				MonetaryValue = prize.PrizeValue,
@@ -253,7 +256,7 @@ namespace hrvster.Web.Controllers
 			{
 				Sweep = sweep,
 				SweepId = sweep.SweepId,
-				Prize = prize,
+				Prize = _mapper.Map<Prize>(prize),
 				PrizeName = prize.PrizeName,
 				PrizeUid = prize.PrizeUid,
 				MonetaryValue = prize.PrizeValue,

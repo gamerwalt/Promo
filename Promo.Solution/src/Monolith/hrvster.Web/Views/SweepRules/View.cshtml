@@ -2,7 +2,7 @@
 @using hrvster.Models.WebModels.Sweeps
 
 @inject LinkBuilder linkBuilder
-@model SweepRule
+@model SweepstakeAndRules
 @{
     ViewData["Title"] = $"{@Model.Sweepstake.Name}'s Rules";
     var entryRuleExists = @Model.EntryRule == null ? false : true;

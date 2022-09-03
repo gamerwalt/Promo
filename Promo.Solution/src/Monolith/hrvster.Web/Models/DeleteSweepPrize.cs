@@ -9,7 +9,7 @@ namespace hrvster.Web.Models
 		public int SweepId { get; set; }
 		public string PrizeName { get; set; }
 		public Guid PrizeUid { get; set; }
-		public SweepPrize Prize { get; set; }
+		public Prize Prize { get; set; }
 		public decimal MonetaryValue { get; set; }
 		public string PrizeDescription { get; set; }
 		public string SweepName { get; set; }

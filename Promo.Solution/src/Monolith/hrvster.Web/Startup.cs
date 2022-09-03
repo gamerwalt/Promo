@@ -8,12 +8,10 @@ using hrvster.Core.Authentication;
 using hrvster.Core.Clients;
 using hrvster.Core.Clients.Publishers;
 using hrvster.Core.Handlers.Profiles;
-using hrvster.Core.Mapper;
 using hrvster.Core.Requests;
 using hrvster.Core.Requests.Notifications;
 using hrvster.Core.Requests.Notifications.Handlers;
 using hrvster.Core.Requests.Notifications.Harvester;
-using hrvster.Core.Requests.Validators;
 using hrvster.Core.Requests.WebRequests;
 using hrvster.Core.Requests.WebRequests.Validators;
 using hrvster.Extensions.Configuration;
@@ -25,7 +23,7 @@ using hrvster.Infrastructure.Harvester;
 using hrvster.Infrastructure.Scheduling;
 using hrvster.Models;
 using hrvster.Models.Options;
-using hrvster.Web.Models;
+using hrvster.Web.Mapper;
 using hrvster.Web.Validation;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -44,7 +42,6 @@ using Serilog;
 using System;
 using System.Net;
 using System.Reflection;
-using System.Security.Policy;
 using Tweetinvi;
 using Tweetinvi.Auth;
 using Tweetinvi.Models;
@@ -77,7 +74,7 @@ namespace hrvster.Web
 			AddServicesOptions(services);
 			ConfigureSweeepstakes(services);
 			AddPublishers(services);
-			
+
 			services.AddTransient<IFileService, FileService>();
 			services.AddSingleton<HrvsterUser>();
 			services.AddSingleton<LinkBuilder>();
@@ -304,7 +301,7 @@ namespace hrvster.Web
 					else
 						response.Redirect($"/Session/SignIn?returnUrl={url}");
 				}
-					
+
 			});
 
 			app.UseEndpoints(endpoints =>

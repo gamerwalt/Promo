@@ -14,5 +14,12 @@ namespace hrvster.Models.WebModels.Sweeps
 		public DateTime? DrawDate { get; set; }
 		public bool Drawn { get; set; }
 		public DateTime? DateDrawn { get; set; }
+
+		public bool IsActive()
+			=> DateTime.UtcNow >= StartDate.ToUniversalTime() &&
+				DateTime.UtcNow <= EndDate.ToUniversalTime();
+
+		public bool WillBeInProgress()
+			=> DateTime.UtcNow <= StartDate.ToUniversalTime();
 	}
 }

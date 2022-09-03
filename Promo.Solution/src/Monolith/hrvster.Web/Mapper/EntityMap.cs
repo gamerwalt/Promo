@@ -1,38 +1,48 @@
 ﻿using AutoMapper;
 using hrvster.Models.WebModels;
 using hrvster.Models.WebModels.Sweeps;
+using hrvster.Web.Models;
 
-namespace hrvster.Core.Mapper
+namespace hrvster.Web.Mapper
 {
 	public class EntityMap : Profile
 	{
 		public EntityMap()
 		{
-			CreateMap<Models.Campaign, Promotion>()
+			CreateMap<hrvster.Models.Campaign, Promotion>()
 				.ForMember(d => d.PromotionType, o => o.MapFrom(s => s.CampaignType))
 				.ReverseMap();
 
-			CreateMap<Models.CampaignType, PromotionType>()
+			CreateMap<hrvster.Models.CampaignType, PromotionType>()
 				.ReverseMap();
 
-			CreateMap<Models.Account, Account>()
+			CreateMap<hrvster.Models.Account, Account>()
 				.ReverseMap();
 
-			CreateMap<Models.Sweep, Sweepstake>()
+			CreateMap<hrvster.Models.Sweep, Sweepstake>()
 				.ReverseMap();
 
-			CreateMap<Models.Rule, Rule>()
+			CreateMap<hrvster.Models.Rule, Rule>()
 				.ForMember(dest => dest.WatchType, opt => opt.MapFrom(src => src.WatchTypeCode))
 			.ReverseMap();
 
-			CreateMap<Models.SweepEntryRule, EntryRule>()
+			CreateMap<hrvster.Models.SweepEntryRule, EntryRule>()
 				.ReverseMap();
 
-			CreateMap<Models.DrawRule, DrawRule>()
+			CreateMap<hrvster.Models.DrawRule, DrawRule>()
 				.ForMember(dest => dest.DrawRuleUid, opt => opt.MapFrom(src => src.SweepDrawRuleUid))
 				.ReverseMap();
 
-			CreateMap<Models.WatchType, WatchType>()
+			CreateMap<hrvster.Models.WatchType, WatchType>()
+				.ReverseMap();
+
+			CreateMap<hrvster.Models.SweepEntry, SweepEntry>()
+				.ReverseMap();
+
+			CreateMap<hrvster.Models.SweepPrize, Prize>()
+				.ReverseMap();
+
+			CreateMap<hrvster.Models.SweepWinner, Winner>()
 				.ReverseMap();
 		}
 	}

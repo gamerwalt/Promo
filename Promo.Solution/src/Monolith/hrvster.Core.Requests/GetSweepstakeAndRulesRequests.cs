@@ -4,11 +4,11 @@ using System;
 
 namespace hrvster.Core.Requests
 {
-	public class GetSweepRules : IRequest<SweepRule>
+	public class GetSweepstakeAndRulesRequests : IRequest<SweepstakeAndRules>
 	{
 		private Guid sweepUid;
 
-		public GetSweepRules(Guid sweepUid)
+		public GetSweepstakeAndRulesRequests(Guid sweepUid)
 		{
 			this.sweepUid = sweepUid;
 		}

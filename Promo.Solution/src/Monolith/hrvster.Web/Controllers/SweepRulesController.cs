@@ -66,7 +66,7 @@ namespace hrvster.Web.Controllers
 
 		public async Task<IActionResult> View(Guid sweepUid)
 		{
-			var sweepRule = await _mediator.Send(new GetSweepRules(sweepUid));
+			var sweepRule = await _mediator.Send(new GetSweepstakeAndRulesRequests(sweepUid));
 
 			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
 			if (sweep == null)

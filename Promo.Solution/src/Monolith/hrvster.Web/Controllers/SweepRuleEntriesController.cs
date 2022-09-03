@@ -1,4 +1,5 @@
 ﻿using AspNetCoreHero.ToastNotification.Abstractions;
+using AutoMapper;
 using hrvster.Core.Requests;
 using hrvster.Core.Requests.WebRequests.Sweeps;
 using hrvster.Models.Options;
@@ -7,6 +8,7 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace hrvster.Web.Controllers
@@ -15,17 +17,20 @@ namespace hrvster.Web.Controllers
 	{
 		private readonly ILogger<SweepRuleEntriesController> _logger;
 		private readonly IMediator _mediator;
+		private readonly IMapper _mapper;
 		private readonly INotyfService _notificationService;
 		private readonly NotificationServiceOptions _notificationConfiguration;
 
 		public SweepRuleEntriesController(
-			ILoggerFactory loggerFactory, 
+			ILoggerFactory loggerFactory,
 			IMediator mediator,
+			IMapper mapper,
 			INotyfService notificationService,
 			NotificationServiceOptions notificationServiceOptions)
 		{
 			_logger = loggerFactory.CreateLogger<SweepRuleEntriesController>();
 			_mediator = mediator;
+			_mapper = mapper;
 			_notificationConfiguration = notificationServiceOptions;
 			_notificationService = notificationService;
 		}
@@ -54,7 +59,7 @@ namespace hrvster.Web.Controllers
 
 			var model = new ViewSweepEntries
 			{
-				SweepEntries = sweepEntries,
+				SweepEntries = _mapper.Map<IEnumerable<SweepEntry>>(sweepEntries),
 				Sweepstake = sweep,
 				Rule = rule
 			};

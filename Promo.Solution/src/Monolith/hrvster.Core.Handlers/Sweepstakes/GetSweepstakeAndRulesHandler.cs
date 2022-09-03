@@ -11,16 +11,16 @@ using System.Threading.Tasks;
 
 namespace hrvster.Core.Handlers.Sweepstakes
 {
-	public class GetSweepRulesHandler : IRequestHandler<GetSweepRules, SweepRule>
+	public class GetSweepstakeAndRulesHandler : IRequestHandler<GetSweepstakeAndRulesRequests, SweepstakeAndRules>
 	{
-		private readonly ILogger<GetSweepRulesHandler> _logger;
+		private readonly ILogger<GetSweepstakeAndRulesHandler> _logger;
 		private readonly ISweepsRepository _sweepsRepository;
 		private readonly ISweepRulesRepository _rulesRepository;
 		private readonly ISweepEntryRulesRepository _entryRulesRepository;
 		private readonly IDrawRuleRepository _drawRuleRepository;
 		private readonly IMapper _mapper;
 
-		public GetSweepRulesHandler(
+		public GetSweepstakeAndRulesHandler(
 			ILoggerFactory loggerFactory,
 			ISweepsRepository sweepsRepository,
 			ISweepRulesRepository rulesRepository,
@@ -28,7 +28,7 @@ namespace hrvster.Core.Handlers.Sweepstakes
 			IDrawRuleRepository drawRuleRepository,
 			IMapper mapper)
 		{
-			_logger = loggerFactory.CreateLogger<GetSweepRulesHandler>();
+			_logger = loggerFactory.CreateLogger<GetSweepstakeAndRulesHandler>();
 			_sweepsRepository = sweepsRepository;
 			_rulesRepository = rulesRepository;
 			_entryRulesRepository = entryRulesRepository;
@@ -36,7 +36,7 @@ namespace hrvster.Core.Handlers.Sweepstakes
 			_mapper = mapper;
 		}
 
-		public async Task<SweepRule> Handle(GetSweepRules request, CancellationToken cancellationToken)
+		public async Task<SweepstakeAndRules> Handle(GetSweepstakeAndRulesRequests request, CancellationToken cancellationToken)
 		{
 			_logger.LogInformation("Handling getting sweep rules for Sweep Uid {sweepUid}", request.SweepUid);
 
@@ -45,7 +45,7 @@ namespace hrvster.Core.Handlers.Sweepstakes
 			var entryRule = await _entryRulesRepository.GetSweepEntryRuleAsync(request.SweepUid);
 			var drawRule = await _drawRuleRepository.GetSweepDrawRuleAsync(request.SweepUid);
 
-			var sweepRule = new SweepRule
+			var sweepRule = new SweepstakeAndRules
 			{
 				Sweepstake = _mapper.Map<Sweepstake>(sweep),
 				Rules = _mapper.Map<IEnumerable<Rule>>(rules.ToList()),

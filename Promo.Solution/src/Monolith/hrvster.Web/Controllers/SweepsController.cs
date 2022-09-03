@@ -7,12 +7,12 @@ using hrvster.Core.Requests.WebRequests.Sweeps;
 using hrvster.Extensions.ModelExtensions;
 using hrvster.Models;
 using hrvster.Models.Options;
-using hrvster.Models.WebModels;
 using hrvster.Models.WebModels.Sweeps;
 using hrvster.Web.Models;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,6 +24,7 @@ namespace hrvster.Web.Controllers
 	[FirebaseAuthorize]
 	public class SweepsController : Controller
 	{
+		private readonly ILogger<SweepsController> _logger;
 		private readonly IMediator _mediator;
 		private readonly HrvsterUser _hrvsterUser;
 		private readonly IMapper _mapper;
@@ -32,6 +33,7 @@ namespace hrvster.Web.Controllers
 		private readonly NotificationServiceOptions _notificationConfiguration;
 
 		public SweepsController(
+			ILoggerFactory loggerFactory,
 			IMediator mediator,
 			HrvsterUser hrvsterUser,
 			IMapper mapper,
@@ -39,6 +41,7 @@ namespace hrvster.Web.Controllers
 			SweepstakeConfiguration sweepstakeConfiguration,
 			NotificationServiceOptions notificationConfiguration)
 		{
+			_logger = loggerFactory.CreateLogger<SweepsController>();
 			_mediator = mediator;
 			_hrvsterUser = hrvsterUser;
 			_mapper = mapper;
@@ -61,7 +64,7 @@ namespace hrvster.Web.Controllers
 			var anyActivePromotions = promotions.Any(c => c.IsActive());
 			var anyWillBeInProgress = promotions.Any(c => c.WillBeInProgress());
 
-			if (anyActivePromotions && !anyWillBeInProgress)
+			if (!anyActivePromotions || anyWillBeInProgress)
 			{
 				_notificationService.Error(
 					"None of your promotions are active. We need 1 active promotion to continue.",
@@ -149,7 +152,7 @@ namespace hrvster.Web.Controllers
 		{
 			var campaign = await _mediator.Send(new GetCampaign(campaignUid));
 
-			if(campaign == null)
+			if (campaign == null)
 			{
 				_notificationService.Warning(
 					$"Could not find campaign with uid: {campaignUid}.",
@@ -158,7 +161,7 @@ namespace hrvster.Web.Controllers
 				return RedirectToAction("Index");
 			}
 
-			if(!campaign.IsActive() && !campaign.WillBeInProgress())
+			if (!campaign.IsActive() && !campaign.WillBeInProgress())
 			{
 				_notificationService.Warning("Promotion is not active.", _notificationConfiguration.DismissInSeconds);
 
@@ -176,10 +179,10 @@ namespace hrvster.Web.Controllers
 					EndDate = form.EndDate,
 					DrawDate = form.DrawDate
 				};
-				
+
 				var sweep = await _mediator.Send(new Core.Requests.CreateSweep(request));
 
-				if(sweep == null)
+				if (sweep == null)
 				{
 					_notificationService.Warning(
 						$"Unable to create sweep. Please reach out to support.",
@@ -201,9 +204,46 @@ namespace hrvster.Web.Controllers
 		[HttpGet]
 		public async Task<IActionResult> View(Guid sweepUid)
 		{
-			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
+			var sweepAndRulles = await _mediator.Send(new GetSweepstakeAndRulesRequests(sweepUid));
+			if (sweepAndRulles == null)
+			{
+				_logger.LogError("Could not find sweepstake with uid: {sweepUid}", sweepUid);
 
-			return View(_mapper.Map<Sweepstake>(sweep));
+				_notificationService.Warning(
+					$"Could not find sweepstake with uid: {sweepUid}.",
+					_notificationConfiguration.DismissInSeconds);
+
+				return RedirectToAction("Index");
+			}
+
+			var tasks = new List<Task>();
+			var entriesTask = _mediator.Send(new GetSweepEntriesRequest(sweepUid));
+			var prizesTask = _mediator.Send(new GetSweepPrizesBySweepUidRequest(sweepUid));
+			var winnersTask = _mediator.Send(new GetSweepWinners(sweepUid));
+
+			tasks.Add(entriesTask);
+			tasks.Add(prizesTask);
+			tasks.Add(winnersTask);
+			await Task.WhenAll(tasks);
+
+			var model = new ViewSweepstake()
+			{
+				Sweepstake = sweepAndRulles.Sweepstake,
+				Rules = sweepAndRulles.Rules,
+				DrawRule = sweepAndRulles.DrawRule,
+				EntryRule = sweepAndRulles.EntryRule,
+				SweepEntries = _mapper.Map<IEnumerable<Models.SweepEntry>>(entriesTask.Result),
+				Prizes = _mapper.Map<IEnumerable<Prize>>(prizesTask.Result.Prizes),
+				Winners = _mapper.Map<IEnumerable<Winner>>(winnersTask.Result),
+				UpdateSweepstake = new UpdateSweepstake
+				{
+					Name = sweepAndRulles.Sweepstake.Name,
+					StartDate = sweepAndRulles.Sweepstake.StartDate,
+					EndDate = sweepAndRulles.Sweepstake.EndDate
+				}
+			};
+
+			return View(model);
 		}
 
 		private CreateNewSweep BuildCreateNewForm(List<Campaign> promotions)
