@@ -96,17 +96,24 @@ namespace hrvster.Web.Controllers
 				SweepName = sweep.Name,
 				SweepUid = sweepUid,
 				CampaignUid = campaignUid,
-				ReturnAction = returnAction,
-				ReturnController = returnController,
+				ReturnAction = returnAction ?? "View",
+				ReturnController = returnController ?? "Sweeps",
 				Position = GetNextPosition(currentPrizes)
 			};
 
 			if (currentPrizes.Prizes.Count == drawRule.WinnerCount)
 			{
 				model.DisableAll = true;
-				_notificationService.Information("We have all the prizes we need for this sweepstake.");
+				_notificationService.Warning("We have all the prizes we need for this sweepstake.");
 				
-				return RedirectToAction(returnAction, returnController, new { campaignUid = campaignUid });
+				return RedirectToAction(
+					returnAction ?? "View", 
+					returnController ?? "Sweeps", 
+					new 
+					{ 
+						campaignUid = campaignUid,
+						sweepUid = sweepUid
+					});
 			}
 
 			return View(model);
@@ -146,12 +153,12 @@ namespace hrvster.Web.Controllers
 				await _mediator.Send(new CreateASweepPrizeRequest(sweepUid, form.Position, form.PrizeName, form.PrizeDescription, form.MonetaryValue));
 
 				return RedirectToAction(
-					"View", 
+					returnAction ?? "View", returnController ?? "Sweeps", 
 					new { 
 						sweepUid = sweepUid, 
 						campaignUid = campaignUid,
-						returnAction = returnAction, 
-						returnController = returnController 
+						returnAction = returnAction ?? "View", 
+						returnController = returnController ?? "Sweeps"
 					});
 			}
 
@@ -224,13 +231,15 @@ namespace hrvster.Web.Controllers
 
 			await _mediator.Send(new DeleteSweepPrizeRequest(prizeUid));
 
-			return RedirectToAction("View",
+			_notificationService.Success("Prize deleted successfully.", 10);
+
+			return RedirectToAction(actionName ?? "View", controllerName ?? "Sweeps",
 				new
 				{
 					sweepUid = sweepUid,
 					campaignUid = campaignUid,
-					actionName = actionName,
-					controllerName = controllerName
+					actionName = actionName ?? "View",
+ 					controllerName = controllerName ?? "Sweeps"
 				});
 		}
 
@@ -301,14 +310,17 @@ namespace hrvster.Web.Controllers
 			{
 				await _mediator.Send(new UpdateSweepPrize(sweepUid, prizeUid, form.PrizeName, form.PrizeDescription, form.MonetaryValue));
 
+				_notificationService.Success("Prize updated successfully", 10);
+
 				return RedirectToAction(
-					"View",
+					actionName ?? "View",
+					controllerName ?? "Sweeps",
 					new
 					{
 						sweepUid = sweepUid,
 						campaignUid = campaignUid,
-						returnAction = actionName,
-						returnController = controllerName
+						returnAction = actionName ?? "View",
+						returnController = controllerName ?? "Sweeps"
 					});
 			}
 
@@ -324,7 +336,7 @@ namespace hrvster.Web.Controllers
 			_logger.LogError(message);
 			_notificationService.Warning(message);
 
-			return RedirectToAction(returnAction, returnController, new { sweepUid = sweepUid, campaignUid = campaignUid });
+			return RedirectToAction(returnAction ?? "View", returnController ?? "Sweeps", new { sweepUid = sweepUid, campaignUid = campaignUid });
 		}
 
 		private int GetNextPosition(SweepPrizes currentPrizes)

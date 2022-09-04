@@ -344,6 +344,17 @@
 								</tbody>
 							</table>
 						</div>
+						<div class="separator mb-4"></div>
+						<a class="btn btn-primary mb-4"
+							asp-controller="SweepRules"
+							asp-action="SelectProvider"
+							asp-route-sweepUid="@Model.Sweepstake.SweepUid"
+							asp-route-actionName=@ViewContext.RouteData.Values["action"]
+							asp-route-controllerName=@ViewContext.RouteData.Values["controller"]
+						>
+                            Create New Watch
+                        </a>
+						<div class="separator"></div>
 						<div class="card-body">
 							<div class="fv-row mb-6 w-lg-250px">
 								<label class="d-flex align-items-center fs-6 fw-semibold form-label mb-2">
@@ -402,6 +413,8 @@
 																asp-controller="SweepPrizes"
 																asp-route-sweepUid="@Model.Sweepstake.SweepUid"
 																asp-route-prizeUid="@prize.PrizeUid"
+																asp-route-actionName="View"
+																asp-route-controllerName="Sweeps"
 																class="menu-link flex-stack px-3">
 																Update
 															</a>
@@ -411,6 +424,8 @@
 															   asp-controller="SweepPrizes"
 															   asp-route-sweepUid="@Model.Sweepstake.SweepUid"
 															   asp-route-prizeUid="@prize.PrizeUid"
+															   asp-route-actionName="View"
+																asp-route-controllerName="Sweeps"
 															   class="menu-link flex-stack px-3">
 																Delete
 															</a>
@@ -420,23 +435,22 @@
 											</td>
 										</tr>
 									}
-									@if (Model.DrawRule.WinnerCount > Model.Prizes.Count())
-									{
-									<tfoot>
-										<a asp-action="Create"
-									   asp-controller="SweepPrizes"
-									   asp-route-sweepUid="@Model.Sweepstake.SweepUid"
-									   asp-route-campaignUid="@Model.Sweepstake.Campaign.CampaignUid"
-									   asp-route-returnAction="View"
-									   asp-route-returnController="Sweeps"
-									   class="menu-link flex-stack px-3">
-											Create New Prize
-										</a>
-									</tfoot>
-									}
 								</tbody>
-								
 							</table>
+							<div>
+								@if (Model.DrawRule.WinnerCount > Model.Prizes.Count())
+								{
+									<a asp-action="Create"
+									asp-controller="SweepPrizes"
+									asp-route-sweepUid="@Model.Sweepstake.SweepUid"
+									asp-route-campaignUid="@Model.Sweepstake.Campaign.CampaignUid"
+									asp-route-returnAction="View"
+									asp-route-returnController="Sweeps"
+								   class="btn btn-md btn-light btn-primary me-3">
+										Create New Prize
+									</a>
+								}
+							</div>
 						</div>
 					</div>
 					<div class="tab-pane fade show" id="sweepEntries" role="tabpanel">

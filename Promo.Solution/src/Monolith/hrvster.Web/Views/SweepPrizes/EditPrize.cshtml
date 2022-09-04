@@ -3,71 +3,67 @@
 @{
     ViewData["Title"] = $"Edit Prize {@Model.PrizeName} for {@Model.SweepName}";
 }
-<div class="row">
-    <div class="col-md-12">
-        <h4><strong>Edit details for @Model.PrizeName</strong></h4>
-    </div>
-</div>
-<hr />
-<div class="row">
-    <div class="col-lg-6">
-        <form 
-        asp-controller="SweepPrizes" 
-        asp-action="EditPrize" 
-        asp-route-sweepUid=@Model.SweepUid
-        asp-route-campaignUid=@Model.CampaignUid
-        asp-route-prizeUid=@Model.PrizeUid
-        asp-route-returnAction=@Model.ReturnAction
-        asp-route-returnController=@Model.ReturnController
-        enctype="multipart/form-data"
-        class="form-horizontal form-material mx-2">
-            @Html.HiddenFor(m => m.SweepName)
-            @Html.HiddenFor(m => m.SweepId)
-            @Html.HiddenFor(m => m.SweepUid)
-            @Html.HiddenFor(m => m.PrizeUid)
-            @Html.HiddenFor(m => m.ReturnAction)
-            @Html.HiddenFor(m => m.ReturnController)
-            <div class="card">
-                <div class="card-header"><strong>Edit Prize</strong></div>
-                <div class="card-body">
-                    <div class="form-group">
-                        <label class="col-md-12">Name:</label>
-                        <div class="col-md-8">
-                            <input 
-                                class="form-control form-control-lg" 
-                                id="PrizeName" 
-                                asp-for="PrizeName"/>
-                            <span asp-validation-for="PrizeName"></span>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label class="col-md-12">Description:</label>
-                        <div class="col-md-12">
-                            <input 
-                                class="form-control form-control-lg" 
-                                id="PrizeDescription" 
-                                asp-for="PrizeDescription"/>
-                            <span asp-validation-for="PrizeDescription"></span>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label class="col-md-12">Montetary Value:</label>
-                        <div class="col-md-5">
-                            <input 
-                                class="form-control form-control-lg" 
-                                id="MonetaryValue" 
-                                asp-for="MonetaryValue"/>
-                            <span asp-validation-for="MonetaryValue"></span>
-                        </div>
-                    </div>
-                </div>
-                <div class="card-footer align-content-end">
-                    <div class="col-lg-12">
-                        <button class="btn btn-sm btn-primary" type="submit">Update</button>
-                        <a class="btn btn-sm btn-link" href="javascript:history.go(-1)">Back</a>
-                    </div>
-                </div>
+<div class="card card-bordered">
+    <form asp-controller="SweepPrizes"
+          asp-action="EditPrize"
+          asp-route-sweepUid=@Model.SweepUid
+          asp-route-prizeUid=@Model.PrizeUid
+          asp-route-campaignUid=@Model.CampaignUid
+          asp-route-returnAction=@Model.ReturnAction
+          asp-route-returnController=@Model.ReturnController
+          enctype="multipart/form-data"
+          class="form-horizontal form-material mx-2"
+    >
+        @Html.HiddenFor(m => m.SweepName)
+        @Html.HiddenFor(m => m.SweepId)
+        @Html.HiddenFor(m => m.SweepUid)
+        @Html.HiddenFor(m => m.ReturnAction)
+        @Html.HiddenFor(m => m.ReturnController)
+        <div class="card-header">
+            <h3 class="card-title">Edit details for @Model.PrizeName</h3>
+        </div>
+        <div class="card-body">
+            <div class="fv-row mb-8">
+                <label class="required d-flex align-items-center fs-6 fw-semibold form-label mb-2">
+                    Prize Name
+                </label>
+                <input type="text"
+                       class="form-control form-control-solid"
+                       placeholder="@Model.PrizeName"
+                       value="@Model.PrizeName"
+                       asp-for="@Model.PrizeName" />
+                <span asp-validation-for="PrizeName"></span>
             </div>
-        </form>
-    </div>
+            <div class="fv-row mb-8">
+                <label class="required d-flex align-items-center fs-6 fw-semibold form-label mb-2">
+                    Description
+                </label>
+                <input type="text"
+                       class="form-control form-control-solid"
+                       placeholder="@Model.PrizeDescription"
+                       value="@Model.PrizeDescription"
+                       asp-for="@Model.PrizeDescription" />
+                <span asp-validation-for="PrizeDescription"></span>
+            </div>
+            <div class="fv-row mb-8 w-lg-200px">
+                <label class="required d-flex align-items-center fs-6 fw-semibold form-label mb-2">
+                    Prize Value
+                </label>
+                <input type="text"
+                       class="form-control form-control-solid"
+                       placeholder="@Model.MonetaryValue"
+                       value="@Model.MonetaryValue"
+                       asp-for="@Model.MonetaryValue" />
+                <span asp-validation-for="MonetaryValue"></span>
+            </div>
+        </div>
+        <div class="card-footer">
+            <div class="col-lg-12">
+                <button type="submit" class="btn btn-md btn-light btn-primary me-3">
+                    Update
+                </button>
+                <a class="btn btn-light btn-default" href="javascript:history.go(-1)">Back</a>
+            </div>
+        </div>
+    </form>
 </div>
