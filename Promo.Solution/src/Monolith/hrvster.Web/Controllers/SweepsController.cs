@@ -248,7 +248,8 @@ namespace hrvster.Web.Controllers
 					SweepUid = sweepAndRulles.Sweepstake.SweepUid,
 					Name = sweepAndRulles.Sweepstake.Name,
 					StartDate = sweepAndRulles.Sweepstake.StartDate,
-					EndDate = sweepAndRulles.Sweepstake.EndDate
+					EndDate = sweepAndRulles.Sweepstake.EndDate,
+					DrawDate = sweepAndRulles.Sweepstake.DrawDate.GetValueOrDefault()
 				}
 			};
 		}

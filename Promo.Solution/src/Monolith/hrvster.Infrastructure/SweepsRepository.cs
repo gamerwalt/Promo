@@ -207,7 +207,7 @@ namespace hrvster.Infrastructure
 			command.CommandText = "sweep_update";
 			command.CommandType = CommandType.StoredProcedure;
 			command
-				.AddParameter("sweepUid", sweep.SweepUid)
+				.AddParameter("sweepUid", sweepUid)
 				.AddParameter("sweepName", sweep.Name)
 				.AddParameter("startDate", sweep.StartDate)
 				.AddParameter("endDate", sweep.EndDate)
