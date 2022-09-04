@@ -7,6 +7,8 @@
           asp-action="Update"
           asp-route-sweepUid=@Model.SweepstakeUid
           asp-route-entryRuleUid=@Model.SweepEntryRuleUid
+          asp-route-actionName=@Model.ReturnAction
+          asp-route-controllerName=@Model.ReturnController
           class="form-horizontal form-material mx-2">
         @Html.HiddenFor(m => m.SweepstakeId)
         @Html.HiddenFor(m => m.SweepstakeName)

@@ -3,6 +3,7 @@ using hrvster.Core.Authentication;
 using hrvster.Core.Requests;
 using hrvster.Core.Requests.WebRequests.Sweeps;
 using hrvster.Core.Validators.Sweepstakes;
+using hrvster.Extensions.ModelExtensions;
 using hrvster.Models.Options;
 using hrvster.Web.Models;
 using MediatR;
@@ -46,7 +47,7 @@ namespace hrvster.Web.Controllers
 
 				_notificationService.Warning($"Could not find sweepstake with uid: {sweepUid}.");
 
-				return RedirectToAction("View", "SweepRules", new { sweepUid = sweepUid });
+				return RedirectToAction(actionName ?? "View", controllerName ?? "Sweeps", new { sweepUid = sweepUid });
 			}
 
 			var model = new Models.CreateSweepEntryRule
@@ -55,15 +56,15 @@ namespace hrvster.Web.Controllers
 				SweepstakeUid = sweep.SweepUid,
 				SweepstakeName = sweep.Name,
 				EntryPerUser = _sweepConfig.EntryPerUser,
-				ReturnAction = actionName ?? HttpContext.Request.RouteValues["action"].ToString(),
-				ReturnController = controllerName ?? HttpContext.Request.RouteValues["controller"].ToString()
+				ReturnAction = actionName ?? "View",
+				ReturnController = controllerName ?? "Sweeps"
 			};
 
 			return View(model);
 		}
 
 		[HttpPost]
-		public async Task<ActionResult> Create(Guid sweepUid, Models.CreateSweepEntryRule model)
+		public async Task<ActionResult> Create(Guid sweepUid, Models.CreateSweepEntryRule model, string actionName, string controllerName)
 		{
 			if(ModelState.IsValid)
 			{
@@ -74,23 +75,22 @@ namespace hrvster.Web.Controllers
 
 					_notificationService.Warning($"Could not find sweepstake with uid: {sweepUid}.");
 
-					return View(model);
+					return RedirectToAction(actionName ?? "View", controllerName ?? "Sweeps", new { sweepUid = sweepUid });
 				}
 
-				var request = new CreateSweepEntryRuleRequest
+				await _mediator.Send(new CreateSweepEntryRuleRequest
 				{
 					SweepUid = sweepUid,
 					SweepId = model.SweepstakeId,
 					EntryPerUser = model.EntryPerUser
-				};
+				});
 
-				await _mediator.Send(request);
+				_notificationService.Success("Sweep entry rule created successfully.", 10);
 
-				if (string.IsNullOrWhiteSpace(model.ReturnAction))
-					return RedirectToAction("Create", new { sweepUid = sweepUid });
-
-				return RedirectToAction(model.ReturnAction, model.ReturnController, new { sweepUid = sweepUid });
+				return RedirectToAction(actionName ?? "View", controllerName ?? "Sweeps", new { sweepUid = sweepUid });
 			}
+
+			_notificationService.Error(ModelState.BuildMessageFromErrors());
 
 			return View(model);
 		}
@@ -103,18 +103,18 @@ namespace hrvster.Web.Controllers
 			{
 				_logger.LogError("Could not find sweepstake with uid: {sweepUid}", sweepUid);
 
-				_notificationService.Warning($"Could not find sweepstake with uid: {sweepUid}.");
+				_notificationService.Warning($"Could not find sweepstake with uid: {sweepUid}.", 10);
 
-				return RedirectToAction("View", "SweepRules", new { sweepUid = sweepUid });
+				return RedirectToAction(actionName ?? "View", controllerName ?? "Sweeps", new { sweepUid = sweepUid });
 			}
 			var sweepEntryRule = await _mediator.Send(new GetSweepEntryRuleByUid(entryRuleUid));
 			if(sweepEntryRule == null)
 			{
 				_logger.LogError("Could not find the sweep entry rule with uid: {sweepEntryRuleUid}", entryRuleUid);
 
-				_notificationService.Warning($"Could not find the sweep entry rule with uid: {entryRuleUid}.");
+				_notificationService.Warning($"Could not find the sweep entry rule with uid: {entryRuleUid}.", 10);
 
-				return RedirectToAction("View", "SweepRules", new { sweepUid = sweepUid });
+				return RedirectToAction(actionName ?? "View", controllerName ?? "Sweeps", new { sweepUid = sweepUid });
 			}
 
 			var canUpdate = await _sweepRuleValidator.CanUpdateAsync(sweep, sweepEntryRule);
@@ -123,9 +123,9 @@ namespace hrvster.Web.Controllers
 			{
 				_logger.LogWarning("Cannot update this sweep entry rule. Reason {message}", canUpdate.Message);
 
-				_notificationService.Warning($"Cannot update this sweep entry rule. Reason {canUpdate.Message}");
+				_notificationService.Warning($"Cannot update this sweep entry rule. Reason {canUpdate.Message}", 10);
 
-				return RedirectToAction("View", "SweepRules", new { sweepUid = sweepUid });
+				return RedirectToAction(actionName ?? "View", controllerName ?? "Sweeps", new { sweepUid = sweepUid });
 			}
 
 			var model = new UpdateSweepEntryRule
@@ -135,15 +135,15 @@ namespace hrvster.Web.Controllers
 				SweepstakeUid = sweep.SweepUid,
 				EntryPerUser = sweepEntryRule.EntryPerUser,
 				SweepEntryRuleUid = sweepEntryRule.EntryRuleUid,
-				ReturnAction = actionName ?? HttpContext.Request.RouteValues["action"].ToString(),
-				ReturnController = controllerName ?? HttpContext.Request.RouteValues["controller"].ToString()
+				ReturnAction = actionName ?? "View",
+				ReturnController = controllerName ?? "Sweeps"
 			};
 
 			return View(model);
 		}
 
 		[HttpPost]
-		public async Task<ActionResult> Update(Guid sweepUid, Guid entryRuleUid, UpdateSweepEntryRule form)
+		public async Task<ActionResult> Update(Guid sweepUid, Guid entryRuleUid, UpdateSweepEntryRule form, string actionName, string controllerName)
 		{
 			if(ModelState.IsValid)
 			{
@@ -152,18 +152,18 @@ namespace hrvster.Web.Controllers
 				{
 					_logger.LogError("Could not find sweepstake with uid: {sweepUid}", sweepUid);
 
-					_notificationService.Warning($"Could not find sweepstake with uid: {sweepUid}.");
+					_notificationService.Warning($"Could not find sweepstake with uid: {sweepUid}.", 10);
 
-					return View(form);
+					return RedirectToAction(actionName ?? "View", controllerName ?? "Sweeps", new { sweepUid = sweepUid });
 				}
 				var sweepEntryRule = await _mediator.Send(new GetSweepEntryRuleByUid(entryRuleUid));
 				if (sweepEntryRule == null)
 				{
 					_logger.LogError("Could not find the sweep entry rule with uid: {sweepEntryRuleUid}", entryRuleUid);
 
-					_notificationService.Warning($"Could not find Entry rule with uid: {entryRuleUid}.");
+					_notificationService.Warning($"Could not find Entry rule with uid: {entryRuleUid}.", 10);
 
-					return View(form);
+					return RedirectToAction(actionName ?? "View", controllerName ?? "Sweeps", new { sweepUid = sweepUid });
 				}
 
 				var canUpdate = await _sweepRuleValidator.CanUpdateAsync(sweep, sweepEntryRule);
@@ -172,9 +172,9 @@ namespace hrvster.Web.Controllers
 				{
 					_logger.LogWarning("Cannot update this sweep entry rule. Reason {message}", canUpdate.Message);
 
-					_notificationService.Warning($"Cannot update this sweep entry rule. Reason {canUpdate.Message}");
+					_notificationService.Warning($"Cannot update this sweep entry rule. Reason {canUpdate.Message}", 10);
 
-					return RedirectToAction("View", "Sweep", new {sweepUid = sweepUid});
+					return RedirectToAction(actionName ?? "View", controllerName ?? "Sweeps", new { sweepUid = sweepUid });
 				}
 
 				var request = new UpdateSweepEntryRuleRequest
@@ -187,17 +187,18 @@ namespace hrvster.Web.Controllers
 
 				await _mediator.Send(request);
 
-				if (string.IsNullOrWhiteSpace(form.ReturnAction))
-					return RedirectToAction("Update", new { sweepUid = sweepUid, entryRuleUid = entryRuleUid });
+				_notificationService.Success("Sweep entry rule updated successfully.", 10);
 
-				return RedirectToAction(
-					form.ReturnAction, 
-					form.ReturnController, 
-					new 
-						{ sweepUid = sweepUid });
+				return RedirectToAction(actionName ?? "View", controllerName ?? "Sweeps", new { sweepUid = sweepUid });
 			}
 
-			return View(form);
+			_notificationService.Error(ModelState.BuildMessageFromErrors());
+
+			return RedirectToAction("Update", "SweepEntryRule", new
+			{
+				sweepUid = sweepUid,
+				entryRuleUid = entryRuleUid
+			});
 		}
 	}
 }

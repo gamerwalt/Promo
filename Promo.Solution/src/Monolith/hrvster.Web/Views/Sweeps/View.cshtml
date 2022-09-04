@@ -355,24 +355,111 @@
                             Create New Watch
                         </a>
 						<div class="separator"></div>
-						<div class="card-body">
-							<div class="fv-row mb-6 w-lg-250px">
-								<label class="d-flex align-items-center fs-6 fw-semibold form-label mb-2">
-									Entry Per User
-								</label>
-								<span>@Model.EntryRule.EntryPerUser</span>
+						<div class="row p-0 mb-5 px-9">
+							<div class="col">
+								<div class="border border-dashed border-gray-300 text-center min-w-125px rounded pt-4 pb-2 my-3">
+									<span class="fs-4 fw-semibold text-success d-block">Entry Per User</span>
+									<span 
+										class="fs-2hx fw-bold text-gray-900 counted" 
+										data-kt-countup="true"
+										data-kt-countup-value="@Model.EntryRule?.EntryPerUser"
+										data-kt-initialized="1">
+										@Model.EntryRule?.EntryPerUser
+									</span>
+									@if(Model.EntryRule == null)
+									{
+										<a 
+											asp-action="Create"
+											asp-controller="SweepEntryRule"
+											asp-route-sweepUid="@Model.Sweepstake.SweepUid"
+											asp-route-actionName="View"
+											asp-route-controllerName="Sweeps"
+										>
+											Add
+										</a>
+									}
+
+									@if (Model.SweepEntries.Count() < 1 && Model.EntryRule != null)
+									{
+										<a 
+											asp-action="Update" 
+											asp-controller="SweepEntryRule"
+											asp-route-sweepUid="@Model.Sweepstake.SweepUid"
+											asp-route-entryRuleUid="@Model.EntryRule?.EntryRuleUid">
+											Update
+										</a>
+									}
+								</div>
 							</div>
-							<div class="fv-row mb-6 w-lg-250px">
-								<label class="d-flex align-items-center fs-6 fw-semibold form-label mb-2">
-									Winner Count
-								</label>
-								<span>@Model.DrawRule.WinnerCount</span>
+							<div class="col">
+								<div class="border border-dashed border-gray-300 text-center min-w-125px rounded pt-4 pb-2 my-3">
+									<span class="fs-4 fw-semibold text-primary d-block">Winner Count</span>
+									<span 
+										class="fs-2hx fw-bold text-gray-900 counted" 
+										data-kt-countup="true"
+										  data-kt-countup-value="@Model.DrawRule?.WinnerCount"
+										  data-kt-initialized="1">
+										@Model.DrawRule?.WinnerCount
+									</span>
+									@if (Model.DrawRule == null)
+									{
+										<a asp-action="Create"
+											asp-controller="SweepDrawRule"
+											asp-route-sweepUid="@Model.Sweepstake.SweepUid"
+											asp-route-actionName="View"
+											asp-route-controllerName="Sweeps"
+										>
+											Add
+										</a>
+									}
+									@if (Model.Winners.Count() < 1 && Model.DrawRule != null)
+									{
+										<a 
+											asp-action="Update"
+											asp-controller="SweepDrawRule"
+											asp-route-sweepUid="@Model.Sweepstake.SweepUid"
+											asp-route-drawRuleUid="@Model.DrawRule?.DrawRuleUid"
+											asp-route-actionName="View"
+											asp-route-controllerName="Sweeps">
+											Update
+										</a>
+									}
+								</div>
 							</div>
-							<div class="fv-row mb-6 w-lg-250px">
-								<label class="d-flex align-items-center fs-6 fw-semibold form-label mb-2">
-									Backup Winner Count
-								</label>
-								<span>@Model.DrawRule.WinnerBackupCount</span>
+							<div class="col">
+								<div class="border border-dashed border-gray-300 text-center min-w-125px rounded pt-4 pb-2 my-3">
+									<span class="fs-4 fw-semibold text-primary d-block">Backup Winner Count</span>
+									<span 
+										class="fs-2hx fw-bold text-gray-900 counted" 
+										data-kt-countup="true"
+										  data-kt-countup-value="@Model.DrawRule?.WinnerBackupCount"
+										  data-kt-initialized="1">
+										@Model.DrawRule?.WinnerBackupCount
+									</span>
+									@if (Model.DrawRule == null)
+									{
+										<a asp-action="Create"
+											asp-controller="SweepDrawRule"
+											asp-route-sweepUid="@Model.Sweepstake.SweepUid"
+											asp-route-actionName="View"
+											asp-route-controllerName="Sweeps"
+										>
+											Add
+										</a>
+									}
+									@if (Model.Winners.Count() < 1 && Model.DrawRule != null)
+									{
+										<a asp-action="Update"
+											asp-action="Update"
+											asp-controller="SweepDrawRule"
+											asp-route-sweepUid="@Model.Sweepstake.SweepUid"
+											asp-route-drawRuleUid="@Model.DrawRule?.DrawRuleUid"
+											asp-route-actionName="View"
+											asp-route-controllerName="Sweeps">
+											Update
+										</a>
+									}
+								</div>
 							</div>
 						</div>
 					</div>
@@ -438,7 +525,7 @@
 								</tbody>
 							</table>
 							<div>
-								@if (Model.DrawRule.WinnerCount > Model.Prizes.Count())
+								@if (Model.DrawRule?.WinnerCount > Model.Prizes.Count())
 								{
 									<a asp-action="Create"
 									asp-controller="SweepPrizes"

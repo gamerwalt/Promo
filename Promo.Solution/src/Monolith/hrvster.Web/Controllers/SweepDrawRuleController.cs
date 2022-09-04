@@ -2,6 +2,7 @@
 using hrvster.Core.Authentication;
 using hrvster.Core.Requests;
 using hrvster.Core.Requests.WebRequests.Sweeps;
+using hrvster.Extensions.ModelExtensions;
 using hrvster.Models.Options;
 using hrvster.Web.Models;
 using MediatR;
@@ -42,7 +43,7 @@ namespace hrvster.Web.Controllers
 
 				_notificationService.Warning($"Could not find sweepstake with uid: {sweepUid}.");
 
-				return RedirectToAction(actionName, controllerName);
+				return RedirectToAction(actionName ?? "View", controllerName ?? "Sweeps", new { sweepUid = sweepUid });
 			}
 
 			var model = new CreateSweepDrawRule
@@ -69,7 +70,7 @@ namespace hrvster.Web.Controllers
 
 				_notificationService.Warning($"Could not find sweepstake with uid: {sweepUid}.");
 
-				return RedirectToAction(actionName, controllerName);
+				return RedirectToAction(actionName ?? "View", controllerName ?? "Sweeps", new { sweepUid = sweepUid });
 			}
 
 			var sweepDrawRule = await _mediator.Send(new GetSweepDrawRuleRequest(drawRuleUid));
@@ -79,7 +80,7 @@ namespace hrvster.Web.Controllers
 
 				_notificationService.Warning($"Could not find the draw rule with uid: {drawRuleUid}");
 
-				return RedirectToAction(actionName, controllerName);
+				return RedirectToAction(actionName ?? "View", controllerName ?? "Sweeps", new { sweepUid = sweepUid });
 			}
 
 			var model = new UpdateSweepDrawRule
@@ -98,7 +99,7 @@ namespace hrvster.Web.Controllers
 		}
 
 		[HttpPost]
-		public async Task<ActionResult> Create(Guid sweepUid, CreateSweepDrawRule model)
+		public async Task<ActionResult> Create(Guid sweepUid, CreateSweepDrawRule model, string actionName, string controllerName)
 		{
 			if (ModelState.IsValid)
 			{
@@ -109,7 +110,7 @@ namespace hrvster.Web.Controllers
 
 					_notificationService.Warning($"Could not find sweepstake with uid: {sweepUid}.");
 
-					return View(model);
+					return RedirectToAction(actionName ?? "View", controllerName ?? "Sweeps", new { sweepUid = sweepUid });
 				}
 
 				var request = new CreateSweepDrawRuleRequest
@@ -122,17 +123,18 @@ namespace hrvster.Web.Controllers
 
 				await _mediator.Send(request);
 
-				if (string.IsNullOrWhiteSpace(model.ReturnAction))
-					return RedirectToAction("Create", new { sweepUid = sweepUid });
+				_notificationService.Success("Draw rule created successfully.", 10);
 
-				return RedirectToAction(model.ReturnAction, model.ReturnController, new { sweepUid = sweepUid });
+				return RedirectToAction(actionName ?? "View", controllerName ?? "Sweeps", new { sweepUid = sweepUid });
 			}
+
+			_notificationService.Error(ModelState.BuildMessageFromErrors());
 
 			return View(model);
 		}
 
 		[HttpPost]
-		public async Task<ActionResult> Update(Guid sweepUid, Guid drawRuleUid, UpdateSweepDrawRule form)
+		public async Task<ActionResult> Update(Guid sweepUid, Guid drawRuleUid, UpdateSweepDrawRule form, string actionName, string controllerName)
 		{
 			if(ModelState.IsValid)
 			{
@@ -143,7 +145,7 @@ namespace hrvster.Web.Controllers
 
 					_notificationService.Warning($"Could not find sweepstake with uid: {sweepUid}.");
 
-					return View(form);
+					return RedirectToAction(actionName ?? "View", controllerName ?? "Sweeps", new { sweepUid = sweepUid });
 				}
 
 				var sweepDrawRule = await _mediator.Send(new GetSweepDrawRuleRequest(drawRuleUid));
@@ -153,22 +155,19 @@ namespace hrvster.Web.Controllers
 
 					_notificationService.Warning($"Could not find the draw rule with uid: {drawRuleUid}");
 
-					return View(form);
+					return RedirectToAction(actionName ?? "View", controllerName ?? "Sweeps", new { sweepUid = sweepUid });
 				}
 
 				var request = new UpdateSweepDrawRuleRequest(sweep.SweepId, sweepUid, drawRuleUid, form.WinnerCount, form.WinnerBackupCount);
 
 				await _mediator.Send(request);
 
-				if (string.IsNullOrWhiteSpace(form.ReturnAction))
-					return RedirectToAction("Update", new { sweepUid = sweepUid, drawRuleUid = drawRuleUid });
+				_notificationService.Success("Draw rule updated successfully.", 10);
 
-				return RedirectToAction(
-					form.ReturnAction,
-					form.ReturnController,
-					new
-					{ sweepUid = sweepUid });
+				return RedirectToAction(actionName ?? "View", controllerName ?? "Sweeps", new { sweepUid = sweepUid });
 			}
+			
+			_notificationService.Error(ModelState.BuildMessageFromErrors());
 
 			return View(form);
 		}

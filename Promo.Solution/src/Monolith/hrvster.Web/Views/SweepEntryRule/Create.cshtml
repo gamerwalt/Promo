@@ -5,7 +5,10 @@
 <div class="card card-bordered">
     <form 
         asp-controller="SweepEntryRule" 
-        asp-action="Create" asp-route-sweepUid="@Model.SweepstakeName"
+        asp-action="Create" 
+        asp-route-sweepUid="@Model.SweepstakeUid"
+        asp-route-actionName="@Model.ReturnAction"
+        asp-route-controllerName="@Model.ReturnController"
 		class="form-horizontal form-material mx-2">
         @Html.HiddenFor(m => m.SweepstakeId)
         @Html.HiddenFor(m => m.SweepstakeName)
