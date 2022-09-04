@@ -37,5 +37,11 @@ namespace hrvster.Core
 				.Replace("{username}", _hrvsterUser.TwitterUserName)
 				.Replace("{tweetId}", tweetId));
 		}
+
+		public Uri BuildTwitterHandleLink(string userHandle)
+		{
+			var uri = _services.TweetHandleUrl.Replace("{username}", userHandle.Replace("@", ""));
+			return new Uri(uri);
+		}
 	}
 }
