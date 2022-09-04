@@ -5,7 +5,6 @@ using hrvster.Core.Requests;
 using hrvster.Core.Requests.ApiRequests;
 using hrvster.Core.Requests.WebRequests.Sweeps;
 using hrvster.Extensions.ModelExtensions;
-using hrvster.Models;
 using hrvster.Models.Options;
 using hrvster.Models.WebModels.Sweeps;
 using hrvster.Web.Models;
@@ -17,7 +16,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Campaign = hrvster.Models.Campaign;
 using CreateSweep = hrvster.Web.Models.CreateSweep;
+using Winner = hrvster.Web.Models.Winner;
 
 namespace hrvster.Web.Controllers
 {
@@ -225,8 +226,14 @@ namespace hrvster.Web.Controllers
 			tasks.Add(prizesTask);
 			tasks.Add(winnersTask);
 			await Task.WhenAll(tasks);
+			var model = BuildViewSweepstake(sweepAndRulles, entriesTask, prizesTask, winnersTask);
 
-			var model = new ViewSweepstake()
+			return View(model);
+		}
+
+		private ViewSweepstake BuildViewSweepstake(SweepstakeAndRules sweepAndRulles, Task<IEnumerable<hrvster.Models.SweepEntry>> entriesTask, Task<SweepPrizes> prizesTask, Task<IEnumerable<hrvster.Models.SweepWinner>> winnersTask)
+		{
+			return new ViewSweepstake()
 			{
 				Sweepstake = sweepAndRulles.Sweepstake,
 				Rules = sweepAndRulles.Rules,
@@ -237,11 +244,56 @@ namespace hrvster.Web.Controllers
 				Winners = _mapper.Map<IEnumerable<Winner>>(winnersTask.Result),
 				UpdateSweepstake = new UpdateSweepstake
 				{
+					CampaignUid = sweepAndRulles.Sweepstake.Campaign.CampaignUid,
+					SweepUid = sweepAndRulles.Sweepstake.SweepUid,
 					Name = sweepAndRulles.Sweepstake.Name,
 					StartDate = sweepAndRulles.Sweepstake.StartDate,
 					EndDate = sweepAndRulles.Sweepstake.EndDate
 				}
 			};
+		}
+
+		[HttpPost]
+		public async Task<IActionResult> View(ViewSweepstake form, Guid sweepUid)
+		{
+			var sweepAndRulles = await _mediator.Send(new GetSweepstakeAndRulesRequests(sweepUid));
+			if (sweepAndRulles == null)
+			{
+				_logger.LogError("Could not find sweepstake with uid: {sweepUid}", sweepUid);
+
+				_notificationService.Warning(
+					$"Could not find sweepstake with uid: {sweepUid}.",
+					_notificationConfiguration.DismissInSeconds);
+
+				return RedirectToAction("Index");
+			}
+
+			if (ModelState.IsValid)
+			{
+				await _mediator.Send(new UpdateSweepstakeRequest(
+					sweepUid, 
+					form.UpdateSweepstake.Name, 
+					form.UpdateSweepstake.StartDate, 
+					form.UpdateSweepstake.EndDate, 
+					form.UpdateSweepstake.DrawDate));
+
+				_notificationService.Success("Sweepstake updated successfully.", _notificationConfiguration.DismissInSeconds);
+
+				return RedirectToAction("View", new { sweepUid = sweepUid });
+			}
+
+			_notificationService.Error(ModelState.BuildMessageFromErrors());
+
+			var tasks = new List<Task>();
+			var entriesTask = _mediator.Send(new GetSweepEntriesRequest(sweepUid));
+			var prizesTask = _mediator.Send(new GetSweepPrizesBySweepUidRequest(sweepUid));
+			var winnersTask = _mediator.Send(new GetSweepWinners(sweepUid));
+
+			tasks.Add(entriesTask);
+			tasks.Add(prizesTask);
+			tasks.Add(winnersTask);
+			await Task.WhenAll(tasks);
+			var model = BuildViewSweepstake(sweepAndRulles, entriesTask, prizesTask, winnersTask);
 
 			return View(model);
 		}

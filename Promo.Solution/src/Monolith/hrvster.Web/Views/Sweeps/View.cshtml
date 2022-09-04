@@ -1,4 +1,8 @@
-﻿@model ViewSweepstake
+﻿@using hrvster.Models.Extensions
+@using hrvster.Core
+
+@inject LinkBuilder linkBuilder
+@model ViewSweepstake
 @{
     ViewData["Title"] = @Model.Sweepstake.Name;
 }
@@ -114,9 +118,10 @@
 				<div class="tab-content" id="promotionsTabContent">
 					<div class="tab-pane fade active show" id="editDetails" role="tabpanel">
 						<form 
-							asp-action="Update" 
+							asp-action="View" 
 							asp-route-sweepUid="@Model.Sweepstake.SweepUid">
-							@Html.HiddenFor(m => m.Sweepstake.SweepUid)
+							@Html.HiddenFor(m => m.UpdateSweepstake.SweepUid)
+							@Html.HiddenFor(m => m.UpdateSweepstake.CampaignUid)
 							<div class="card">
 								<div class="card-body">
 									<div class="fv-row mb-8">
@@ -150,6 +155,16 @@
 											   asp-format="{0:yyyy-MM-ddThh:mm:ss}" />
 										<span asp-validation-for="@Model.UpdateSweepstake.EndDate"></span>
 									</div>
+									<div class="fv-row mb-6 w-lg-250px">
+										<label class="required d-flex align-items-center fs-6 fw-semibold form-label mb-2">
+											Draw Date
+										</label>
+										<input class="form-control form-control-solid"
+											   value="@Model.UpdateSweepstake.DrawDate.ToString("yyyy-MM-ddThh:mm:ss")"
+											   asp-for="@Model.UpdateSweepstake.DrawDate"
+											   asp-format="{0:yyyy-MM-ddThh:mm:ss}" />
+										<span asp-validation-for="@Model.UpdateSweepstake.DrawDate"></span>
+									</div>
 								</div>
 								<div class="card-footer">
 									<button type="submit" class="btn btn-lg btn-primary">Update</button>
@@ -158,7 +173,177 @@
 						</form>
 					</div>
 					<div class="tab-pane fade show" id="rules" role="tabpanel">
-						Rules Go here
+						<div class="table-responsive">
+							<table class="table table-striped gy-7 gs-7">
+								<thead>
+									<tr class="fw-semibold fs-6 text-gray-800 border-bottom-2 border-gray-200">
+										<th>Watch Value</th>
+										<th>Tweet</th>
+										<th>Active</th>
+										<th>Must Be Following?</th>
+										<th>Actions</th>
+									</tr>
+								</thead>
+								<tbody>
+									@foreach (var rule in @Model.Rules)
+									{
+										<tr>
+											<td>@rule.WatchValue</td>
+											<td>
+												@if (@rule.ExternalId == "0")
+												{
+													<a asp-action="View" asp-controller="ScheduledTweets"
+											   asp-route-ruleUid="@rule.RuleUid"
+											   asp-route-sweepUid="@Model.Sweepstake.SweepUid"
+											   target="_blank">
+														Scheduled
+													</a>
+												}
+												else
+												{
+													<a href="@linkBuilder.BuildTwitterLink(@rule.ExternalId).Result" target="_blank">@rule.ExternalId</a>
+												}
+											</td>
+											<td>
+												@if (@rule.ActiveInd)
+												{
+													<span>True</span>
+												}
+												else
+												{
+													<span>False</span>
+												}
+											</td>
+											<td>
+												@if (@rule.MustBeFollowing)
+												{
+													<span>True</span>
+												}
+												else
+												{
+													<span>False</span>
+												}
+											</td>
+											<td>
+												<div class="me-0">
+													<button class="btn btn-sm btn-bg-light btn-active-color-primary"
+														data-kt-menu-trigger="click" data-kt-menu-placement="bottom-end">
+														Actions
+													</button>
+													<div class="menu menu-sub menu-sub-dropdown menu-column menu-rounded menu-gray-800 menu-state-bg-light-primary fw-semibold w-200px py-3" data-kt-menu="true">
+														<div class="menu-item px-3">
+															<div class="menu-content text-muted pb-2 px-3 fs-7 text-uppercase">
+																Rule Actions
+															</div>
+														</div>
+														@if (rule.ExternalId == "0")
+														{
+															<div class="menu-item px-3">
+																<a asp-action="View"
+														   asp-controller="ScheduledTweets"
+														   asp-route-sweepUid="@Model.Sweepstake.SweepUid"
+														   asp-route-ruleUid="@rule.RuleUid"
+														   asp-route-actionName=@ViewContext.RouteData.Values["action"]
+														   asp-route-controllerName=@ViewContext.RouteData.Values["controller"]
+														   target="_blank"
+														   class="menu-link flex-stack px-3">
+																	View
+																</a>
+															</div>
+														}
+														else
+														{
+															<div class="menu-item px-3">
+																<a asp-action="View"
+														   asp-controller="SweepRuleEntries"
+														   asp-route-sweepUid="@Model.Sweepstake.SweepUid"
+														   asp-route-ruleUid="@rule.RuleUid"
+														   asp-route-actionName=@ViewContext.RouteData.Values["action"]
+														   asp-route-controllerName=@ViewContext.RouteData.Values["controller"]
+														   target="_blank"
+														   class="menu-link flex-stack px-3">
+																	View Entries
+																</a>
+															</div>
+														}
+														@if (rule.ExternalId != "0")
+														{
+															<div class="menu-item px-3">
+																<a asp-action="DeleteRule"
+														   asp-controller="SweepRules"
+														   asp-route-sweepUid="@Model.Sweepstake.SweepUid"
+														   asp-route-ruleUid="@rule.RuleUid"
+														   asp-route-actionName=@ViewContext.RouteData.Values["action"]
+														   asp-route-controllerName=@ViewContext.RouteData.Values["controller"]
+														   class="menu-link flex-stack px-3">
+																	Delete
+																</a>
+															</div>
+														}
+														else
+														{
+															<div class="menu-item px-3">
+																<a asp-action="DeleteScheduledRule"
+														   asp-controller="ScheduledTweets"
+														   asp-route-sweepUid="@Model.Sweepstake.SweepUid"
+														   asp-route-ruleUid="@rule.RuleUid"
+														   asp-route-actionName=@ViewContext.RouteData.Values["action"]
+														   asp-route-controllerName=@ViewContext.RouteData.Values["controller"]
+														   class="menu-link flex-stack px-3">
+																	Delete Scheduled
+																</a>
+															</div>
+														}
+														@if (rule.ActiveInd)
+														{
+															<div class="menu-item px-3">
+																<a asp-action="Deactivate"
+														   asp-controller="SweepRules"
+														   asp-route-sweepUid="@Model.Sweepstake.SweepUid"
+														   asp-route-ruleUid="@rule.RuleUid"
+														   asp-route-actionName=@ViewContext.RouteData.Values["action"]
+														   asp-route-controllerName=@ViewContext.RouteData.Values["controller"]
+														   class="menu-link flex-stack px-3">
+																	Deactivate
+																</a>
+															</div>
+														}
+														else
+														{
+															<div class="menu-item px-3">
+																<a asp-action="Activate"
+														   asp-controller="SweepRules"
+														   asp-route-sweepUid="@Model.Sweepstake.SweepUid"
+														   asp-route-ruleUid="@rule.RuleUid"
+														   asp-route-actionName=@ViewContext.RouteData.Values["action"]
+														   asp-route-controllerName=@ViewContext.RouteData.Values["controller"]
+														   class="menu-link flex-stack px-3">
+																	Activate
+																</a>
+															</div>
+														}
+													</div>
+												</div>
+											</td>
+										</tr>
+									}
+								</tbody>
+								<tfoot>
+									<tr>
+										<td colspan="5">
+											<a class="btn btn-primary"
+											   asp-controller="SweepRules"
+											   asp-action="SelectProvider"
+											   asp-route-sweepUid="@Model.Sweepstake.SweepUid"
+											   asp-route-actionName=@ViewContext.RouteData.Values["action"]
+											   asp-route-controllerName=@ViewContext.RouteData.Values["controller"]>
+												Create New Watch
+											</a>
+										</td>
+									</tr>
+								</tfoot>
+							</table>
+						</div>
 					</div>
 					<div class="tab-pane fade show" id="entryRules" role="tabpanel">
 						Entry Rules Go here

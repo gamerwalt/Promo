@@ -22,6 +22,7 @@ namespace hrvster.Extensions.ModelExtensions
 			{
 				if(string.IsNullOrWhiteSpace(messageReplace))
 				{
+
 					sb.Append(error.FirstOrDefault()?.ErrorMessage);
 				}
 				else
