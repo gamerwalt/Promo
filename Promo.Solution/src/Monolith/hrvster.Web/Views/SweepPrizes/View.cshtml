@@ -5,78 +5,77 @@
     ViewData["Title"] = $"{@Model.SweepName}'s Prizes";
     var counter = 0;
 }
-<div class="row">
-    <div class="col-lg-12">
-        <h4><strong>@Model.SweepName's Prizes</strong></h4>
-    </div>
-</div>
-<hr />
-@if(Model.Prizes.Count() < Model.WinnerCount)
-{
-    <div class="row">
-        <div class="col-lg-12">
-            <a class=" btn btn-primary" 
-            asp-action="Create" 
-            asp-controller="SweepPrizes" 
-            asp-route-sweepUid="@Model.SweepUid"
-            asp-route-campaignUid="@Model.CampaignUid"
-            asp-route-returnAction=@Model.ReturnAction
-            asp-route-returnController=@Model.ReturnController>Create Prize</a>
+<div class="card card-flush">
+    <div class="card-header mt-5">
+        <div class="card-title flex-column">
+            <h3 class="fw-bold mb-1">@Model.SweepName's Prizes</h3>
+            <div class="fs-6 text-gray-400">@Model.Prizes.Count() prizes(s) so far</div>
         </div>
-    </div>
-}
-else
-{
-    <div class="row">
-        <div class="col-lg-12">
-            <div class="alert alert-info">We have all the prize information we need for the winners</div>
-        </div>
-    </div>
-}
-
-<hr />
-<div class="row">
-    @foreach(var prize in @Model.Prizes)
-    {
-        counter++;
-        <div class="col-md-4" style="margin-bottom: 0.5em">
-            <div class="card">
-                <div class="card-header"><strong>Prize Position: @prize.GetPrizePositionLiteral()</strong></div>
-                <div class="card-body">
-                    <div><strong>Name</strong>: @prize.PrizeName</div>
-                    <div><strong>Description</strong>: @prize.PrizeDescription</div>
-                    <div><strong>Value</strong>: @prize.PrizeValue</div>
-                </div>
-                <div class="card-footer">
-                    <a 
-                    class="btn btn-primary btn-sm"
-                    asp-controller="SweepPrizes"
-                    asp-action="EditPrize"
-                    asp-route-prizeUid="@prize.PrizeUid"
-                    asp-route-sweepUid="@Model.SweepUid"
-                    asp-route-campaignUid="@Model.CampaignUid"
-                    asp-route-actionName=@ViewContext.RouteData.Values["action"]
-                    asp-route-controllerName=@ViewContext.RouteData.Values["controller"]>
-                    Edit
-                    </a>
-                    <a 
-                    class="btn btn-danger btn-sm"
-                    asp-controller="SweepPrizes"
-                    asp-action="DeletePrize"
-                    asp-route-prizeUid="@prize.PrizeUid"
-                    asp-route-sweepUid="@Model.SweepUid"
-                    asp-route-campaignUid="@Model.CampaignUid"
-                    asp-route-actionName=@ViewContext.RouteData.Values["action"]
-                    asp-route-controllerName=@ViewContext.RouteData.Values["controller"]>
-                    Delete
-                    </a>
-                </div>
+        <div class="card-toolbar my-1">
+            <div class="me-6 my-1">
+                <a asp-action="Create" class="btn btn-sm btn-primary me-3">Add Prize</a>
             </div>
         </div>
-        if(counter == 3)
-        {
-            counter = 0;
-            <div class="row"><div class="col-lg-12"></div></div>
-        }
-    }
+    </div>
+    <div class="card-body pt-0">
+        <div class="table-responsive">
+			<table id="kt_profile_overview_table" class="table table-row-bordered table-row-dashed gy-4 align-middle fw-bold">
+				<thead class="fs-7 text-gray-400 text-uppercase">
+					<tr>
+						<th class="min-w-250px">Name</th>
+						<th class="min-w-150px">Description</th>
+						<th class="min-w-90px">Value</th>
+                        <th class="min-w-90px">Actions</th>
+					</tr>
+				</thead>
+				<tbody class="fs-6">
+                    @foreach(var prize in Model.Prizes)
+                    {
+                        <tr>
+                            <td>@prize.PrizeName</td>
+                            <td>@prize.PrizeDescription</td>
+                            <td>@prize.PrizeValue</td>
+                            <td>
+                                <div class="me-0">
+                                    <button class="btn btn-sm btn-bg-light btn-active-color-primary"
+                                        data-kt-menu-trigger="click" data-kt-menu-placement="bottom-end">
+                                        Actions
+                                    </button>
+                                    <div class="menu menu-sub menu-sub-dropdown menu-column menu-rounded menu-gray-800 menu-state-bg-light-primary fw-semibold w-200px py-3" data-kt-menu="true">
+                                        <div class="menu-item px-3">
+                                            <div class="menu-content text-muted pb-2 px-3 fs-7 text-uppercase">
+                                                Prize Actions
+                                            </div>
+                                        </div>
+                                        <div class="menu-item px-3">
+                                            <a asp-action="EditPrize"
+                                               asp-controller="SweepPrizes"
+                                               asp-route-sweepUid="@Model.SweepUid"
+                                               asp-route-prizeUid="@prize.PrizeUid"
+                                               asp-route-campaignUid="@Model.CampaignUid"
+                                               class="menu-link flex-stack px-3"
+                                            >
+                                                Update
+                                            </a>
+                                        </div>
+                                        <div class="menu-item px-3">
+                                            <a asp-action="DeletePrize"
+                                               asp-controller="SweepPrizes"
+                                               asp-route-sweepUid="@Model.SweepUid"
+                                               asp-route-prizeUid="@prize.PrizeUid"
+                                               asp-route-campaignUid="@Model.CampaignUid"
+                                               class="menu-link flex-stack px-3"
+                                            >
+                                                Delete
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
