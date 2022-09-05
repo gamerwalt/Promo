@@ -2,6 +2,7 @@
 using Firebase.Auth;
 using hrvster.Core.Authentication;
 using hrvster.Core.Requests.WebRequests;
+using hrvster.Infrastructure.Authentication.ConfigurationOptions;
 using hrvster.Web.Models;
 using MediatR;
 using Microsoft.AspNetCore.Http;
@@ -9,7 +10,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
-using Promo.Core.Authentication.ConfigurationOptions;
 using System.Threading.Tasks;
 
 namespace hrvster.Web.Controllers

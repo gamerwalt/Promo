@@ -9,7 +9,7 @@ namespace hrvster.Infrastructure
 {
 	public interface IFileService
 	{
-		Task<string> UploadToFileServer(IFormFile media, string addToPath, Guid userUid);
+		Task UploadToFileServer(IFormFile media, string addToPath);
 	}
 
 	public class FileService : IFileService
@@ -23,23 +23,13 @@ namespace hrvster.Infrastructure
 			_fileServerOptions = fileServerOptions;
 		}
 
-		public async Task<string> UploadToFileServer(IFormFile media, string addToPath, Guid userUid)
+		public Task UploadToFileServer(IFormFile media, string filePath)
 		{
-			var filePath = GetFilePath(userUid, addToPath);
-
 			Directory.CreateDirectory(filePath);
 			filePath = Path.Combine(filePath, media.FileName);
 
 			using var stream = File.Create(filePath);
-			await media.CopyToAsync(stream);
-
-			return filePath;
-		}
-
-		private string GetFilePath(Guid userUid, string addToPath)
-		{
-			//return Path.Combine(_fileServerOptions.Path, userUid.ToString(), addToPath);
-			return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "hrvster", userUid.ToString(), addToPath);
+			return media.CopyToAsync(stream);
 		}
 	}
 }

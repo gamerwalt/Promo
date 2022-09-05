@@ -7,6 +7,7 @@ using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using System;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -74,9 +75,25 @@ namespace hrvster.Core.Handlers.Scheduling
 			await _repository.UpdateScheduledTweetImageAsync(imageId, location);
 		}
 
-		private async Task<string> UploadMediaToServerAsync(IFormFile media1, Guid userUid)
+		private async Task<string> UploadMediaToServerAsync(IFormFile media, Guid userUid)
 		{
-			return await _fileService.UploadToFileServer(media1, ProfileType.Twitter.ToString(), userUid);
+			var filePath = GetFilePath(userUid, ProfileType.Twitter.ToString());
+
+			Directory.CreateDirectory(filePath);
+			filePath = Path.Combine(filePath, media.FileName);
+
+			using var stream = File.Create(filePath);
+			await media.CopyToAsync(stream);
+
+			return filePath;
+
+			//return await _fileService.UploadToFileServer(media1, ProfileType.Twitter.ToString(), userUid);
+		}
+
+		private string GetFilePath(Guid userUid, string addToPath)
+		{
+			//return Path.Combine(_fileServerOptions.Path, userUid.ToString(), addToPath);
+			return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "hrvster", userUid.ToString(), addToPath);
 		}
 	}
 }

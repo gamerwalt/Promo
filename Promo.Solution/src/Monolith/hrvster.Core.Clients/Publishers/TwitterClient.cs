@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using Tweetinvi.Models;
 using Tweetinvi.Parameters;
@@ -128,18 +129,24 @@ namespace hrvster.Core.Clients.Publishers
 						path,
 						message.Profile.ProfileUid);
 
-					var bytes = File.ReadAllBytes(path);
-					var uploadedImage = await _twitterClient.Upload.UploadTweetImageAsync(bytes);
+					var fileName = Path.GetFileName(path);
 
-					if (uploadedImage == null)
+					using (var client = new WebClient())
 					{
-						_logger.LogError("Was unable to upload the media {path} for the profile with uid {profileUid}",
-							path,
-							message.Profile.ProfileUid);
-					}
-					else
-					{
-						mediaIds.Add(uploadedImage.Id.GetValueOrDefault());
+						var byteArray = await client.DownloadDataTaskAsync(new Uri(path));
+						var uploadedImage = await _twitterClient.Upload
+							.UploadTweetImageAsync(byteArray);
+
+						if (uploadedImage == null)
+						{
+							_logger.LogError("Was unable to upload the media {path} for the profile with uid {profileUid}",
+								path,
+								message.Profile.ProfileUid);
+						}
+						else
+						{
+							mediaIds.Add(uploadedImage.Id.GetValueOrDefault());
+						}
 					}
 				}
 			}
