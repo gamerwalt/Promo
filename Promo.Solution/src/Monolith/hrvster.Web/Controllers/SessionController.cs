@@ -20,21 +20,20 @@ namespace hrvster.Web.Controllers
 		private readonly IMediator _mediator;
 		private readonly GoogleServicesOptions _googleServicesOptions;
 		private readonly INotyfService _notificationService;
-
-		FirebaseAuthProvider authProvider;
+		private readonly FirebaseAuthProvider _firebaseAuthProvider;
 
 		public SessionController(
 			ILoggerFactory loggerFactory, 
 			IMediator mediator, 
 			IOptions<GoogleServicesOptions> googleServicesOptions,
-			INotyfService notificationService)
+			INotyfService notificationService,
+			FirebaseAuthProvider firebaseAuthProvider)
 		{
 			_logger = loggerFactory.CreateLogger<SessionController>();
 			_mediator = mediator;
 			_googleServicesOptions = googleServicesOptions.Value;
 			_notificationService = notificationService;
-
-			authProvider = new FirebaseAuthProvider(new Firebase.Auth.FirebaseConfig(_googleServicesOptions.WebApiKey));
+			_firebaseAuthProvider = firebaseAuthProvider;
 		}
 
 		[HttpGet]
@@ -60,7 +59,7 @@ namespace hrvster.Web.Controllers
 		{
 			try
 			{
-				var link = await authProvider.SignInWithEmailAndPasswordAsync(form.Email, form.Password);
+				var link = await _firebaseAuthProvider.SignInWithEmailAndPasswordAsync(form.Email, form.Password);
 
 				if (!string.IsNullOrWhiteSpace(link.FirebaseToken))// && link.User.IsEmailVerified)
 				{
