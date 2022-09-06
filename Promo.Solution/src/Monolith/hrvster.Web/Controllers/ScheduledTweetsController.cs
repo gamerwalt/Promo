@@ -90,7 +90,7 @@ namespace hrvster.Web.Controllers
 				ScheduledId = scheduledTweet.ScheduledId,
 				ScheduledTimeUtc = scheduledTweet.ScheduledTimeUtc,
 				Status = scheduledTweet.Status,
-				Images = CopyImagesForWebView(scheduledImages.ToList()),
+				Images = scheduledImages,
 				ActionName = actionName ?? "Index",
 				ControllerName = controllerName ?? "Dashboard"
 				
@@ -276,7 +276,7 @@ namespace hrvster.Web.Controllers
 				ScheduledId = scheduledTweet.ScheduledId,
 				ScheduledTimeUtc = scheduledTweet.ScheduledTimeUtc,
 				Status = scheduledTweet.Status,
-				Images = CopyImagesForWebView(scheduledImages.ToList()),
+				Images = scheduledImages,
 				ActionName = actionName ?? "Index",
 				ControllerName = controllerName ?? "Dashboard"
 			};
@@ -349,21 +349,6 @@ namespace hrvster.Web.Controllers
 			_notificationService.Success("Scheduled tweet deleted successfully.", _notificationServiceOptions.DismissInSeconds);
 
 			return RedirectToAction("View", "SweepRules", new { sweepUid = sweepUid, ruleUid = ruleUid });
-		}
-
-		private static List<string> CopyImagesForWebView(List<string> list)
-		{
-			var tempLocation = "wwwroot\\tempImages";
-			var newLocation = new List<string>();
-			foreach(var item in list)
-			{
-				var newFileLocation = Path.Combine(tempLocation, Path.GetFileName(item));
-				System.IO.File.Copy(item, newFileLocation, true);
-
-				newLocation.Add(newFileLocation.Replace("wwwroot\\", ""));
-			}
-
-			return newLocation;
 		}
 	}
 }

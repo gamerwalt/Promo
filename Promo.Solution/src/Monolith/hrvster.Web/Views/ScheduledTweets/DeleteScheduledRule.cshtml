@@ -55,22 +55,22 @@
 								</label>
 								@if(Model.Images.Count >= 1 && Model.Images?[0] != null)
 								{
-									<img src="~/@Model.Images[0]" width="80px" alt="Media1" />
+									<img src="@Model.Images[0]" width="80px" alt="Media1" />
 									<input type="hidden" name="PreviousMediaId1" id="PreviousMediaId1" value="@Model.PreviousMediaId1" />
 								}
 								@if (Model.Images.Count >= 2 && Model.Images?[1] != null)
 								{
-									<img src="~/@Model.Images[1]" width="80px" alt="Media1" />
+									<img src="@Model.Images[1]" width="80px" alt="Media1" />
 									<input type="hidden" name="PreviousMediaId2" id="PreviousMediaId2" value="@Model.PreviousMediaId2" />
 								}
 								@if (Model.Images.Count >= 3 && Model.Images?[2] != null)
 								{
-									<img src="~/@Model.Images[2]" width="80px" alt="Media1" />
+									<img src="@Model.Images[2]" width="80px" alt="Media1" />
 									<input type="hidden" name="PreviousMediaId3" id="PreviousMediaId3" value="@Model.PreviousMediaId3" />
 								}
 								@if (Model.Images.Count >= 4 && Model.Images?[3] != null)
 								{
-									<img src="~/@Model.Images[3]" width="80px" alt="Media1" />
+									<img src="@Model.Images[3]" width="80px" alt="Media1" />
 									<input type="hidden" name="PreviousMediaId4" id="PreviousMediaId4" value="@Model.PreviousMediaId4" />
 								}
 							</div>
