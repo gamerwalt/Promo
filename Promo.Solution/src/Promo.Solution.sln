@@ -210,6 +210,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "hrvster.Twitter.Harvester",
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Readme", "Readme", "{9352DCBF-5984-4129-874D-F765294E6B79}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Database", "Database", "{65B56DCB-9DA7-4EDE-AC31-1A1DB5679564}"
+	ProjectSection(SolutionItems) = preProject
+		Monolith\Database\hrvster.sql = Monolith\Database\hrvster.sql
+		Monolith\Database\hrvsterData.sql = Monolith\Database\hrvsterData.sql
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -520,6 +526,7 @@ Global
 		{ED1B3EC5-A0DC-4073-9606-EA51FE87BB15} = {71429F9B-A81B-4A12-98DD-505C0F9FDB34}
 		{7E904EE8-F334-482C-A176-EEB818E6A281} = {71429F9B-A81B-4A12-98DD-505C0F9FDB34}
 		{9352DCBF-5984-4129-874D-F765294E6B79} = {71429F9B-A81B-4A12-98DD-505C0F9FDB34}
+		{65B56DCB-9DA7-4EDE-AC31-1A1DB5679564} = {71429F9B-A81B-4A12-98DD-505C0F9FDB34}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {94B46B7F-1545-465E-863A-AAD0C58A8C0F}

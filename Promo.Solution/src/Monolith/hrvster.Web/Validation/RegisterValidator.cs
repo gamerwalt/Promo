@@ -3,6 +3,8 @@ using hrvster.Infrastructure;
 using hrvster.Web.Models;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace hrvster.Web.Validation
 {
@@ -42,11 +44,26 @@ namespace hrvster.Web.Validation
 			RuleFor(x => x.Password)
 				.NotEmpty()
 				.NotNull()
-				.WithMessage("Please supply a password before continuing.");
+					.WithMessage("Please supply a password before continuing.")
+				.Must(
+					c => c.Length >= 8 &&
+					c.Any(x => char.IsUpper(x)) && HasSpecialCharacters(c))
+					.WithMessage("Your password should be more than 7 characters, must contain an upper case character and a special symbol.");
 
 			RuleFor(x => x.AcceptedTerms)
 				.Must(c => BeAccepted(c))
 				.WithMessage("You have to accept the terms and conditions.");
+		}
+
+		private bool HasSpecialCharacters(string s)
+		{
+			var specialCharacters = @"\|!#$%&/()=?»«@£§€{}.-;'\<>_,";
+			foreach(var c in specialCharacters)
+			{
+				if (s.Contains(c)) return true;
+			}
+
+			return false;
 		}
 
 		private bool BeAccepted(bool c)

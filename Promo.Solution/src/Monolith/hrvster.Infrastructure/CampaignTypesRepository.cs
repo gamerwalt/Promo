@@ -1,10 +1,10 @@
-﻿using hrvster.Models;
+﻿using hrvster.Infrastructure.Extensions;
+using hrvster.Models;
 using MySqlConnector;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Threading.Tasks;
-using hrvster.Infrastructure.Extensions;
 
 namespace hrvster.Infrastructure
 {
