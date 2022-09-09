@@ -10,6 +10,7 @@ namespace hrvster.Infrastructure.Harvester
 {
 	public interface IBlacklistedSweepsUsersRepository
 	{
+		Task CreateAsync(string externalUserId, Guid sweepUid);
 		Task<IEnumerable<BlacklistedSweepUser>> GetBlacklistedSweepUsersAsync(Guid sweepUid);
 	}
 
@@ -20,6 +21,20 @@ namespace hrvster.Infrastructure.Harvester
 		public BlacklistedSweepsUsersRepository(IDatabase database)
 		{
 			_database = database;
+		}
+
+		public async Task CreateAsync(string externalUserId, Guid sweepUid)
+		{
+			using var conn = new MySqlConnection(_database.GetReportingConnectionString());
+			var command = conn.CreateCommand();
+			command.CommandText = "blacklisted_sweeps_user_create";
+			command.CommandType = CommandType.StoredProcedure;
+			command
+				.AddParameter("externalUserId", externalUserId)
+				.AddParameter("sweepUid", sweepUid);
+
+			await conn.OpenAsync();
+			await command.ExecuteNonQueryAsync();
 		}
 
 		public async Task<IEnumerable<BlacklistedSweepUser>> GetBlacklistedSweepUsersAsync(Guid sweepUid)

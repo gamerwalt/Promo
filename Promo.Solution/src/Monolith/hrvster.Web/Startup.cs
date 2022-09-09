@@ -8,6 +8,7 @@ using hrvster.Core.Authentication;
 using hrvster.Core.Clients;
 using hrvster.Core.Clients.Publishers;
 using hrvster.Core.Handlers.Profiles;
+using hrvster.Core.Handlers.ServiceHandlers;
 using hrvster.Core.Requests;
 using hrvster.Core.Requests.Notifications;
 using hrvster.Core.Requests.Notifications.Handlers;
@@ -176,8 +177,9 @@ namespace hrvster.Web
 			var webRequestAssembly = typeof(SigninForm).GetTypeInfo().Assembly;
 			var webRequestValidatorAssembly = typeof(SigninFormValidator).GetTypeInfo().Assembly;
 			var getUserProfileHandler = typeof(GetUserProfileHandler).GetTypeInfo().Assembly;
+			var serviceHandlers = typeof(ProcessNewTweet).GetTypeInfo().Assembly;
 
-			services.AddMediatR(new[] { handlerAssembly, notificationAssembly, notificationHandlerAssembly, harvsterHandlerAssembly, webRequestAssembly, getUserProfileHandler });
+			services.AddMediatR(new[] { handlerAssembly, notificationAssembly, notificationHandlerAssembly, harvsterHandlerAssembly, webRequestAssembly, getUserProfileHandler, serviceHandlers });
 			services.AddFluentValidation(f =>
 			{
 				f.RegisterValidatorsFromAssemblies(new[] { handlerAssembly, validatorAssembly, webRequestValidatorAssembly });
@@ -212,6 +214,7 @@ namespace hrvster.Web
 			services.AddTransient<IProfilesRepository, ProfilesRepository>();
 			services.AddTransient<ISweepTweetSchedulerRepository, SweepTweetSchedulerRepository>();
 			services.AddTransient<IScheduledSweepRuleTweetsRepository, ScheduledSweepRuleTweetsRepository>();
+			services.AddTransient<IIncomingTweetsRepository, IncomingTweetsRepository>();
 		}
 
 		private void AddServicesOptions(IServiceCollection services)

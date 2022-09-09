@@ -14,7 +14,7 @@ namespace hrvster.ApplicationServices.Processors
 {
 	public interface ITweetProcessor
 	{
-		Task ProcessTweetAsync(ITweet tweet, Rule rule, Guid userUid, Guid harvestedUid);
+		Task ProcessTweetAsync(IncomingTweet incomingTweet, ITweet tweet, Rule rule, Guid userUid, Guid harvestedUid);
 	}
 
 	public class TweetProcessor : ITweetProcessor
@@ -39,7 +39,12 @@ namespace hrvster.ApplicationServices.Processors
 			_mediator = mediator;
 		}
 
-		public async Task ProcessTweetAsync(ITweet tweet, Rule rule, Guid userUid, Guid harvestedUid)
+		public async Task ProcessTweetAsync(
+			IncomingTweet incomingTweet, 
+			ITweet tweet, 
+			Rule rule, 
+			Guid userUid, 
+			Guid harvestedUid)
 		{
 			if (rule.Campaign == null)
 			{
@@ -73,10 +78,11 @@ namespace hrvster.ApplicationServices.Processors
 				rule.Campaign.CampaignUid,
 				rule.Sweep.SweepUid);
 
-			await ValidateCampaignTypeAsync(blacklisted, entryRules, tweet, rule, userUid, harvestedUid, userReport);
+			await ValidateCampaignTypeAsync(incomingTweet, blacklisted, entryRules, tweet, rule, userUid, harvestedUid, userReport);
 		}
 
 		private async Task ValidateCampaignTypeAsync(
+			IncomingTweet incomingTweet,
 			IEnumerable<BlacklistedSweepUser> blacklisted, 
 			SweepEntryRule entryRules, 
 			ITweet tweet, 
@@ -96,9 +102,9 @@ namespace hrvster.ApplicationServices.Processors
 						rule.Campaign.CampaignName);
 
 					await _mediator.Send( 
-						new ProcessAutoEnterSweepsFromHashtagRequest
+						new ProcessAutoEnterSweepsFromHashtagReplyRequest
 						(
-							blacklisted, entryRules, tweet, rule, userUid, harvestedUid, userReport
+							incomingTweet, blacklisted, entryRules, tweet, rule, userUid, harvestedUid, userReport
 						)
 					);
 					break;

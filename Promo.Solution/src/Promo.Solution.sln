@@ -216,6 +216,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Database", "Database", "{65
 		Monolith\Database\hrvsterData.sql = Monolith\Database\hrvsterData.sql
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Website Tests", "Website Tests", "{8B75BBA2-BA13-4C11-9152-7E6809B452DC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "hrvsterWebsiteTests", "Monolith\Tests\SweepsControllerTests\hrvsterWebsiteTests.csproj", "{E4CA9C9C-4CD8-4179-803E-98ECA0A9BF27}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -442,6 +446,10 @@ Global
 		{7E904EE8-F334-482C-A176-EEB818E6A281}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7E904EE8-F334-482C-A176-EEB818E6A281}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7E904EE8-F334-482C-A176-EEB818E6A281}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E4CA9C9C-4CD8-4179-803E-98ECA0A9BF27}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E4CA9C9C-4CD8-4179-803E-98ECA0A9BF27}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E4CA9C9C-4CD8-4179-803E-98ECA0A9BF27}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E4CA9C9C-4CD8-4179-803E-98ECA0A9BF27}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -527,6 +535,8 @@ Global
 		{7E904EE8-F334-482C-A176-EEB818E6A281} = {71429F9B-A81B-4A12-98DD-505C0F9FDB34}
 		{9352DCBF-5984-4129-874D-F765294E6B79} = {71429F9B-A81B-4A12-98DD-505C0F9FDB34}
 		{65B56DCB-9DA7-4EDE-AC31-1A1DB5679564} = {71429F9B-A81B-4A12-98DD-505C0F9FDB34}
+		{8B75BBA2-BA13-4C11-9152-7E6809B452DC} = {8F3D8585-5B5D-4512-A73E-E109D4178F38}
+		{E4CA9C9C-4CD8-4179-803E-98ECA0A9BF27} = {8B75BBA2-BA13-4C11-9152-7E6809B452DC}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {94B46B7F-1545-465E-863A-AAD0C58A8C0F}

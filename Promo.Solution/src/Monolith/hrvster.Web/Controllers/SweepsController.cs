@@ -65,7 +65,7 @@ namespace hrvster.Web.Controllers
 			var anyActivePromotions = promotions.Any(c => c.IsActive());
 			var anyWillBeInProgress = promotions.Any(c => c.WillBeInProgress());
 
-			if (!anyActivePromotions || anyWillBeInProgress)
+			if (!anyActivePromotions || !anyWillBeInProgress)
 			{
 				_notificationService.Error(
 					"None of your promotions are active. We need 1 active promotion to continue.",
@@ -84,7 +84,10 @@ namespace hrvster.Web.Controllers
 		{
 			var promotions = await _mediator.Send(new GetAllCampaignsForAccount(_hrvsterUser.UserUid));
 
-			if (!promotions.Any(c => c.IsActive()))
+			var anyActivePromotions = promotions.Any(c => c.IsActive());
+			var anyWillBeInProgress = promotions.Any(c => c.WillBeInProgress());
+
+			if (!anyActivePromotions || !anyWillBeInProgress)
 			{
 				_notificationService.Error(
 					"None of your promotions are active. We need 1 active promotion to continue.",

@@ -7,7 +7,7 @@ using Tweetinvi.Models;
 
 namespace hrvster.Core.Requests.ServiceRequests
 {
-	public class ProcessAutoEnterSweepsFromHashtagRequest : IRequest
+	public class ProcessAutoEnterSweepsFromHashtagReplyRequest : IRequest
 	{
 		private IEnumerable<BlacklistedSweepUser> _blacklisted;
 		private SweepEntryRule _entryRules;
@@ -16,8 +16,17 @@ namespace hrvster.Core.Requests.ServiceRequests
 		private Guid _userUid;
 		private Guid _harvestedUid;
 		private SweepEntryReport _sweepEntryReport;
+		private IncomingTweet _incomingTweet;
 
-		public ProcessAutoEnterSweepsFromHashtagRequest(IEnumerable<BlacklistedSweepUser> blacklisted, SweepEntryRule entryRules, ITweet tweet, Rule rule, Guid userUid, Guid harvestedUid, SweepEntryReport userReport)
+		public ProcessAutoEnterSweepsFromHashtagReplyRequest(
+			IncomingTweet incomingTweet, 
+			IEnumerable<BlacklistedSweepUser> blacklisted, 
+			SweepEntryRule entryRules, 
+			ITweet tweet, 
+			Rule rule, 
+			Guid userUid, 
+			Guid harvestedUid, 
+			SweepEntryReport userReport)
 		{
 			_blacklisted = blacklisted;
 			_entryRules = entryRules;
@@ -26,6 +35,7 @@ namespace hrvster.Core.Requests.ServiceRequests
 			_userUid = userUid;
 			_harvestedUid = harvestedUid;
 			_sweepEntryReport = userReport;
+			_incomingTweet = incomingTweet;
 		}
 
 		public IEnumerable<BlacklistedSweepUser> BlackListed { get { return _blacklisted; } }
@@ -35,6 +45,6 @@ namespace hrvster.Core.Requests.ServiceRequests
 		public Guid UserUid { get { return _userUid; } }
 		public Guid HarvestedUid { get { return _harvestedUid; } }
 		public SweepEntryReport SweepEntryReport { get { return _sweepEntryReport; } }
-
+		public IncomingTweet IncomingTweet { get { return _incomingTweet; } }
 	}
 }

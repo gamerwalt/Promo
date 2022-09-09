@@ -36,6 +36,7 @@ namespace hrvster.Infrastructure
 			command
 				.AddParameter("sweepEntryUid", sweepEntry.SweepEntryUid)
 				.AddParameter("sweepUid", sweepEntry.Sweep.SweepUid)
+				.AddParameter("ruleUid", sweepEntry.Rule.RuleUid)
 				.AddParameter("userIdentifier", sweepEntry.UserIdentifier)
 				.AddParameter("userIdentifierType", sweepEntry.UserIdentifierType.ToString())
 				.AddParameter("acceptedTerms", sweepEntry.AcceptedTerms);

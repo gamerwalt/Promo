@@ -2,6 +2,7 @@
 using hrvster.Core.Requests.ServiceRequests.Notifications;
 using hrvster.Infrastructure;
 using hrvster.Infrastructure.Accounts;
+using hrvster.Infrastructure.Harvester;
 using hrvster.Models;
 using hrvster.Models.Profiles;
 using MediatR;
@@ -14,50 +15,58 @@ using Tweetinvi;
 
 namespace hrvster.Core.Handlers.ServiceHandlers
 {
-	public class ProcessAutoEnterSweepsFromHashtag : AsyncRequestHandler<ProcessAutoEnterSweepsFromHashtagRequest>
+	public class ProcessAutoEnterSweepsFromHashtagReply : AsyncRequestHandler<ProcessAutoEnterSweepsFromHashtagReplyRequest>
 	{
-		private readonly ILogger<ProcessAutoEnterSweepsFromHashtag> _logger;
+		private readonly ILogger<ProcessAutoEnterSweepsFromHashtagReply> _logger;
 		private readonly ISweepsEntriesRepository _sweepsEntriesRepository;
 		private readonly IProfilesRepository _profilesRepository;
 		private readonly TwitterAccount _twitterAccount;
 		private readonly IMediator _mediator;
+		private readonly IIncomingTweetsRepository _incomingTweetsRepository;
 
 		private TwitterClient _twitterClient;
 
-		public ProcessAutoEnterSweepsFromHashtag(
+		public ProcessAutoEnterSweepsFromHashtagReply(
 			ILoggerFactory loggerFactory,
 			ISweepsEntriesRepository sweepsEntriesRepository,
 			IProfilesRepository profilesRepository,
 			TwitterAccount twitterAccount,
-			IMediator mediator)
+			IMediator mediator,
+			IIncomingTweetsRepository incomingTweetsRepository)
 		{
-			_logger = loggerFactory.CreateLogger<ProcessAutoEnterSweepsFromHashtag>();
+			_logger = loggerFactory.CreateLogger<ProcessAutoEnterSweepsFromHashtagReply>();
 			_sweepsEntriesRepository = sweepsEntriesRepository;
 			_profilesRepository = profilesRepository;
 			_twitterAccount = twitterAccount;
 			_mediator = mediator;
+			_incomingTweetsRepository = incomingTweetsRepository;
 		}
 
-		protected override async Task Handle(ProcessAutoEnterSweepsFromHashtagRequest request, CancellationToken cancellationToken)
+		protected override async Task Handle(ProcessAutoEnterSweepsFromHashtagReplyRequest request, CancellationToken cancellationToken)
 		{
 			var profile = await _profilesRepository.GetProfileByCampaignUid(request.Rule.Campaign.CampaignUid, ProfileType.Twitter);
 
 			if (CanEnterSweepstakes(request))
 			{
-				if(await IsFollowing(profile, request))
+				if (await IsFollowing(profile, request))
+				{
 					await EnterSweepstakesAsync(request);
+				}
 				else
 				{
 					_logger.LogInformation("The user {screenName} is not following Profile {accountScreenName}",
 						request.Tweet.CreatedBy.ScreenName,
 						profile.ScreenName);
 
-					await _mediator.Send(new NotifyUserOfNotFollowingProfileRequest(request.Tweet, profile));
+					await _mediator.Send(new NotifyUserOfNotFollowingProfileRequest(
+						request.Tweet, 
+						profile, 
+						request.IncomingTweet));
 				}
 			}
 		}
 
-		private async Task<bool> IsFollowing(Profile profile, ProcessAutoEnterSweepsFromHashtagRequest request)
+		private async Task<bool> IsFollowing(Profile profile, ProcessAutoEnterSweepsFromHashtagReplyRequest request)
 		{
 			if (profile == null)
 			{
@@ -87,7 +96,7 @@ namespace hrvster.Core.Handlers.ServiceHandlers
 				accessTokenSecret);
 		}
 
-		private async Task EnterSweepstakesAsync(ProcessAutoEnterSweepsFromHashtagRequest request)
+		private async Task EnterSweepstakesAsync(ProcessAutoEnterSweepsFromHashtagReplyRequest request)
 		{
 			if (request.Rule.Campaign.ActiveInd &&
 				CampaignIsRunning(request.Rule.Campaign) &&
@@ -104,18 +113,28 @@ namespace hrvster.Core.Handlers.ServiceHandlers
 				{
 					AcceptedTerms = true,
 					Sweep = request.Rule.Sweep,
+					Rule = request.Rule,
 					UserIdentifier = $"@{request.Tweet.CreatedBy.ScreenName}",
 					UserIdentifierType = UserIdentifierType.TwitterHandle,
 					SweepEntryUid = sweepEntryUid
 				});
 
-				await _mediator.Publish(new SweepEntryFromTweetRecorded(request.Rule.Campaign, request.Rule.Sweep, request.Tweet, UserIdentifierType.TwitterHandle));
+				await _mediator.Publish(new SweepEntryFromTweetRecorded(
+					request.IncomingTweet, 
+					request.Rule.Campaign, 
+					request.Rule.Sweep, 
+					request.Tweet, 
+					UserIdentifierType.TwitterHandle));
 			}
 			else
 			{
 				_logger.LogWarning("Campaign {campaignName} or Sweepstakes {sweepName} are probably not running right now.",
 				request.Rule.Campaign.CampaignName,
 				request.Rule.Sweep.Name);
+
+				await _incomingTweetsRepository.UpdateStatusAsync(
+					request.IncomingTweet.IncomingTweetUid, 
+					Models.Harvester.IncomingTweetStatus.CompletedCampaignOrSweepstakeNotRunning);
 			}
 		}
 
@@ -128,7 +147,7 @@ namespace hrvster.Core.Handlers.ServiceHandlers
 			=> DateTime.UtcNow < campaign.EndDate &&
 				DateTime.UtcNow > campaign.StartDate;
 
-		private bool CanEnterSweepstakes(ProcessAutoEnterSweepsFromHashtagRequest request)
+		private bool CanEnterSweepstakes(ProcessAutoEnterSweepsFromHashtagReplyRequest request)
 		{
 			var userCanEnterSweeps = UserCanEnterSweepstakes(request);
 			_logger.LogInformation("User can enter sweepstakes {sweepName}? {canEnter}", request.Rule.Sweep.Name, userCanEnterSweeps);
@@ -142,13 +161,13 @@ namespace hrvster.Core.Handlers.ServiceHandlers
 			return userCanEnterSweeps && tweetIsInReplyToMainTweet && !userIsNotInBlacklistedUsers;
 		}
 
-		private bool UserIsNotInBlacklistedUsers(ProcessAutoEnterSweepsFromHashtagRequest request)
+		private bool UserIsNotInBlacklistedUsers(ProcessAutoEnterSweepsFromHashtagReplyRequest request)
 			=> request.BlackListed.Any(c => c.Equals(request.Tweet.CreatedBy.Id));
 
-		private bool TweetIsInReplyToRuleTweetId(ProcessAutoEnterSweepsFromHashtagRequest request)
+		private bool TweetIsInReplyToRuleTweetId(ProcessAutoEnterSweepsFromHashtagReplyRequest request)
 			=> request.Tweet.InReplyToStatusId.Equals(request.Rule.ExternalId);
 
-		private bool UserCanEnterSweepstakes(ProcessAutoEnterSweepsFromHashtagRequest request)
+		private bool UserCanEnterSweepstakes(ProcessAutoEnterSweepsFromHashtagReplyRequest request)
 			=> request.SweepEntryReport == null
 				? true
 				: request.SweepEntryReport.Entries < request.EntryRules.EntryPerUser;

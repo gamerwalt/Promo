@@ -1,4 +1,5 @@
-﻿using hrvster.Core.Requests.ServiceRequests;
+﻿using hrvster.Core.Requests.Harvester;
+using hrvster.Core.Requests.ServiceRequests;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
@@ -62,7 +63,9 @@ namespace hrvster.ApplicationServices.Harvesters.Twitter
 		private async void NewTweetReceived(object sender, MatchedTweetReceivedEventArgs @event)
 		{
 			//Task.Run(async () => await _mediator.Send(new ProcessNewTweetRequest(@event.Tweet, @event.Json))).Wait();
-			await _mediator.Send(new ProcessNewTweetRequest(@event.Tweet, @event.Json));
+			var incomingTweet = await _mediator.Send(new SaveNewTweetReceivedRequest(@event.Json));
+
+			await _mediator.Send(new ProcessNewTweetRequest(@event.Tweet, @event.Json, incomingTweet));
 		}
 	}
 }

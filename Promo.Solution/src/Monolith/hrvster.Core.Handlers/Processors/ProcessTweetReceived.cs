@@ -24,7 +24,12 @@ namespace hrvster.Core.Handlers.Processors
 				nameof(ProcessTweetReceived),
 				notification.Tweet.Id);
 
-			await _tweetProcessor.ProcessTweetAsync(notification.Tweet, notification.Rule, notification.UserUid, notification.HarvestedUid);
+			await _tweetProcessor.ProcessTweetAsync(
+				notification.IncomingTweet,
+				notification.Tweet, 
+				notification.Rule, 
+				notification.UserUid, 
+				notification.HarvestedUid);
 		}
 	}
 }

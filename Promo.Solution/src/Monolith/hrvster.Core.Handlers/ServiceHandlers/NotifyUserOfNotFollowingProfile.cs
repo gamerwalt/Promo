@@ -1,6 +1,7 @@
 ﻿using hrvster.Core.Clients.Common;
 using hrvster.Core.Clients.Publishers;
 using hrvster.Core.Requests.ServiceRequests;
+using hrvster.Infrastructure.Harvester;
 using hrvster.Models;
 using MediatR;
 using Microsoft.Extensions.Logging;
@@ -14,17 +15,22 @@ namespace hrvster.Core.Handlers.ServiceHandlers
 	{
 		private readonly ILogger<NotifyUserOfNotFollowingProfile> _logger;
 		private readonly Func<ExternalClientType, IExternalClient> _publisherResolver;
+		private readonly IIncomingTweetsRepository _repository;
 
 		public NotifyUserOfNotFollowingProfile(
 			ILoggerFactory loggerFactory,
-			Func<ExternalClientType, IExternalClient> publisherResolver)
+			Func<ExternalClientType, IExternalClient> publisherResolver,
+			IIncomingTweetsRepository repository)
 		{
 			_logger = loggerFactory.CreateLogger<NotifyUserOfNotFollowingProfile>();
 			_publisherResolver = publisherResolver;
+			_repository = repository;
 		}
 
 		protected override async Task Handle(NotifyUserOfNotFollowingProfileRequest request, CancellationToken cancellationToken)
 		{
+			_logger.LogInformation("Notifying user {} of not following profile account.", request.Tweet.CreatedBy.ScreenName);
+
 			var message = new Message
 			{
 				Profile = request.Profile,
@@ -34,6 +40,8 @@ namespace hrvster.Core.Handlers.ServiceHandlers
 			var twitterPublisher = _publisherResolver(ExternalClientType.Twitter);
 
 			await twitterPublisher.PublishResponse(message, request.Tweet.IdStr);
+
+			await _repository.UpdateAsProcessedAsync(request.IncomingTweet.IncomingTweetUid, Models.Harvester.IncomingTweetStatus.CompletedUserNotFollowing);
 		}
 	}
 }
