@@ -6,9 +6,6 @@
         "DOTNET_ENVIRONMENT": "local"
       },
       "dotnetRunMessages": "true"
-    },
-    "Docker": {
-      "commandName": "Docker"
     }
   }
 }
