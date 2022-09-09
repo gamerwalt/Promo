@@ -1,3 +1,4 @@
+using hrvster.Models.Extensions;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
@@ -21,6 +22,10 @@ namespace hrvster.Web
 			Log.Logger = new LoggerConfiguration()
 				.ReadFrom.Configuration(configuration)
 				.CreateLogger();
+
+			Log.Information("Creating Web Host for hrvster.WEB for environment {env}", env);
+			Log.Information("Configuration loaded... {config}", configuration.ToJsonString());
+			Log.Information("Databases : {databasesConfiguration}", configuration.GetConnectionString("hrvster"));
 
 			CreateHostBuilder(args).Build().Run();
 		}

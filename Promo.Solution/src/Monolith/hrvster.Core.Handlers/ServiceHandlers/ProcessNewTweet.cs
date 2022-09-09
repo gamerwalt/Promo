@@ -112,6 +112,10 @@ namespace hrvster.Core.Handlers.ServiceHandlers
 				_logger.LogInformation("Rolling back transaction");
 
 				await _harvesterRepository.RollbackTransaction();
+
+				await _incomingTweetsRepository.UpdateStatusAsync(
+					request.IncomingTweet.IncomingTweetUid, 
+					Models.Harvester.IncomingTweetStatus.Failed);
 			}
 		}
 	}

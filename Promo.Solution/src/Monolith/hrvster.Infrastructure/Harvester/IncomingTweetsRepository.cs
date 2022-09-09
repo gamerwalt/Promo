@@ -4,7 +4,6 @@ using MySqlConnector;
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace hrvster.Infrastructure.Harvester
@@ -29,7 +28,7 @@ namespace hrvster.Infrastructure.Harvester
 
 		public async Task CreateAsync(Guid incomingTweetUid, string jsonTweet, IncomingTweetStatus status)
 		{
-			using var conn = new MySqlConnection(_database.GetConnectionString());
+			using var conn = new MySqlConnection(_database.GetHarvesterConnectionString());
 			var command = conn.CreateCommand();
 			command.CommandText = "incoming_tweets_create";
 			command.CommandType = CommandType.StoredProcedure;
@@ -88,7 +87,7 @@ namespace hrvster.Infrastructure.Harvester
 
 		public async Task UpdateAsProcessedAsync(Guid incomingTweetUid, IncomingTweetStatus status)
 		{
-			using var conn = new MySqlConnection(_database.GetConnectionString());
+			using var conn = new MySqlConnection(_database.GetHarvesterConnectionString());
 			var command = conn.CreateCommand();
 			command.CommandText = "incoming_tweets_update_as_processed";
 			command.CommandType = CommandType.StoredProcedure;
@@ -102,7 +101,7 @@ namespace hrvster.Infrastructure.Harvester
 
 		public async Task UpdateStatusAsync(Guid incomingTweetUid, IncomingTweetStatus status)
 		{
-			using var conn = new MySqlConnection(_database.GetConnectionString());
+			using var conn = new MySqlConnection(_database.GetHarvesterConnectionString());
 			var command = conn.CreateCommand();
 			command.CommandText = "incoming_tweets_update_status";
 			command.CommandType = CommandType.StoredProcedure;
