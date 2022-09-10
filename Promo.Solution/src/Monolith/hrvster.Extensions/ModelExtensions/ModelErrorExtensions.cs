@@ -18,24 +18,21 @@ namespace hrvster.Extensions.ModelExtensions
 				.ToList();
 
 			var sb = new StringBuilder();
+			sb.Append("<ol>");
 			foreach (var error in errors)
 			{
 				if(string.IsNullOrWhiteSpace(messageReplace))
 				{
 
-					sb.Append(error.FirstOrDefault()?.ErrorMessage);
+					sb.Append($"<li>{error.FirstOrDefault()?.ErrorMessage}</li>");
 				}
 				else
 				{
-					sb.Append(error.FirstOrDefault()?.ErrorMessage?.Replace(messageReplace, replaceWith));
-				}
-
-				if(errors.Count > 1)
-				{
-					sb.Append("<br/>");
-					sb.Append("<br/>");
+					sb.Append($"<li>{error.FirstOrDefault()?.ErrorMessage?.Replace(messageReplace, replaceWith)}</li>");
 				}
 			}
+
+			sb.Append("</ol>");
 
 			return sb.ToString();
 		}

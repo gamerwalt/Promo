@@ -40,17 +40,24 @@ namespace hrvster.Core.Handlers.Sweepstakes
 		{
 			_logger.LogInformation("Handling getting sweep rules for Sweep Uid {sweepUid}", request.SweepUid);
 
-			var sweep = await _sweepsRepository.GetAsync(request.SweepUid);
-			var rules = await _rulesRepository.GetSweepRuleAsync(request.SweepUid);
-			var entryRule = await _entryRulesRepository.GetSweepEntryRuleAsync(request.SweepUid);
-			var drawRule = await _drawRuleRepository.GetSweepDrawRuleAsync(request.SweepUid);
+			var tasks = new List<Task>();
+			var sweepTask = _sweepsRepository.GetAsync(request.SweepUid);
+			var ruleTask = _rulesRepository.GetSweepRuleAsync(request.SweepUid);
+			var entryRuleTask = _entryRulesRepository.GetSweepEntryRuleAsync(request.SweepUid);
+			var drawRuleTask = _drawRuleRepository.GetDrawRuleAsync(request.SweepUid);
+			tasks.Add(sweepTask);
+			tasks.Add(ruleTask);
+			tasks.Add(entryRuleTask);
+			tasks.Add(drawRuleTask);
+
+			await Task.WhenAll(tasks);
 
 			var sweepRule = new SweepstakeAndRules
 			{
-				Sweepstake = _mapper.Map<Sweepstake>(sweep),
-				Rules = _mapper.Map<IEnumerable<Rule>>(rules.ToList()),
-				EntryRule = _mapper.Map<EntryRule>(entryRule),
-				DrawRule = _mapper.Map<DrawRule>(drawRule)
+				Sweepstake = _mapper.Map<Sweepstake>(sweepTask.Result),
+				Rules = _mapper.Map<IEnumerable<Rule>>(ruleTask.Result.ToList()),
+				EntryRule = _mapper.Map<EntryRule>(entryRuleTask.Result),
+				DrawRule = _mapper.Map<DrawRule>(drawRuleTask.Result)
 			};
 
 			_logger.LogInformation("Finished handling getting sweep rules for Sweep Uid {sweepUid}", request.SweepUid);

@@ -208,8 +208,8 @@ namespace hrvster.Web.Controllers
 		[HttpGet]
 		public async Task<IActionResult> View(Guid sweepUid)
 		{
-			var sweepAndRulles = await _mediator.Send(new GetSweepstakeAndRulesRequests(sweepUid));
-			if (sweepAndRulles == null)
+			var sweepAndRules = await _mediator.Send(new GetSweepstakeAndRulesRequests(sweepUid));
+			if (sweepAndRules == null)
 			{
 				_logger.LogError("Could not find sweepstake with uid: {sweepUid}", sweepUid);
 
@@ -229,12 +229,12 @@ namespace hrvster.Web.Controllers
 			tasks.Add(prizesTask);
 			tasks.Add(winnersTask);
 			await Task.WhenAll(tasks);
-			var model = BuildViewSweepstake(sweepAndRulles, entriesTask, prizesTask, winnersTask);
+			var model = BuildViewSweepstake(sweepAndRules, entriesTask, prizesTask, winnersTask);
 
 			return View(model);
 		}
 
-		private ViewSweepstake BuildViewSweepstake(SweepstakeAndRules sweepAndRulles, Task<IEnumerable<hrvster.Models.SweepEntry>> entriesTask, Task<SweepPrizes> prizesTask, Task<IEnumerable<hrvster.Models.SweepWinner>> winnersTask)
+		private ViewSweepstake BuildViewSweepstake(SweepstakeAndRules sweepAndRulles, Task<IEnumerable<hrvster.Models.SweepEntry>> entriesTask, Task<SweepPrize> prizesTask, Task<IEnumerable<hrvster.Models.SweepWinner>> winnersTask)
 		{
 			return new ViewSweepstake()
 			{

@@ -218,7 +218,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Database", "Database", "{65
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Website Tests", "Website Tests", "{8B75BBA2-BA13-4C11-9152-7E6809B452DC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "hrvsterWebsiteTests", "Monolith\Tests\SweepsControllerTests\hrvsterWebsiteTests.csproj", "{E4CA9C9C-4CD8-4179-803E-98ECA0A9BF27}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "hrvsterWebsiteTests", "Monolith\Tests\SweepsControllerTests\hrvsterWebsiteTests.csproj", "{E4CA9C9C-4CD8-4179-803E-98ECA0A9BF27}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "PackageSource", "PackageSource", "{946B1C08-5AA1-43BD-ADEB-F73E3FDB27A0}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspNetCoreHero.ToastNotification", "..\..\..\Development\ToastNotification\AspNetCoreHero.ToastNotification\AspNetCoreHero.ToastNotification.csproj", "{055D1A21-4062-42BD-86E6-B46AFB5136E0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -450,6 +454,10 @@ Global
 		{E4CA9C9C-4CD8-4179-803E-98ECA0A9BF27}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E4CA9C9C-4CD8-4179-803E-98ECA0A9BF27}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E4CA9C9C-4CD8-4179-803E-98ECA0A9BF27}.Release|Any CPU.Build.0 = Release|Any CPU
+		{055D1A21-4062-42BD-86E6-B46AFB5136E0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{055D1A21-4062-42BD-86E6-B46AFB5136E0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{055D1A21-4062-42BD-86E6-B46AFB5136E0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{055D1A21-4062-42BD-86E6-B46AFB5136E0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -537,6 +545,8 @@ Global
 		{65B56DCB-9DA7-4EDE-AC31-1A1DB5679564} = {71429F9B-A81B-4A12-98DD-505C0F9FDB34}
 		{8B75BBA2-BA13-4C11-9152-7E6809B452DC} = {8F3D8585-5B5D-4512-A73E-E109D4178F38}
 		{E4CA9C9C-4CD8-4179-803E-98ECA0A9BF27} = {8B75BBA2-BA13-4C11-9152-7E6809B452DC}
+		{946B1C08-5AA1-43BD-ADEB-F73E3FDB27A0} = {71429F9B-A81B-4A12-98DD-505C0F9FDB34}
+		{055D1A21-4062-42BD-86E6-B46AFB5136E0} = {946B1C08-5AA1-43BD-ADEB-F73E3FDB27A0}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {94B46B7F-1545-465E-863A-AAD0C58A8C0F}

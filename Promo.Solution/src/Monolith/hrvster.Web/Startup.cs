@@ -14,7 +14,6 @@ using hrvster.Core.Requests.Notifications;
 using hrvster.Core.Requests.Notifications.Handlers;
 using hrvster.Core.Requests.Notifications.Harvester;
 using hrvster.Core.Requests.WebRequests;
-using hrvster.Core.Requests.WebRequests.Validators;
 using hrvster.Extensions.Configuration;
 using hrvster.Extensions.OptionsConfiguration;
 using hrvster.Infrastructure;

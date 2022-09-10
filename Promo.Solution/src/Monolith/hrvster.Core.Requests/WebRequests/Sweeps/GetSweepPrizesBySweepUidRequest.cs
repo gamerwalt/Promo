@@ -1,10 +1,10 @@
-﻿using hrvster.Web.Models;
+﻿using hrvster.Models.WebModels.Sweeps;
 using MediatR;
 using System;
 
 namespace hrvster.Core.Requests.WebRequests.Sweeps
 {
-	public class GetSweepPrizesBySweepUidRequest : IRequest<SweepPrizes>
+	public class GetSweepPrizesBySweepUidRequest : IRequest<SweepPrize>
 	{
 		private Guid _sweepUid;
 

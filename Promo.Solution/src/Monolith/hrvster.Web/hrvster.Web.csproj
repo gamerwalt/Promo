@@ -1343,7 +1343,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="AspNetCoreHero.ToastNotification" Version="1.1.0" />
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="11.0.0" />
     <PackageReference Include="FirebaseAuthentication.net" Version="3.7.2" />
     <PackageReference Include="FluentValidation" Version="11.0.1" />
@@ -1359,6 +1358,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\..\..\Development\ToastNotification\AspNetCoreHero.ToastNotification\AspNetCoreHero.ToastNotification.csproj" />
     <ProjectReference Include="..\..\Promo.Clients\Promo.Clients.csproj" />
     <ProjectReference Include="..\..\Promo.Configuration\Promo.Configuration.csproj" />
     <ProjectReference Include="..\hrvster.ApplicationServices\hrvster.ApplicationServices.csproj" />

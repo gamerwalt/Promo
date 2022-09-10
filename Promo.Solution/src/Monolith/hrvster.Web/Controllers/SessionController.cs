@@ -1,8 +1,11 @@
 ﻿using AspNetCoreHero.ToastNotification.Abstractions;
+using AspNetCoreHero.ToastNotification.Helpers;
 using Firebase.Auth;
 using hrvster.Core.Authentication;
 using hrvster.Core.Requests.WebRequests;
+using hrvster.Extensions.ModelExtensions;
 using hrvster.Infrastructure.Authentication.ConfigurationOptions;
+using hrvster.Models.Extensions;
 using hrvster.Web.Models;
 using MediatR;
 using Microsoft.AspNetCore.Http;
@@ -57,38 +60,45 @@ namespace hrvster.Web.Controllers
 		[HttpPost]
 		public async Task<ActionResult> SignIn(SigninForm form, string returnUrl)
 		{
-			try
+			if(ModelState.IsValid)
 			{
-				var link = await _firebaseAuthProvider.SignInWithEmailAndPasswordAsync(form.Email, form.Password);
-
-				if (!string.IsNullOrWhiteSpace(link.FirebaseToken))// && link.User.IsEmailVerified)
+				try
 				{
-					if(!link.User.IsEmailVerified)
+					var link = await _firebaseAuthProvider.SignInWithEmailAndPasswordAsync(form.Email, form.Password);
+
+					if (!string.IsNullOrWhiteSpace(link.FirebaseToken))// && link.User.IsEmailVerified)
 					{
-						return RedirectToAction("Index", "VerifyEmail");
+						if (!link.User.IsEmailVerified)
+						{
+							return RedirectToAction("Index", "VerifyEmail");
+						}
+
+						HttpContext.Session.SetString(SessionConstants.UserToken, link.FirebaseToken);
+						HttpContext.Session.SetString(SessionConstants.UserUid, link.User.LocalId);
+						HttpContext.Session.SetString(SessionConstants.UserEmail, link.User.Email);
+						HttpContext.Session.SetString(SessionConstants.UserDisplayName, link.User.DisplayName);
+
+						if (string.IsNullOrWhiteSpace(returnUrl))
+							return RedirectToAction(actionName: "Index", controllerName: "Dashboard");
+						else
+							return Redirect(returnUrl);
 					}
+				}
+				catch (FirebaseAuthException ex)
+				{
+					var firebaseError = JsonConvert.DeserializeObject<FirebaseError>(ex.ResponseData);
 
-					HttpContext.Session.SetString(SessionConstants.UserToken, link.FirebaseToken);
-					HttpContext.Session.SetString(SessionConstants.UserUid, link.User.LocalId);
-					HttpContext.Session.SetString(SessionConstants.UserEmail, link.User.Email);
-					HttpContext.Session.SetString(SessionConstants.UserDisplayName, link.User.DisplayName);
+					_logger.LogWarning("A Firebase error has occurred during logon. Error: {firebaseError}", firebaseError.ToJsonString());
 
-					if (string.IsNullOrWhiteSpace(returnUrl))
-						return RedirectToAction(actionName: "Index", controllerName: "Dashboard");
-					else
-						return Redirect(returnUrl);
+					_notificationService.Error("Invalid email or password. Please try again.", 10);
+
+					return RedirectToAction("SignIn");
 				}
 			}
-			catch (FirebaseAuthException ex)
-			{
-				var firebaseError = JsonConvert.DeserializeObject<FirebaseError>(ex.ResponseData);
 
-				_notificationService.Warning("Invalid email or password.");
+			_notificationService.Error(ModelState.BuildMessageFromErrors(), 10); 
 
-				return View(form);
-			}
-
-			return RedirectToAction(nameof(SignIn));
+			return RedirectToAction("SignIn");
 		}
 
 		public async Task<ActionResult> SignOut()

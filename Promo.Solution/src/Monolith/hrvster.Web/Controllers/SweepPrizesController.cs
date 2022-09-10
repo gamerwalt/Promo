@@ -5,6 +5,7 @@ using FluentValidation.AspNetCore;
 using hrvster.Core.Authentication;
 using hrvster.Core.Requests;
 using hrvster.Core.Requests.WebRequests.Sweeps;
+using hrvster.Models.WebModels.Sweeps;
 using hrvster.Web.Models;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -339,7 +340,7 @@ namespace hrvster.Web.Controllers
 			return RedirectToAction(returnAction ?? "View", returnController ?? "Sweeps", new { sweepUid = sweepUid, campaignUid = campaignUid });
 		}
 
-		private int GetNextPosition(SweepPrizes currentPrizes)
+		private int GetNextPosition(SweepPrize currentPrizes)
 		{
 			if (currentPrizes.Prizes.Count == 0) return 1;
 
