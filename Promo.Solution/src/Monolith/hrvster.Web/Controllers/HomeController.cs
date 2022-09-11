@@ -6,7 +6,6 @@ using System.Diagnostics;
 
 namespace hrvster.Web.Controllers
 {
-	[FirebaseAuthorize]
 	public class HomeController : Controller
 	{
 		private readonly ILogger<HomeController> _logger;

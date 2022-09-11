@@ -42,6 +42,12 @@ namespace hrvster.Web.Mapper
 			CreateMap<hrvster.Models.SweepPrize, Prize>()
 				.ReverseMap();
 
+			CreateMap<hrvster.Models.SweepPrize, SweepPrize>()
+				.ReverseMap();
+
+			CreateMap<SweepPrize, Prize>()
+				.ReverseMap();
+
 			CreateMap<hrvster.Models.SweepWinner, Winner>()
 				.ReverseMap();
 		}

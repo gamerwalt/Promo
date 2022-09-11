@@ -44,7 +44,7 @@ namespace hrvster.Core.Handlers.Sweepstakes
 			var sweepTask = _sweepsRepository.GetAsync(request.SweepUid);
 			var ruleTask = _rulesRepository.GetSweepRuleAsync(request.SweepUid);
 			var entryRuleTask = _entryRulesRepository.GetSweepEntryRuleAsync(request.SweepUid);
-			var drawRuleTask = _drawRuleRepository.GetDrawRuleAsync(request.SweepUid);
+			var drawRuleTask = _drawRuleRepository.GetSweepDrawRuleAsync(request.SweepUid);
 			tasks.Add(sweepTask);
 			tasks.Add(ruleTask);
 			tasks.Add(entryRuleTask);

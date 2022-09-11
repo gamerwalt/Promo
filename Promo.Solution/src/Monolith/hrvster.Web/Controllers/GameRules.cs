@@ -23,9 +23,9 @@ namespace hrvster.Web.Controllers
 		[Route("GameRules/Sweepstakes/NG/en/{sweepUid}")]
 		public async Task<IActionResult> Sweepstakes([FromRoute] Guid sweepUid)
 		{
-			var sweepAndRules = await _mediator.Send(new GetSweepstakeForRulesViewRequest(sweepUid));
+			var sweepRulesAndPrizes = await _mediator.Send(new GetSweepstakeForRulesViewRequest(sweepUid));
 
-			return new OkObjectResult(sweepAndRules);
+			return View(sweepRulesAndPrizes);
 		}
 	}
 }
