@@ -17,7 +17,7 @@ namespace hrvster.Web.Controllers
 
 		public IActionResult Index()
 		{
-			return View();
+			return RedirectToAction("Index", "Dashboard");
 		}
 
 		[ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

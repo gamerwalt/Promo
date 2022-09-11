@@ -15,6 +15,7 @@ namespace hrvster.Infrastructure.Accounts
 		Task<Profile> GetProfileAsync(Guid userUid, ProfileType profileType);
 		Task<IEnumerable<Profile>> GetProfilesAsync(Guid userUid);
 		Task<Profile> GetProfileByCampaignUid(Guid campaignUid, ProfileType profileType);
+		Task<Profile> GetProfileBelongingToSweepRuleAsync(Guid ruleUid, ProfileType profileType	);
 	}
 
 	public class ProfilesRepository : IProfilesRepository
@@ -141,6 +142,29 @@ namespace hrvster.Infrastructure.Accounts
 				command.CommandText = "profile_get_by_campaign_uid";
 				command.CommandType = CommandType.StoredProcedure;
 				command.AddParameter(nameof(campaignUid), campaignUid)
+					.AddParameter("profileType", profileType);
+
+				await conn.OpenAsync();
+				using var reader = await command.ExecuteReaderAsync();
+				while (await reader.ReadAsync())
+				{
+					profile = CreateRecordFrom(reader);
+				}
+			}
+
+			return profile;
+		}
+
+		public async Task<Profile> GetProfileBelongingToSweepRuleAsync(Guid ruleUid, ProfileType profileType)
+		{
+			var profile = default(Profile);
+
+			using (var conn = new MySqlConnection(_database.GetConnectionString()))
+			{
+				var command = conn.CreateCommand();
+				command.CommandText = "profile_get_by_rule_uid";
+				command.CommandType = CommandType.StoredProcedure;
+				command.AddParameter(nameof(ruleUid), ruleUid)
 					.AddParameter("profileType", profileType);
 
 				await conn.OpenAsync();

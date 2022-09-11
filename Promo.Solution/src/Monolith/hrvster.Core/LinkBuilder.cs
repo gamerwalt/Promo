@@ -1,6 +1,7 @@
 ﻿using hrvster.Core.Authentication;
 using hrvster.Infrastructure;
 using hrvster.Infrastructure.Accounts;
+using hrvster.Models;
 using hrvster.Models.Options;
 using System;
 using System.Threading.Tasks;
@@ -25,12 +26,19 @@ namespace hrvster.Core
 			_services = services;
 		}
 
-		public async Task<Uri> BuildTwitterLink(string tweetId)
+		public async Task<Uri> BuildTwitterLink(string tweetId, Guid ruleUid)
 		{
 			if (string.IsNullOrWhiteSpace(_hrvsterUser.TwitterUserName))
 			{
 				var profile = await _profilesRepository.GetProfileAsync(_hrvsterUser.UserUid, Models.ProfileType.Twitter);
 				_hrvsterUser.TwitterUserName = profile?.ScreenName;
+			}
+			var twitterUserName = string.Empty;
+
+			if(string.IsNullOrWhiteSpace(_hrvsterUser.TwitterUserName))
+			{
+				var profile = await _profilesRepository.GetProfileBelongingToSweepRuleAsync(ruleUid, ProfileType.Twitter);
+				_hrvsterUser.TwitterUserName = profile.ScreenName;
 			}
 
 			return new Uri(_services.TweetIdUrl

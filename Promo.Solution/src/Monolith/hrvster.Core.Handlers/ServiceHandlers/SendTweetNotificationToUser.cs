@@ -6,9 +6,11 @@ using hrvster.Infrastructure.Accounts;
 using hrvster.Models;
 using hrvster.Models.Profiles;
 using MediatR;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Linq;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -20,21 +22,26 @@ namespace hrvster.Core.Handlers.ServiceHandlers
 		private readonly ISweepPrizesRepository _sweepPrizesRepository;
 		private readonly IProfilesRepository _profilesRepository;
 		private readonly Func<ExternalClientType, IExternalClient> _publisherResolver;
+		private readonly IConfiguration _config;
 
 		public SendTweetNotificationToUser(
 			ILoggerFactory loggerFactory,
 			ISweepPrizesRepository sweepPrizesRepository,
 			IProfilesRepository profilesRepository,
-			Func<ExternalClientType, Clients.Publishers.IExternalClient> publisherResolver)
+			Func<ExternalClientType, IExternalClient> publisherResolver,
+			IConfiguration config)
 		{
 			_logger = loggerFactory.CreateLogger<SendTweetNotificationToUser>();
 			_sweepPrizesRepository = sweepPrizesRepository;
 			_profilesRepository = profilesRepository;
 			_publisherResolver = publisherResolver;
+			_config = config;
 		}
 
 		public async Task Handle(SweepEntryFromTweetRecorded notification, CancellationToken cancellationToken)
 		{
+			var twitterPublisher = _publisherResolver(ExternalClientType.Twitter);
+
 			var prizes = await _sweepPrizesRepository.GetSweepPrizesAsync(notification.Sweep.SweepUid);
 			var totalValue = prizes.Sum(c => c.PrizeValue);
 
@@ -58,8 +65,6 @@ namespace hrvster.Core.Handlers.ServiceHandlers
 				}
 			}
 
-			var twitterPublisher = _publisherResolver(ExternalClientType.Twitter);
-
 			var profile = await _profilesRepository.GetProfileByCampaignUid(notification.Campaign.CampaignUid, ProfileType.Twitter);
 			if (profile == null)
 			{
@@ -70,16 +75,18 @@ namespace hrvster.Core.Handlers.ServiceHandlers
 				return;
 			}
 
-			var tweetId = await twitterPublisher
-				.PublishResponse(
-					new Message
-					{
-						Text = tweetText,
-						Profile = profile
-					}, 
-					notification.Tweet.IdStr);
-
+			var tweetId = await twitterPublisher.PublishResponse(new Message { Text = tweetText, Profile = profile }, notification.Tweet.IdStr);
 			var replyToTweet = await twitterPublisher.PublishResponse(new Message { Text = prizesText, Profile = profile }, tweetId);
+			var rulesReplyToTweet = await twitterPublisher.PublishResponse(new Message { Text = GetRuleText(notification.Sweep), Profile = profile }, replyToTweet);
+		}
+
+		private string GetRuleText(Sweep sweep)
+		{
+			//Todo: We need to do this better
+			var url = _config["hrvsterUrls"];
+			var uriString = $"{url}/{Constants.GameRulesPath}/{GameTypes.Sweepstake}/NG/en/{sweep.SweepUid}";
+
+			return $"To see official rules, please visit {uriString}";
 		}
 	}
 }

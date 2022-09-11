@@ -9,5 +9,12 @@
 
 		//urls
 		public const string ScheduledTweetUrl = "https://ads-api.twitter.com/11/accounts/18ce55gm9g0/scheduled_tweets?as_user_id={asUserId}&schduled_at={scheduledAt}";
+
+		public static string GameRulesPath = "GameRules";
+	}
+
+	public class GameTypes
+	{
+		public const string Sweepstake = "Sweepstakes";
 	}
 }

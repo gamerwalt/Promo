@@ -9,9 +9,4 @@ namespace hrvster.Models.WebModels.Sweeps
 		public EntryRule EntryRule { get; set; }
 		public DrawRule DrawRule { get; set; }
 	}
-
-	public class SweepstakeRulesAndPrizes : SweepstakeAndRules
-	{
-		public IEnumerable<Models.SweepPrize> Prizes { get; set; }
-	}
 }

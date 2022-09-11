@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using hrvster.Core.Requests.WebRequests;
 using hrvster.Infrastructure;
+using hrvster.Infrastructure.Accounts;
 using hrvster.Models.WebModels.Sweeps;
 using MediatR;
 using Microsoft.Extensions.Logging;
@@ -20,6 +21,7 @@ namespace hrvster.Core.Handlers.Sweepstakes
 		private readonly ISweepEntryRulesRepository _entryRulesRepository;
 		private readonly IDrawRuleRepository _drawRuleRepository;
 		private readonly ISweepPrizesRepository _sweepPrizesRepository;
+		private readonly IProfilesRepository _profilesRepository;
 		private readonly IMapper _mapper;
 
 		public GetSweepstakeForRulesView(
@@ -29,6 +31,7 @@ namespace hrvster.Core.Handlers.Sweepstakes
 			ISweepEntryRulesRepository entryRulesRepository,
 			IDrawRuleRepository drawRuleRepository,
 			ISweepPrizesRepository sweepPrizesRepository,
+			IProfilesRepository profilesRepository,
 			IMapper mapper)
 		{
 			_logger = loggerFactory.CreateLogger<GetSweepstakeAndRulesHandler>();
@@ -37,6 +40,7 @@ namespace hrvster.Core.Handlers.Sweepstakes
 			_entryRulesRepository = entryRulesRepository;
 			_drawRuleRepository = drawRuleRepository;
 			_sweepPrizesRepository = sweepPrizesRepository;
+			_profilesRepository = profilesRepository;
 			_mapper = mapper;
 		}
 
@@ -59,8 +63,12 @@ namespace hrvster.Core.Handlers.Sweepstakes
 			tasks.Add(prizesTask);
 
 			var sweepRuleAndPrizes = default(SweepstakeRulesAndPrizes);
-
+			var profile = default(Models.Profiles.Profile);
 			await Task.WhenAll(tasks);
+
+
+			if(ruleTask.Result.Count() > 0)
+				profile = await _profilesRepository.GetProfileBelongingToSweepRuleAsync(ruleTask.Result.FirstOrDefault().RuleUid, Models.ProfileType.Twitter);
 
 			sweepRuleAndPrizes = new SweepstakeRulesAndPrizes
 			{
@@ -68,7 +76,8 @@ namespace hrvster.Core.Handlers.Sweepstakes
 				Rules = _mapper.Map<IEnumerable<Rule>>(ruleTask.Result.ToList()),
 				EntryRule = _mapper.Map<EntryRule>(entryRuleTask.Result),
 				DrawRule = _mapper.Map<DrawRule>(drawRuleTask.Result),
-				Prizes = prizesTask.Result.ToList()
+				Prizes = prizesTask.Result.ToList(),
+				Profile = profile
 			};
 
 			_logger.LogInformation("Finished handling getting sweep rules and prizes for Sweep Uid {sweepUid}",
