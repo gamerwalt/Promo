@@ -86,7 +86,7 @@ namespace hrvster.Core.Handlers.ServiceHandlers
 			var url = _config["hrvsterUrls"];
 			var uriString = $"{url}/{Constants.GameRulesPath}/{GameTypes.Sweepstake}/NG/en/{sweep.SweepUid}";
 
-			return $"To see official rules, please visit {uriString}";
+			return $"Visit {uriString} to view the official rules of the sweepstake.";
 		}
 	}
 }

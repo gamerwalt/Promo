@@ -3,7 +3,7 @@
     "hrvster.Twitter.Harvester": {
       "commandName": "Project",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "local"
       },
       "dotnetRunMessages": "true"
     }
