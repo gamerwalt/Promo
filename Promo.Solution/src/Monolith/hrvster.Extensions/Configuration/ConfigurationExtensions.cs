@@ -1,4 +1,5 @@
-﻿using hrvster.Infrastructure;
+﻿using hrvster.ApplicationServices.Common;
+using hrvster.Infrastructure;
 using hrvster.Infrastructure.Accounts;
 using hrvster.Infrastructure.Harvester;
 using hrvster.Infrastructure.Scheduling;
@@ -45,10 +46,14 @@ namespace hrvster.Extensions.Configuration
 			=> services
 				.AddTransient<IHarvesterRepository, HarvesterRepository>()
 				.AddTransient<IReportingRepository, ReportingRepository>()
-				.AddTransient<IIncomingTweetsRepository, IncomingTweetsRepository>();
+				.AddTransient<IIncomingTweetsRepository, IncomingTweetsRepository>()
+				.AddTransient<IUserLimiterRepository, UserLimiterRepository>();
 
 		public static IServiceCollection AddEmailRepository(this IServiceCollection services)
 			=> services
 				.AddTransient<IMailRepository, MailRepository>();
+
+		public static IServiceCollection AddUserRateLimiterService(this IServiceCollection services)
+			=> services.AddTransient<IUserRateLimiterService, UserRateLimiterService>();
 	}
 }

@@ -29,7 +29,7 @@ namespace hrvster.Core.Handlers.ServiceHandlers
 
 		protected override async Task Handle(NotifyUserOfNotFollowingProfileRequest request, CancellationToken cancellationToken)
 		{
-			_logger.LogInformation("Notifying user {} of not following profile account.", request.Tweet.CreatedBy.ScreenName);
+			_logger.LogInformation("Notifying user {userName} of not following profile account.", request.Tweet.CreatedBy.ScreenName);
 
 			var message = new Message
 			{

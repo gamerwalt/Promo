@@ -10,6 +10,8 @@ using System.Threading;
 using hrvster.Infrastructure.Harvester;
 using hrvster.Models;
 using hrvster.Models.Extensions;
+using System.Runtime.CompilerServices;
+using hrvster.ApplicationServices.Common;
 
 namespace hrvster.Core.Handlers.ServiceHandlers
 {
@@ -20,19 +22,22 @@ namespace hrvster.Core.Handlers.ServiceHandlers
 		private readonly ISweepRulesRepository _sweepRulesRepository;
 		private readonly IHarvesterRepository _harvesterRepository;
 		private readonly IIncomingTweetsRepository _incomingTweetsRepository;
+		private readonly IUserRateLimiterService _userRateLimiterService;
 
 		public ProcessNewTweet(
 			ILoggerFactory loggerFactory,
 			IMediator mediator,
 			ISweepRulesRepository sweepRulesRepository,
 			IHarvesterRepository harvesterRepository,
-			IIncomingTweetsRepository incomingTweetsRepository)
+			IIncomingTweetsRepository incomingTweetsRepository,
+			IUserRateLimiterService userRateLimiterService)
 		{
 			_logger = loggerFactory.CreateLogger<ProcessNewTweet>();
 			_mediator = mediator;
 			_sweepRulesRepository = sweepRulesRepository;
 			_harvesterRepository = harvesterRepository;
 			_incomingTweetsRepository = incomingTweetsRepository;
+			_userRateLimiterService = userRateLimiterService;
 		}
 
 		async protected override Task Handle(ProcessNewTweetRequest request, CancellationToken cancellationToken)
@@ -42,6 +47,18 @@ namespace hrvster.Core.Handlers.ServiceHandlers
 				request.Tweet.Text,
 				request.Json);
 
+			if(!await _userRateLimiterService.IsAllowedAsync(
+				request.Tweet.CreatedBy.IdStr, 
+				request.Tweet.Hashtags, 
+				UserIdentifierType.TwitterHandle))
+			{
+				_logger.LogWarning("Cannot continue processing this tweet. User has tweeted to many times.");
+
+				await _mediator.Publish(new TweetProcessingStopped(RateLimiter.UserRateLimiter, request, request.IncomingTweet));
+
+				return;
+			}
+
 			await _incomingTweetsRepository.UpdateStatusAsync(
 				request.IncomingTweet.IncomingTweetUid, 
 				Models.Harvester.IncomingTweetStatus.Processing);
@@ -50,6 +67,7 @@ namespace hrvster.Core.Handlers.ServiceHandlers
 			//Send to harvster table as not processed
 			//we should have another cron job periodically check and process unprocessed tweets
 			var rules = new List<Rule>();
+			var tasks = new List<Task>();
 
 			foreach (var hashtag in request.Tweet.Hashtags)
 			{
@@ -62,6 +80,8 @@ namespace hrvster.Core.Handlers.ServiceHandlers
 					hashtag.Text);
 
 				rules.AddRange(sweepRules);
+
+				await _userRateLimiterService.UpsertAsync(hashtag, request.Tweet.CreatedBy.IdStr, UserIdentifierType.TwitterHandle);
 			}
 
 			var newUserUid = Guid.NewGuid();

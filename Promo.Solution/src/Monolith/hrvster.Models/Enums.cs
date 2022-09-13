@@ -60,4 +60,9 @@
 		Sent,
 		Failed
 	}
+
+	public enum RateLimiter
+	{
+		UserRateLimiter
+	}
 }

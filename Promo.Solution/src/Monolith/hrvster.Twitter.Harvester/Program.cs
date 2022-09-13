@@ -1,6 +1,7 @@
 using hrvster.Core.Handlers.ServiceHandlers;
 using hrvster.Core.Requests.ServiceRequests;
 using hrvster.Extensions.Configuration;
+using hrvster.Extensions.OptionsConfiguration;
 using hrvster.Infrastructure;
 using MediatR;
 using Microsoft.Extensions.Configuration;
@@ -49,7 +50,9 @@ namespace hrvster.Twitter.Harvester
 						.AddBlacklistedRepository()
 						.AddTwitterClient(Configuration)
 						.AddApplicationCronServices()
-						.AddPublishers();
+						.AddPublishers()
+						.AddUserRateLimiterService()
+						.AddHarvsterConfigurationOption(Configuration);
 
 					AddDatabases(services);
 					AddMediator(services);

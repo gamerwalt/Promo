@@ -7,6 +7,7 @@
 		Retrying,
 		CompletedUserNotFollowing,
 		CompletedCampaignOrSweepstakeNotRunning,
+		CompletedTooManyTweets,
 		Completed,
 		Failed
 	}

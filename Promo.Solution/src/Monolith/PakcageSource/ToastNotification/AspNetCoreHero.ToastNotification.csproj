@@ -17,6 +17,7 @@
     <PackageIcon>OculusScreenshot1655955058.jpeg</PackageIcon>
     <PackageProjectUrl>https://github.com/aspnetcorehero/ToastNotification</PackageProjectUrl>
     <RepositoryUrl>https://github.com/aspnetcorehero/ToastNotification</RepositoryUrl>
+    <IsPublishable>False</IsPublishable>
   </PropertyGroup>
 
   <ItemGroup>

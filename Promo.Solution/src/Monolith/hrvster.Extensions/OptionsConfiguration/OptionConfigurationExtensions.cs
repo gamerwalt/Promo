@@ -40,5 +40,13 @@ namespace hrvster.Extensions.OptionsConfiguration
 					.Configure<NotificationServiceOptions>(configuration)
 					.Configure<NotificationServiceOptions>(configuration.GetSection(NotificationServiceOptions.SectionName))
 					.AddTransient(s => s.GetService<IOptions<NotificationServiceOptions>>().Value);
+
+		public static IServiceCollection AddHarvsterConfigurationOption(
+			this IServiceCollection services,
+			IConfiguration configuration)
+				=> services
+					.Configure<HarvesterSettingsOptions>(configuration)
+					.Configure<HarvesterSettingsOptions>(configuration.GetSection(HarvesterSettingsOptions.SectionName))
+					.AddTransient(s => s.GetService<IOptions<HarvesterSettingsOptions>>().Value);
 	}
 }
