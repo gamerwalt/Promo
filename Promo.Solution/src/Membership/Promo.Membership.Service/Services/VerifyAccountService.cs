@@ -1,6 +1,7 @@
 ﻿using FirebaseAdmin;
 using FirebaseAdmin.Auth;
 using Google.Apis.Auth.OAuth2;
+using hrvster.Models.Options;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
@@ -30,19 +31,22 @@ namespace Promo.Membership.Service.Services
         private readonly IMailClient _mailClient;
         private readonly IConfiguration _config;
         private readonly IServiceAuthenticate _serviceAuthenticate;
+		private readonly HarvesterSettingsOptions _harvesterSettings;
 
         public VerifyAccountService(
             ILogger<VerifyAccountService> logger,
             IAccountsRepository repository,
             IMailClient mailclient,
             IConfiguration config,
-            IServiceAuthenticate serviceAuthenticate)
+            IServiceAuthenticate serviceAuthenticate,
+			HarvesterSettingsOptions harvesterSettings)
         {
             _logger = logger;
             _repository = repository;
             _config = config;
             _mailClient = mailclient;
             _serviceAuthenticate = serviceAuthenticate;
+			_harvesterSettings = harvesterSettings;
         }
 
         public async Task VerifyAnyUnverifiedAccounts(CancellationToken token)
@@ -108,7 +112,7 @@ namespace Promo.Membership.Service.Services
                 Parameters = new Dictionary<string, string>()
                 {
                     { "DisplayName", account.DisplayName },
-                    { "DashboardLink", "https://dashboardlink" }
+                    { "DashboardLink", _harvesterSettings.hrvsterUrl }
                 },
                 Status = EmailStatus.New,
                 Template = EmailTemplate.WelcomeEmail

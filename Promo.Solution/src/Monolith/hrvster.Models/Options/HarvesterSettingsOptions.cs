@@ -5,5 +5,6 @@
 		public static string SectionName = "HrvsterSettings";
 
 		public int UserTweetRateLimiterInMinutes { get; set; } = 0;
+		public string hrvsterUrl { get; set; }
 	}
 }

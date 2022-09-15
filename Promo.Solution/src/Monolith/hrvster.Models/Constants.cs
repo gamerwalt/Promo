@@ -17,4 +17,9 @@
 	{
 		public const string Sweepstake = "Sweepstakes";
 	}
+
+	public class UrlTypes
+	{
+		public const string DashboardLink = "Dashboard";
+	}
 }

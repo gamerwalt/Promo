@@ -47,6 +47,7 @@ namespace hrvster.Services
 					services.AddSingleton<IService, ScheduledTweetService>();
 					services.AddSingleton<IService, SweepstakesDrawService>();
 					services.AddSingleton<IService, EmailNotificationService>();
+					services.AddSingleton<IService, AccountVerificationService>();
 
 					services
 						.AddAccountRepositories()
@@ -59,7 +60,9 @@ namespace hrvster.Services
 						.AddApplicationCronServices()
 						.AddPublishers()
 						.AddSendGrid(Configuration)
-						.AddRandomizer();
+						.AddRandomizer()
+						.AddFirebaseServices(Configuration)
+						.AddHarvsterConfigurationOption(Configuration);
 
 					AddDatabases(services);
 					LoadServices(services);

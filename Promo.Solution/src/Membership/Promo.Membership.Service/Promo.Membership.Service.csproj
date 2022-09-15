@@ -10,6 +10,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\Monolith\hrvster.Models\hrvster.Models.csproj" />
     <ProjectReference Include="..\..\Promo.Clients\Promo.Clients.csproj" />
     <ProjectReference Include="..\..\Promo.Core\Promo.Core.csproj" />
     <ProjectReference Include="..\Promo.Membership.Infrastructure\Promo.Membership.Infrastructure.csproj" />

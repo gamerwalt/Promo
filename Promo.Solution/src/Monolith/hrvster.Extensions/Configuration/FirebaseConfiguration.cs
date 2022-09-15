@@ -22,9 +22,9 @@ namespace hrvster.Extensions.Configuration
 			services.Configure<FirebaseConfig>(configuration.GetSection(FirebaseConfig.Firebase));
 			services.AddTransient(p => p.GetService<IOptions<FirebaseConfig>>().Value);
 
-			services.AddSingleton<FirebaseApp>(c => BuildFirebaseApp(c, configuration));
-			services.AddSingleton<FirebaseAuth>(c => BuildFirebaseAuth(c, configuration));
-			services.AddSingleton<FirebaseAuthProvider>(c => BuildFirebaseAuthProvider(c, configuration));
+			services.AddSingleton(c => BuildFirebaseApp(c, configuration));
+			services.AddSingleton(c => BuildFirebaseAuth(c, configuration));
+			services.AddSingleton(c => BuildFirebaseAuthProvider(c, configuration));
 			return services;
 		}
 
