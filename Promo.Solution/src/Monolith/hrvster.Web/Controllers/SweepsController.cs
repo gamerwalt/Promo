@@ -65,7 +65,7 @@ namespace hrvster.Web.Controllers
 			var anyActivePromotions = promotions.Any(c => c.IsActive());
 			var anyWillBeInProgress = promotions.Any(c => c.WillBeInProgress());
 
-			if (!anyActivePromotions || !anyWillBeInProgress)
+			if (!anyActivePromotions && !anyWillBeInProgress)
 			{
 				_notificationService.Error(
 					"None of your promotions are active. We need 1 active promotion to continue.",
@@ -87,7 +87,7 @@ namespace hrvster.Web.Controllers
 			var anyActivePromotions = promotions.Any(c => c.IsActive());
 			var anyWillBeInProgress = promotions.Any(c => c.WillBeInProgress());
 
-			if (!anyActivePromotions || !anyWillBeInProgress)
+			if (!anyActivePromotions && !anyWillBeInProgress)
 			{
 				_notificationService.Error(
 					"None of your promotions are active. We need 1 active promotion to continue.",
@@ -108,7 +108,7 @@ namespace hrvster.Web.Controllers
 			}
 
 			form.Promotions = promotions
-				.Where(p => p.IsActive())
+				.Where(p => p.IsActive() || p.WillBeInProgress())
 				.Select(a => new SelectListItem()
 				{
 					Text = $"{a.CampaignName} - {a.StartDate.ToString("d")} to {a.EndDate.ToString("d")}",
@@ -319,7 +319,7 @@ namespace hrvster.Web.Controllers
 			var model = new CreateNewSweep
 			{
 				Promotions = promotions
-					.Where(p => p.IsActive())
+					.Where(p => p.IsActive() || p.WillBeInProgress())
 					.Select(a => new SelectListItem()
 					{
 						Text = $"{a.CampaignName} - {a.StartDate.ToString("d")} to {a.EndDate.ToString("d")}",

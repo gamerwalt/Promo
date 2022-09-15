@@ -3,6 +3,7 @@ using hrvster.Infrastructure;
 using hrvster.Models.Extensions;
 using MediatR;
 using Microsoft.Extensions.Logging;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -27,6 +28,7 @@ namespace hrvster.Core.Handlers.Sweepstakes
 
 			await _repository.CreateAsync(new Models.Sweep
 			{
+				SweepUid = Guid.NewGuid(),
 				Account = new Models.Account
 				{
 					AccountUid = request.AccountUid
