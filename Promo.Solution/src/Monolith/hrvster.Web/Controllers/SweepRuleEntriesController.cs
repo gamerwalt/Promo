@@ -1,5 +1,6 @@
 ﻿using AspNetCoreHero.ToastNotification.Abstractions;
 using AutoMapper;
+using hrvster.Core.Authentication;
 using hrvster.Core.Requests;
 using hrvster.Core.Requests.WebRequests.Sweeps;
 using hrvster.Models.Options;
@@ -20,19 +21,22 @@ namespace hrvster.Web.Controllers
 		private readonly IMapper _mapper;
 		private readonly INotyfService _notificationService;
 		private readonly NotificationServiceOptions _notificationConfiguration;
+		private readonly HrvsterUser _hrvsterUser;
 
 		public SweepRuleEntriesController(
 			ILoggerFactory loggerFactory,
 			IMediator mediator,
 			IMapper mapper,
 			INotyfService notificationService,
-			NotificationServiceOptions notificationServiceOptions)
+			NotificationServiceOptions notificationServiceOptions,
+			HrvsterUser hrvsterUser)
 		{
 			_logger = loggerFactory.CreateLogger<SweepRuleEntriesController>();
 			_mediator = mediator;
 			_mapper = mapper;
 			_notificationConfiguration = notificationServiceOptions;
 			_notificationService = notificationService;
+			_hrvsterUser = hrvsterUser;
 		}
 
 		public async Task<IActionResult> View(Guid sweepUid, Guid ruleUid, string actionName, string controllerName)
@@ -49,7 +53,10 @@ namespace hrvster.Web.Controllers
 				return RedirectToAction(actionName ?? "View", controllerName ?? "SweepRules", new { sweepUid = sweepUid });
 			}
 
-			if(rule == null)
+			if (sweep.Account.AccountUid != _hrvsterUser.UserUid)
+				return RedirectToAction(actionName ?? "Index", controllerName ?? "Sweeps");
+
+			if (rule == null)
 			{
 				_logger.LogWarning("There is no sweeps with the uid {ruleUid}.", ruleUid);
 				_notificationService.Warning($"There is no rule with the uid {ruleUid}", _notificationConfiguration.DismissInSeconds);

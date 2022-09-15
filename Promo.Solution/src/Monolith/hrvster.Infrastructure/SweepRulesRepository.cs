@@ -195,6 +195,10 @@ namespace hrvster.Infrastructure
 						CampaignTypeName = reader.GetString("campaign_type_name"),
 						CampaignTypeCode = (CampaignTypeCode)Enum.Parse(typeof(CampaignTypeCode), reader.GetString("campaign_type_code")),
 						CamapaignTypeDescription = reader.GetString("campaign_type_description")
+					},
+					Account = new Account
+					{
+						AccountUid = reader.GetGuid("account_uid")
 					}
 				},
 				Sweep = new Sweep
@@ -202,54 +206,25 @@ namespace hrvster.Infrastructure
 					SweepUid = reader.GetGuid("sweep_uid"),
 					SweepId = reader.GetInt32("sweep_id"),
 					Name = reader.GetString("sweep_name"),
-					RulesUrl = GetStringValue(reader, "rules_url"),
+					RulesUrl = reader.GetStringValue("rules_url"),
 					StartDate = reader.GetDateTime("start_date"),
 					EndDate = reader.GetDateTime("end_date"),
 					DrawDate = reader.GetDateTime("draw_date"),
-					DateDrawn = GetNullableDateTimeValue(reader, "date_drawn")
+					DateDrawn = reader.GetNullableDateTimeValue("date_drawn"),
+					Account = new Account
+					{
+						AccountUid = reader.GetGuid("account_uid")
+					}
 				},
 				RuleUid = reader.GetGuid("rule_uid"),
 				WatchValue = reader.GetString("watch_value"),
 				WatchTypeCode = (WatchTypeCode)Enum.Parse(typeof(WatchTypeCode), reader.GetString("watch_type_code")),
-				ExternalId = GetLongValue(reader, "external_id"),
+				ExternalId = reader.GetLongValue("external_id"),
 				ActiveInd = reader.GetBoolean("active_ind"),
 				MustBeFollowing = reader.GetBoolean("must_be_following"),
 				CreatedDate = reader.GetDateTime("created_date"),
-				UpdatedDate = GetNullableDateTimeValue(reader, "updated_date")
+				UpdatedDate = reader.GetNullableDateTimeValue("updated_date")
 			};
-		}
-
-		private string GetStringValue(MySqlDataReader reader, string fieldName)
-		{
-			var value = reader[fieldName].ToString();
-			if(string.IsNullOrWhiteSpace(value))
-			{
-				return string.Empty;
-			}
-
-			return reader.GetString(fieldName);
-		}
-
-		private long GetLongValue(MySqlDataReader reader, string fieldName)
-		{
-			var value = reader[fieldName].ToString();
-			if (string.IsNullOrWhiteSpace(value))
-			{
-				return 0;
-			}
-
-			return reader.GetInt64(fieldName);
-		}
-
-		private DateTime? GetNullableDateTimeValue(MySqlDataReader reader, string fieldName)
-		{
-			var value = reader[fieldName].ToString();
-			if (string.IsNullOrWhiteSpace(value))
-			{
-				return null;
-			}
-
-			return reader.GetDateTime(fieldName);
 		}
 
 		public async Task UpdateRuleExternalId(Guid ruleUid, string externalId)

@@ -59,6 +59,8 @@ namespace hrvster.Web.Controllers
 				return RedirectToAction("Index");
 			}
 
+			if (campaign.Account.AccountUid != _hrvsterUser.UserUid) return RedirectToAction("Index");
+
 			var sweeps = await _mediator.Send(new GetSweepsForCampaignUid(campaignUid, _hrvsterUser.UserUid));
 			var campaignTypes = await _mediator.Send(new GetCampaignTypesRequest());
 
@@ -100,8 +102,10 @@ namespace hrvster.Web.Controllers
 			{
 				_notificationService.Error("Promotion not found.", 10);
 
-				return RedirectToAction("View");
+				return RedirectToAction("Index");
 			}
+
+			if (campaign.Account.AccountUid != _hrvsterUser.UserUid) return RedirectToAction("Index");
 
 			var sweeps = await _mediator.Send(new GetSweepsForCampaignUid(campaignUid, _hrvsterUser.UserUid));
 			var campaignTypes = await _mediator.Send(new GetCampaignTypesRequest());

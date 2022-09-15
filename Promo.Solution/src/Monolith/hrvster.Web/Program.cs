@@ -1,5 +1,6 @@
 using hrvster.Models.Extensions;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Hosting.StaticWebAssets;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -39,6 +40,13 @@ namespace hrvster.Web
 					webBuilder
 						.UseStartup<Startup>()
 						.UseContentRoot(Directory.GetCurrentDirectory())
+						.ConfigureAppConfiguration((context, config) =>
+						{
+							if(!context.HostingEnvironment.IsDevelopment())
+							{
+								StaticWebAssetsLoader.UseStaticWebAssets(context.HostingEnvironment, context.Configuration);
+							}
+						})
 						.UseSerilog(ConfigureSerilog, preserveStaticLogger: true, true);
 				});
 

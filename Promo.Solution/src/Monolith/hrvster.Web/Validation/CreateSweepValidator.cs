@@ -52,8 +52,15 @@ namespace hrvster.Web.Validation
 			RuleFor(sweepStake => sweepStake.DrawDate)
 				.Must((sweepStake, drawDate) => BeBetweenPromotionDates(sweepStake, drawDate))
 				.WithMessage("The sweepstake draw date should be between the promotion dates.");
+
+			RuleFor(sweepstake => sweepstake.AcceptTerms)
+				.Must(c => BeAccepted(c))
+				.WithMessage("You have to accept the terms and conditions of creating a game on our platform.");
 		}
 
+		private bool BeAccepted(bool accepted)
+			=> accepted;
+		
 		private bool ShouldNotExistAlready(string name)
 		{
 			var accountUid = _hrvsterUser.UserUid;

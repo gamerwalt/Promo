@@ -20,17 +20,20 @@ namespace hrvster.Web.Controllers
 		private readonly IMediator _mediator;
 		private readonly SweepstakeConfiguration _sweepConfig;
 		private readonly INotyfService _notificationService;
+		private readonly HrvsterUser _hrvsterUser;
 
 		public SweepDrawRuleController(
 			ILoggerFactory loggerFactory,
 			IMediator mediator,
 			SweepstakeConfiguration sweepConfig,
-			INotyfService notificationService)
+			INotyfService notificationService,
+			HrvsterUser hrvsterUser)
 		{
 			_logger = loggerFactory.CreateLogger<SweepDrawRuleController>();
 			_mediator = mediator;
 			_sweepConfig = sweepConfig;
 			_notificationService = notificationService;
+			_hrvsterUser = hrvsterUser;
 		}
 
 		[HttpGet]
@@ -45,6 +48,9 @@ namespace hrvster.Web.Controllers
 
 				return RedirectToAction(actionName ?? "View", controllerName ?? "Sweeps", new { sweepUid = sweepUid });
 			}
+
+			if (sweep.Account.AccountUid != _hrvsterUser.UserUid)
+				return RedirectToAction(actionName ?? "Index", controllerName ?? "Sweeps");
 
 			var model = new CreateSweepDrawRule
 			{
@@ -72,6 +78,9 @@ namespace hrvster.Web.Controllers
 
 				return RedirectToAction(actionName ?? "View", controllerName ?? "Sweeps", new { sweepUid = sweepUid });
 			}
+
+			if (sweep.Account.AccountUid != _hrvsterUser.UserUid)
+				return RedirectToAction(actionName ?? "Index", controllerName ?? "Sweeps");
 
 			var sweepDrawRule = await _mediator.Send(new GetSweepDrawRuleRequest(drawRuleUid));
 			if(sweepDrawRule == null)
@@ -113,6 +122,9 @@ namespace hrvster.Web.Controllers
 					return RedirectToAction(actionName ?? "View", controllerName ?? "Sweeps", new { sweepUid = sweepUid });
 				}
 
+				if (sweep.Account.AccountUid != _hrvsterUser.UserUid)
+					return RedirectToAction(actionName ?? "Index", controllerName ?? "Sweeps");
+
 				var request = new CreateSweepDrawRuleRequest
 				{
 					SweepUid = sweepUid,
@@ -147,6 +159,9 @@ namespace hrvster.Web.Controllers
 
 					return RedirectToAction(actionName ?? "View", controllerName ?? "Sweeps", new { sweepUid = sweepUid });
 				}
+
+				if (sweep.Account.AccountUid != _hrvsterUser.UserUid)
+					return RedirectToAction(actionName ?? "Index", controllerName ?? "Sweeps");
 
 				var sweepDrawRule = await _mediator.Send(new GetSweepDrawRuleRequest(drawRuleUid));
 				if (sweepDrawRule == null)

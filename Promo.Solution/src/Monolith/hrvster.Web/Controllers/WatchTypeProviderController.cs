@@ -48,6 +48,9 @@ namespace hrvster.Web.Controllers
 				return RedirectToAction(actionName, controllerName);
 			}
 
+			if (sweep.Account.AccountUid != _hrvsterUser.UserUid)
+				return RedirectToAction(actionName ?? "Index", controllerName ?? "Sweeps");
+
 			var watchTypeProviders = await _mediator.Send(new GetWatchTypeProvidersRequest());
 
 			var model = new SelectWatchTypeProvider()
@@ -83,7 +86,10 @@ namespace hrvster.Web.Controllers
 					return View(form);
 				}
 
-				switch(form.ProviderCode)
+				if (sweep.Account.AccountUid != _hrvsterUser.UserUid)
+					return RedirectToAction("Index", "Dashboard");
+
+				switch (form.ProviderCode)
 				{
 					case Constants.TwitterProvider:
 

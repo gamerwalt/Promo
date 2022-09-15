@@ -208,6 +208,10 @@ namespace hrvster.Web.Controllers
 		[HttpGet]
 		public async Task<IActionResult> View(Guid sweepUid)
 		{
+			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
+			if (sweep == null) return RedirectToAction("Index");
+			if (sweep.Account.AccountUid != _hrvsterUser.UserUid) return RedirectToAction("Index");
+
 			var sweepAndRules = await _mediator.Send(new GetSweepstakeAndRulesRequests(sweepUid));
 			if (sweepAndRules == null)
 			{
@@ -260,6 +264,10 @@ namespace hrvster.Web.Controllers
 		[HttpPost]
 		public async Task<IActionResult> View(ViewSweepstake form, Guid sweepUid)
 		{
+			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
+			if (sweep == null) return RedirectToAction("Index");
+			if (sweep.Account.AccountUid != _hrvsterUser.UserUid) return RedirectToAction("Index");
+
 			var sweepAndRulles = await _mediator.Send(new GetSweepstakeAndRulesRequests(sweepUid));
 			if (sweepAndRulles == null)
 			{

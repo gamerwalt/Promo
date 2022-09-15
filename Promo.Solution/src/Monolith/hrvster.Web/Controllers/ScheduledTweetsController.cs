@@ -61,6 +61,9 @@ namespace hrvster.Web.Controllers
 				return RedirectToAction(actionName, controllerName);
 			}
 
+			if (sweep.Account.AccountUid != _hrvsterUser.UserUid)
+				return RedirectToAction(actionName ?? "Index", controllerName ?? "Sweeps");
+
 			var rule = await _mediator.Send(new GetRule(ruleUid));
 			if (rule == null)
 			{
@@ -72,6 +75,9 @@ namespace hrvster.Web.Controllers
 
 				return RedirectToAction(actionName, controllerName);
 			}
+
+			if(rule.Sweep.Account.AccountUid != _hrvsterUser.UserUid)
+				return RedirectToAction(actionName ?? "Index", controllerName ?? "Sweeps");
 
 			var scheduledTweet = await _mediator.Send(new GetScheduledTweetRequest(rule));
 			var scheduledImages = scheduledTweet.Images?.Select(item => new string(item.ImageLocation)).ToList();
@@ -126,6 +132,9 @@ namespace hrvster.Web.Controllers
 				});
 			}
 
+			if (sweep.Account.AccountUid != _hrvsterUser.UserUid)
+				return RedirectToAction(actionName ?? "Index", controllerName ?? "Sweeps");
+
 			var rule = await _mediator.Send(new GetRule(ruleUid));
 			if (rule == null)
 			{
@@ -143,6 +152,9 @@ namespace hrvster.Web.Controllers
 					controllerName = controllerName
 				});
 			}
+
+			if (rule.Sweep.Account.AccountUid != _hrvsterUser.UserUid)
+				return RedirectToAction(actionName ?? "Index", controllerName ?? "Sweeps");
 
 			var scheduledTweet = await _mediator.Send(new GetScheduledTweetRequest(rule));
 			if(scheduledTweet == null)
@@ -245,6 +257,11 @@ namespace hrvster.Web.Controllers
 				});
 			}
 
+			if (sweep.Account.AccountUid != _hrvsterUser.UserUid)
+				return RedirectToAction(actionName ?? "Index", controllerName ?? "Sweeps");
+			if (rule.Sweep.Account.AccountUid != _hrvsterUser.UserUid)
+				return RedirectToAction(actionName ?? "Index", controllerName ?? "Sweeps");
+
 			var scheduledTweet = await _mediator.Send(new GetScheduledTweetRequest(rule));
 			if (scheduledTweet == null)
 			{
@@ -327,6 +344,11 @@ namespace hrvster.Web.Controllers
 					controllerName = controllerName
 				});
 			}
+
+			if (sweep.Account.AccountUid != _hrvsterUser.UserUid)
+				return RedirectToAction(actionName ?? "Index", controllerName ?? "Sweeps");
+			if (rule.Sweep.Account.AccountUid != _hrvsterUser.UserUid)
+				return RedirectToAction(actionName ?? "Index", controllerName ?? "Sweeps");
 
 			var scheduledTweet = await _mediator.Send(new GetScheduledTweetRequest(rule));
 			if (scheduledTweet == null)

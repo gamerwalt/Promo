@@ -24,6 +24,7 @@ namespace hrvster.Web.Controllers
 		private readonly INotyfService _notificationService;
 		private readonly IValidator<CreateSweepPrize> _createSweepPrizeValidator;
 		private readonly IValidator<EditSweepPrize> _editSweepPrizeValidator;
+		private readonly HrvsterUser _hrvsterUser;
 
 		public SweepPrizesController(
 			ILoggerFactory loggerFactory,
@@ -31,7 +32,8 @@ namespace hrvster.Web.Controllers
 			IMapper mapper,
 			INotyfService notificationService,
 			IValidator<CreateSweepPrize> createSweepPrizeValidator,
-			IValidator<EditSweepPrize> editSweepPrizeValidator)
+			IValidator<EditSweepPrize> editSweepPrizeValidator,
+			HrvsterUser hrvsterUser)
 		{
 			_logger = loggerFactory.CreateLogger<SweepPrizesController>();
 			_mediator = mediator;
@@ -39,6 +41,7 @@ namespace hrvster.Web.Controllers
 			_notificationService = notificationService;
 			_createSweepPrizeValidator = createSweepPrizeValidator;
 			_editSweepPrizeValidator = editSweepPrizeValidator;
+			_hrvsterUser = hrvsterUser;
 		}
 
 		[HttpGet]
@@ -51,6 +54,9 @@ namespace hrvster.Web.Controllers
 					$"Could not find sweepstake with uid: {sweepUid}",
 					sweepUid, campaignUid, returnAction, returnController);
 			}
+			if (sweep.Account.AccountUid != _hrvsterUser.UserUid)
+				return RedirectToAction(returnAction ?? "Index", returnController ?? "Sweeps");
+
 			var drawRule = await _mediator.Send(new GetDrawRuleForSweepsRequest(sweepUid));
 			if (drawRule == null)
 			{
@@ -80,6 +86,9 @@ namespace hrvster.Web.Controllers
 					$"Could not find sweepstake with uid: {sweepUid}", 
 					sweepUid, campaignUid, returnAction, returnController);
 			}
+
+			if (sweep.Account.AccountUid != _hrvsterUser.UserUid)
+				return RedirectToAction(returnAction ?? "Index", returnController ?? "Sweeps");
 
 			var drawRule = await _mediator.Send(new GetDrawRuleForSweepsRequest(sweepUid));
 			if(drawRule == null)
@@ -131,6 +140,9 @@ namespace hrvster.Web.Controllers
 					sweepUid, campaignUid, returnAction, returnController);
 			}
 
+			if (sweep.Account.AccountUid != _hrvsterUser.UserUid)
+				return RedirectToAction(returnAction ?? "Index", returnController ?? "Sweeps");
+
 			var drawRule = await _mediator.Send(new GetDrawRuleForSweepsRequest(sweepUid));
 			if (drawRule == null)
 			{
@@ -180,6 +192,9 @@ namespace hrvster.Web.Controllers
 					sweepUid, campaignUid, actionName, controllerName);
 			}
 
+			if (sweep.Account.AccountUid != _hrvsterUser.UserUid)
+				return RedirectToAction(actionName ?? "Index", controllerName ?? "Sweeps");
+
 			var prize = await _mediator.Send(new GetSweepPrizeByPrizeUid(prizeUid));
 			if (prize == null)
 			{
@@ -223,6 +238,9 @@ namespace hrvster.Web.Controllers
 					sweepUid, campaignUid, actionName, controllerName);
 			}
 
+			if (sweep.Account.AccountUid != _hrvsterUser.UserUid)
+				return RedirectToAction(actionName ?? "Index", controllerName ?? "Sweeps");
+
 			var prize = await _mediator.Send(new GetSweepPrizeByPrizeUid(prizeUid));
 			if (prize == null)
 			{
@@ -245,7 +263,12 @@ namespace hrvster.Web.Controllers
 		}
 
 		[HttpGet]
-		public async Task<IActionResult> EditPrize(Guid prizeUid, Guid sweepUid, Guid campaignUid, string actionName, string controllerName)
+		public async Task<IActionResult> EditPrize(
+			Guid prizeUid, 
+			Guid sweepUid, 
+			Guid campaignUid, 
+			string actionName, 
+			string controllerName)
 		{
 			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
 			if (sweep == null)
@@ -254,6 +277,9 @@ namespace hrvster.Web.Controllers
 					$"Could not find sweepstake with uid: {sweepUid}",
 					sweepUid, campaignUid, actionName, controllerName);
 			}
+
+			if (sweep.Account.AccountUid != _hrvsterUser.UserUid)
+				return RedirectToAction(actionName ?? "Index", controllerName ?? "Sweeps");
 
 			var prize = await _mediator.Send(new GetSweepPrizeByPrizeUid(prizeUid));
 			if(prize == null)
@@ -297,6 +323,9 @@ namespace hrvster.Web.Controllers
 					$"Could not find sweepstake with uid: {sweepUid}",
 					sweepUid, campaignUid, actionName, controllerName);
 			}
+
+			if (sweep.Account.AccountUid != _hrvsterUser.UserUid)
+				return RedirectToAction(actionName ?? "Index", controllerName ?? "Sweeps");
 
 			var prize = await _mediator.Send(new GetSweepPrizeByPrizeUid(prizeUid));
 			if (prize == null)

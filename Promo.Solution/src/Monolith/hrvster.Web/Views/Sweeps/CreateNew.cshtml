@@ -45,6 +45,16 @@
                 </select>
                 <span asp-validation-for="Campaign.CampaignUid"></span>
             </div>
+            <div class="fv-row mb-8 w-lg-500px">
+                <div class="form-check form-check-solid form-switch fv-row">
+                    <input class="form-check-input w-45px h-30px" type="checkbox" asp-for="AcceptTerms" />
+                    <label class="form-check-label" for="allowmarketing">
+                        Accept <a target="_blank" asp-controller="Terms" asp-action="SweepstakesTermsAndConditions" class="link-primary">Game and Prizes Terms and Conditions</a>
+                        <br />
+                        <span asp-validation-for="AcceptTerms"></span>
+                    </label>
+                </div>
+            </div>
         </div>
         <div class="card-footer">
             <div class="card-toolbar">

@@ -80,6 +80,9 @@ namespace hrvster.Web.Controllers
 				return RedirectToAction("Index", "Dashboard");
 			}
 
+			if (sweep.Account.AccountUid != _hrvsterUser.UserUid)
+				return RedirectToAction("Index", "Sweeps");
+
 			return View(sweepRule);
 		}
 
@@ -101,6 +104,9 @@ namespace hrvster.Web.Controllers
 
 				return RedirectToAction(actionName, controllerName);
 			}
+
+			if (sweep.Account.AccountUid != _hrvsterUser.UserUid)
+				return RedirectToAction(actionName ?? "Index", controllerName ?? "Sweeps");
 
 			var rule = await _mediator.Send(new GetRule(ruleUid));
 			if (rule == null)
@@ -157,6 +163,9 @@ namespace hrvster.Web.Controllers
 				return RedirectToAction(actionName, controllerName);
 			}
 
+			if (sweep.Account.AccountUid != _hrvsterUser.UserUid)
+				return RedirectToAction(actionName ?? "Index", controllerName ?? "Sweeps");
+
 			var rule = await _mediator.Send(new GetRule(ruleUid));
 			if (rule == null)
 			{
@@ -212,6 +221,9 @@ namespace hrvster.Web.Controllers
 				return RedirectToAction(actionName, controllerName);
 			}
 
+			if (sweep.Account.AccountUid != _hrvsterUser.UserUid)
+				return RedirectToAction(actionName ?? "Index", controllerName ?? "Sweeps");
+
 			var rule = await _mediator.Send(new GetRule(ruleUid));
 			if (rule == null)
 			{
@@ -266,6 +278,9 @@ namespace hrvster.Web.Controllers
 				return RedirectToAction(actionName, controllerName);
 			}
 
+			if (sweep.Account.AccountUid != _hrvsterUser.UserUid)
+				return RedirectToAction(actionName ?? "Index", controllerName ?? "Sweeps");
+
 			var rule = await _mediator.Send(new GetRule(ruleUid));
 			if (rule == null)
 			{
@@ -316,6 +331,9 @@ namespace hrvster.Web.Controllers
 
 				return RedirectToAction(actionName, controllerName);
 			}
+
+			if (sweep.Account.AccountUid != _hrvsterUser.UserUid)
+				return RedirectToAction(actionName ?? "Index", controllerName ?? "Sweeps");
 
 			var rule = await _mediator.Send(new GetRule(ruleUid));
 			if(rule == null)
@@ -369,6 +387,9 @@ namespace hrvster.Web.Controllers
 				return View(form);
 			}
 
+			if (sweep.Account.AccountUid != _hrvsterUser.UserUid)
+				return RedirectToAction(returnAction ?? "Index", returnController ?? "Sweeps");
+
 			var rule = await _mediator.Send(new GetRule(ruleUid));
 			if (rule == null)
 			{
@@ -419,6 +440,9 @@ namespace hrvster.Web.Controllers
 				return RedirectToAction(actionName, controllerName);
 			}
 
+			if (sweep.Account.AccountUid != _hrvsterUser.UserUid)
+				return RedirectToAction(actionName ?? "Index", controllerName ?? "Sweeps");
+
 			var watchTypeProviders = await _mediator.Send(new GetWatchTypeProvidersRequest());
 
 			var model = new SelectWatchTypeProvider()
@@ -455,6 +479,9 @@ namespace hrvster.Web.Controllers
 
 				return RedirectToAction(actionName, controllerName);
 			}
+
+			if (sweep.Account.AccountUid != _hrvsterUser.UserUid)
+				return RedirectToAction(actionName ?? "Index", controllerName ?? "Sweeps");
 
 			var watchTypeProviders = await _mediator.Send(new GetWatchTypeProvidersRequest());
 
@@ -555,6 +582,9 @@ namespace hrvster.Web.Controllers
 				return RedirectToAction(actionName, controllerName);
 			}
 
+			if (sweep.Account.AccountUid != _hrvsterUser.UserUid)
+				return RedirectToAction(actionName ?? "Index", controllerName ?? "Sweeps");
+
 			var watchTypes = await _mediator.Send(new GetWatchTypeRequest());
 
 			var model = new CreateSweepRuleTweet
@@ -586,6 +616,9 @@ namespace hrvster.Web.Controllers
 
 				return RedirectToAction(actionName, controllerName);
 			}
+
+			if (sweep.Account.AccountUid != _hrvsterUser.UserUid)
+				return RedirectToAction(actionName ?? "Index", controllerName ?? "Sweeps");
 
 			if (ModelState.IsValid)
 			{

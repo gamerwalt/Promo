@@ -12,6 +12,7 @@ namespace hrvster.Web.Models
 		public DateTime StartDate { get; set; }
 		public DateTime EndDate { get; set; }
 		public DateTime DrawDate { get; set; }
+		public bool AcceptTerms { get; set; }
 	}
 
 	public class CreateNewSweep : CreateSweep
