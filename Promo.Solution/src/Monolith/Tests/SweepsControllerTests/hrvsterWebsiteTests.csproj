@@ -21,8 +21,4 @@
     </PackageReference>
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\..\..\..\tests\TestUtilities\Promo.TestUtilities\Promo.TestUtilities.csproj" />
-  </ItemGroup>
-
 </Project>

@@ -43,10 +43,13 @@
 			<div id="kt_aside" class="aside" data-kt-drawer="true" data-kt-drawer-name="aside" data-kt-drawer-activate="{default: true, lg: false}" data-kt-drawer-overlay="true" data-kt-drawer-width="{default:'200px', '300px': '250px'}" data-kt-drawer-direction="start" data-kt-drawer-toggle="#kt_aside_mobile_toggle">
 				<div class="aside-toolbar flex-column-auto" id="kt_aside_toolbar">
 					<div class="aside-user d-flex align-items-sm-center justify-content-center py-5">
+						<div class="symbol symbol-50px">
+							<img src="~/assets/media/avatars/blank.png" alt="">
+						</div>
 						<div class="aside-user-info flex-row-fluid flex-wrap ms-5">
 							<div class="d-flex">
 								<div class="flex-grow-1 me-2">
-									Welcome, <a asp-controller="Profiles" asp-action="Index" class="text-white text-hover-primary fs-6 fw-bold">@hrvsterUser.DisplayName</a>
+									Welcome, <a asp-controller="Profile" asp-action="Index" class="text-white text-hover-primary fs-6 fw-bold">@hrvsterUser.DisplayName</a>
 								</div>
 							</div>
 						</div>

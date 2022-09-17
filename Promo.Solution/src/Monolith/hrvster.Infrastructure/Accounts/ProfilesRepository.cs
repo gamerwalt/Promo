@@ -101,7 +101,7 @@ namespace hrvster.Infrastructure.Accounts
 
 		public async Task<IEnumerable<Profile>> GetProfilesAsync(Guid userUid)
 		{
-			var profiles = default(List<Profile>);
+			var profiles = new List<Profile>();
 
 			using (var conn = new MySqlConnection(_database.GetConnectionString()))
 			{

@@ -4,6 +4,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace hrvster.Core.Authentication
@@ -31,10 +34,22 @@ namespace hrvster.Core.Authentication
 
 		public void OnAuthorization(AuthorizationFilterContext context)
 		{
+			var headerValues = new List<string>();
+			if (context.HttpContext.Request.Headers.ContainsKey(SessionConstants.UserToken))
+				headerValues = context.HttpContext.Request.Headers[SessionConstants.UserToken].ToList();
+
+			var headerToken = headerValues.FirstOrDefault();
+
 			var token = context.HttpContext.Session.GetString(SessionConstants.UserToken);
 
 			if (string.IsNullOrWhiteSpace(token))
-				context.Result = new ForbidResult();
+			{
+				if(string.IsNullOrWhiteSpace(headerToken))
+					context.Result = new ForbidResult();
+
+				var displayNameValue = context.HttpContext.Request.Headers[SessionConstants.UserDisplayName].ToList();
+				User.DisplayName = displayNameValue.FirstOrDefault();
+			}
 			else
 			{
 				try
