@@ -16,6 +16,7 @@ namespace hrvster.Infrastructure
 		Task<IEnumerable<SweepEntry>> GetSweepEntriesAsync(Guid sweepUid);
 		Task<IEnumerable<HarvestedTweet>> GetHarvestedTweetsAsync(Guid userUid, Guid campaignUid);
 		Task<IEnumerable<SweepEntryChart>> GetSweepEntriesByCampaignAndUserAsync(Guid userUid, Guid campaignUid);
+		Task<IEnumerable<SweepEntry>> GetAccountSweepEntriesAsync(Guid accountUid);
 	}
 
 	public class SweepsEntriesRepository : ISweepsEntriesRepository
@@ -75,12 +76,10 @@ namespace hrvster.Infrastructure
 				command.AddParameter(nameof(sweepEntryGuid), sweepEntryGuid);
 
 				await conn.OpenAsync();
-				using (var reader = await command.ExecuteReaderAsync())
+				using var reader = await command.ExecuteReaderAsync();
+				while (await reader.ReadAsync())
 				{
-					while (await reader.ReadAsync())
-					{
-						sweepEntry = CreateSweepEntryFrom(reader);
-					}
+					sweepEntry = CreateSweepEntryFrom(reader);
 				}
 			}
 
@@ -101,12 +100,10 @@ namespace hrvster.Infrastructure
 				command.AddParameter("previousTime", fifteenMiniutes);
 
 				await conn.OpenAsync();
-				using (var reader = await command.ExecuteReaderAsync())
+				using var reader = await command.ExecuteReaderAsync();
+				while (await reader.ReadAsync())
 				{
-					while (await reader.ReadAsync())
-					{
-						harvestedTweets.Add(CreateHarvestedTweetFrom(reader));
-					}
+					harvestedTweets.Add(CreateHarvestedTweetFrom(reader));
 				}
 			}
 
@@ -126,12 +123,10 @@ namespace hrvster.Infrastructure
 					.AddParameter("campaignUid", campaignUid);
 
 				await conn.OpenAsync();
-				using (var reader = await command.ExecuteReaderAsync())
+				using var reader = await command.ExecuteReaderAsync();
+				while (await reader.ReadAsync())
 				{
-					while (await reader.ReadAsync())
-					{
-						entries.Add(CreateSweepEntryChar(reader));
-					}
+					entries.Add(CreateSweepEntryChar(reader));
 				}
 			}
 
@@ -171,12 +166,10 @@ namespace hrvster.Infrastructure
 				command.AddParameter(nameof(sweepUid), sweepUid);
 
 				await conn.OpenAsync();
-				using (var reader = await command.ExecuteReaderAsync())
+				using var reader = await command.ExecuteReaderAsync();
+				while (await reader.ReadAsync())
 				{
-					while (await reader.ReadAsync())
-					{
-						sweepEntries.Add(CreateSweepEntryFrom(reader));
-					}
+					sweepEntries.Add(CreateSweepEntryFrom(reader));
 				}
 			}
 
@@ -204,6 +197,28 @@ namespace hrvster.Infrastructure
 					CreatedDate = reader.GetDateTime("sweep_created_date")
 				}
 			};
+		}
+
+		public async Task<IEnumerable<SweepEntry>> GetAccountSweepEntriesAsync(Guid accountUid)
+		{
+			var sweepEntries = new List<SweepEntry>();
+
+			using (var conn = new MySqlConnection(_database.GetConnectionString()))
+			{
+				var command = conn.CreateCommand();
+				command.CommandText = "sweep_entries_get_by_account_uid";
+				command.CommandType = CommandType.StoredProcedure;
+				command.AddParameter(nameof(accountUid), accountUid);
+
+				await conn.OpenAsync();
+				using var reader = await command.ExecuteReaderAsync();
+				while (await reader.ReadAsync())
+				{
+					sweepEntries.Add(CreateSweepEntryFrom(reader));
+				}
+			}
+
+			return sweepEntries;
 		}
 	}
 }

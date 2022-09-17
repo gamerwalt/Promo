@@ -1,5 +1,4 @@
 using FluentAssertions;
-using hrvster.Models.Profiles;
 using hrvster.Web.Mvc.Common;
 using hrvster.Web.Mvc.Common.Steps;
 using System.Net;
@@ -25,7 +24,6 @@ namespace ProfilesControllerTests
             _feature
                 .Initialize()
                 .GiveACleanSlate()
-                //.WebAuthorization("SomeToken")
                 .WhenILoadMyProfilePage()
                 .ThenTheResponseShouldMatch(HttpStatusCode.Redirect);
         }
