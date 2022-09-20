@@ -506,8 +506,8 @@ namespace hrvster.Web.Controllers
 				}
 
 				HttpContext.Session.SetString(SessionConstants.SweepUid, sweepUid.ToString());
-				HttpContext.Session.SetString(SessionConstants.ReturnController, form.ReturnController);
-				HttpContext.Session.SetString(SessionConstants.ReturnAction, form.ReturnAction);
+				HttpContext.Session.SetString(SessionConstants.ReturnController, form.ReturnController ?? "SweepRules");
+				HttpContext.Session.SetString(SessionConstants.ReturnAction, form.ReturnAction ?? "CreateTweet");
 
 				var authorizationUrl = await _watchTypeProvider.GetAuthorizationUrl(form.ProviderCode, Request.Scheme, Request.Host.Value, $"/SweepRules/Validate{form.ProviderCode}Auth");
 
@@ -564,8 +564,8 @@ namespace hrvster.Web.Controllers
 				new
 				{
 					sweepUid = sweepUid,
-					actionName = returnAction,
-					controllerName = returnController
+					actionName = returnAction ?? "CreateTweet",
+					controllerName = returnController ?? "SweepRules"
 				});
 		}
 

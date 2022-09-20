@@ -214,7 +214,11 @@
 										<span class="text-gray-800 text-hover-primary fs-6 fw-bold">@profile.ScreenName</span>
 										<span class="text-muted fw-semibold d-block fs-7">@profile.Description</span>
 									</div>
-									<a href="#" class="btn btn-sm btn-danger fs-8 fw-bold">Unlink</a>
+									<form id="unlinkProfileForm" asp-action="Unlink" asp-route-profileType=@profile.ProfileType>
+										<button type="submit" class="btn btn-sm btn-danger fs-8 fw-bold">
+											Unlink
+										</button>
+									</form>
 								</div>
 							</div>
 							<div class="separator separator-dashed my-4"></div>

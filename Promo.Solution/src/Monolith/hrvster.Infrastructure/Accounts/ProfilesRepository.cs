@@ -16,6 +16,7 @@ namespace hrvster.Infrastructure.Accounts
 		Task<IEnumerable<Profile>> GetProfilesAsync(Guid userUid);
 		Task<Profile> GetProfileByCampaignUid(Guid campaignUid, ProfileType profileType);
 		Task<Profile> GetProfileBelongingToSweepRuleAsync(Guid ruleUid, ProfileType profileType	);
+		Task RemoveProfileAsync(Guid accountUid, ProfileType profileType);
 	}
 
 	public class ProfilesRepository : IProfilesRepository
@@ -176,6 +177,21 @@ namespace hrvster.Infrastructure.Accounts
 			}
 
 			return profile;
+		}
+
+		public async Task RemoveProfileAsync(Guid accountUid, ProfileType profileType)
+		{
+			using (var conn = new MySqlConnection(_database.GetConnectionString()))
+			{
+				var command = conn.CreateCommand();
+				command.CommandText = "profile_remove";
+				command.CommandType = CommandType.StoredProcedure;
+				command.AddParameter(nameof(accountUid), accountUid)
+					.AddParameter("profileType", profileType);
+
+				await conn.OpenAsync();
+				await command.ExecuteNonQueryAsync();
+			}
 		}
 	}
 }

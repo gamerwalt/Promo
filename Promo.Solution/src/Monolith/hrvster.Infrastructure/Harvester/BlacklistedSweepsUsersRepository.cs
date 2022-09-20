@@ -25,7 +25,7 @@ namespace hrvster.Infrastructure.Harvester
 
 		public async Task CreateAsync(string externalUserId, Guid sweepUid)
 		{
-			using var conn = new MySqlConnection(_database.GetReportingConnectionString());
+			using var conn = new MySqlConnection(_database.GetHarvesterConnectionString());
 			var command = conn.CreateCommand();
 			command.CommandText = "blacklisted_sweeps_user_create";
 			command.CommandType = CommandType.StoredProcedure;

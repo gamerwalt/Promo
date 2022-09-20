@@ -158,5 +158,13 @@ namespace hrvster.Web.Controllers
 
 			return View(await BuildProfileModel());
 		}
+
+		[HttpPost]
+		public async Task<IActionResult> Unlink(ProfileType profileType)
+		{
+			await _mediator.Send(new UnlinkProfileRequest(_hrvsterUser.UserUid, profileType));
+
+			return RedirectToAction("Index");
+		}
 	}
 }
