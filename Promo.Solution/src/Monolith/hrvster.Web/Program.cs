@@ -25,8 +25,6 @@ namespace hrvster.Web
 				.CreateLogger();
 
 			Log.Information("Creating Web Host for hrvster.WEB for environment {env}", env);
-			Log.Information("Configuration loaded... {config}", configuration.ToJsonString());
-			Log.Information("Databases : {databasesConfiguration}", configuration.GetConnectionString("hrvster"));
 
 			CreateHostBuilder(args).Build().Run();
 		}

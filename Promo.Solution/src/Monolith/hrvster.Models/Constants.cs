@@ -22,4 +22,9 @@
 	{
 		public const string DashboardLink = "Dashboard";
 	}
+
+	public class NotificationService
+	{
+		public const int DismissInSeconds = 10;
+	}
 }

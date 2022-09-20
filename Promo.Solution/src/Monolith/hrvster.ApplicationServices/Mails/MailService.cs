@@ -3,9 +3,11 @@ using hrvster.Models;
 using hrvster.Models.Options;
 using hrvster.Models.TemplateMailRequest;
 using MailKit.Net.Smtp;
+using MediatR;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MimeKit;
+using Org.BouncyCastle.Asn1.Ocsp;
 using SendGrid;
 using SendGrid.Helpers.Mail;
 using System;
@@ -92,14 +94,29 @@ namespace hrvster.ApplicationServices.Mails
 								await _mailRepository.UpdateAsSentAsync(email);
 
 							break;
+
+						case EmailTemplate.EmailAddressUpdateRequest:
+
+							var result = await SendEmailAddressEmailAsync(new EmailAddressUpdateRequest
+							{
+								EmailTemplate = EmailTemplate.EmailAddressUpdateRequest,
+								EmailAddress = email.EmailAddress,
+								DisplayName = email.Parameters[EmailParameters.DisplayName],
+								SupportLink = email.Parameters[EmailParameters.SupportLink],
+								OldEmailAddress = email.Parameters[EmailParameters.OldEmailAddress],
+								NewEmailAddress = email.Parameters[EmailParameters.NewEmailAddress]
+							});
+
+							if (result)
+								await _mailRepository.UpdateAsSentAsync(email);
+
+							break;
 					}
 				}
 			}
 
 			_logger.LogInformation($"{nameof(ProcessAnyUnsentEmails)} processing completed.");
 		}
-
-		
 
 		private async Task<bool> SendEmailAsync(MailRequest mailRequest)
 		{
@@ -114,6 +131,38 @@ namespace hrvster.ApplicationServices.Mails
 			var response = await client.SendEmailAsync(msg);
 
 			return response.IsSuccessStatusCode;
+		}
+
+		private async Task<bool> SendEmailAddressEmailAsync(EmailAddressUpdateRequest request)
+		{
+			var mailText = ExtractMailText(request);
+
+			return await SendEmailAsync(
+				new MailRequest
+				{
+					ToEmailAddress = request.EmailAddress,
+					Body = mailText,
+					Subject = "Email address update requested"
+				}
+			);
+		}
+
+		private static string ExtractMailText(EmailRequest request)
+		{
+			var filePath = Directory.GetCurrentDirectory() + $"{Path.DirectorySeparatorChar}Templates{Path.DirectorySeparatorChar}{request.EmailTemplate}.html";
+
+			var streamReader = new StreamReader(filePath);
+			var mailText = streamReader.ReadToEnd();
+			streamReader.Close();
+
+			var type = request.GetType();
+
+			foreach (var f in type.GetProperties(BindingFlags.Instance | BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public))
+			{
+				mailText = mailText.Replace($"[{f.Name}]", f.GetValue(request).ToString());
+			}
+
+			return mailText;
 		}
 
 		private async Task<bool> SendPasswordResetEmailLinkAsync(PasswordResetRequest request)

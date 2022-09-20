@@ -19,7 +19,8 @@
 	{
 		WelcomeEmail,
 		VerificationEmail,
-		PasswordResetEmail
+		PasswordResetEmail,
+		EmailAddressUpdateRequest
 	}
 
 	public enum CampaignTypeCode

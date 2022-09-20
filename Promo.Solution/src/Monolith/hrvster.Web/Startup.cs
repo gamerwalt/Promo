@@ -102,6 +102,8 @@ namespace hrvster.Web
 
 			//Update Validators
 			services.AddUpdateValidators();
+
+			services.AddHarvsterConfigurationOption(Configuration);
 		}
 
 
@@ -214,6 +216,7 @@ namespace hrvster.Web
 			services.AddTransient<ISweepTweetSchedulerRepository, SweepTweetSchedulerRepository>();
 			services.AddTransient<IScheduledSweepRuleTweetsRepository, ScheduledSweepRuleTweetsRepository>();
 			services.AddTransient<IIncomingTweetsRepository, IncomingTweetsRepository>();
+			services.AddTransient<IAccountUpdateHistoryRepository, AccountUpdateHistoryRepository>();
 		}
 
 		private void AddServicesOptions(IServiceCollection services)

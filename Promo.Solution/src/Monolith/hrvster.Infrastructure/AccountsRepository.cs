@@ -24,6 +24,8 @@ namespace hrvster.Infrastructure
 		Account GetUserByEmail(string emailAddress);
 		Account GetUserByUserName(string userName);
 		Account GetByPhoneNumber(string phoneNumber);
+		Task UpdateAsync(Guid accountUid, string firstName, string lastName, string displayName);
+		Task UpdateAsync(Guid accountUid, string emailAddress, string phoneNumber);
 	}
 
 	public class AccountsRepository : IAccountsRepository
@@ -109,13 +111,15 @@ namespace hrvster.Infrastructure
 				AccountId = reader.GetInt32("account_id"),
 				AccountUid = reader.GetGuid("account_uid"),
 				EmailAddress = reader.GetString("email_address"),
-				PhoneNumber = reader.GetString("phone_number"),
+				PhoneNumber = reader.GetStringValue("phone_number"),
 				EmailVerified = reader.GetBoolean("email_address_verified"),
 				PhoneNumberVerified = reader.GetBoolean("phone_number_verified"),
-				DisplayName = reader.GetString("display_name"),
-				Pin = reader.GetString("pin"),
+				FirstName = reader.GetStringValue("first_name"),
+				LastName = reader.GetStringValue("last_name"),
+				DisplayName = reader.GetStringValue("display_name"),
+				Pin = reader.GetStringValue("pin"),
 				TermsAccepted = reader.GetBoolean("terms_accepted"),
-				TwitterUserName = GetNullableString(reader, "twitter_user_name"),
+				TwitterUserName = reader.GetStringValue("twitter_user_name"),
 				CreatedDate = reader.GetDateTime("created_date"),
 				UpdatedDate = GetNullableDateTimeValue(reader, "updated_date")
 			};
@@ -324,6 +328,37 @@ namespace hrvster.Infrastructure
 			}
 
 			return account;
+		}
+
+		public async Task UpdateAsync(Guid accountUid, string firstName, string lastName, string displayName)
+		{
+			using var conn = new MySqlConnection(_database.GetConnectionString());
+			var command = conn.CreateCommand();
+			command.CommandText = "account_update";
+			command.CommandType = CommandType.StoredProcedure;
+			command
+				.AddParameter("accountUid", accountUid)
+				.AddParameter("firstName", firstName)
+				.AddParameter("lastName", lastName)
+				.AddParameter("displayName", displayName);
+
+			await conn.OpenAsync();
+			await command.ExecuteNonQueryAsync();
+		}
+
+		public async Task UpdateAsync(Guid accountUid, string emailAddress, string phoneNumber)
+		{
+			using var conn = new MySqlConnection(_database.GetConnectionString());
+			var command = conn.CreateCommand();
+			command.CommandText = "account_update_email_phone";
+			command.CommandType = CommandType.StoredProcedure;
+			command
+				.AddParameter("accountUid", accountUid)
+				.AddParameter("emailAddress", emailAddress)
+				.AddParameter("phoneNumber", phoneNumber);
+
+			await conn.OpenAsync();
+			await command.ExecuteNonQueryAsync();
 		}
 	}
 }
