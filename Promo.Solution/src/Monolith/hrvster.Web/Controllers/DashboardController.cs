@@ -37,10 +37,18 @@ namespace hrvster.Web.Controllers
 			var account = await _mediator.Send(new GetAccountRequest(_hrvsterUser.UserUid));
 			var promotions = await _mediator.Send(new GetAllCampaignsForAccount(_hrvsterUser.UserUid));
 
+			var campaignTypes = await _mediator.Send(new GetCampaignTypesRequest());
+
 			var model = new Dashboard
 			{
 				Account = _mapper.Map<hrvster.Models.WebModels.Account>(account),
-				Promotions = promotions.Select(a => new SelectListItem() { Text = a.CampaignName, Value = a.CampaignUid.ToString() })
+				Promotions = promotions.Select(a => new SelectListItem() { Text = a.CampaignName, Value = a.CampaignUid.ToString() }),
+				CampaignTypes = campaignTypes.Where(c => c.IsActive).ToList(),
+				CreateNewPromotion = new CreateNewPromotion
+				{
+					PromotionStartDate = DateTime.Now.AddDays(1),
+					PromotionEndDate = DateTime.Now.AddDays(30),
+				}
 			};
 
 			return View(model);
