@@ -104,6 +104,7 @@ namespace hrvster.Web
 			services.AddUpdateValidators();
 
 			services.AddHarvsterConfigurationOption(Configuration);
+			services.AddUserRateLimiterService();
 		}
 
 
@@ -217,6 +218,7 @@ namespace hrvster.Web
 			services.AddTransient<IScheduledSweepRuleTweetsRepository, ScheduledSweepRuleTweetsRepository>();
 			services.AddTransient<IIncomingTweetsRepository, IncomingTweetsRepository>();
 			services.AddTransient<IAccountUpdateHistoryRepository, AccountUpdateHistoryRepository>();
+			services.AddTransient<IUserLimiterRepository, UserLimiterRepository>();
 		}
 
 		private void AddServicesOptions(IServiceCollection services)
