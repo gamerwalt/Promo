@@ -48,6 +48,12 @@ namespace hrvster.Web.Controllers
 				{
 					PromotionStartDate = DateTime.Now.AddDays(1),
 					PromotionEndDate = DateTime.Now.AddDays(30),
+					CreateNewSweep = new CreateNewSweep
+					{
+						StartDate = DateTime.Now.AddDays(1),
+						EndDate = DateTime.Now.AddDays(30),
+						DrawDate = DateTime.Now.AddDays(40)
+					}
 				}
 			};
 

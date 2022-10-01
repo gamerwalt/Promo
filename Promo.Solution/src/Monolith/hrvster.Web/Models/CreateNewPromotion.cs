@@ -9,5 +9,7 @@ namespace hrvster.Web.Models
 		public DateTime PromotionStartDate { get; set; }
 		public DateTime PromotionEndDate { get; set; }
 		public Guid PromotionTypeUid { get; set; }
+
+		public CreateNewSweep CreateNewSweep { get; set; }
 	}
 }
