@@ -22,7 +22,7 @@ namespace hrvster.Web.Validation
 			_campaignsRepository = campaignsRepository;
 			_promotionConfigurationOptions = promotionConfigurationOptions;
 
-			var minDate = DateTime.Now.AddDays(_promotionConfigurationOptions.MinDaysBeforeStart);
+			var minDate = DateTime.Now.AddDays(1);
 
 			RuleFor(x => x.Name)
 				.NotEmpty().WithMessage("Promotion name cannot be empty.")
@@ -32,7 +32,7 @@ namespace hrvster.Web.Validation
 			RuleFor(x => x.StartDate)
 				.NotEmpty()
 				.NotNull()
-				.Must(x => BeGreaterThanToday(x))
+				.Must(x => BeGreaterThanConfiguredNumberOfDays(x))
 					.WithMessage($"The promotion start date must be from {minDate.ToString("f")}");
 
 			RuleFor(x => x)
@@ -45,9 +45,9 @@ namespace hrvster.Web.Validation
 				.WithMessage("You need to supply what type of promotion this is.");
 		}
 
-		private bool BeGreaterThanToday(DateTime inputDate)
+		private bool BeGreaterThanConfiguredNumberOfDays(DateTime inputDate)
 		{
-			var minDate = DateTime.Now.AddDays(_promotionConfigurationOptions.MinDaysBeforeStart);
+			var minDate = DateTime.Now.AddDays(1);
 
 			return inputDate > minDate;
 		}
