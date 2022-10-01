@@ -32,7 +32,7 @@ namespace hrvster.Web.Validation
 			RuleFor(x => x.StartDate)
 				.NotEmpty()
 				.NotNull()
-				.Must(x => BeGreaterThanConfiguredNumberOfDays(x))
+				.Must(x => BeGreaterThanToday(x))
 					.WithMessage($"The promotion start date must be from {minDate.ToString("f")}");
 
 			RuleFor(x => x)
@@ -45,7 +45,7 @@ namespace hrvster.Web.Validation
 				.WithMessage("You need to supply what type of promotion this is.");
 		}
 
-		private bool BeGreaterThanConfiguredNumberOfDays(DateTime inputDate)
+		private bool BeGreaterThanToday(DateTime inputDate)
 		{
 			var minDate = DateTime.Now.AddDays(_promotionConfigurationOptions.MinDaysBeforeStart);
 
