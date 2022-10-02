@@ -93,6 +93,12 @@ namespace hrvster.Web.Controllers
 			return View(viewPromotion);
 		}
 
+		[HttpGet]
+		public async Task<IActionResult> Update(Guid campaignUid)
+		{
+			return RedirectToActionPermanent("View", new { campaignUid = campaignUid });
+		}
+
 		[HttpPost]
 		public async Task<IActionResult> Update([FromQuery] Guid campaignUid, ViewPromotion form)
 		{
@@ -124,7 +130,7 @@ namespace hrvster.Web.Controllers
 
 				GetPromotionDetails(form, campaign, sweeps, campaignTypes);
 
-				return View("View", form);
+				return RedirectToAction("Update", new { campaignUid = campaignUid });
 			}
 
 			GetPromotionDetails(form, campaign, sweeps, campaignTypes);

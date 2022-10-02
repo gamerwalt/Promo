@@ -1,4 +1,5 @@
-﻿@using hrvster.Web.Models
+﻿@using System.Globalization
+@using hrvster.Web.Models
 @model ViewPromotion
 @{
     ViewData["Title"] = @Model.CampaignName;
@@ -121,9 +122,9 @@
 											Start Date
 										</label>
 										<input class="form-control form-control-solid"
-											value="@Model.UpdatePromotion.StartDate.ToString("yyyy-MM-ddThh:mm:ss")"
+											   value="@Model.UpdatePromotion.StartDate.ToString("yyyy-MM-ddThh:mm", CultureInfo.InvariantCulture)"
 											asp-for="@Model.UpdatePromotion.StartDate"
-												asp-format="{0:yyyy-MM-ddThh:mm:ss}" />
+												asp-format="{0:yyyy-MM-ddThh:mm}" />
 										<span asp-validation-for="StartDate"></span>
 									</div>
 									<div class="fv-row mb-6 w-lg-250px">
@@ -131,9 +132,9 @@
 											End Date
 										</label>
 										<input class="form-control form-control-solid"
-											value="@Model.UpdatePromotion.EndDate.ToString("yyyy-MM-ddThh:mm:ss")"
+											value="@Model.UpdatePromotion.EndDate.ToString("yyyy-MM-ddThh:mm", CultureInfo.InvariantCulture)"
 											asp-for="@Model.UpdatePromotion.EndDate"
-												asp-format="{0:yyyy-MM-ddThh:mm:ss}" />
+												asp-format="{0:yyyy-MM-ddThh:mm}" />
 										<span asp-validation-for="EndDate"></span>
 									</div>
 								</div>
@@ -144,7 +145,8 @@
 						</form>
 					</div>
 					<div class="tab-pane fade show" id="sweepStakes" role="tabpanel">
-						<table id="sweepStakesTable" 
+						<div class="table-responsive">
+							<table id="sweepStakesTable" 
 							class="table table-row-bordered table-row-dashed gy-4 align-middle fw-bold">
 							<thead class="fs-7 text-gray-400 text-uppercase">
 								<tr>
@@ -202,6 +204,7 @@
 								}
 							</tbody>
 						</table>
+						</div>
 					</div>
 				</div>
 			</div>
