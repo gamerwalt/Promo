@@ -144,8 +144,8 @@ namespace hrvster.Web.Controllers
 			var createSweep = new CreateSweep();
 			createSweep.Campaign = campaign;
 			createSweep.StartDate = campaign.StartDate.AddDays(1);
-			createSweep.EndDate = campaign.EndDate.AddDays(-1);
-			createSweep.DrawDate = campaign.EndDate.AddDays(10);
+			createSweep.EndDate = campaign.EndDate.AddDays(-_sweepstakeConfiguration.EndDateDaysAfterStartDate);
+			createSweep.DrawDate = campaign.EndDate.AddDays(-_sweepstakeConfiguration.DrawDateDaysAfterEndDate);
 			createSweep.Name = $"{campaign.CampaignName}-Sweepstakes";
 
 			return View(createSweep);
@@ -313,8 +313,8 @@ namespace hrvster.Web.Controllers
 		private CreateNewSweep BuildCreateNewForm(List<Campaign> promotions)
 		{
 			var startDate = DateTime.Now;
-			var endDate = startDate.AddDays(_sweepstakeConfiguration.EndDateDaysAfterStartDate);
-			var drawDate = endDate.AddDays(_sweepstakeConfiguration.DrawDateDaysAfterEndDate);
+			var endDate = startDate.AddDays(-_sweepstakeConfiguration.EndDateDaysAfterStartDate);
+			var drawDate = endDate.AddDays(-_sweepstakeConfiguration.DrawDateDaysAfterEndDate);
 
 			var model = new CreateNewSweep
 			{
