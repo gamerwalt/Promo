@@ -39,7 +39,7 @@ namespace hrvster.Web.Controllers
 		public async Task<IActionResult> Index()
 		{
 			var campaigns = await _mediator.Send(new GetAllCampaignsForAccount(_hrvsterUser.UserUid));
-			var promotions = _mapper.Map<IEnumerable<Promotion>>(campaigns);
+			var promotions = _mapper.Map<IEnumerable<Promotion>>(campaigns.OrderBy(c => c.EndDate));
 
 			return View(promotions);
 		}

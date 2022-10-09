@@ -39,11 +39,12 @@ namespace hrvster.Core.Handlers.Sweepstakes
 			_logger.LogInformation("Retrieving sweeps for account {accountUid}", request.AccountUid);
 
 			var sweeps = await _sweepsRepository.GetAllForAccountAsync(request.AccountUid);
+			var sweepsOrdered = sweeps.ToList().OrderBy(c => c.EndDate);
 
 			var sweepstakeDetail = new SweepstakeDetails();
 			sweepstakeDetail.SweepDetails = new List<SweepDetail>();
 
-			foreach (var sweep in sweeps)
+			foreach (var sweep in sweepsOrdered)
 			{
 				var entries = await GetSweepEntriesFor(sweep);
 
