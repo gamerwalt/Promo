@@ -43,7 +43,7 @@
                        class="form-control form-control-solid"
                        placeholder="@Model.PrizeName"
                        value="@Model.PrizeName"
-                       asp-for="@Model.PrizeName" />
+                       asp-for="@Model.PrizeName" maxlength="90" />
                 <span asp-validation-for="PrizeName"></span>
             </div>
             <div class="fv-row mb-8">
@@ -54,7 +54,7 @@
                        class="form-control form-control-solid"
                        placeholder="@Model.PrizeDescription"
                        value="@Model.PrizeDescription"
-                       asp-for="@Model.PrizeDescription" />
+                       asp-for="@Model.PrizeDescription" maxlength="4500" />
                 <span asp-validation-for="PrizeDescription"></span>
             </div>
             <div class="fv-row mb-8 w-lg-200px">

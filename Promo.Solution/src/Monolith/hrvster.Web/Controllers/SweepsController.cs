@@ -31,7 +31,6 @@ namespace hrvster.Web.Controllers
 		private readonly IMapper _mapper;
 		private readonly INotyfService _notificationService;
 		private readonly SweepstakeConfiguration _sweepstakeConfiguration;
-		private readonly NotificationServiceOptions _notificationConfiguration;
 
 		public SweepsController(
 			ILoggerFactory loggerFactory,
@@ -39,8 +38,7 @@ namespace hrvster.Web.Controllers
 			HrvsterUser hrvsterUser,
 			IMapper mapper,
 			INotyfService notificationService,
-			SweepstakeConfiguration sweepstakeConfiguration,
-			NotificationServiceOptions notificationConfiguration)
+			SweepstakeConfiguration sweepstakeConfiguration)
 		{
 			_logger = loggerFactory.CreateLogger<SweepsController>();
 			_mediator = mediator;
@@ -48,7 +46,6 @@ namespace hrvster.Web.Controllers
 			_mapper = mapper;
 			_notificationService = notificationService;
 			_sweepstakeConfiguration = sweepstakeConfiguration;
-			_notificationConfiguration = notificationConfiguration;
 		}
 
 		public async Task<IActionResult> Index()
@@ -69,7 +66,7 @@ namespace hrvster.Web.Controllers
 			{
 				_notificationService.Error(
 					"None of your promotions are active. We need 1 active promotion to continue.",
-					_notificationConfiguration.DismissInSeconds);
+					hrvster.Models.NotificationService.DismissInSeconds);
 
 				return RedirectToAction("Index");
 			}
@@ -91,7 +88,7 @@ namespace hrvster.Web.Controllers
 			{
 				_notificationService.Error(
 					"None of your promotions are active. We need 1 active promotion to continue.",
-					_notificationConfiguration.DismissInSeconds);
+					hrvster.Models.NotificationService.DismissInSeconds);
 
 				return RedirectToAction("Index");
 			}
@@ -102,7 +99,7 @@ namespace hrvster.Web.Controllers
 
 				_notificationService.Success(
 					"Sweepstake created successfully.",
-					_notificationConfiguration.DismissInSeconds);
+					hrvster.Models.NotificationService.DismissInSeconds);
 
 				return RedirectToAction("Index");
 			}
@@ -129,14 +126,14 @@ namespace hrvster.Web.Controllers
 			{
 				_notificationService.Warning(
 					$"Could not find campaign with uid: {campaignUid}.",
-					_notificationConfiguration.DismissInSeconds);
+					hrvster.Models.NotificationService.DismissInSeconds);
 
 				return RedirectToAction("Index");
 			}
 
 			if (!campaign.IsActive() && !campaign.WillBeInProgress())
 			{
-				_notificationService.Warning("Promotion is not active.", _notificationConfiguration.DismissInSeconds);
+				_notificationService.Warning("Promotion is not active.", hrvster.Models.NotificationService.DismissInSeconds);
 
 				return RedirectToAction("View", "Promotions", new { campaignUid = campaignUid });
 			}
@@ -160,14 +157,14 @@ namespace hrvster.Web.Controllers
 			{
 				_notificationService.Warning(
 					$"Could not find campaign with uid: {campaignUid}.",
-					_notificationConfiguration.DismissInSeconds);
+					hrvster.Models.NotificationService.DismissInSeconds);
 
 				return RedirectToAction("Index");
 			}
 
 			if (!campaign.IsActive() && !campaign.WillBeInProgress())
 			{
-				_notificationService.Warning("Promotion is not active.", _notificationConfiguration.DismissInSeconds);
+				_notificationService.Warning("Promotion is not active.", hrvster.Models.NotificationService.DismissInSeconds);
 
 				return RedirectToAction("View", "Promotions", new { campaignUid = campaignUid });
 			}
@@ -190,10 +187,12 @@ namespace hrvster.Web.Controllers
 				{
 					_notificationService.Warning(
 						$"Unable to create sweep. Please reach out to support.",
-						_notificationConfiguration.DismissInSeconds);
+						hrvster.Models.NotificationService.DismissInSeconds);
 
 					return RedirectToAction("Create", new { campaignUid = form.Campaign.CampaignUid });
 				}
+
+				_notificationService.Success("Sweepstake created successfully.", hrvster.Models.NotificationService.DismissInSeconds);
 
 				return RedirectToAction("View", new { sweepUid = sweep.SweepUid });
 			}
@@ -219,7 +218,7 @@ namespace hrvster.Web.Controllers
 
 				_notificationService.Warning(
 					$"Could not find sweepstake with uid: {sweepUid}.",
-					_notificationConfiguration.DismissInSeconds);
+					hrvster.Models.NotificationService.DismissInSeconds);
 
 				return RedirectToAction("Index");
 			}
@@ -275,7 +274,7 @@ namespace hrvster.Web.Controllers
 
 				_notificationService.Warning(
 					$"Could not find sweepstake with uid: {sweepUid}.",
-					_notificationConfiguration.DismissInSeconds);
+					hrvster.Models.NotificationService.DismissInSeconds);
 
 				return RedirectToAction("Index");
 			}
@@ -283,13 +282,13 @@ namespace hrvster.Web.Controllers
 			if (ModelState.IsValid)
 			{
 				await _mediator.Send(new UpdateSweepstakeRequest(
-					sweepUid, 
-					form.UpdateSweepstake.Name, 
-					form.UpdateSweepstake.StartDate, 
-					form.UpdateSweepstake.EndDate, 
+					sweepUid,
+					form.UpdateSweepstake.Name,
+					form.UpdateSweepstake.StartDate,
+					form.UpdateSweepstake.EndDate,
 					form.UpdateSweepstake.DrawDate));
 
-				_notificationService.Success("Sweepstake updated successfully.", _notificationConfiguration.DismissInSeconds);
+				_notificationService.Success("Sweepstake updated successfully.", hrvster.Models.NotificationService.DismissInSeconds);
 
 				return RedirectToAction("View", new { sweepUid = sweepUid });
 			}

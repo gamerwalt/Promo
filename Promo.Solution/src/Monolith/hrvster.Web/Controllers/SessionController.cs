@@ -64,7 +64,7 @@ namespace hrvster.Web.Controllers
 			{
 				try
 				{
-					var link = await _firebaseAuthProvider.SignInWithEmailAndPasswordAsync(form.Email, form.Password);
+					var link = await _firebaseAuthProvider.SignInWithEmailAndPasswordAsync(form.Email.Trim(), form.Password.Trim());
 
 					if (!string.IsNullOrWhiteSpace(link.FirebaseToken))// && link.User.IsEmailVerified)
 					{

@@ -47,7 +47,7 @@ namespace hrvster.Web.Validation
 
 		private bool BeGreaterThanConfiguredNumberOfDays(DateTime inputDate)
 		{
-			var minDate = DateTime.Now.AddDays(1);
+			var minDate = DateTime.Now;
 
 			return inputDate > minDate;
 		}

@@ -55,34 +55,6 @@
 						</div>
 					</div>
 				</div>
-				<div class="separator mb-2"></div>
-				<div class="col-xl-7">
-					<div class="notice d-flex bg-light-primary rounded border-primary border border-dashed h-lg-200 p-6">
-						<div class="d-flex flex-stack flex-grow-1 flex-wrap flex-md-nowrap">
-							<div class="mb-3 mb-md-0 fw-semibold">
-								<h4 class="text-gray-900 fw-bold">Promotion Details</h4>
-								<div class="separator"></div>
-								<div class="separator"></div>
-								<div class="fs-2 me-3 text-success mb-2"><strong>Promotion Name: </strong>
-									<span class="text-gray-600 fs-4">@Model.Sweepstake.Campaign.CampaignName</span>
-								</div>
-								<div class="fs-2 me-3 text-success mb-2">
-									<strong>Promotion Start Date: </strong>
-									<span class="text-gray-600 fs-4">@Model.Sweepstake.Campaign.StartDate.ToString("f")</span>
-								</div>
-								<div class="fs-2 me-3 text-success">
-									<strong>Promotion Start Date: </strong>
-									<span class="text-gray-600 fs-4">@Model.Sweepstake.Campaign.EndDate.ToString("f")</span>
-								</div>
-							</div>
-							<a 
-								asp-controller="Promotions"
-								asp-action="View"
-								asp-route-campaignUid="@Model.Sweepstake.Campaign.CampaignUid"
-								class="btn btn-primary px-6 align-self-center text-nowrap">View</a>
-						</div>
-					</div>
-				</div>
 			</div>
 		</div>
 		<div class="separator"></div>
@@ -146,7 +118,7 @@
 											   class="form-control form-control-solid"
 											   placeholder="@Model.UpdateSweepstake.Name"
 											   value="@Model.UpdateSweepstake.Name"
-											   asp-for="@Model.UpdateSweepstake.Name" />
+											   asp-for="@Model.UpdateSweepstake.Name" maxlength="90"/>
 										<span asp-validation-for="@Model.UpdateSweepstake.Name"></span>
 									</div>
 									<div class="fv-row mb-6 w-lg-250px">
