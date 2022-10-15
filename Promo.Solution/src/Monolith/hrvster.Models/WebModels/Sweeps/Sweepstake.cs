@@ -1,4 +1,6 @@
-﻿using System;
+﻿using hrvster.Models.Harvester;
+using System;
+using System.Collections.Generic;
 
 namespace hrvster.Models.WebModels.Sweeps
 {
@@ -14,6 +16,8 @@ namespace hrvster.Models.WebModels.Sweeps
 		public DateTime? DrawDate { get; set; }
 		public bool Drawn { get; set; }
 		public DateTime? DateDrawn { get; set; }
+		public IEnumerable<SweepEntry> SweepEntries { get; set; }
+		public IEnumerable<Harvested> Harvested { get; set; }
 
 		public bool IsActive()
 			=> DateTime.UtcNow >= StartDate.ToUniversalTime() &&

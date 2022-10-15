@@ -1,4 +1,5 @@
-﻿@using hrvster.Web.Models
+﻿@using System.Globalization
+@using hrvster.Web.Models
 @model ViewPromotion
 @{
     ViewData["Title"] = @Model.CampaignName;
@@ -24,7 +25,7 @@
 								<span class="badge badge-light-danger me-auto">InActive</span>
 							}
 						</div>
-						<div class="d-flex flex-wrap fw-semibold mb-4 fs-5 text-gray-400">
+						<div class="d-flex flex-wrap fw-semibold mb-4 fs-7 text-gray-400">
 							@Model.Description
 						</div>
 					</div>
@@ -40,13 +41,13 @@
 						<div class="border border-gray-300 border-dashed rounded min-w-125px py-3 px-4 me-6 mb-3">
 							<div class="fw-semibold fs-6 text-gray-400">Start Date</div>
 							<div class="d-flex align-items-center">
-								<div class="fs-4 fw-bold">@Model.StartDate.ToString("f")</div>
+								<div class="fs-4 fw-bold">@Model.StartDate.ToString("MMM dd, yyyy, hh:mm:ss tt")</div>
 							</div>
 						</div>
 						<div class="border border-gray-300 border-dashed rounded min-w-125px py-3 px-4 me-6 mb-3">
 							<div class="fw-semibold fs-6 text-gray-400">End Date</div>
 							<div class="d-flex align-items-center">
-								<div class="fs-4 fw-bold">@Model.EndDate.ToString("f")</div>
+								<div class="fs-4 fw-bold">@Model.EndDate.ToString("MMM dd, yyyy, hh:mm:ss tt")</div>
 							</div>
 						</div>
 						<div class="border border-gray-300 border-dashed rounded min-w-125px py-3 px-4 me-6 mb-3">
@@ -96,7 +97,8 @@
 											class="form-control form-control-solid"
 											placeholder="@Model.UpdatePromotion.CampaignName"
 											value="@Model.UpdatePromotion.CampaignName"
-											asp-for="@Model.UpdatePromotion.CampaignName" />
+											asp-for="@Model.UpdatePromotion.CampaignName"
+											maxlength="40"/>
 										<span asp-validation-for="@Model.UpdatePromotion.CampaignName"></span>
 									</div>
 									<div class="fv-row mb-8">
@@ -104,7 +106,7 @@
 											Description
 										</label>
 										<textarea asp-for="@Model.UpdatePromotion.Description"
-										class="form-control form-control-solid" rows="3">@Model.UpdatePromotion.Description</textarea>
+										class="form-control form-control-solid" rows="3" maxlength="450">@Model.UpdatePromotion.Description</textarea>
 										<span asp-validation-for="Description"></span>
 									</div>
 									<div class="fv-row mb-8">
@@ -121,9 +123,9 @@
 											Start Date
 										</label>
 										<input class="form-control form-control-solid"
-											value="@Model.UpdatePromotion.StartDate.ToString("yyyy-MM-ddThh:mm:ss")"
+											   value="@Model.UpdatePromotion.StartDate.ToString("yyyy-MM-ddThh:mm", CultureInfo.CurrentCulture)"
 											asp-for="@Model.UpdatePromotion.StartDate"
-												asp-format="{0:yyyy-MM-ddThh:mm:ss}" />
+												asp-format="{0:yyyy-MM-ddThh:mm}" />
 										<span asp-validation-for="StartDate"></span>
 									</div>
 									<div class="fv-row mb-6 w-lg-250px">
@@ -131,9 +133,9 @@
 											End Date
 										</label>
 										<input class="form-control form-control-solid"
-											value="@Model.UpdatePromotion.EndDate.ToString("yyyy-MM-ddThh:mm:ss")"
+											value="@Model.UpdatePromotion.EndDate.ToString("yyyy-MM-ddThh:mm", CultureInfo.CurrentCulture)"
 											asp-for="@Model.UpdatePromotion.EndDate"
-												asp-format="{0:yyyy-MM-ddThh:mm:ss}" />
+												asp-format="{0:yyyy-MM-ddThh:mm}" />
 										<span asp-validation-for="EndDate"></span>
 									</div>
 								</div>
@@ -144,25 +146,24 @@
 						</form>
 					</div>
 					<div class="tab-pane fade show" id="sweepStakes" role="tabpanel">
-						<table id="sweepStakesTable" 
-							class="table table-row-bordered table-row-dashed gy-4 align-middle fw-bold">
+						<div class="table-responsive">
+							<table id="sweepStakesTable" 
+							class="table table-row-bordered table-row-dashed gy-4 align-middle">
 							<thead class="fs-7 text-gray-400 text-uppercase">
 								<tr>
 									<th class="min-w-250px">Name</th>
 									<th>Start Date</th>
 									<th>End Date</th>
-									<th>Draw Date</th>
 									<th>Actions</th>
 								</tr>
 							</thead>
-							<tbody class="fs-6">
+							<tbody class="fs-7">
 								@foreach(var item in Model.Sweepstakes)
 								{
 									<tr>
-										<td>@item.Name</td>
-										<td>@item.StartDate.ToString("f")</td>
-										<td>@item.EndDate.ToString("f")</td>
-										<td>@item.DrawDate.GetValueOrDefault().ToString("f")</td>
+										<td class="fw-normal">@item.Name</td>
+										<td>@item.StartDate.ToString("MMM dd, yyyy, hh:mm:ss tt")</td>
+										<td>@item.EndDate.ToString("MMM dd, yyyy, hh:mm:ss tt")</td>
 										<td>
 											<div class="me-0">
 												<button class="btn btn-sm btn-bg-light btn-active-color-primary" 
@@ -191,6 +192,8 @@
 														<a asp-action="View" asp-controller="SweepPrizes"
 															asp-route-sweepUid="@item.SweepUid"
 															asp-route-campaignUid=@Model.CampaignUid
+															asp-route-returnAction="View"
+															asp-route-returnController="Sweeps"
 															class="menu-link px-3">
 															View Prizes
 														</a>
@@ -202,6 +205,7 @@
 								}
 							</tbody>
 						</table>
+						</div>
 					</div>
 				</div>
 			</div>

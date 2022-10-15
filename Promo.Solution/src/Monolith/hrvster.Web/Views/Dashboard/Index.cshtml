@@ -1,487 +1,169 @@
 ﻿@model Dashboard
 @{
-    ViewData["Title"] = "Dashboard";
+	ViewData["Title"] = "Dashboard";
+	var counter = 0;
 }
-<div class="card mb-6 mb-xl-9 my-4">
-	<div class="card-header">
-		<div class="card-toolbar" data-kt-buttons="true" data-kt-initialized="1">
-			<a 
-				href="#" 
-				class="btn btn-primary er fs-6 px-8 py-4" 
-				data-bs-toggle="modal" 
-				data-bs-target="#kt_modal_create_campaign">
-				Create Promotion
-			</a>
-		</div>
-    </div>
+<div class="card card-flush" style="background-color: #1C325E;">
 	<div class="card-body pt-9 pb-0">
-		<div class="d-flex flex-wrap flex-sm-nowrap mb-6">
-			<div class="flex-grow-1">
-				<div class="d-flex justify-content-between align-items-start flex-wrap mb-2">
-					<div class="d-flex flex-column">
-						<div class="d-flex align-items-center mb-1">
-							<form name="promotionForm" id="promotionForm">
-								<select asp-items="@Model.Promotions" class="form-select">
-									<option>Please select A Promotion</option>
-								</select>
-							</form>
+		<div class="row g-5 g-xl-10">
+			@foreach (var promotion in Model.Promotions)
+			{
+				<div class="card card-flush mb-4 col-md-5 mx-6">
+					<div class="mt-1 card-header rounded bgi-no-repeat bgi-size-cover bgi-position-y-top bgi-position-x-center align-items-start h-250px" style="background-image:url('assets/media/svg/shapes/top-green.png" data-theme="light">
+						<h3 class="card-title align-items-start flex-column text-white pt-15">
+							<a asp-action="View" asp-controller="Promotions" asp-route-campaignUid="@promotion.CampaignUid"><span class="fw-bold fs-2x mb-3">@promotion.CampaignName</span></a>
+							<div class="fs-4 text-white">
+								<span class="opacity-75">You have @promotion.Sweepstakes.Count() sweepstake game(s)</span>
+								<span class="opacity-75 fw-semibold fs-6">Promotion runs from @promotion.StartDate.ToString("d") to @promotion.EndDate.ToString("d")</span>
+							</div>
+						</h3>
+						<div class="card-toolbar pt-5">
+							@*<!--begin::Menu-->
+							<button class="btn btn-sm btn-icon btn-active-color-primary btn-color-white bg-white bg-opacity-25 bg-hover-opacity-100 bg-hover-white bg-active-opacity-25 w-20px h-20px" data-kt-menu-trigger="click" data-kt-menu-placement="bottom-end" data-kt-menu-overflow="true">
+								<!--begin::Svg Icon | path: icons/duotune/general/gen052.svg-->
+								<span class="svg-icon svg-icon-4">
+									<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+										<rect x="10" y="10" width="4" height="4" rx="2" fill="currentColor"></rect>
+										<rect x="17" y="10" width="4" height="4" rx="2" fill="currentColor"></rect>
+										<rect x="3" y="10" width="4" height="4" rx="2" fill="currentColor"></rect>
+									</svg>
+								</span>
+								<!--end::Svg Icon-->
+							</button>
+							<!--begin::Menu 2-->
+							<div class="menu menu-sub menu-sub-dropdown menu-column menu-rounded menu-gray-800 menu-state-bg-light-primary fw-semibold w-200px" data-kt-menu="true">
+								<!--begin::Menu item-->
+								<div class="menu-item px-3">
+									<div class="menu-content fs-6 text-dark fw-bold px-3 py-4">Quick Actions</div>
+								</div>
+								<!--end::Menu item-->
+								<!--begin::Menu separator-->
+								<div class="separator mb-3 opacity-75"></div>
+								<!--end::Menu separator-->
+								<!--begin::Menu item-->
+								<div class="menu-item px-3">
+									<a href="#" class="menu-link px-3">New Ticket</a>
+								</div>
+								<!--end::Menu item-->
+								<!--begin::Menu item-->
+								<div class="menu-item px-3">
+									<a href="#" class="menu-link px-3">New Customer</a>
+								</div>
+								<!--end::Menu item-->
+								<!--begin::Menu item-->
+								<div class="menu-item px-3" data-kt-menu-trigger="hover" data-kt-menu-placement="right-start">
+									<!--begin::Menu item-->
+									<a href="#" class="menu-link px-3">
+										<span class="menu-title">New Group</span>
+										<span class="menu-arrow"></span>
+									</a>
+									<!--end::Menu item-->
+									<!--begin::Menu sub-->
+									<div class="menu-sub menu-sub-dropdown w-175px py-4">
+										<!--begin::Menu item-->
+										<div class="menu-item px-3">
+											<a href="#" class="menu-link px-3">Admin Group</a>
+										</div>
+										<!--end::Menu item-->
+										<!--begin::Menu item-->
+										<div class="menu-item px-3">
+											<a href="#" class="menu-link px-3">Staff Group</a>
+										</div>
+										<!--end::Menu item-->
+										<!--begin::Menu item-->
+										<div class="menu-item px-3">
+											<a href="#" class="menu-link px-3">Member Group</a>
+										</div>
+										<!--end::Menu item-->
+									</div>
+									<!--end::Menu sub-->
+								</div>
+								<!--end::Menu item-->
+								<!--begin::Menu item-->
+								<div class="menu-item px-3">
+									<a href="#" class="menu-link px-3">New Contact</a>
+								</div>
+								<!--end::Menu item-->
+								<!--begin::Menu separator-->
+								<div class="separator mt-3 opacity-75"></div>
+								<!--end::Menu separator-->
+								<!--begin::Menu item-->
+								<div class="menu-item px-3">
+									<div class="menu-content px-3 py-3">
+										<a class="btn btn-primary btn-sm px-4" href="#">Generate Reports</a>
+									</div>
+								</div>
+								<!--end::Menu item-->
+							</div>
+							<!--end::Menu 2-->
+							<!--end::Menu-->*@
+						</div>
+					</div>
+					<div class="card-body mt-n20">
+						<div class="mt-n20 position-relative">
+							<div class="row g-3 g-lg-6">
+								<div class="col-6">
+									<div class="bg-gray-100 bg-opacity-70 rounded-2 px-6 py-5">
+										<div class="symbol symbol-30px me-5 mb-8">
+											<span class="symbol-label">
+												<span class="svg-icon svg-icon-1 svg-icon-primary">
+													<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+														<path opacity="0.3" d="M11.8 5.2L17.7 8.6V15.4L11.8 18.8L5.90001 15.4V8.6L11.8 5.2ZM11.8 2C11.5 2 11.2 2.1 11 2.2L3.8 6.4C3.3 6.7 3 7.3 3 7.9V16.2C3 16.8 3.3 17.4 3.8 17.7L11 21.9C11.3 22 11.5 22.1 11.8 22.1C12.1 22.1 12.4 22 12.6 21.9L19.8 17.7C20.3 17.4 20.6 16.8 20.6 16.2V7.9C20.6 7.3 20.3 6.7 19.8 6.4L12.6 2.2C12.4 2.1 12.1 2 11.8 2Z" fill="currentColor" />
+														<path d="M11.8 8.69995L8.90001 10.3V13.7L11.8 15.3L14.7 13.7V10.3L11.8 8.69995Z" fill="currentColor" />
+													</svg>
+												</span>
+											</span>
+										</div>
+										<div class="m-0">
+											<span class="text-gray-700 fw-bolder d-block fs-2qx lh-1 ls-n1 mb-1">@promotion.Sweepstakes.Count()</span>
+											<a href="#"><span class="text-p fw-semibold fs-6">Sweepstakes</span></a>
+										</div>
+									</div>
+								</div>
+								<div class="col-6">
+									<div class="bg-gray-100 bg-opacity-70 rounded-2 px-6 py-5">
+										<div class="symbol symbol-30px me-5 mb-8">
+											<span class="symbol-label">
+												<span class="svg-icon svg-icon-1 svg-icon-primary">
+													<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+														<path d="M14 18V16H10V18L9 20H15L14 18Z" fill="currentColor"></path>
+														<path opacity="0.3" d="M20 4H17V3C17 2.4 16.6 2 16 2H8C7.4 2 7 2.4 7 3V4H4C3.4 4 3 4.4 3 5V9C3 11.2 4.8 13 7 13C8.2 14.2 8.8 14.8 10 16H14C15.2 14.8 15.8 14.2 17 13C19.2 13 21 11.2 21 9V5C21 4.4 20.6 4 20 4ZM5 9V6H7V11C5.9 11 5 10.1 5 9ZM19 9C19 10.1 18.1 11 17 11V6H19V9ZM17 21V22H7V21C7 20.4 7.4 20 8 20H16C16.6 20 17 20.4 17 21ZM10 9C9.4 9 9 8.6 9 8V5C9 4.4 9.4 4 10 4C10.6 4 11 4.4 11 5V8C11 8.6 10.6 9 10 9ZM10 13C9.4 13 9 12.6 9 12V11C9 10.4 9.4 10 10 10C10.6 10 11 10.4 11 11V12C11 12.6 10.6 13 10 13Z" fill="currentColor"></path>
+													</svg>
+												</span>
+											</span>
+										</div>
+										<div class="m-0">
+											<span class="text-gray-700 fw-bolder d-block fs-2qx lh-1 ls-n1 mb-1">@promotion.SweepEntries</span>
+											<a href="#"><span class="text-gray-500 fw-semibold fs-6">Sweepstake Entries</span></a>
+										</div>
+									</div>
+								</div>
+								<div class="col-6">
+									<div class="bg-gray-100 bg-opacity-70 rounded-2 px-6 py-5">
+										<div class="symbol symbol-30px me-5 mb-8">
+											<span class="symbol-label">
+												<span class="svg-icon svg-icon-1 svg-icon-primary">
+													<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+														<path d="M21 7H3C2.4 7 2 6.6 2 6V4C2 3.4 2.4 3 3 3H21C21.6 3 22 3.4 22 4V6C22 6.6 21.6 7 21 7Z" fill="currentColor" />
+														<path opacity="0.3" d="M21 14H3C2.4 14 2 13.6 2 13V11C2 10.4 2.4 10 3 10H21C21.6 10 22 10.4 22 11V13C22 13.6 21.6 14 21 14ZM22 20V18C22 17.4 21.6 17 21 17H3C2.4 17 2 17.4 2 18V20C2 20.6 2.4 21 3 21H21C21.6 21 22 20.6 22 20Z" fill="currentColor" />
+													</svg>
+												</span>
+											</span>
+										</div>
+										<div class="m-0">
+											<span class="text-gray-700 fw-bolder d-block fs-2qx lh-1 ls-n1 mb-1">@promotion.Harvested</span>
+											<a href="#"><span class="text-gray-500 fw-semibold fs-6">Tweets Harvested</span></a>
+										</div>
+									</div>
+								</div>
+							</div>
 						</div>
 					</div>
 				</div>
-			</div>
-		</div>
-		<div class="separator my-5 mx-5"></div>
-		<div id="sweepstakesTweetsLineChart"></div>
-		<div class="separator my-5 mx-5"></div>
-		<div id="sweepstakesEntriesLineChart"></div>
-	</div>
-</div>
-<div class="modal fade" id="kt_modal_create_campaign" tabindex="-1" aria-hidden="true">
-	<div class="modal-dialog modal-fullscreen p-9">
-		<div class="modal-content modal-rounded">
-			<div class="modal-header py-7 d-flex justify-content-between">
-				<h2>Create Promotion</h2>
-				<div class="btn btn-sm btn-icon btn-active-color-primary" data-bs-dismiss="modal">
-					<span class="svg-icon svg-icon-1">
-						<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-							<rect opacity="0.5" x="6" y="17.3137" width="16" height="2" rx="1" transform="rotate(-45 6 17.3137)" fill="currentColor" />
-							<rect x="7.41422" y="6" width="16" height="2" rx="1" transform="rotate(45 7.41422 6)" fill="currentColor" />
-						</svg>
-					</span>
-				</div>
-			</div>
-			<div class="modal-body scroll-y m-5">
-				<div class="stepper stepper-links d-flex flex-column" id="kt_modal_create_campaign_stepper">
-					<div class="stepper-nav justify-content-center py-2">
-						<div class="stepper-item me-5 me-md-15 current" data-kt-stepper-element="nav">
-							<h3 class="stepper-title">Promotion Details</h3>
-						</div>
-						<div class="stepper-item me-5 me-md-15" data-kt-stepper-element="nav">
-							<h3 class="stepper-title">Games</h3>
-						</div>
-						<div class="stepper-item me-5 me-md-15" data-kt-stepper-element="nav">
-							<h3 class="stepper-title">Rules</h3>
-						</div>
-						<div class="stepper-item me-5 me-md-15" data-kt-stepper-element="nav">
-							<h3 class="stepper-title">Prizes</h3>
-						</div>
-						<div class="stepper-item" data-kt-stepper-element="nav">
-							<h3 class="stepper-title">Completed</h3>
-						</div>
-					</div>
-					<form class="mx-auto w-100 mw-600px pt-15 pb-10" novalidate="novalidate" id="kt_modal_create_campaign_stepper_form">
-						<!--begin::Step 1-->
-						<div class="current" data-kt-stepper-element="content">
-							<div class="w-100">
-								<div class="pb-10 pb-lg-15">
-									<h2 class="fw-bold d-flex align-items-center text-dark">
-										Setup Promotion Details
-										<i class="fas fa-exclamation-circle ms-2 fs-7" data-bs-toggle="tooltip" 
-										title="Promotion name will be used as reference to house your games. The start and end dates will determine the boundaries of the start and end date of your games"></i>
-									</h2>
-									<!--begin::Notice-->
-									@*<div class="text-muted fw-semibold fs-6">
-										If you need more info, please check out
-										<a href="#" class="link-primary fw-bold">Help Page</a>.
-									</div>*@
-									<!--end::Notice-->
-								</div>
-								<div class="mb-10 fv-row">
-									<label class="required form-label mb-3">Promotion Name</label>
-									<input type="text" 
-										class="form-control form-control-lg form-control-solid" 
-										placeholder=""
-										asp-for="CreateNewPromotion.PromotionName" />
-									<span asp-validation-for="CreateNewPromotion.PromotionName"></span>
-								</div>
-								<div class="mb-10 fv-row">
-									<label class="form-label mb-3">Describe your Promotion</label>
-									<textarea asp-for="CreateNewPromotion.PromotionDescription" 
-										id="Promotion.Description" 
-										placeholder=""
-										class="form-control form-control-lg form-control-solid"
-										style="height: 100px"></textarea>
-									<span asp-validation-for="CreateNewPromotion.PromotionDescription"></span>
-								</div>
-								<div class="mb-10 fv-row w-lg-300px">
-									<label class="required form-label mb-3">Start Date</label>
-									<input asp-for="CreateNewPromotion.PromotionStartDate"
-										class="form-control form-control-lg form-control-solid"
-										asp-format="{0:yyyy-MM-ddTHH:mm:ss}" 
-										placeholder="" />
-									<span asp-validation-for="CreateNewPromotion.PromotionStartDate"></span>
-								</div>
-								<div class="mb-10 fv-row w-lg-300px">
-									<label class="required form-label mb-3">Draw Date</label>
-									<input asp-for="CreateNewPromotion.PromotionEndDate"
-										   class="form-control form-control-lg form-control-solid"
-										   asp-format="{0:yyyy-MM-ddTHH:mm:ss}"
-										   placeholder="" />
-									<span asp-validation-for="CreateNewPromotion.PromotionEndDate"></span>
-								</div>
-								<!--begin::Input group-->
-								<div class="mb-10">
-									<label class="required fw-semibold fs-6 mb-5">Promotion Type</label>
-									@foreach(var promotionType in Model.CampaignTypes)
-									{
-										<div class="d-flex fv-row">
-											<div class="form-check form-check-custom form-check-solid">
-												<input 
-													class="form-check-input me-3" 
-													asp-for="CreateNewPromotion.PromotionTypeUid"
-													type="radio" 
-													value="@promotionType.CampaignTypeUid" id="kt_modal_update_role_option_0" 
-													checked='checked' />
-												<label class="form-check-label" for="kt_modal_update_role_option_0">
-													<div class="fw-bold text-gray-800">
-														@promotionType.CampaignTypeName
-													</div>
-													<div class="text-gray-600">
-														@promotionType.CamapaignTypeDescription
-													</div>
-												</label>
-											</div>
-										</div>
-										<div class='separator separator-dashed my-5'></div>
-									}
-								</div>
-								<!--end::Input group-->
-							</div>
-							<!--end::Wrapper-->
-						</div>
-						<!--end::Step 1-->
-						<!--begin::Step 2-->
-						<div data-kt-stepper-element="content">
-							<div class="w-100">
-								<div class="pb-10 pb-lg-15">
-									<h2 class="fw-bold d-flex align-items-center text-dark">
-										Sweepstake
-									</h2>
-									<div class="text-muted fw-semibold fs-4">
-										A sweepstake is just like a Raffle Draw Game.
-									</div>
-									<!--begin::Notice-->
-									@*<div class="text-muted fw-semibold fs-6">
-									If you need more info, please check out
-									<a href="#" class="link-primary fw-bold">Help Page</a>.
-									</div>*@
-									<!--end::Notice-->
-								</div>
-								<div class="mb-10 fv-row">
-									<label class="required form-label mb-3">Sweepstake Name</label>
-									<input type="text"
-										   class="form-control form-control-lg form-control-solid"
-										   placeholder=""
-										   asp-for="CreateNewPromotion.CreateNewSweep.Name" />
-									<span asp-validation-for="CreateNewPromotion.CreateNewSweep.Name"></span>
-								</div>
-								<div class="mb-10 fv-row w-lg-300px">
-									<label class="required form-label mb-3">Start Date</label>
-									<input asp-for="CreateNewPromotion.CreateNewSweep.StartDate"
-										   class="form-control form-control-lg form-control-solid"
-										   asp-format="{0:yyyy-MM-ddTHH:mm:ss}"
-										   placeholder="" />
-									<span asp-validation-for="CreateNewPromotion.CreateNewSweep.StartDate"></span>
-								</div>
-								<div class="mb-10 fv-row w-lg-300px">
-									<label class="required form-label mb-3">End Date</label>
-									<input asp-for="CreateNewPromotion.CreateNewSweep.EndDate"
-										   class="form-control form-control-lg form-control-solid"
-										   asp-format="{0:yyyy-MM-ddTHH:mm:ss}"
-										   placeholder="" />
-									<span asp-validation-for="CreateNewPromotion.CreateNewSweep.EndDate"></span>
-								</div>
-								<div class="mb-10 fv-row w-lg-300px">
-									<label class="required form-label mb-3">End Date</label>
-									<input asp-for="CreateNewPromotion.CreateNewSweep.DrawDate"
-										   class="form-control form-control-lg form-control-solid"
-										   asp-format="{0:yyyy-MM-ddTHH:mm:ss}"
-										   placeholder="" />
-									<span asp-validation-for="CreateNewPromotion.CreateNewSweep.DrawDate"></span>
-								</div>
-							</div>
-						</div>
-						<!--end::Step 2-->
-						<!--begin::Step 3-->
-						<div data-kt-stepper-element="content">
-							<!--begin::Wrapper-->
-							<div class="w-100">
-								<!--begin::Heading-->
-								<div class="pb-10 pb-lg-12">
-									<!--begin::Title-->
-									<h1 class="fw-bold text-dark">Configure Audiences</h1>
-									<!--end::Title-->
-									<!--begin::Description-->
-									<div class="text-muted fw-semibold fs-4">
-										If you need more info, please check
-										<a href="#" class="link-primary">Campaign Guidelines</a>
-									</div>
-									<!--end::Description-->
-								</div>
-								<!--end::Heading-->
-								<!--begin::Input group-->
-								<div class="fv-row mb-10">
-									<!--begin::Label-->
-									<label class="fs-6 fw-semibold mb-2">
-										Gender
-										<i class="fas fa-exclamation-circle ms-2 fs-7" data-bs-toggle="tooltip" title="Show your ads to either men or women, or select 'All' for both"></i>
-									</label>
-									<!--End::Label-->
-									<!--begin::Row-->
-									<div class="row g-9" data-kt-buttons="true" data-kt-buttons-target="[data-kt-button='true']">
-										<!--begin::Col-->
-										<div class="col">
-											<!--begin::Option-->
-											<label class="btn btn-outline btn-outline-dashed btn-active-light-primary active d-flex text-start p-6" data-kt-button="true">
-												<!--begin::Radio-->
-												<span class="form-check form-check-custom form-check-solid form-check-sm align-items-start mt-1">
-													<input class="form-check-input" type="radio" name="campaign_gender" value="1" checked="checked" />
-												</span>
-												<!--end::Radio-->
-												<!--begin::Info-->
-												<span class="ms-5">
-													<span class="fs-4 fw-bold text-gray-800 d-block">All</span>
-												</span>
-												<!--end::Info-->
-											</label>
-											<!--end::Option-->
-										</div>
-										<!--end::Col-->
-										<!--begin::Col-->
-										<div class="col">
-											<!--begin::Option-->
-											<label class="btn btn-outline btn-outline-dashed btn-active-light-primary d-flex text-start p-6" data-kt-button="true">
-												<!--begin::Radio-->
-												<span class="form-check form-check-custom form-check-solid form-check-sm align-items-start mt-1">
-													<input class="form-check-input" type="radio" name="campaign_gender" value="2" />
-												</span>
-												<!--end::Radio-->
-												<!--begin::Info-->
-												<span class="ms-5">
-													<span class="fs-4 fw-bold text-gray-800 d-block">Male</span>
-												</span>
-												<!--end::Info-->
-											</label>
-											<!--end::Option-->
-										</div>
-										<!--end::Col-->
-										<!--begin::Col-->
-										<div class="col">
-											<!--begin::Option-->
-											<label class="btn btn-outline btn-outline-dashed btn-active-light-primary d-flex text-start p-6" data-kt-button="true">
-												<!--begin::Radio-->
-												<span class="form-check form-check-custom form-check-solid form-check-sm align-items-start mt-1">
-													<input class="form-check-input" type="radio" name="campaign_gender" value="3" />
-												</span>
-												<!--end::Radio-->
-												<!--begin::Info-->
-												<span class="ms-5">
-													<span class="fs-4 fw-bold text-gray-800 d-block">Female</span>
-												</span>
-												<!--end::Info-->
-											</label>
-											<!--end::Option-->
-										</div>
-										<!--end::Col-->
-									</div>
-									<!--end::Row-->
-								</div>
-								<!--end::Input group-->
-								<!--begin::Input group-->
-								<div class="fv-row mb-10">
-									<!--begin::Label-->
-									<label class="fs-6 fw-semibold mb-2">
-										Age
-										<i class="fas fa-exclamation-circle ms-2 fs-7" data-bs-toggle="tooltip" title="Select the minimum and maximum age of the people who will find your ad relevant."></i>
-									</label>
-									<!--End::Label-->
-									<!--begin::Slider-->
-									<div class="d-flex flex-stack">
-										<div id="kt_modal_create_campaign_age_min" class="fs-7 fw-semibold text-muted"></div>
-										<div id="kt_modal_create_campaign_age_slider" class="noUi-sm w-100 ms-5 me-8"></div>
-										<div id="kt_modal_create_campaign_age_max" class="fs-7 fw-semibold text-muted"></div>
-									</div>
-									<!--end::Slider-->
-								</div>
-								<!--end::Input group-->
-								<!--begin::Input group-->
-								<div class="fv-row mb-10">
-									<!--begin::Label-->
-									<label class="fs-6 fw-semibold mb-2">
-										Location
-										<i class="fas fa-exclamation-circle ms-2 fs-7" data-bs-toggle="tooltip" title="Enter one or more location points for more specific targeting."></i>
-									</label>
-									<!--End::Label-->
-									<!--begin::Tagify-->
-									<input class="form-control d-flex align-items-center" value="" id="kt_modal_create_campaign_location" />
-									<!--end::Tagify-->
-								</div>
-								<!--end::Input group-->
-							</div>
-							<!--end::Wrapper-->
-						</div>
-						<!--end::Step 3-->
-						<!--begin::Step 4-->
-						<div data-kt-stepper-element="content">
-							<!--begin::Wrapper-->
-							<div class="w-100">
-								<!--begin::Heading-->
-								<div class="pb-10 pb-lg-12">
-									<!--begin::Title-->
-									<h1 class="fw-bold text-dark">Budget Estimates</h1>
-									<!--end::Title-->
-									<!--begin::Description-->
-									<div class="text-muted fw-semibold fs-4">
-										If you need more info, please check
-										<a href="#" class="link-primary">Campaign Guidelines</a>
-									</div>
-									<!--end::Description-->
-								</div>
-								<!--end::Heading-->
-								<!--begin::Input group-->
-								<div class="fv-row mb-10">
-									<!--begin::Label-->
-									<label class="fs-6 fw-semibold mb-2">
-										Campaign Duration
-										<i class="fas fa-exclamation-circle ms-2 fs-7" data-bs-toggle="tooltip" title="Choose how long you want your ad to run for"></i>
-									</label>
-									<!--end::Label-->
-									<!--begin::Duration option-->
-									<div class="d-flex gap-9 mb-7">
-										<!--begin::Button-->
-										<button type="button" class="btn btn-outline btn-outline-dashed btn-active-light-primary active" id="kt_modal_create_campaign_duration_all">
-											Continuous duration
-											<br />
-											<span class="fs-7">Your ad will run continuously for a daily budget.</span>
-										</button>
-										<!--end::Button-->
-										<!--begin::Button-->
-										<button type="button" class="btn btn-outline btn-outline-dashed btn-active-light-primary btn-outline-default" id="kt_modal_create_campaign_duration_fixed">
-											Fixed duration
-											<br />
-											<span class="fs-7">Your ad will run on the specified dates only.</span>
-										</button>
-										<!--end::Button-->
-									</div>
-									<!--end::Duration option-->
-									<!--begin::Datepicker-->
-									<input class="form-control form-control-solid d-none" placeholder="Pick date &amp; time" id="kt_modal_create_campaign_datepicker" />
-									<!--end::Datepicker-->
-								</div>
-								<!--end::Input group-->
-								<!--begin::Input group-->
-								<div class="fv-row mb-10">
-									<!--begin::Label-->
-									<label class="fs-6 fw-semibold mb-2">
-										Daily Budget
-										<i class="fas fa-exclamation-circle ms-2 fs-7" data-bs-toggle="tooltip" title="Choose the budget allocated for each day. Higher budget will generate better results"></i>
-									</label>
-									<!--end::Label-->
-									<!--begin::Slider-->
-									<div class="d-flex flex-column text-center">
-										<div class="d-flex align-items-start justify-content-center mb-7">
-											<span class="fw-bold fs-4 mt-1 me-2">$</span>
-											<span class="fw-bold fs-3x" id="kt_modal_create_campaign_budget_label"></span>
-											<span class="fw-bold fs-3x">.00</span>
-										</div>
-										<div id="kt_modal_create_campaign_budget_slider" class="noUi-sm"></div>
-									</div>
-									<!--end::Slider-->
-								</div>
-								<!--end::Input group-->
-							</div>
-							<!--end::Wrapper-->
-						</div>
-						<!--end::Step 4-->
-						<!--begin::Step 5-->
-						<div data-kt-stepper-element="content">
-							<!--begin::Wrapper-->
-							<div class="w-100">
-								<!--begin::Heading-->
-								<div class="pb-12 text-center">
-									<!--begin::Title-->
-									<h1 class="fw-bold text-dark">Campaign Created!</h1>
-									<!--end::Title-->
-									<!--begin::Description-->
-									<div class="fw-semibold text-muted fs-4">You will receive an email with with the summary of your newly created campaign!</div>
-									<!--end::Description-->
-								</div>
-								<!--end::Heading-->
-								<!--begin::Actions-->
-								<div class="d-flex flex-center pb-20">
-									<button id="kt_modal_create_campaign_create_new" type="button" class="btn btn-lg btn-light me-3" data-kt-element="complete-start">Create New Campaign</button>
-									<a href="" class="btn btn-lg btn-primary" data-bs-toggle="tooltip" title="Coming Soon">View Campaign</a>
-								</div>
-								<!--end::Actions-->
-								<!--begin::Illustration-->
-								<div class="text-center px-4">
-									<img src="assets/media/illustrations/sketchy-1/9.png" alt="" class="mww-100 mh-350px" />
-								</div>
-								<!--end::Illustration-->
-							</div>
-						</div>
-						<!--end::Step 5-->
-						<!--begin::Actions-->
-						<div class="d-flex flex-stack pt-10">
-							<!--begin::Wrapper-->
-							<div class="me-2">
-								<button id="previous" type="button" class="btn btn-lg btn-light-primary me-3" data-kt-stepper-action="previous">
-									<!--begin::Svg Icon | path: icons/duotune/arrows/arr063.svg-->
-									<span class="svg-icon svg-icon-3 me-1">
-										<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-											<rect opacity="0.5" x="6" y="11" width="13" height="2" rx="1" fill="currentColor" />
-											<path d="M8.56569 11.4343L12.75 7.25C13.1642 6.83579 13.1642 6.16421 12.75 5.75C12.3358 5.33579 11.6642 5.33579 11.25 5.75L5.70711 11.2929C5.31658 11.6834 5.31658 12.3166 5.70711 12.7071L11.25 18.25C11.6642 18.6642 12.3358 18.6642 12.75 18.25C13.1642 17.8358 13.1642 17.1642 12.75 16.75L8.56569 12.5657C8.25327 12.2533 8.25327 11.7467 8.56569 11.4343Z" fill="currentColor" />
-										</svg>
-									</span>
-									<!--end::Svg Icon-->Back
-								</button>
-							</div>
-							<!--end::Wrapper-->
-							<!--begin::Wrapper-->
-							<div>
-
-								<button type="button" class="btn btn-lg btn-primary" data-kt-stepper-action="submit">
-									<span class="indicator-label">
-										Submit
-										<!--begin::Svg Icon | path: icons/duotune/arrows/arr064.svg-->
-										<span class="svg-icon svg-icon-3 ms-2 me-0">
-											<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-												<rect opacity="0.5" x="18" y="13" width="13" height="2" rx="1" transform="rotate(-180 18 13)" fill="currentColor" />
-												<path d="M15.4343 12.5657L11.25 16.75C10.8358 17.1642 10.8358 17.8358 11.25 18.25C11.6642 18.6642 12.3358 18.6642 12.75 18.25L18.2929 12.7071C18.6834 12.3166 18.6834 11.6834 18.2929 11.2929L12.75 5.75C12.3358 5.33579 11.6642 5.33579 11.25 5.75C10.8358 6.16421 10.8358 6.83579 11.25 7.25L15.4343 11.4343C15.7467 11.7467 15.7467 12.2533 15.4343 12.5657Z" fill="currentColor" />
-											</svg>
-										</span>
-										<!--end::Svg Icon-->
-									</span>
-									<span class="indicator-progress">
-										Please wait...
-										<span class="spinner-border spinner-border-sm align-middle ms-2"></span>
-									</span>
-								</button>
-								<button type="button" class="btn btn-lg btn-primary" data-kt-stepper-action="next">
-									Continue
-									<!--begin::Svg Icon | path: icons/duotune/arrows/arr064.svg-->
-									<span class="svg-icon svg-icon-3 ms-1 me-0">
-										<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-											<rect opacity="0.5" x="18" y="13" width="13" height="2" rx="1" transform="rotate(-180 18 13)" fill="currentColor" />
-											<path d="M15.4343 12.5657L11.25 16.75C10.8358 17.1642 10.8358 17.8358 11.25 18.25C11.6642 18.6642 12.3358 18.6642 12.75 18.25L18.2929 12.7071C18.6834 12.3166 18.6834 11.6834 18.2929 11.2929L12.75 5.75C12.3358 5.33579 11.6642 5.33579 11.25 5.75C10.8358 6.16421 10.8358 6.83579 11.25 7.25L15.4343 11.4343C15.7467 11.7467 15.7467 12.2533 15.4343 12.5657Z" fill="currentColor" />
-										</svg>
-									</span>
-									<!--end::Svg Icon-->
-								</button>
-							</div>
-							<!--end::Wrapper-->
-						</div>
-						<!--end::Actions-->
-					</form>
-					<!--end::Form-->
-				</div>
-				<!--end::Stepper-->
-			</div>
-			<!--begin::Modal body-->
+			}
 		</div>
 	</div>
 </div>
-<!--end::Modal - Create Campaign-->
 @section Scripts {
     @{await Html.RenderPartialAsync("_DashboardsPartial");}
 }

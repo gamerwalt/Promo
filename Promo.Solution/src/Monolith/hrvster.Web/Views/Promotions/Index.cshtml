@@ -28,7 +28,7 @@
 						<th class="min-w-50px text-end">Details</th>
 					</tr>
 				</thead>
-				<tbody class="fs-6">
+				<tbody class="fs-7">
 					@foreach(var item in @Model)
 					{
 						<tr>
@@ -46,8 +46,8 @@
 									</div>
 								</div>
 							</td>
-							<td>@item.StartDate.ToString("f")</td>
-							<td>@item.EndDate.ToString("f")</td>
+							<td>@item.StartDate.ToString("MMM dd, yyyy, hh:mm:ss tt")</td>
+							<td>@item.EndDate.ToString("MMM dd, yyyy, hh:mm:ss tt")</td>
 							<td>
 								@if (item.IsActive())
 								{

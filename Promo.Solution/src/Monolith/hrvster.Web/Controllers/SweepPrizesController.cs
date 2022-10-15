@@ -61,7 +61,7 @@ namespace hrvster.Web.Controllers
 			if (drawRule == null)
 			{
 				return LogAndRedirectBack(
-					$"Could not find the draw rules for the sweepstake with uid: {sweepUid}",
+					$"Could not find the draw rules for the sweepstake {sweep.Name}. We need the draw rules before we can access the prizes.",
 					sweepUid, campaignUid, returnAction, returnController);
 			}
 

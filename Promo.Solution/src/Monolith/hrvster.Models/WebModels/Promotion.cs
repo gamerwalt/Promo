@@ -17,5 +17,7 @@ namespace hrvster.Models.WebModels
 		public DateTime CreatedDate { get; set; }
 		public bool ActiveInd { get; set; }
 		public IEnumerable<Sweepstake> Sweepstakes { get; set; }
+		public int SweepEntries { get; set; }
+		public int Harvested { get; set; }
 	}
 }

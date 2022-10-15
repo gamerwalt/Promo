@@ -11,14 +11,11 @@ using hrvster.Models.WebModels.Sweeps;
 using hrvster.Web.Models;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using Tweetinvi.Models.V2;
 
 namespace hrvster.Web.Controllers
 {
@@ -42,8 +39,8 @@ namespace hrvster.Web.Controllers
 		public async Task<IActionResult> Index()
 		{
 			var campaigns = await _mediator.Send(new GetAllCampaignsForAccount(_hrvsterUser.UserUid));
-			var promotions = _mapper.Map<IEnumerable<Promotion>>(campaigns);
-			
+			var promotions = _mapper.Map<IEnumerable<Promotion>>(campaigns.OrderBy(c => c.EndDate));
+
 			return View(promotions);
 		}
 
@@ -52,9 +49,9 @@ namespace hrvster.Web.Controllers
 		{
 			var campaign = await _mediator.Send(new GetCampaign(campaignUid));
 
-			if(campaign == null)
+			if (campaign == null)
 			{
-				_notificationService.Error("Promotion not found.", 10);
+				_notificationService.Error("Promotion not found.", NotificationService.DismissInSeconds);
 
 				return RedirectToAction("Index");
 			}
@@ -93,6 +90,12 @@ namespace hrvster.Web.Controllers
 			return View(viewPromotion);
 		}
 
+		[HttpGet]
+		public async Task<IActionResult> Update(Guid campaignUid)
+		{
+			return RedirectToActionPermanent("View", new { campaignUid = campaignUid });
+		}
+
 		[HttpPost]
 		public async Task<IActionResult> Update([FromQuery] Guid campaignUid, ViewPromotion form)
 		{
@@ -100,7 +103,7 @@ namespace hrvster.Web.Controllers
 
 			if (campaign == null)
 			{
-				_notificationService.Error("Promotion not found.", 10);
+				_notificationService.Error("Promotion not found.", NotificationService.DismissInSeconds);
 
 				return RedirectToAction("Index");
 			}
@@ -120,16 +123,16 @@ namespace hrvster.Web.Controllers
 					form.UpdatePromotion.StartDate,
 					form.UpdatePromotion.EndDate));
 
-				_notificationService.Success("Promotion updated.");
+				_notificationService.Success("Promotion updated.", NotificationService.DismissInSeconds);
 
 				GetPromotionDetails(form, campaign, sweeps, campaignTypes);
 
-				return View("View", form);
+				return RedirectToAction("Update", new { campaignUid = campaignUid });
 			}
 
 			GetPromotionDetails(form, campaign, sweeps, campaignTypes);
 
-			_notificationService.Error(ModelState.BuildMessageFromErrors());
+			_notificationService.Error(ModelState.BuildMessageFromErrors(), NotificationService.DismissInSeconds);
 
 			return View("View", form);
 		}
@@ -175,7 +178,7 @@ namespace hrvster.Web.Controllers
 		[HttpPost]
 		public async Task<IActionResult> Create(CreatePromotion model)
 		{
-			if(ModelState.IsValid)
+			if (ModelState.IsValid)
 			{
 				var newCampaignRequest = new NewCampaignRequest
 				{
@@ -188,10 +191,12 @@ namespace hrvster.Web.Controllers
 
 				var promotionUid = await _mediator.Send(new CreateCampaignRequest(newCampaignRequest, _hrvsterUser.UserUid));
 
+				_notificationService.Success("Promotion/Campaign created successfully.", NotificationService.DismissInSeconds);
+
 				return RedirectToAction("View", new { campaignUid = promotionUid });
 			}
 
-			_notificationService.Error(ModelState.BuildMessageFromErrors("Update Promotion ", string.Empty));
+			_notificationService.Error(ModelState.BuildMessageFromErrors("Update Promotion ", string.Empty), NotificationService.DismissInSeconds);
 
 			var campaignTypes = await _mediator.Send(new GetCampaignTypesRequest());
 

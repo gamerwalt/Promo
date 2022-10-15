@@ -22,7 +22,7 @@ namespace hrvster.Web.Validation
 			_campaignsRepository = campaignsRepository;
 			_promotionConfigurationOptions = promotionConfigurationOptions;
 
-			var minDate = DateTime.Now.AddDays(_promotionConfigurationOptions.MinDaysBeforeStart);
+			var minDate = DateTime.Now.AddDays(1);
 
 			RuleFor(x => x.Name)
 				.NotEmpty().WithMessage("Promotion name cannot be empty.")
@@ -47,7 +47,7 @@ namespace hrvster.Web.Validation
 
 		private bool BeGreaterThanConfiguredNumberOfDays(DateTime inputDate)
 		{
-			var minDate = DateTime.Now.AddDays(_promotionConfigurationOptions.MinDaysBeforeStart);
+			var minDate = DateTime.Now;
 
 			return inputDate > minDate;
 		}

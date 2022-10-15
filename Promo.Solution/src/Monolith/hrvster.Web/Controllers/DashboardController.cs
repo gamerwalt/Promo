@@ -35,26 +35,13 @@ namespace hrvster.Web.Controllers
 		public async Task<ActionResult> Index()
 		{
 			var account = await _mediator.Send(new GetAccountRequest(_hrvsterUser.UserUid));
-			var promotions = await _mediator.Send(new GetAllCampaignsForAccount(_hrvsterUser.UserUid));
 
-			var campaignTypes = await _mediator.Send(new GetCampaignTypesRequest());
+			var promotions = await _mediator.Send(new GetAllCampaignsAndPropertiesRequest(_hrvsterUser.UserUid));
 
 			var model = new Dashboard
 			{
 				Account = _mapper.Map<hrvster.Models.WebModels.Account>(account),
-				Promotions = promotions.Select(a => new SelectListItem() { Text = a.CampaignName, Value = a.CampaignUid.ToString() }),
-				CampaignTypes = campaignTypes.Where(c => c.IsActive).ToList(),
-				CreateNewPromotion = new CreateNewPromotion
-				{
-					PromotionStartDate = DateTime.Now.AddDays(1),
-					PromotionEndDate = DateTime.Now.AddDays(30),
-					CreateNewSweep = new CreateNewSweep
-					{
-						StartDate = DateTime.Now.AddDays(1),
-						EndDate = DateTime.Now.AddDays(30),
-						DrawDate = DateTime.Now.AddDays(40)
-					}
-				}
+				Promotions = promotions
 			};
 
 			return View(model);
