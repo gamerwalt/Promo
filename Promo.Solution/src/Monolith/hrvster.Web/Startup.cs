@@ -58,7 +58,12 @@ namespace hrvster.Web
 		// This method gets called by the runtime. Use this method to add services to the container.
 		public void ConfigureServices(IServiceCollection services)
 		{
-			services.AddControllersWithViews();
+			services.AddControllersWithViews().AddNToastNotifyToastr(new NToastNotify.ToastrOptions
+			{
+				ProgressBar = true,
+				TimeOut = 10000,
+				CloseButton = true
+			});
 			services.AddMvc(o =>
 			{
 				o.Filters.Add(new AutoValidateAntiforgeryTokenAttribute());
@@ -291,7 +296,8 @@ namespace hrvster.Web
 			app.UseAuthentication();
 			app.UseAuthorization();
 
-			app.UseNotyf();
+			//app.UseNotyf();
+			app.UseNToastNotify();
 
 			app.UseStatusCodePages(async context =>
 			{

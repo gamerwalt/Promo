@@ -216,6 +216,7 @@ namespace hrvster.Infrastructure
 					CampaignTypeUid = reader.GetGuid("campaign_type_uid"),
 					CampaignTypeCode = (CampaignTypeCode)Enum.Parse(typeof(CampaignTypeCode), reader.GetString("campaign_type_code")),
 					CampaignTypeName = reader.GetString("campaign_type_name"),
+					CamapaignTypeDescription = reader.GetStringValue("campaign_type_description"),
 					IsActive = reader.GetBoolean("campaign_type_active_ind")
 				}
 			};

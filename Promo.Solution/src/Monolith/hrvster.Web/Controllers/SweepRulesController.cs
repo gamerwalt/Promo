@@ -1,5 +1,4 @@
-﻿using AspNetCoreHero.ToastNotification.Abstractions;
-using AutoMapper;
+﻿using AutoMapper;
 using hrvster.Core.Authentication;
 using hrvster.Core.Clients;
 using hrvster.Core.Requests;
@@ -11,17 +10,15 @@ using hrvster.Core.Requests.WebRequests.Sweeps;
 using hrvster.Extensions.ModelExtensions;
 using hrvster.Models;
 using hrvster.Models.Options;
-using hrvster.Models.WebModels.Sweeps;
 using hrvster.Web.Models;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.Logging;
+using NToastNotify;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -31,15 +28,14 @@ namespace hrvster.Web.Controllers
 	[FirebaseAuthorize]
 	public class SweepRulesController : Controller
 	{
-		private string[] AllowedExtensions = {".jpeg", ".jpg", ".png", ".gif"};
+		private string[] AllowedExtensions = { ".jpeg", ".jpg", ".png", ".gif" };
 		private readonly ILogger<SweepRulesController> _logger;
 		private readonly IMediator _mediator;
 		private readonly IWatchTypeProvider _watchTypeProvider;
 		private readonly Func<ExternalClientType, Core.Clients.Publishers.IExternalClient> _publisherResolver;
 		private readonly HrvsterUser _hrvsterUser;
 		private readonly IMapper _mapper;
-		private readonly INotyfService _notificationService;
-		private readonly NotificationServiceOptions _notificationServiceOptions;
+		private readonly IToastNotification _notificationService;
 		private readonly SweepstakeConfiguration _sweepstakeConfiguration;
 
 		public SweepRulesController(
@@ -49,8 +45,7 @@ namespace hrvster.Web.Controllers
 			Func<ExternalClientType, Core.Clients.Publishers.IExternalClient> publisherResolver,
 			HrvsterUser hrvsterUser,
 			IMapper mapper,
-			INotyfService notificationService,
-			NotificationServiceOptions notificationServiceOptions,
+			IToastNotification notificationService,
 			SweepstakeConfiguration sweepstakeConfiguration)
 		{
 			_logger = loggerFactory.CreateLogger<SweepRulesController>();
@@ -60,7 +55,6 @@ namespace hrvster.Web.Controllers
 			_hrvsterUser = hrvsterUser;
 			_mapper = mapper;
 			_notificationService = notificationService;
-			_notificationServiceOptions = notificationServiceOptions;
 			_sweepstakeConfiguration = sweepstakeConfiguration;
 		}
 
@@ -73,9 +67,7 @@ namespace hrvster.Web.Controllers
 			{
 				_logger.LogError("Could not find sweepstake with uid: {sweepUid}", sweepUid);
 
-				_notificationService.Warning(
-					$"Could not find sweepstake with uid: {sweepUid}.",
-					_notificationServiceOptions.DismissInSeconds);
+				_notificationService.AddWarningToastMessage($"Could not find sweepstake with uid: {sweepUid}.");
 
 				return RedirectToAction("Index", "Dashboard");
 			}
@@ -98,9 +90,7 @@ namespace hrvster.Web.Controllers
 			{
 				_logger.LogError("Could not find sweepstake with uid: {sweepUid}", sweepUid);
 
-				_notificationService.Warning(
-					$"Could not find sweepstake with uid: {sweepUid}.",
-					_notificationServiceOptions.DismissInSeconds);
+				_notificationService.AddWarningToastMessage($"Could not find sweepstake with uid: {sweepUid}.");
 
 				return RedirectToAction(actionName, controllerName);
 			}
@@ -113,9 +103,7 @@ namespace hrvster.Web.Controllers
 			{
 				_logger.LogError("Could not find the rule with uid: {ruleUid}", ruleUid);
 
-				_notificationService.Warning(
-					$"Could not find rule with uid: {ruleUid} ",
-					_notificationServiceOptions.DismissInSeconds);
+				_notificationService.AddWarningToastMessage($"Could not find rule with uid: {ruleUid} ");
 
 				return RedirectToAction(actionName, controllerName);
 			}
@@ -129,7 +117,7 @@ namespace hrvster.Web.Controllers
 					sweep.Name,
 					rule.WatchValue);
 
-				_notificationService.Error($"Sweep entries exists for sweepstakes {sweep.Name} and rule for {rule.WatchValue}.", _notificationServiceOptions.DismissInSeconds);
+				_notificationService.AddErrorToastMessage($"Sweep entries exists for sweepstakes {sweep.Name} and rule for {rule.WatchValue}.");
 
 				return RedirectToAction(actionName ?? "View", controllerName ?? "SweepRules", new { sweepUid = sweepUid });
 			}
@@ -156,9 +144,7 @@ namespace hrvster.Web.Controllers
 			{
 				_logger.LogError("Could not find sweepstake with uid: {sweepUid}", sweepUid);
 
-				_notificationService.Warning(
-					$"Could not find sweepstake with uid: {sweepUid}.",
-					_notificationServiceOptions.DismissInSeconds);
+				_notificationService.AddWarningToastMessage($"Could not find sweepstake with uid: {sweepUid}.");
 
 				return RedirectToAction(actionName, controllerName);
 			}
@@ -171,9 +157,7 @@ namespace hrvster.Web.Controllers
 			{
 				_logger.LogError("Could not find the rule with uid: {ruleUid}", ruleUid);
 
-				_notificationService.Warning(
-					$"Could not find rule with uid: {ruleUid} ",
-					_notificationServiceOptions.DismissInSeconds);
+				_notificationService.AddWarningToastMessage($"Could not find rule with uid: {ruleUid} ");
 
 				return RedirectToAction(actionName, controllerName);
 			}
@@ -187,7 +171,7 @@ namespace hrvster.Web.Controllers
 					sweep.Name,
 					rule.WatchValue);
 
-				_notificationService.Error($"Sweep entries exists for sweepstakes {sweep.Name} and rule for {rule.WatchValue}.", _notificationServiceOptions.DismissInSeconds);
+				_notificationService.AddErrorToastMessage($"Sweep entries exists for sweepstakes {sweep.Name} and rule for {rule.WatchValue}.");
 
 				return RedirectToAction(actionName ?? "View", controllerName ?? "SweepRules", new { sweepUid = sweepUid });
 			}
@@ -196,7 +180,7 @@ namespace hrvster.Web.Controllers
 			{
 				await _mediator.Send(new ActivateSweepRuleRequest(sweepUid, ruleUid));
 
-				_notificationService.Success($"Rule {rule.WatchValue} for sweepstake {sweep.Name} deactivated successfully.");
+				_notificationService.AddSuccessToastMessage($"Rule {rule.WatchValue} for sweepstake {sweep.Name} deactivated successfully.");
 			}
 
 			return RedirectToAction(actionName ?? "View", controllerName ?? "SweepRules", new { sweepUid = sweepUid });
@@ -204,9 +188,9 @@ namespace hrvster.Web.Controllers
 
 		[HttpGet]
 		public async Task<IActionResult> Deactivate(
-			Guid sweepUid, 
-			Guid ruleUid, 
-			string actionName, 
+			Guid sweepUid,
+			Guid ruleUid,
+			string actionName,
 			string controllerName)
 		{
 			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
@@ -214,9 +198,7 @@ namespace hrvster.Web.Controllers
 			{
 				_logger.LogError("Could not find sweepstake with uid: {sweepUid}", sweepUid);
 
-				_notificationService.Warning(
-					$"Could not find sweepstake with uid: {sweepUid}.",
-					_notificationServiceOptions.DismissInSeconds);
+				_notificationService.AddWarningToastMessage($"Could not find sweepstake with uid: {sweepUid}.");
 
 				return RedirectToAction(actionName, controllerName);
 			}
@@ -229,9 +211,7 @@ namespace hrvster.Web.Controllers
 			{
 				_logger.LogError("Could not find the rule with uid: {ruleUid}", ruleUid);
 
-				_notificationService.Warning(
-					$"Could not find rule with uid: {ruleUid} ",
-					_notificationServiceOptions.DismissInSeconds);
+				_notificationService.AddWarningToastMessage($"Could not find rule with uid: {ruleUid}");
 
 				return RedirectToAction(actionName, controllerName);
 			}
@@ -245,9 +225,9 @@ namespace hrvster.Web.Controllers
 					sweep.Name,
 					rule.WatchValue);
 
-				_notificationService.Error($"Sweep entries exists for sweepstakes {sweep.Name} and rule for {rule.WatchValue}.", _notificationServiceOptions.DismissInSeconds);
+				_notificationService.AddErrorToastMessage($"Sweep entries exists for sweepstakes {sweep.Name} and rule for {rule.WatchValue}.");
 
-				return RedirectToAction(actionName ?? "View", controllerName ?? "SweepRules", new {sweepUid = sweepUid});
+				return RedirectToAction(actionName ?? "View", controllerName ?? "SweepRules", new { sweepUid = sweepUid });
 			}
 
 			var model = new DeactivateSweepRule
@@ -271,9 +251,7 @@ namespace hrvster.Web.Controllers
 			{
 				_logger.LogError("Could not find sweepstake with uid: {sweepUid}", sweepUid);
 
-				_notificationService.Warning(
-					$"Could not find sweepstake with uid: {sweepUid}.",
-					_notificationServiceOptions.DismissInSeconds);
+				_notificationService.AddWarningToastMessage($"Could not find sweepstake with uid: {sweepUid}.");
 
 				return RedirectToAction(actionName, controllerName);
 			}
@@ -286,9 +264,7 @@ namespace hrvster.Web.Controllers
 			{
 				_logger.LogError("Could not find the rule with uid: {ruleUid}", ruleUid);
 
-				_notificationService.Warning(
-					$"Could not find rule with uid: {ruleUid} ",
-					_notificationServiceOptions.DismissInSeconds);
+				_notificationService.AddWarningToastMessage($"Could not find rule with uid: {ruleUid} ");
 
 				return RedirectToAction(actionName, controllerName);
 			}
@@ -302,16 +278,16 @@ namespace hrvster.Web.Controllers
 					sweep.Name,
 					rule.WatchValue);
 
-				_notificationService.Error($"Sweep entries exists for sweepstakes {sweep.Name} and rule for {rule.WatchValue}.", _notificationServiceOptions.DismissInSeconds);
+				_notificationService.AddErrorToastMessage($"Sweep entries exists for sweepstakes {sweep.Name} and rule for {rule.WatchValue}.");
 
 				return RedirectToAction(actionName ?? "View", controllerName ?? "SweepRules", new { sweepUid = sweepUid });
 			}
 
-			if(ModelState.IsValid)
+			if (ModelState.IsValid)
 			{
 				await _mediator.Send(new DeactivateSweepRuleRequest(sweepUid, ruleUid));
 
-				_notificationService.Success($"Rule {rule.WatchValue} for sweepstake {sweep.Name} deactivated successfully.");
+				_notificationService.AddSuccessToastMessage($"Rule {rule.WatchValue} for sweepstake {sweep.Name} deactivated successfully.");
 			}
 
 			return RedirectToAction(actionName ?? "View", controllerName ?? "SweepRules", new { sweepUid = sweepUid });
@@ -325,9 +301,7 @@ namespace hrvster.Web.Controllers
 			{
 				_logger.LogError("Could not find sweepstake with uid: {sweepUid}", sweepUid);
 
-				_notificationService.Warning(
-					$"Could not find sweepstake with uid: {sweepUid}.",
-					_notificationServiceOptions.DismissInSeconds);
+				_notificationService.AddWarningToastMessage($"Could not find sweepstake with uid: {sweepUid}.");
 
 				return RedirectToAction(actionName, controllerName);
 			}
@@ -336,13 +310,11 @@ namespace hrvster.Web.Controllers
 				return RedirectToAction(actionName ?? "Index", controllerName ?? "Sweeps");
 
 			var rule = await _mediator.Send(new GetRule(ruleUid));
-			if(rule == null)
+			if (rule == null)
 			{
 				_logger.LogError("Could not find the rule with uid: {ruleUid}", ruleUid);
 
-				_notificationService.Warning(
-					$"Could not find rule with uid: {ruleUid} ",
-					_notificationServiceOptions.DismissInSeconds);
+				_notificationService.AddWarningToastMessage($"Could not find rule with uid: {ruleUid} ");
 
 				return RedirectToAction(actionName, controllerName);
 			}
@@ -356,7 +328,7 @@ namespace hrvster.Web.Controllers
 					sweep.Name,
 					rule.WatchValue);
 
-				_notificationService.Error($"Sweep entries exists for sweepstakes {sweep.Name} and rule for {rule.WatchValue}.", _notificationServiceOptions.DismissInSeconds);
+				_notificationService.AddErrorToastMessage($"Sweep entries exists for sweepstakes {sweep.Name} and rule for {rule.WatchValue}.");
 
 				return RedirectToAction(actionName ?? "View", controllerName ?? "SweepRules", new { sweepUid = sweepUid });
 			}
@@ -382,7 +354,7 @@ namespace hrvster.Web.Controllers
 			{
 				_logger.LogError("Could not find sweepstake with uid: {sweepUid}", sweepUid);
 
-				_notificationService.Warning($"Could not find sweepstake with uid: {sweepUid}.", _notificationServiceOptions.DismissInSeconds);
+				_notificationService.AddWarningToastMessage($"Could not find sweepstake with uid: {sweepUid}.");
 
 				return View(form);
 			}
@@ -395,7 +367,7 @@ namespace hrvster.Web.Controllers
 			{
 				_logger.LogError("Could not find the rule with uid: {ruleUid}", ruleUid);
 
-				_notificationService.Warning($"Could not find rule with uid: {ruleUid} ", _notificationServiceOptions.DismissInSeconds);
+				_notificationService.AddWarningToastMessage($"Could not find rule with uid: {ruleUid} ");
 
 				return View(form);
 			}
@@ -409,7 +381,7 @@ namespace hrvster.Web.Controllers
 					sweep.Name,
 					rule.WatchValue);
 
-				_notificationService.Error($"Sweep entries exists for sweepstakes {sweep.Name} and rule for {rule.WatchValue}.", _notificationServiceOptions.DismissInSeconds);
+				_notificationService.AddErrorToastMessage($"Sweep entries exists for sweepstakes {sweep.Name} and rule for {rule.WatchValue}.");
 
 				return RedirectToAction(returnAction ?? "View", returnController ?? "SweepRules", new { sweepUid = sweepUid });
 			}
@@ -435,7 +407,7 @@ namespace hrvster.Web.Controllers
 			{
 				_logger.LogError("Could not find sweepstake with uid: {sweepUid}", sweepUid);
 
-				_notificationService.Warning($"Could not find sweepstake with uid: {sweepUid}.", _notificationServiceOptions.DismissInSeconds);
+				_notificationService.AddWarningToastMessage($"Could not find sweepstake with uid: {sweepUid}.");
 
 				return RedirectToAction(actionName, controllerName);
 			}
@@ -465,8 +437,8 @@ namespace hrvster.Web.Controllers
 
 		[HttpPost]
 		public async Task<IActionResult> SelectProvider(
-			Guid sweepUid, 
-			string actionName, 
+			Guid sweepUid,
+			string actionName,
 			string controllerName,
 			SelectWatchTypeProvider form)
 		{
@@ -475,7 +447,7 @@ namespace hrvster.Web.Controllers
 			{
 				_logger.LogError("Could not find sweepstake with uid: {sweepUid}", sweepUid);
 
-				_notificationService.Warning($"Could not find sweepstake with uid: {sweepUid}.", _notificationServiceOptions.DismissInSeconds);
+				_notificationService.AddWarningToastMessage($"Could not find sweepstake with uid: {sweepUid}.");
 
 				return RedirectToAction(actionName, controllerName);
 			}
@@ -526,7 +498,7 @@ namespace hrvster.Web.Controllers
 			form.ReturnAction = actionName;
 			form.ReturnController = controllerName;
 
-			_notificationService.Error(ModelState.BuildMessageFromErrors(), _notificationServiceOptions.DismissInSeconds);
+			_notificationService.AddErrorToastMessage(ModelState.BuildMessageFromErrors());
 
 			return View(form);
 		}
@@ -577,7 +549,7 @@ namespace hrvster.Web.Controllers
 			{
 				_logger.LogError("Could not find sweepstake with uid: {sweepUid}", sweepUid);
 
-				_notificationService.Warning($"Could not find sweepstake with uid: {sweepUid}.", _notificationServiceOptions.DismissInSeconds);
+				_notificationService.AddWarningToastMessage($"Could not find sweepstake with uid: {sweepUid}.");
 
 				return RedirectToAction(actionName, controllerName);
 			}
@@ -612,7 +584,7 @@ namespace hrvster.Web.Controllers
 			{
 				_logger.LogError("Could not find sweepstake with uid: {sweepUid}", sweepUid);
 
-				_notificationService.Warning($"Could not find sweepstake with uid: {sweepUid}.", _notificationServiceOptions.DismissInSeconds);
+				_notificationService.AddWarningToastMessage($"Could not find sweepstake with uid: {sweepUid}.");
 
 				return RedirectToAction(actionName, controllerName);
 			}
@@ -635,29 +607,29 @@ namespace hrvster.Web.Controllers
 				if (form.Media4 != null || form.Media4?.Length > 0)
 					media.Add(form.Media4);
 
-				if(media.Count > 0)
+				if (media.Count > 0)
 					mediaLocation = await _mediator.Send(new UploadFileToFileServerRequest(media, _hrvsterUser.UserUid, ProfileType.Twitter, _hrvsterUser.Token));
 
 				var profile = await _mediator.Send(new GetUserProfile(_hrvsterUser.UserUid, ProfileType.Twitter));
 
 				var published = await _mediator.Send(
 					new PublishSweepRuleTweetRequest(
-						sweep, 
+						sweep,
 						profile,
 						form.WatchTypeId,
-						form.WatchValue, 
-						form.TweetText, 
-						form.PostNow, 
+						form.WatchValue,
+						form.TweetText,
+						form.PostNow,
 						form.ScheduledDate,
 						form.MustBeFollowing,
 						mediaLocation));
 				var word = form.PostNow ? "created" : "scheduled";
-				_notificationService.Success($"Tweet {word} successfully.", _notificationServiceOptions.DismissInSeconds);
+				_notificationService.AddSuccessToastMessage($"Tweet {word} successfully.");
 
 				return RedirectToAction(actionName ?? "View", controllerName ?? "SweepRules", new { sweepUid = sweepUid });
 			}
 
-			_notificationService.Error(ModelState.BuildMessageFromErrors(), _notificationServiceOptions.DismissInSeconds);
+			_notificationService.AddErrorToastMessage(ModelState.BuildMessageFromErrors());
 
 			var watchTypes = await _mediator.Send(new GetWatchTypeRequest());
 

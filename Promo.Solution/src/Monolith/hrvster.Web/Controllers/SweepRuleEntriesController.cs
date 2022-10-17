@@ -1,13 +1,12 @@
-﻿using AspNetCoreHero.ToastNotification.Abstractions;
-using AutoMapper;
+﻿using AutoMapper;
 using hrvster.Core.Authentication;
 using hrvster.Core.Requests;
 using hrvster.Core.Requests.WebRequests.Sweeps;
-using hrvster.Models.Options;
 using hrvster.Web.Models;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using NToastNotify;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -19,22 +18,19 @@ namespace hrvster.Web.Controllers
 		private readonly ILogger<SweepRuleEntriesController> _logger;
 		private readonly IMediator _mediator;
 		private readonly IMapper _mapper;
-		private readonly INotyfService _notificationService;
-		private readonly NotificationServiceOptions _notificationConfiguration;
+		private readonly IToastNotification _notificationService;
 		private readonly HrvsterUser _hrvsterUser;
 
 		public SweepRuleEntriesController(
 			ILoggerFactory loggerFactory,
 			IMediator mediator,
 			IMapper mapper,
-			INotyfService notificationService,
-			NotificationServiceOptions notificationServiceOptions,
+			IToastNotification notificationService,
 			HrvsterUser hrvsterUser)
 		{
 			_logger = loggerFactory.CreateLogger<SweepRuleEntriesController>();
 			_mediator = mediator;
 			_mapper = mapper;
-			_notificationConfiguration = notificationServiceOptions;
 			_notificationService = notificationService;
 			_hrvsterUser = hrvsterUser;
 		}
@@ -45,10 +41,10 @@ namespace hrvster.Web.Controllers
 			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
 			var rule = await _mediator.Send(new GetSweepRuleByUidRequest(ruleUid));
 
-			if(sweep == null)
+			if (sweep == null)
 			{
 				_logger.LogWarning("There is no sweeps with the uid {sweepUid}.", sweepUid);
-				_notificationService.Warning($"There is no sweeps with the uid {sweepUid}", _notificationConfiguration.DismissInSeconds);
+				_notificationService.AddWarningToastMessage($"There is no sweeps with the uid {sweepUid}");
 
 				return RedirectToAction(actionName ?? "View", controllerName ?? "SweepRules", new { sweepUid = sweepUid });
 			}
@@ -59,7 +55,7 @@ namespace hrvster.Web.Controllers
 			if (rule == null)
 			{
 				_logger.LogWarning("There is no sweeps with the uid {ruleUid}.", ruleUid);
-				_notificationService.Warning($"There is no rule with the uid {ruleUid}", _notificationConfiguration.DismissInSeconds);
+				_notificationService.AddWarningToastMessage($"There is no rule with the uid {ruleUid}");
 
 				return RedirectToAction(actionName ?? "View", controllerName ?? "SweepRules", new { sweepUid = sweepUid });
 			}

@@ -1,0 +1,145 @@
+﻿@using hrvster.Extensions.ModelExtensions
+@model CreateSweep
+@{
+    ViewData["Title"] = $"Create Sweep for {@Model.Campaign.CampaignName}";
+}
+<div class="card card-flush">
+    <form asp-controller="Sweeps" asp-action="Create" asp-route-campaignUid="@Model.Campaign.CampaignUid"
+		class="form-horizontal form-material mx-2">
+        <div class="card-header">
+            <h3 class="card-title">Create Sweepstake/Raffle for @Model.Campaign.CampaignName</h3>
+        </div>
+        <div class="card-body">
+            <div class="d-flex flex-column flex-lg-row">
+                <div class="flex-lg-row-fluid me-lg-15 order-2 order-lg-1 mb-10 mb-lg-0">
+                    @Html.HiddenFor(m => m.Campaign.CampaignUid)
+                    <div class="fv-row mb-8">
+                        <label class="required d-flex align-items-center fs-6 fw-semibold form-label mb-2">
+                            Name
+                        </label>
+                        <input type="text" asp-for="Name" id="Name" class="form-control" placeholder="Name" maxlength="90"/>
+                        <span asp-validation-for="Name"></span>
+                    </div>
+                    <div class="fv-row mb-8 w-lg-250px">
+                        <label class="required d-flex align-items-center fs-6 fw-semibold form-label mb-2">
+                            Start Date
+                        </label>
+                        <input asp-for="StartDate" class="form-control" />
+                        <span asp-validation-for="StartDate"></span>
+                    </div>
+                    <div class="fv-row mb-8 w-lg-250px">
+                        <label class="required d-flex align-items-center fs-6 fw-semibold form-label mb-2">
+                            End Date
+                        </label>
+                        <input asp-for="EndDate" class="form-control" />
+                        <span asp-validation-for="EndDate"></span>
+                    </div>
+                    <div class="fv-row mb-8 w-lg-250px">
+                        <label class="required d-flex align-items-center fs-6 fw-semibold form-label mb-2">
+                            Draw Date
+                        </label>
+                        <input asp-for="DrawDate" class="form-control" asp-format="{0:yyyy-MM-ddTHH:mm}" placeholder="DrawDate" />
+                        <span asp-validation-for="DrawDate"></span>
+                    </div>
+					<div class="fv-row mb-8 w-lg-500px">
+						<div class="form-check form-check-solid form-switch fv-row">
+							<input class="form-check-input w-45px h-30px" type="checkbox" asp-for="AcceptTerms" />
+							<label class="form-check-label" for="allowmarketing">
+								Accept <a target="_blank" asp-controller="Terms" asp-action="SweepstakesTermsAndConditions" class="link-primary">Game and Prizes Terms and Conditions</a>
+								<br />
+								<span asp-validation-for="AcceptTerms"></span>
+							</label>
+						</div>
+					</div>
+                </div>
+				<div class="flex-column flex-lg-row-auto w-100 w-lg-250px w-xl-300px mb-10 order-1 order-lg-2">
+					<div class="card card-flush pt-3 mb-0" data-kt-sticky="true" data-kt-sticky-name="subscription-summary" data-kt-sticky-offset="{default: false, lg: '200px'}" data-kt-sticky-width="{lg: '250px', xl: '300px'}" data-kt-sticky-left="auto" data-kt-sticky-top="150px" data-kt-sticky-animation="false" data-kt-sticky-zindex="95">
+						<div class="card-header">
+							<div class="card-title">
+								<h2>Promotion Details</h2>
+							</div>
+						</div>
+						<div class="card-body pt-0 fs-6">
+							<div class="mb-7">
+								<div class="d-flex align-items-center mb-1">
+									<a 
+										asp-action="View" 
+										asp-controller="Promotions"
+										asp-route-campaignUid="@Model.Campaign.CampaignUid"
+										class="fw-bold text-gray-800 text-hover-primary me-2">
+										@Model.Campaign.CampaignName
+									</a>
+									@if(Model.Campaign.IsActive())
+									{
+										<span class="badge badge-light-success">
+											In Progress
+										</span>
+									}
+									else if(Model.Campaign.WillBeInProgress())
+									{
+										<span class="badge badge-light-info">
+											Future Progress
+										</span>
+									}
+								</div>
+								<div class="fw-semibold text-gray-600 text-hover-primary">
+									@Model.Campaign.Description
+								</div>
+							</div>
+							<div class="separator separator-dashed mb-7"></div>
+							<div class="mb-7">
+								<h5 class="mb-3">Dates</h5>
+								<div class="mb-0">
+									<span class="badge badge-light-info me-2">Start Date: @Model.Campaign.StartDate.ToString("f")</span>
+									<span class="badge badge-light-info me-2">End Date: @Model.Campaign.EndDate.ToString("f")</span>
+								</div>
+							</div>
+							<div class="separator separator-dashed mb-7"></div>
+							<div class="mb-10">
+								<h5 class="mb-3">Promotion Type</h5>
+								<div class="mb-0">
+									<div class="fw-semibold text-gray-600 d-flex align-items-center">
+										@Model.Campaign.CampaignType.CampaignTypeName
+										@*<img src="~/assets/media/svg/card-logos/mastercard.svg" class="w-35px ms-2" alt="">*@
+									</div>
+								</div>
+							</div>
+							<div class="mb-0">
+								<a class="btn btn-primary"
+									asp-action="View" asp-controller="Promotions" asp-route-campaignUid="@Model.Campaign.CampaignUid">
+									Update
+								</a>
+							</div>
+						</div>
+					</div>
+				</div>
+            </div>
+        </div>
+        <div class="card-footer">
+			<div class="d-flex flex-stack pt-10">
+				<div class="me-2">
+					<a class="btn btn-lg btn-light-primary me-3" href="javascript:history.go(-1)">
+						<span class="svg-icon svg-icon-3 me-1">
+							<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+								<rect opacity="0.5" x="6" y="11" width="13" height="2" rx="1" fill="currentColor"></rect>
+								<path d="M8.56569 11.4343L12.75 7.25C13.1642 6.83579 13.1642 6.16421 12.75 5.75C12.3358 5.33579 11.6642 5.33579 11.25 5.75L5.70711 11.2929C5.31658 11.6834 5.31658 12.3166 5.70711 12.7071L11.25 18.25C11.6642 18.6642 12.3358 18.6642 12.75 18.25C13.1642 17.8358 13.1642 17.1642 12.75 16.75L8.56569 12.5657C8.25327 12.2533 8.25327 11.7467 8.56569 11.4343Z" fill="currentColor"></path>
+							</svg>
+						</span>
+						Back
+					</a>
+				</div>
+				<div>
+					<button type="submit" class="btn btn-lg btn-primary">
+						Continue
+						<span class="svg-icon svg-icon-3 ms-1 me-0">
+							<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+								<rect opacity="0.5" x="18" y="13" width="13" height="2" rx="1" transform="rotate(-180 18 13)" fill="currentColor"></rect>
+								<path d="M15.4343 12.5657L11.25 16.75C10.8358 17.1642 10.8358 17.8358 11.25 18.25C11.6642 18.6642 12.3358 18.6642 12.75 18.25L18.2929 12.7071C18.6834 12.3166 18.6834 11.6834 18.2929 11.2929L12.75 5.75C12.3358 5.33579 11.6642 5.33579 11.25 5.75C10.8358 6.16421 10.8358 6.83579 11.25 7.25L15.4343 11.4343C15.7467 11.7467 15.7467 12.2533 15.4343 12.5657Z" fill="currentColor"></path>
+							</svg>
+						</span>
+					</button>
+				</div>
+			</div>
+        </div>
+    </form>
+</div>

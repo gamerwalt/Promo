@@ -25,23 +25,44 @@ namespace hrvster.Core.Handlers.Sweepstakes
 			_logger.LogInformation("Handling the action {className} for the request {request}.",
 				nameof(CreateSweep),
 				request.ToJsonString());
-
-			await _repository.CreateAsync(new Models.Sweep
+			if(request.SweepUid == null)
 			{
-				SweepUid = Guid.NewGuid(),
-				Account = new Models.Account
+				await _repository.CreateAsync(new Models.Sweep
 				{
-					AccountUid = request.AccountUid
-				},
-				Name = request.Name,
-				StartDate = request.StartDate,
-				EndDate = request.EndDate,
-				DrawDate = request.DrawDate,
-				Campaign = new Models.Campaign
+					SweepUid = Guid.NewGuid(),
+					Account = new Models.Account
+					{
+						AccountUid = request.AccountUid
+					},
+					Name = request.Name,
+					StartDate = request.StartDate,
+					EndDate = request.EndDate,
+					DrawDate = request.DrawDate,
+					Campaign = new Models.Campaign
+					{
+						CampaignUid = request.CampaignUid
+					}
+				});
+			}
+			else
+			{
+				await _repository.CreateAsync(new Models.Sweep
 				{
-					CampaignUid = request.CampaignUid
-				}
-			});
+					SweepUid = request.SweepUid,
+					Account = new Models.Account
+					{
+						AccountUid = request.AccountUid
+					},
+					Name = request.Name,
+					StartDate = request.StartDate,
+					EndDate = request.EndDate,
+					DrawDate = request.DrawDate,
+					Campaign = new Models.Campaign
+					{
+						CampaignUid = request.CampaignUid
+					}
+				});
+			}			
 		}
 	}
 }

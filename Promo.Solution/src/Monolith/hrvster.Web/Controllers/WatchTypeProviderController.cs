@@ -1,5 +1,4 @@
-﻿using AspNetCoreHero.ToastNotification.Abstractions;
-using hrvster.Core.Authentication;
+﻿using hrvster.Core.Authentication;
 using hrvster.Core.Requests;
 using hrvster.Core.Requests.WebRequests.Core;
 using hrvster.Models;
@@ -9,6 +8,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.Logging;
+using NToastNotify;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -21,13 +21,13 @@ namespace hrvster.Web.Controllers
 		private readonly ILogger<WatchTypeProviderController> _logger;
 		private readonly IMediator _mediator;
 		private readonly HrvsterUser _hrvsterUser;
-		private readonly INotyfService _notificationService;
+		private readonly IToastNotification _notificationService;
 
 		public WatchTypeProviderController(
 			ILoggerFactory loggerFactory,
 			IMediator mediator,
 			HrvsterUser hrvsterUser,
-			INotyfService notificationService)
+			IToastNotification notificationService)
 		{
 			_logger = loggerFactory.CreateLogger<WatchTypeProviderController>();
 			_mediator = mediator;
@@ -43,7 +43,7 @@ namespace hrvster.Web.Controllers
 			{
 				_logger.LogError("Could not find sweepstake with uid: {sweepUid}", sweepUid);
 
-				_notificationService.Warning($"Could not find sweepstake with uid: {sweepUid}.");
+				_notificationService.AddWarningToastMessage($"Could not find sweepstake with uid: {sweepUid}.");
 
 				return RedirectToAction(actionName, controllerName);
 			}
@@ -74,14 +74,14 @@ namespace hrvster.Web.Controllers
 		[HttpPost]
 		public async Task<IActionResult> Select(Guid sweepUid, SelectWatchTypeProvider form)
 		{
-			if(ModelState.IsValid)
+			if (ModelState.IsValid)
 			{
 				var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
 				if (sweep == null)
 				{
 					_logger.LogError("Could not find sweepstake with uid: {sweepUid}", sweepUid);
 
-					_notificationService.Warning($"Could not find sweepstake with uid: {sweepUid}.");
+					_notificationService.AddWarningToastMessage($"Could not find sweepstake with uid: {sweepUid}.");
 
 					return View(form);
 				}

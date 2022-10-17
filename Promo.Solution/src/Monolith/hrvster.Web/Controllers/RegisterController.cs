@@ -1,10 +1,9 @@
-﻿using AspNetCoreHero.ToastNotification.Abstractions;
-using hrvster.Core.Authentication;
-using hrvster.Core.Requests.WebRequests.Accounts;
+﻿using hrvster.Core.Requests.WebRequests.Accounts;
 using hrvster.Web.Models;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using NToastNotify;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,9 +15,9 @@ namespace hrvster.Web.Controllers
 	public class RegisterController : Controller
 	{
 		private readonly IMediator _mediator;
-		private readonly INotyfService _notificationService;
+		private readonly IToastNotification _notificationService;
 
-		public RegisterController(IMediator mediator, INotyfService notificationService)
+		public RegisterController(IMediator mediator, IToastNotification notificationService)
 		{
 			_mediator = mediator;
 			_notificationService = notificationService;
@@ -33,20 +32,20 @@ namespace hrvster.Web.Controllers
 		[HttpPost]
 		public async Task<IActionResult> Create(Register form)
 		{
-			if(ModelState.IsValid)
+			if (ModelState.IsValid)
 			{
 				var userUid = Guid.NewGuid();
 				await _mediator.Send(new CreateAccountRequest(
-					userUid, 
-					form.EmailAddress, 
-					form.UserName, 
-					form.PhoneNumber, 
-					form.FirstName, 
-					form.LastName, 
-					form.Password, 
+					userUid,
+					form.EmailAddress,
+					form.UserName,
+					form.PhoneNumber,
+					form.FirstName,
+					form.LastName,
+					form.Password,
 					form.AcceptedTerms));
 
-				_notificationService.Success("Account created successfully.");
+				_notificationService.AddSuccessToastMessage("Account created successfully.");
 
 				return RedirectToActionPermanent("SignIn", "Session");
 			}
@@ -55,7 +54,7 @@ namespace hrvster.Web.Controllers
 				.Where(c => c.Count > 0)
 				.ToList();
 
-			_notificationService.Error(BuildMessageFromErrors(errors));
+			_notificationService.AddErrorToastMessage(BuildMessageFromErrors(errors));
 
 			return View("Create", form);
 		}
@@ -63,7 +62,7 @@ namespace hrvster.Web.Controllers
 		private string BuildMessageFromErrors(List<ModelErrorCollection> errors)
 		{
 			var sb = new StringBuilder();
-			foreach(var error in errors)
+			foreach (var error in errors)
 			{
 				sb.Append(error.FirstOrDefault()?.ErrorMessage);
 			}

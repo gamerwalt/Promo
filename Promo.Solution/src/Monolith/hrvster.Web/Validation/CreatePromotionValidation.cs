@@ -41,6 +41,7 @@ namespace hrvster.Web.Validation
 
 			RuleFor(x => x.CampaignTypeUid)
 				.NotEmpty()
+				.WithMessage("You need to supply what type of promotion this is.")
 				.NotNull()
 				.WithMessage("You need to supply what type of promotion this is.");
 		}

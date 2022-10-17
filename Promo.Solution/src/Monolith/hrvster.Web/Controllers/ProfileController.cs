@@ -1,5 +1,4 @@
-﻿using AspNetCoreHero.ToastNotification.Abstractions;
-using hrvster.Core.Authentication;
+﻿using hrvster.Core.Authentication;
 using hrvster.Core.Requests.WebRequests.Accounts;
 using hrvster.Extensions.ModelExtensions;
 using hrvster.Models;
@@ -7,6 +6,7 @@ using hrvster.Web.Models;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using NToastNotify;
 using System.Threading.Tasks;
 using UpdateAccount = hrvster.Web.Models.UpdateAccount;
 
@@ -18,13 +18,13 @@ namespace hrvster.Web.Controllers
 		private readonly ILogger<ProfileController> _logger;
 		private readonly HrvsterUser _hrvsterUser;
 		private readonly IMediator _mediator;
-		private readonly INotyfService _notificationService;
+		private readonly IToastNotification _notificationService;
 
 		public ProfileController(
 			ILoggerFactory loggerFactory,
 			HrvsterUser hrvsterUser,
 			IMediator mediator,
-			INotyfService notificationService)
+			IToastNotification notificationService)
 		{
 			_logger = loggerFactory.CreateLogger<ProfileController>();
 			_hrvsterUser = hrvsterUser;
@@ -97,7 +97,7 @@ namespace hrvster.Web.Controllers
 			{
 				await _mediator.Send(new UpdateAccountRequest(_hrvsterUser.UserUid, form.DisplayName, form.FirstName, form.LastName));
 
-				_notificationService.Success("Account updated successfully.", NotificationService.DismissInSeconds);
+				_notificationService.AddSuccessToastMessage("Account updated successfully.");
 
 				return RedirectToAction("Index");
 			}
@@ -106,9 +106,9 @@ namespace hrvster.Web.Controllers
 
 			_logger.LogWarning(errorMessages);
 
-			_notificationService.Error(errorMessages, NotificationService.DismissInSeconds);
+			_notificationService.AddErrorToastMessage(errorMessages);
 
-			_notificationService.Error(ModelState.BuildMessageFromErrors());
+			_notificationService.AddErrorToastMessage(ModelState.BuildMessageFromErrors());
 
 			return View(await BuildProfileModel());
 		}
@@ -142,11 +142,11 @@ namespace hrvster.Web.Controllers
 		[HttpPost]
 		public async Task<IActionResult> UpdateAccountDetails(UpdateAccount form)
 		{
-			if(ModelState.IsValid)
+			if (ModelState.IsValid)
 			{
 				await _mediator.Send(new UpdateAccountDetailsRequest(_hrvsterUser.UserUid, form.EmailAddress, form.PhoneNumber));
 
-				_notificationService.Success("Account details updated. Please logon.");
+				_notificationService.AddSuccessToastMessage("Account details updated. Please logon.");
 
 				return RedirectToAction("SignOut", "Session");
 			}
@@ -154,7 +154,7 @@ namespace hrvster.Web.Controllers
 
 			_logger.LogWarning(errorMessages);
 
-			_notificationService.Error(errorMessages, NotificationService.DismissInSeconds);
+			_notificationService.AddErrorToastMessage(errorMessages);
 
 			return View(await BuildProfileModel());
 		}

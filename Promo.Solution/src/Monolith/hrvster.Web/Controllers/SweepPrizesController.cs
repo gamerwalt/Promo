@@ -1,7 +1,5 @@
-﻿using AspNetCoreHero.ToastNotification.Abstractions;
-using AutoMapper;
+﻿using AutoMapper;
 using FluentValidation;
-using FluentValidation.AspNetCore;
 using hrvster.Core.Authentication;
 using hrvster.Core.Requests;
 using hrvster.Core.Requests.WebRequests.Sweeps;
@@ -10,6 +8,7 @@ using hrvster.Web.Models;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using NToastNotify;
 using System;
 using System.Threading.Tasks;
 
@@ -21,7 +20,7 @@ namespace hrvster.Web.Controllers
 		private readonly ILogger<SweepPrizesController> _logger;
 		private readonly IMediator _mediator;
 		private readonly IMapper _mapper;
-		private readonly INotyfService _notificationService;
+		private readonly IToastNotification _notificationService;
 		private readonly IValidator<CreateSweepPrize> _createSweepPrizeValidator;
 		private readonly IValidator<EditSweepPrize> _editSweepPrizeValidator;
 		private readonly HrvsterUser _hrvsterUser;
@@ -30,7 +29,7 @@ namespace hrvster.Web.Controllers
 			ILoggerFactory loggerFactory,
 			IMediator mediator,
 			IMapper mapper,
-			INotyfService notificationService,
+			IToastNotification notificationService,
 			IValidator<CreateSweepPrize> createSweepPrizeValidator,
 			IValidator<EditSweepPrize> editSweepPrizeValidator,
 			HrvsterUser hrvsterUser)
@@ -83,7 +82,7 @@ namespace hrvster.Web.Controllers
 			if (sweep == null)
 			{
 				return LogAndRedirectBack(
-					$"Could not find sweepstake with uid: {sweepUid}", 
+					$"Could not find sweepstake with uid: {sweepUid}",
 					sweepUid, campaignUid, returnAction, returnController);
 			}
 
@@ -91,7 +90,7 @@ namespace hrvster.Web.Controllers
 				return RedirectToAction(returnAction ?? "Index", returnController ?? "Sweeps");
 
 			var drawRule = await _mediator.Send(new GetDrawRuleForSweepsRequest(sweepUid));
-			if(drawRule == null)
+			if (drawRule == null)
 			{
 				return LogAndRedirectBack(
 					$"Could not find the draw rules for the sweepstake with uid: {sweepUid}",
@@ -114,13 +113,13 @@ namespace hrvster.Web.Controllers
 			if (currentPrizes.Prizes.Count == drawRule.WinnerCount)
 			{
 				model.DisableAll = true;
-				_notificationService.Warning("We have all the prizes we need for this sweepstake.");
-				
+				_notificationService.AddWarningToastMessage("We have all the prizes we need for this sweepstake.");
+
 				return RedirectToAction(
-					returnAction ?? "View", 
-					returnController ?? "Sweeps", 
-					new 
-					{ 
+					returnAction ?? "View",
+					returnController ?? "Sweeps",
+					new
+					{
 						campaignUid = campaignUid,
 						sweepUid = sweepUid
 					});
@@ -160,22 +159,23 @@ namespace hrvster.Web.Controllers
 			}
 
 			var validationResult = await _createSweepPrizeValidator.ValidateAsync(form);
-			
-			if(validationResult.IsValid)
+
+			if (validationResult.IsValid)
 			{
 				await _mediator.Send(new CreateASweepPrizeRequest(sweepUid, form.Position, form.PrizeName, form.PrizeDescription, form.MonetaryValue));
 
 				return RedirectToAction(
-					returnAction ?? "View", returnController ?? "Sweeps", 
-					new { 
-						sweepUid = sweepUid, 
+					returnAction ?? "View", returnController ?? "Sweeps",
+					new
+					{
+						sweepUid = sweepUid,
 						campaignUid = campaignUid,
-						returnAction = returnAction ?? "View", 
+						returnAction = returnAction ?? "View",
 						returnController = returnController ?? "Sweeps"
 					});
 			}
 
-			_notificationService.Error(
+			_notificationService.AddErrorToastMessage(
 				$"There were issues saving the Sweep Prize. ${System.Environment.NewLine}Errors returned: {string.Join(", ", validationResult.Errors)}");
 
 			return View(form);
@@ -223,10 +223,10 @@ namespace hrvster.Web.Controllers
 
 		[HttpPost]
 		public async Task<IActionResult> DeletePrize(
-			Guid prizeUid, 
-			Guid sweepUid, 
-			Guid campaignUid, 
-			string actionName, 
+			Guid prizeUid,
+			Guid sweepUid,
+			Guid campaignUid,
+			string actionName,
 			string controllerName,
 			DeleteSweepPrize form)
 		{
@@ -250,7 +250,7 @@ namespace hrvster.Web.Controllers
 
 			await _mediator.Send(new DeleteSweepPrizeRequest(prizeUid));
 
-			_notificationService.Success("Prize deleted successfully.", 10);
+			_notificationService.AddSuccessToastMessage("Prize deleted successfully.");
 
 			return RedirectToAction(actionName ?? "View", controllerName ?? "Sweeps",
 				new
@@ -258,16 +258,16 @@ namespace hrvster.Web.Controllers
 					sweepUid = sweepUid,
 					campaignUid = campaignUid,
 					actionName = actionName ?? "View",
- 					controllerName = controllerName ?? "Sweeps"
+					controllerName = controllerName ?? "Sweeps"
 				});
 		}
 
 		[HttpGet]
 		public async Task<IActionResult> EditPrize(
-			Guid prizeUid, 
-			Guid sweepUid, 
-			Guid campaignUid, 
-			string actionName, 
+			Guid prizeUid,
+			Guid sweepUid,
+			Guid campaignUid,
+			string actionName,
 			string controllerName)
 		{
 			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
@@ -282,7 +282,7 @@ namespace hrvster.Web.Controllers
 				return RedirectToAction(actionName ?? "Index", controllerName ?? "Sweeps");
 
 			var prize = await _mediator.Send(new GetSweepPrizeByPrizeUid(prizeUid));
-			if(prize == null)
+			if (prize == null)
 			{
 				return LogAndRedirectBack($"Could not find the prize with the uid: {prizeUid}.",
 					sweepUid, campaignUid, actionName, controllerName);
@@ -309,11 +309,11 @@ namespace hrvster.Web.Controllers
 
 		[HttpPost]
 		public async Task<IActionResult> EditPrize(
-			Guid prizeUid, 
-			Guid sweepUid, 
-			Guid campaignUid, 
-			string actionName, 
-			string controllerName, 
+			Guid prizeUid,
+			Guid sweepUid,
+			Guid campaignUid,
+			string actionName,
+			string controllerName,
 			EditSweepPrize form)
 		{
 			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
@@ -336,11 +336,11 @@ namespace hrvster.Web.Controllers
 
 			var validationResult = _editSweepPrizeValidator.Validate(form);
 
-			if(validationResult.IsValid)
+			if (validationResult.IsValid)
 			{
 				await _mediator.Send(new UpdateSweepPrize(sweepUid, prizeUid, form.PrizeName, form.PrizeDescription, form.MonetaryValue));
 
-				_notificationService.Success("Prize updated successfully", 10);
+				_notificationService.AddSuccessToastMessage("Prize updated successfully");
 
 				return RedirectToAction(
 					actionName ?? "View",
@@ -354,7 +354,7 @@ namespace hrvster.Web.Controllers
 					});
 			}
 
-			_notificationService.Error(
+			_notificationService.AddErrorToastMessage(
 				$"There were issues saving the Sweep Prize. ${System.Environment.NewLine}Errors returned: {string.Join(", ", validationResult.Errors)}");
 
 			return View(form);
@@ -364,7 +364,7 @@ namespace hrvster.Web.Controllers
 		private IActionResult LogAndRedirectBack(string message, Guid sweepUid, Guid campaignUid, string returnAction, string returnController)
 		{
 			_logger.LogError(message);
-			_notificationService.Warning(message);
+			_notificationService.AddWarningToastMessage(message);
 
 			return RedirectToAction(returnAction ?? "View", returnController ?? "Sweeps", new { sweepUid = sweepUid, campaignUid = campaignUid });
 		}

@@ -1,18 +1,14 @@
-﻿using AspNetCoreHero.ToastNotification.Abstractions;
-using AspNetCoreHero.ToastNotification.Helpers;
-using Firebase.Auth;
+﻿using Firebase.Auth;
 using hrvster.Core.Authentication;
 using hrvster.Core.Requests.WebRequests;
 using hrvster.Extensions.ModelExtensions;
-using hrvster.Infrastructure.Authentication.ConfigurationOptions;
 using hrvster.Models.Extensions;
 using hrvster.Web.Models;
-using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
+using NToastNotify;
 using System.Threading.Tasks;
 
 namespace hrvster.Web.Controllers
@@ -20,21 +16,15 @@ namespace hrvster.Web.Controllers
 	public class SessionController : Controller
 	{
 		private readonly ILogger<SessionController> _logger;
-		private readonly IMediator _mediator;
-		private readonly GoogleServicesOptions _googleServicesOptions;
-		private readonly INotyfService _notificationService;
+		private readonly IToastNotification _notificationService;
 		private readonly FirebaseAuthProvider _firebaseAuthProvider;
 
 		public SessionController(
-			ILoggerFactory loggerFactory, 
-			IMediator mediator, 
-			IOptions<GoogleServicesOptions> googleServicesOptions,
-			INotyfService notificationService,
+			ILoggerFactory loggerFactory,
+			IToastNotification notificationService,
 			FirebaseAuthProvider firebaseAuthProvider)
 		{
 			_logger = loggerFactory.CreateLogger<SessionController>();
-			_mediator = mediator;
-			_googleServicesOptions = googleServicesOptions.Value;
 			_notificationService = notificationService;
 			_firebaseAuthProvider = firebaseAuthProvider;
 		}
@@ -60,7 +50,7 @@ namespace hrvster.Web.Controllers
 		[HttpPost]
 		public async Task<ActionResult> SignIn(SigninForm form, string returnUrl)
 		{
-			if(ModelState.IsValid)
+			if (ModelState.IsValid)
 			{
 				try
 				{
@@ -90,13 +80,13 @@ namespace hrvster.Web.Controllers
 
 					_logger.LogWarning("A Firebase error has occurred during logon. Error: {firebaseError}", firebaseError.ToJsonString());
 
-					_notificationService.Error("Invalid email or password. Please try again.", 10);
+					_notificationService.AddErrorToastMessage("Invalid email or password. Please try again.");
 
 					return RedirectToAction("SignIn");
 				}
 			}
 
-			_notificationService.Error(ModelState.BuildMessageFromErrors(), 10); 
+			_notificationService.AddErrorToastMessage(ModelState.BuildMessageFromErrors());
 
 			return RedirectToAction("SignIn");
 		}

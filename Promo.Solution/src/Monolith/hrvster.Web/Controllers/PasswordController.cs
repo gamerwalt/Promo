@@ -1,10 +1,10 @@
-﻿using AspNetCoreHero.ToastNotification.Abstractions;
-using hrvster.Core.Requests.WebRequests;
+﻿using hrvster.Core.Requests.WebRequests;
 using hrvster.Web.Models;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.Extensions.Logging;
+using NToastNotify;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -15,10 +15,10 @@ namespace hrvster.Web.Controllers
 	public class PasswordController : Controller
 	{
 		private readonly ILogger<PasswordController> _logger;
-		private readonly INotyfService _notificationService;
+		private readonly IToastNotification _notificationService;
 		private readonly IMediator _mediator;
 
-		public PasswordController(ILoggerFactory loggerFactory, INotyfService notificationService, IMediator mediator)
+		public PasswordController(ILoggerFactory loggerFactory, IToastNotification notificationService, IMediator mediator)
 		{
 			_logger = loggerFactory.CreateLogger<PasswordController>();
 			_notificationService = notificationService;
@@ -34,7 +34,7 @@ namespace hrvster.Web.Controllers
 		[HttpPost]
 		public async Task<IActionResult> Forgot(ForgotPassword form)
 		{
-			if(ModelState.IsValid)
+			if (ModelState.IsValid)
 			{
 				await _mediator.Send(new ForgotPasswordRequest(form.EmailAddress));
 
@@ -45,7 +45,7 @@ namespace hrvster.Web.Controllers
 				.Where(c => c.Count > 0)
 				.ToList();
 
-			_notificationService.Error(BuildMessageFromErrors(errors));
+			_notificationService.AddErrorToastMessage(BuildMessageFromErrors(errors));
 
 			return View();
 		}

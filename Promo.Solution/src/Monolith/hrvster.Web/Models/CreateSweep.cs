@@ -7,7 +7,7 @@ namespace hrvster.Web.Models
 {
 	public class CreateSweep
 	{
-		public hrvster.Models.Campaign Campaign { get; set; }
+		public Campaign Campaign { get; set; }
 		public string Name { get; set; }
 		public DateTime StartDate { get; set; }
 		public DateTime EndDate { get; set; }

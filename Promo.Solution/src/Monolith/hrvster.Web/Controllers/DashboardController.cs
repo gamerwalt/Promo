@@ -34,14 +34,19 @@ namespace hrvster.Web.Controllers
 		[HttpGet]
 		public async Task<ActionResult> Index()
 		{
-			var account = await _mediator.Send(new GetAccountRequest(_hrvsterUser.UserUid));
+			var tasks = new List<Task>();
+			var accountTask = _mediator.Send(new GetAccountRequest(_hrvsterUser.UserUid));
+			var promotionsTask = _mediator.Send(new GetAllCampaignsAndPropertiesRequest(_hrvsterUser.UserUid));
 
-			var promotions = await _mediator.Send(new GetAllCampaignsAndPropertiesRequest(_hrvsterUser.UserUid));
+			tasks.Add(accountTask);
+			tasks.Add(promotionsTask);
+
+			await Task.WhenAll(tasks);
 
 			var model = new Dashboard
 			{
-				Account = _mapper.Map<hrvster.Models.WebModels.Account>(account),
-				Promotions = promotions
+				Account = _mapper.Map<hrvster.Models.WebModels.Account>(accountTask.Result),
+				Promotions = promotionsTask.Result,
 			};
 
 			return View(model);

@@ -1,5 +1,4 @@
-﻿using AspNetCoreHero.ToastNotification.Abstractions;
-using AutoMapper;
+﻿using AutoMapper;
 using hrvster.Core.Authentication;
 using hrvster.Core.Requests;
 using hrvster.Core.Requests.ApiRequests;
@@ -12,6 +11,7 @@ using hrvster.Web.Models;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using NToastNotify;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,9 +25,9 @@ namespace hrvster.Web.Controllers
 		private readonly IMediator _mediator;
 		private readonly HrvsterUser _hrvsterUser;
 		private readonly IMapper _mapper;
-		private readonly INotyfService _notificationService;
+		private readonly IToastNotification _notificationService;
 
-		public PromotionsController(IMediator mediator, HrvsterUser hrvsterUser, IMapper mapper, INotyfService notificationService)
+		public PromotionsController(IMediator mediator, HrvsterUser hrvsterUser, IMapper mapper, IToastNotification notificationService)
 		{
 			_mediator = mediator;
 			_hrvsterUser = hrvsterUser;
@@ -51,7 +51,7 @@ namespace hrvster.Web.Controllers
 
 			if (campaign == null)
 			{
-				_notificationService.Error("Promotion not found.", NotificationService.DismissInSeconds);
+				_notificationService.AddErrorToastMessage("Promotion not found.");
 
 				return RedirectToAction("Index");
 			}
@@ -103,7 +103,7 @@ namespace hrvster.Web.Controllers
 
 			if (campaign == null)
 			{
-				_notificationService.Error("Promotion not found.", NotificationService.DismissInSeconds);
+				_notificationService.AddErrorToastMessage("Promotion not found.");
 
 				return RedirectToAction("Index");
 			}
@@ -123,7 +123,7 @@ namespace hrvster.Web.Controllers
 					form.UpdatePromotion.StartDate,
 					form.UpdatePromotion.EndDate));
 
-				_notificationService.Success("Promotion updated.", NotificationService.DismissInSeconds);
+				_notificationService.AddSuccessToastMessage("Promotion updated.");
 
 				GetPromotionDetails(form, campaign, sweeps, campaignTypes);
 
@@ -132,7 +132,7 @@ namespace hrvster.Web.Controllers
 
 			GetPromotionDetails(form, campaign, sweeps, campaignTypes);
 
-			_notificationService.Error(ModelState.BuildMessageFromErrors(), NotificationService.DismissInSeconds);
+			_notificationService.AddErrorToastMessage(ModelState.BuildMessageFromErrors());
 
 			return View("View", form);
 		}
@@ -191,12 +191,12 @@ namespace hrvster.Web.Controllers
 
 				var promotionUid = await _mediator.Send(new CreateCampaignRequest(newCampaignRequest, _hrvsterUser.UserUid));
 
-				_notificationService.Success("Promotion/Campaign created successfully.", NotificationService.DismissInSeconds);
+				_notificationService.AddSuccessToastMessage("Promotion/Campaign created successfully.");
 
 				return RedirectToAction("View", new { campaignUid = promotionUid });
 			}
 
-			_notificationService.Error(ModelState.BuildMessageFromErrors("Update Promotion ", string.Empty), NotificationService.DismissInSeconds);
+			_notificationService.AddErrorToastMessage(ModelState.BuildMessageFromErrors("Update Promotion ", string.Empty));
 
 			var campaignTypes = await _mediator.Send(new GetCampaignTypesRequest());
 

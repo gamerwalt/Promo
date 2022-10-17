@@ -11,6 +11,7 @@ using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using NToastNotify;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -24,21 +25,19 @@ namespace hrvster.Web.Controllers
 	{
 		private readonly ILogger<ScheduledTweetsController> _logger;
 		private readonly IMediator _mediator;
-		private readonly INotyfService _notificationService;
-		private readonly NotificationServiceOptions _notificationServiceOptions;
+		private readonly IToastNotification _notificationService;
 		private readonly HrvsterUser _hrvsterUser;
 
 		public ScheduledTweetsController(
 			ILoggerFactory loggerFactory,
 			IMediator mediator,
-			INotyfService notificationService,
+			IToastNotification notificationService,
 			NotificationServiceOptions notificationServiceOptions,
 			HrvsterUser hrvsterUser)
 		{
 			_logger = loggerFactory.CreateLogger<ScheduledTweetsController>();
 			_mediator = mediator;
 			_notificationService = notificationService;
-			_notificationServiceOptions = notificationServiceOptions;
 			_hrvsterUser = hrvsterUser;
 		}
 
@@ -54,9 +53,7 @@ namespace hrvster.Web.Controllers
 			{
 				_logger.LogError("Could not find sweepstake with uid: {sweepUid}", sweepUid);
 
-				_notificationService.Warning(
-					$"Could not find sweepstake with uid: {sweepUid}.",
-					_notificationServiceOptions.DismissInSeconds);
+				_notificationService.AddWarningToastMessage($"Could not find sweepstake with uid: {sweepUid}.");
 
 				return RedirectToAction(actionName, controllerName);
 			}
@@ -69,9 +66,7 @@ namespace hrvster.Web.Controllers
 			{
 				_logger.LogError("Could not find the rule with uid: {ruleUid}", ruleUid);
 
-				_notificationService.Warning(
-					$"Could not find rule with uid: {ruleUid} ",
-					_notificationServiceOptions.DismissInSeconds);
+				_notificationService.AddWarningToastMessage($"Could not find rule with uid: {ruleUid} ");
 
 				return RedirectToAction(actionName, controllerName);
 			}
@@ -119,9 +114,7 @@ namespace hrvster.Web.Controllers
 			{
 				_logger.LogError("Could not find sweepstake with uid: {sweepUid}", sweepUid);
 
-				_notificationService.Warning(
-					$"Could not find sweepstake with uid: {sweepUid}.",
-					_notificationServiceOptions.DismissInSeconds);
+				_notificationService.AddWarningToastMessage($"Could not find sweepstake with uid: {sweepUid}.");
 
 				return RedirectToAction("View", new
 				{
@@ -140,9 +133,7 @@ namespace hrvster.Web.Controllers
 			{
 				_logger.LogError("Could not find the rule with uid: {ruleUid}", ruleUid);
 
-				_notificationService.Warning(
-					$"Could not find rule with uid: {ruleUid} ",
-					_notificationServiceOptions.DismissInSeconds);
+				_notificationService.AddWarningToastMessage($"Could not find rule with uid: {ruleUid} ");
 
 				return RedirectToAction("View", new
 				{
@@ -161,7 +152,7 @@ namespace hrvster.Web.Controllers
 			{
 				_logger.LogError("Could not find the scheduled tweet for the rule {rule}", rule.ToJsonString());
 
-				_notificationService.Warning($"Could not find the scheduled tweet.", _notificationServiceOptions.DismissInSeconds);
+				_notificationService.AddWarningToastMessage($"Could not find the scheduled tweet.");
 
 				return RedirectToAction("View", new
 				{
@@ -174,7 +165,7 @@ namespace hrvster.Web.Controllers
 
 			if (!form.Text.Contains(rule.WatchValue))
 			{
-				_notificationService.Warning("Your tweet needs to contain the watch value.", _notificationServiceOptions.DismissInSeconds);
+				_notificationService.AddWarningToastMessage("Your tweet needs to contain the watch value.");
 
 				return RedirectToAction("View", new
 				{
@@ -187,7 +178,7 @@ namespace hrvster.Web.Controllers
 
 			if(scheduledTweet.Status != ScheduledStatus.New)
 			{
-				_notificationService.Warning("You cannot make changes to this scheduled tweet again.", _notificationServiceOptions.DismissInSeconds);
+				_notificationService.AddWarningToastMessage("You cannot make changes to this scheduled tweet again.");
 
 				return RedirectToAction("View", new
 				{
@@ -202,7 +193,7 @@ namespace hrvster.Web.Controllers
 			{
 				await _mediator.Send(new UpdateScheduledTweetRequest(_hrvsterUser.UserUid, rule, sweep, scheduledUid, form.Text, form.ScheduledTime, form.PreviousMediaId1, form.Media1, form.PreviousMediaId2, form.Media2, form.PreviousMediaId3, form.Media3, form.PreviousMediaId4, form.Media4));
 
-				_notificationService.Success("Scheduled tweet updated successfully.", _notificationServiceOptions.DismissInSeconds);
+				_notificationService.AddSuccessToastMessage("Scheduled tweet updated successfully.");
 			}
 
 			return RedirectToAction("View", new
@@ -226,9 +217,7 @@ namespace hrvster.Web.Controllers
 			{
 				_logger.LogError("Could not find sweepstake with uid: {sweepUid}", sweepUid);
 
-				_notificationService.Warning(
-					$"Could not find sweepstake with uid: {sweepUid}.",
-					_notificationServiceOptions.DismissInSeconds);
+				_notificationService.AddWarningToastMessage($"Could not find sweepstake with uid: {sweepUid}.");
 
 				return RedirectToAction("View", new
 				{
@@ -244,9 +233,7 @@ namespace hrvster.Web.Controllers
 			{
 				_logger.LogError("Could not find the rule with uid: {ruleUid}", ruleUid);
 
-				_notificationService.Warning(
-					$"Could not find rule with uid: {ruleUid} ",
-					_notificationServiceOptions.DismissInSeconds);
+				_notificationService.AddWarningToastMessage($"Could not find rule with uid: {ruleUid} ");
 
 				return RedirectToAction("View", new
 				{
@@ -267,7 +254,7 @@ namespace hrvster.Web.Controllers
 			{
 				_logger.LogError("Could not find the scheduled tweet for the rule {rule}", rule.ToJsonString());
 
-				_notificationService.Warning($"Could not find the scheduled tweet.", _notificationServiceOptions.DismissInSeconds);
+				_notificationService.AddWarningToastMessage($"Could not find the scheduled tweet.");
 
 				return RedirectToAction("View", new
 				{
@@ -314,9 +301,7 @@ namespace hrvster.Web.Controllers
 			{
 				_logger.LogError("Could not find sweepstake with uid: {sweepUid}", sweepUid);
 
-				_notificationService.Warning(
-					$"Could not find sweepstake with uid: {sweepUid}.",
-					_notificationServiceOptions.DismissInSeconds);
+				_notificationService.AddWarningToastMessage($"Could not find sweepstake with uid: {sweepUid}.");
 
 				return RedirectToAction("View", new
 				{
@@ -332,9 +317,7 @@ namespace hrvster.Web.Controllers
 			{
 				_logger.LogError("Could not find the rule with uid: {ruleUid}", ruleUid);
 
-				_notificationService.Warning(
-					$"Could not find rule with uid: {ruleUid} ",
-					_notificationServiceOptions.DismissInSeconds);
+				_notificationService.AddWarningToastMessage($"Could not find rule with uid: {ruleUid} ");
 
 				return RedirectToAction("View", new
 				{
@@ -355,7 +338,7 @@ namespace hrvster.Web.Controllers
 			{
 				_logger.LogError("Could not find the scheduled tweet for the rule {rule}", rule.ToJsonString());
 
-				_notificationService.Warning($"Could not find the scheduled tweet.", _notificationServiceOptions.DismissInSeconds);
+				_notificationService.AddWarningToastMessage($"Could not find the scheduled tweet.");
 
 				return RedirectToAction("View", new
 				{
@@ -368,7 +351,7 @@ namespace hrvster.Web.Controllers
 
 			await _mediator.Send(new DeleteScheduledSweepRuleTweetRequest(form.ScheduledUid, ruleUid));
 
-			_notificationService.Success("Scheduled tweet deleted successfully.", _notificationServiceOptions.DismissInSeconds);
+			_notificationService.AddSuccessToastMessage("Scheduled tweet deleted successfully.");
 
 			return RedirectToAction("View", "SweepRules", new { sweepUid = sweepUid, ruleUid = ruleUid });
 		}
