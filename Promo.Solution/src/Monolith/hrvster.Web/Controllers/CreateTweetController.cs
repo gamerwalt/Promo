@@ -36,6 +36,7 @@ namespace hrvster.Web.Controllers
 		}
 
 		[HttpGet]
+		[Route("/CreateTweet/Create/Sweep/{sweepUid:Guid}")]
 		public async Task<IActionResult> Create(Guid sweepsUid)
 		{
 			var sweep = await _mediator.Send(new GetSweepByUid(sweepsUid));

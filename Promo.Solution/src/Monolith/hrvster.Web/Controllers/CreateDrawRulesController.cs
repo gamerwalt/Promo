@@ -2,6 +2,7 @@
 using hrvster.Core.Requests;
 using hrvster.Core.Requests.WebRequests.Sweeps;
 using hrvster.Extensions.ModelExtensions;
+using hrvster.Models.WebModels.Sweeps;
 using hrvster.Web.Models;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -193,16 +194,19 @@ namespace hrvster.Web.Controllers
 
 			if(ModelState.IsValid)
 			{
-				await _mediator.Send(new UpdateSweepDrawRuleRequest(
-					sweep.SweepId, 
-					sweep.SweepUid, 
-					form.SweepDrawRuleUid, 
-					form.WinnerCount, 
+				if(IsDirty(form, drawRule))
+				{
+					await _mediator.Send(new UpdateSweepDrawRuleRequest(
+					sweep.SweepId,
+					sweep.SweepUid,
+					form.SweepDrawRuleUid,
+					form.WinnerCount,
 					form.WinnerBackupCount));
 
-				_notificationService.AddSuccessToastMessage("Draw rule updated successfully.");
+					_notificationService.AddSuccessToastMessage("Draw rule updated successfully.");
+				}
 
-				return RedirectToAction("Create", "CreateTweet", new { sweepUid = sweepUid });
+				return RedirectToAction("Create", "CreateSweepPrizes", new { sweepUid = sweepUid });
 			}
 
 			var messages = ModelState.BuildMessageFromErrors();
@@ -221,6 +225,12 @@ namespace hrvster.Web.Controllers
 			form.SweepstakeId = sweep.SweepId;
 
 			return View(form);
+		}
+
+		private bool IsDirty(UpdateSweepDrawRule form, DrawRule drawRule)
+		{
+			return form.WinnerCount != drawRule.WinnerCount ||
+				form.WinnerBackupCount != drawRule.WinnerBackupCount;
 		}
 	}
 }

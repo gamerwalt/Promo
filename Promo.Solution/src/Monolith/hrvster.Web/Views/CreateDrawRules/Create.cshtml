@@ -1,12 +1,12 @@
 ﻿@model CreateSweepDrawRule
 @{
-	ViewData["Title"] = "Create Entry and Winner Rules";
+	ViewData["Title"] = "Create Entry Rules for " + Model.SweepstakeName;
 }
 <div class="card card-flush">
 	<form asp-controller="CreateDrawRules" asp-action="Create" asp-route-sweepUid="@Model.SweepstakeUid" class="form-horizontal form-material mx-2">
 		<div class="card-header mt-5">
 			<div class="card-title flex-column">
-				<h3 class="fw-bold mb-1">Create Rule for @Model.SweepstakeName </h3>
+				<h3 class="fw-bold mb-1">Create Draw Rule for @Model.SweepstakeName </h3>
 			</div>
 		</div>
 		@Html.HiddenFor(m => m.SweepstakeUid)

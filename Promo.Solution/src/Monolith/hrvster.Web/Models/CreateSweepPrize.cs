@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace hrvster.Web.Models
 {
@@ -15,5 +16,6 @@ namespace hrvster.Web.Models
 		public int Position { get; set; }
 		public decimal MonetaryValue { get; set; }
 		public bool DisableAll { get; internal set; }
+		public IEnumerable<Prize> Prizes { get; set; }
 	}
 }
