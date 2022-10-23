@@ -6,6 +6,7 @@ using hrvster.Models;
 using hrvster.Models.Options;
 using hrvster.Web.Models;
 using MediatR;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using NToastNotify;
@@ -53,6 +54,11 @@ namespace hrvster.Web.Controllers
 
 			if(campaign.Account.AccountUid != _hrvsterUser.UserUid)
 				return RedirectToAction("Index", "Sweeps");
+
+			var wizardSweepUid = HttpContext.Session.GetString(SessionConstants.WizardSweepUid);
+
+			if (!string.IsNullOrWhiteSpace(wizardSweepUid))
+				return RedirectToAction("View", new { sweepUid = wizardSweepUid });
 
 			if (!campaign.IsActive() && !campaign.WillBeInProgress())
 			{
@@ -138,6 +144,8 @@ namespace hrvster.Web.Controllers
 
 			if (sweep.Account.AccountUid != _hrvsterUser.UserUid)
 				return RedirectToAction("Index", "Sweeps");
+
+			HttpContext.Session.SetString(SessionConstants.WizardSweepUid, sweepUid.ToString());
 
 			var model = new UpdateSweepstake
 			{

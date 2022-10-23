@@ -9,5 +9,7 @@
 		public const string SweepUid = "_SweepUid";
 		public const string ReturnAction = "_ReturnAction";
 		public const string ReturnController = "_ReturnController";
+
+		public const string WizardSweepUid = "_WizardSweepUid";
 	}
 }
