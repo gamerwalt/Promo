@@ -1,5 +1,4 @@
-﻿using AspNetCoreHero.ToastNotification.Abstractions;
-using hrvster.Core.Authentication;
+﻿using hrvster.Core.Authentication;
 using hrvster.Core.Requests;
 using hrvster.Core.Requests.WebRequests.Publishing;
 using hrvster.Core.Requests.WebRequests.Sweeps;
@@ -8,13 +7,10 @@ using hrvster.Models.Extensions;
 using hrvster.Models.Options;
 using hrvster.Web.Models;
 using MediatR;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using NToastNotify;
 using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -71,12 +67,12 @@ namespace hrvster.Web.Controllers
 				return RedirectToAction(actionName, controllerName);
 			}
 
-			if(rule.Sweep.Account.AccountUid != _hrvsterUser.UserUid)
+			if (rule.Sweep.Account.AccountUid != _hrvsterUser.UserUid)
 				return RedirectToAction(actionName ?? "Index", controllerName ?? "Sweeps");
 
 			var scheduledTweet = await _mediator.Send(new GetScheduledTweetRequest(rule));
 			var scheduledImages = scheduledTweet.Images?.Select(item => new string(item.ImageLocation)).ToList();
-			var model =  new UpdateScheduledSweepRuleTweet
+			var model = new UpdateScheduledSweepRuleTweet
 			{
 				RuleId = rule.RuleId,
 				ScheduledUid = scheduledTweet.ScheduledUid,
@@ -94,7 +90,7 @@ namespace hrvster.Web.Controllers
 				Images = scheduledImages,
 				ActionName = actionName ?? "Index",
 				ControllerName = controllerName ?? "Dashboard"
-				
+
 			};
 
 			return View(model);
@@ -102,11 +98,11 @@ namespace hrvster.Web.Controllers
 
 		[HttpPost]
 		public async Task<IActionResult> Update(
-			UpdateScheduledSweepRuleTweet form, 
-			Guid scheduledUid, 
-			Guid sweepUid, 
-			Guid ruleUid, 
-			string actionName, 
+			UpdateScheduledSweepRuleTweet form,
+			Guid scheduledUid,
+			Guid sweepUid,
+			Guid ruleUid,
+			string actionName,
 			string controllerName)
 		{
 			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
@@ -148,7 +144,7 @@ namespace hrvster.Web.Controllers
 				return RedirectToAction(actionName ?? "Index", controllerName ?? "Sweeps");
 
 			var scheduledTweet = await _mediator.Send(new GetScheduledTweetRequest(rule));
-			if(scheduledTweet == null)
+			if (scheduledTweet == null)
 			{
 				_logger.LogError("Could not find the scheduled tweet for the rule {rule}", rule.ToJsonString());
 
@@ -176,7 +172,7 @@ namespace hrvster.Web.Controllers
 				});
 			}
 
-			if(scheduledTweet.Status != ScheduledStatus.New)
+			if (scheduledTweet.Status != ScheduledStatus.New)
 			{
 				_notificationService.AddWarningToastMessage("You cannot make changes to this scheduled tweet again.");
 
@@ -207,9 +203,9 @@ namespace hrvster.Web.Controllers
 
 		[HttpGet]
 		public async Task<IActionResult> DeleteScheduledRule(
-			Guid sweepUid, 
-			Guid ruleUid, 
-			string controllerName, 
+			Guid sweepUid,
+			Guid ruleUid,
+			string controllerName,
 			string actionName)
 		{
 			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));

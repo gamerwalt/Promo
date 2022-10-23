@@ -2,6 +2,7 @@
 using hrvster.Core.Requests;
 using hrvster.Core.Requests.WebRequests.Promotions;
 using hrvster.Extensions.ModelExtensions;
+using hrvster.Models;
 using hrvster.Web.Models;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -97,6 +98,119 @@ namespace hrvster.Web.Controllers
 					}).ToList();
 
 			return View(form);
+		}
+
+		[HttpGet]
+		[Route("/CreatePromotion/View/{promotionUid:Guid}")]
+		public async Task<IActionResult> View(Guid promotionUid)
+		{
+			var campaign = await _mediator.Send(new GetCampaign(promotionUid));
+
+			if (campaign == null)
+			{
+				_logger.LogWarning("Could not find the campaign with uid {campaignUid}", promotionUid);
+
+				_notificationService.AddWarningToastMessage($"Could not find promotion with uid: {promotionUid}.");
+
+				return RedirectToAction("View", "Promotions", new { campaignUid = promotionUid });
+			}
+
+			if (!campaign.IsActive() && !campaign.WillBeInProgress())
+			{
+				_logger.LogWarning("Campaign with {campaignUid} is currently not active or will not be in progress in the future.", promotionUid);
+
+				_notificationService.AddWarningToastMessage("Promotion is not active.");
+
+				return RedirectToAction("View", "Promotions", new { campaignUid = promotionUid });
+			}
+
+			var campaignTypes = await _mediator.Send(new GetCampaignTypesRequest());
+
+			var model = new UpdatePromotion
+			{
+				CampaignName = campaign.CampaignName,
+				CampaignUid = campaign.CampaignUid,
+				Description = campaign.Description,
+				StartDate = campaign.StartDate,
+				EndDate = campaign.EndDate,
+				CampaignTypes = campaignTypes
+					.Where(a => a.IsActive)
+					.Select(a => new SelectListItem()
+					{
+						Text = a.CampaignTypeName,
+						Value = a.CampaignTypeUid.ToString()
+					}).ToList(),
+				CampaignTypeUid = campaign.CampaignType.CampaignTypeUid
+			};
+
+			return View(model);
+		}
+
+		[HttpPost]
+		[Route("/CreatePromotion/View/{promotionUid:Guid}")]
+		public async Task<IActionResult> View(Guid promotionUid, UpdatePromotion form)
+		{
+			var campaign = await _mediator.Send(new GetCampaign(promotionUid));
+
+			if (campaign == null)
+			{
+				_logger.LogWarning("Could not find the campaign with uid {campaignUid}", promotionUid);
+
+				_notificationService.AddWarningToastMessage($"Could not find promotion with uid: {promotionUid}.");
+
+				return RedirectToAction("View", "Promotions", new { campaignUid = promotionUid });
+			}
+
+			if (!campaign.IsActive() && !campaign.WillBeInProgress())
+			{
+				_logger.LogWarning("Campaign with {campaignUid} is currently not active or will not be in progress in the future.", promotionUid);
+
+				_notificationService.AddWarningToastMessage("Promotion is not active.");
+
+				return RedirectToAction("View", "Promotions", new { campaignUid = promotionUid });
+			}
+
+			var campaignTypes = await _mediator.Send(new GetCampaignTypesRequest());
+
+			if(ModelState.IsValid)
+			{
+				if(IsFormDirty(campaign, form))
+				{
+					await _mediator.Send(new UpdatePromotionRequest(promotionUid, form.CampaignName, form.Description, form.CampaignTypeUid, form.StartDate, form.EndDate));
+
+					_notificationService.AddSuccessToastMessage("Promotion updated successfully.");
+				}
+
+				return RedirectToAction("Create", "CreateSweeps", new { campaignUid = promotionUid });
+			}
+
+			var messages = ModelState.BuildMessageFromErrors();
+
+			_logger.LogInformation("Error from creating a promotion. ClassName: {className}. Method Name: {action}. Message: {message}",
+				nameof(CreatePromotionController),
+				nameof(View),
+				messages);
+
+			_notificationService.AddErrorToastMessage(messages);
+
+			form.CampaignTypes = campaignTypes
+					.Where(a => a.IsActive)
+					.Select(a => new SelectListItem()
+					{
+						Text = a.CampaignTypeName,
+						Value = a.CampaignTypeUid.ToString()
+					}).ToList();
+
+			return View(form);
+		}
+
+		private bool IsFormDirty(Campaign campaign, UpdatePromotion form)
+		{
+			return campaign.CampaignName != form.CampaignName ||
+				campaign.Description != form.Description ||
+				campaign.CampaignType.CampaignTypeUid != form.CampaignTypeUid ||
+				campaign.StartDate != form.StartDate ||
+				campaign.EndDate != form.EndDate;
 		}
 	}
 }

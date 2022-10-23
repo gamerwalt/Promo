@@ -4,7 +4,7 @@
     ViewData["Title"] = $"Create Sweep for {@Model.Campaign.CampaignName}";
 }
 <div class="card card-flush">
-    <form asp-controller="Sweeps" asp-action="Create" asp-route-campaignUid="@Model.Campaign.CampaignUid"
+    <form asp-controller="CreateSweeps" asp-action="Create" asp-route-campaignUid="@Model.Campaign.CampaignUid"
 		class="form-horizontal form-material mx-2">
         <div class="card-header">
             <h3 class="card-title">Create Sweepstake/Raffle for @Model.Campaign.CampaignName</h3>
@@ -118,7 +118,7 @@
         <div class="card-footer">
 			<div class="d-flex flex-stack pt-10">
 				<div class="me-2">
-					<a class="btn btn-lg btn-light-primary me-3" href="javascript:history.go(-1)">
+					<a class="btn btn-lg btn-light-primary me-3" asp-action="View" asp-controller="CreatePromotion" asp-route-promotionUid="@Model.Campaign.CampaignUid">
 						<span class="svg-icon svg-icon-3 me-1">
 							<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
 								<rect opacity="0.5" x="6" y="11" width="13" height="2" rx="1" fill="currentColor"></rect>

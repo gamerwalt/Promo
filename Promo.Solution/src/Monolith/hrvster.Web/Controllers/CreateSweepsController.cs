@@ -4,6 +4,7 @@ using hrvster.Core.Requests.WebRequests.Sweeps;
 using hrvster.Extensions.ModelExtensions;
 using hrvster.Models;
 using hrvster.Models.Options;
+using hrvster.Web.Models;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -13,6 +14,7 @@ using System.Threading.Tasks;
 
 namespace hrvster.Web.Controllers
 {
+	[FirebaseAuthorize]
 	public class CreateSweepsController : Controller
 	{
 		private readonly ILogger<CreateSweepsController> _logger;
@@ -49,6 +51,9 @@ namespace hrvster.Web.Controllers
 				return RedirectToAction("View", "Promotions", new { campaignUid = campaignUid });
 			}
 
+			if(campaign.Account.AccountUid != _hrvsterUser.UserUid)
+				return RedirectToAction("Index", "Sweeps");
+
 			if (!campaign.IsActive() && !campaign.WillBeInProgress())
 			{
 				_logger.LogWarning("Campaign with {campaignUid} is currently not active or will not be in progress in the future.", campaignUid);
@@ -59,8 +64,6 @@ namespace hrvster.Web.Controllers
 			}
 
 			var createSweep = GetCreateSweepModel(campaign);
-
-			//_notificationService.AddSuccessToastMessage("Promotion created successfully. Let's create a Game of Sweepstakes now.", NotificationService.DismissInSeconds);
 
 			return View(createSweep);
 		}
@@ -102,7 +105,7 @@ namespace hrvster.Web.Controllers
 
 				_notificationService.AddSuccessToastMessage("Sweepstake created successfully.");
 
-				return RedirectToAction("Create", "CreateSweepRules", new { sweepUid = sweepUid });
+				return RedirectToAction("Create", "CreateEntryRules", new { sweepUid = sweepUid });
 			}
 
 			var messages = ModelState.BuildMessageFromErrors();
@@ -117,6 +120,84 @@ namespace hrvster.Web.Controllers
 			form.Campaign = campaign;
 
 			return View(form);
+		}
+
+		[HttpGet]
+		[Route("/CreateSweeps/View/{sweepUid:Guid}")]
+		public async Task<IActionResult> View(Guid sweepUid)
+		{
+			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
+			if (sweep == null)
+			{
+				_logger.LogWarning("Could not find the sweepstake with uid {sweepsUid}", sweepUid);
+
+				_notificationService.AddWarningToastMessage($"Could not find sweepstake with uid: {sweepUid}.");
+
+				return RedirectToAction("View", "Sweeps", new { sweepsUid = sweepUid });
+			}
+
+			if (sweep.Account.AccountUid != _hrvsterUser.UserUid)
+				return RedirectToAction("Index", "Sweeps");
+
+			var model = new UpdateSweepstake
+			{
+				SweepUid = sweepUid,
+				CampaignUid = sweep.Campaign.CampaignUid,
+				Name = sweep.Name,
+				StartDate = sweep.StartDate,
+				EndDate = sweep.EndDate,
+				DrawDate = sweep.DrawDate.GetValueOrDefault()
+			};
+
+			return View(model);
+		}
+
+		[HttpPost]
+		[Route("/CreateSweeps/View/{sweepUid:Guid}")]
+		public async Task<IActionResult> View(Guid sweepUid, UpdateSweepstake form)
+		{
+			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
+			if (sweep == null)
+			{
+				_logger.LogWarning("Could not find the sweepstake with uid {sweepsUid}", sweepUid);
+
+				_notificationService.AddWarningToastMessage($"Could not find sweepstake with uid: {sweepUid}.");
+
+				return RedirectToAction("View", "Sweeps", new { sweepsUid = sweepUid });
+			}
+
+			if (sweep.Account.AccountUid != _hrvsterUser.UserUid)
+				return RedirectToAction("Index", "Sweeps");
+
+			if(ModelState.IsValid)
+			{
+				if(IsFormDirty(form, sweep))
+				{
+					await _mediator.Send(new UpdateSweepstakeRequest(sweepUid, form.Name, form.StartDate, form.EndDate, form.DrawDate));
+
+					_notificationService.AddSuccessToastMessage("Sweep updated successfully.");
+				}
+
+				return RedirectToAction("Create", "CreateEntryRules", new { sweepUid = sweepUid });
+			}
+			var messages = ModelState.BuildMessageFromErrors();
+
+			_logger.LogInformation("Error from creating a sweepstake. ClassName: {className}. Method Name: {action}. Message: {message}",
+				nameof(CreateSweepsController),
+				nameof(View),
+				messages);
+
+			_notificationService.AddErrorToastMessage(messages);
+
+			return View(form);
+		}
+
+		private bool IsFormDirty(UpdateSweepstake form, Sweep sweep)
+		{
+			return form.Name != sweep.Name ||
+				form.StartDate != sweep.StartDate ||
+				form.EndDate != sweep.EndDate ||
+				form.DrawDate != sweep.DrawDate;
 		}
 
 		private Models.CreateSweep GetCreateSweepModel(Campaign campaign)

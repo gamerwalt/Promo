@@ -1,5 +1,3 @@
-using AspNetCoreHero.ToastNotification;
-using AspNetCoreHero.ToastNotification.Extensions;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using hrvster.ApplicationServices.Processors;
@@ -89,13 +87,6 @@ namespace hrvster.Web
 
 			services.AddTransient<IWatchTypeProvider, WatchTypeProvider>();
 			services.AddTransient<ITwitterWatchTypeProvider, TwitterWatchTypeProvider>();
-
-			services.AddNotyf(config =>
-			{
-				config.DurationInSeconds = 10;
-				config.IsDismissable = true;
-				config.Position = NotyfPosition.TopCenter;
-			});
 
 			services.AddTransient<ITweetProcessor, TweetProcessor>();
 			services.AddDrawSettingConfiguration(Configuration);
@@ -273,7 +264,7 @@ namespace hrvster.Web
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
 		public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
 		{
-			if (env.IsDevelopment())
+			if (env.IsDevelopment() || env.EnvironmentName.Equals("local"))
 			{
 				app.UseDeveloperExceptionPage();
 			}

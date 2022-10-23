@@ -21,6 +21,7 @@ namespace hrvster.Web.Mapper
 
 			CreateMap<hrvster.Models.Sweep, Sweepstake>()
 				.ReverseMap();
+			CreateMap<hrvster.Models.Sweep, ViewSweep>();
 
 			CreateMap<hrvster.Models.Rule, Rule>()
 				.ForMember(dest => dest.WatchType, opt => opt.MapFrom(src => src.WatchTypeCode))

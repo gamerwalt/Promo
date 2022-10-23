@@ -27,7 +27,7 @@ namespace hrvster.Core.Handlers.Sweepstakes
 				nameof(CreateSweepEntryRuleRequestHandler),
 				request.SweepUid);
 
-			await _repository.Create(new Models.DrawRule
+			await _repository.CreateAsync(new Models.DrawRule
 			{
 				SweepDrawRuleUid = Guid.NewGuid(),
 				SweepUid = request.SweepUid,
