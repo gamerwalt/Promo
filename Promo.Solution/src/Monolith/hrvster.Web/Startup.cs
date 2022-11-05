@@ -101,6 +101,7 @@ namespace hrvster.Web
 
 			services.AddHarvsterConfigurationOption(Configuration);
 			services.AddUserRateLimiterService();
+			services.AddSingleton<PrizePositionFinder>();
 		}
 
 

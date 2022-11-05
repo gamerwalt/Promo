@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using hrvster.Core;
 using hrvster.Core.Authentication;
 using hrvster.Core.Requests;
 using hrvster.Core.Requests.WebRequests.Sweeps;
@@ -23,19 +24,22 @@ namespace hrvster.Web.Controllers
 		private readonly IMapper _mapper;
 		private readonly IToastNotification _notificationService;
 		private readonly HrvsterUser _hrvsterUser;
+		private readonly PrizePositionFinder _prizePositionFinder;
 
 		public CreateSweepPrizesController(
 			ILoggerFactory loggerFactory,
 			IMediator mediator,
 			IMapper mapper,
 			IToastNotification notificationService,
-			HrvsterUser hrvsterUser)
+			HrvsterUser hrvsterUser,
+			PrizePositionFinder prizePositionFinder)
 		{
 			_logger = loggerFactory.CreateLogger<CreateSweepPrizesController>();
 			_mediator = mediator;
 			_mapper = mapper;
 			_notificationService = notificationService;
 			_hrvsterUser = hrvsterUser;
+			_prizePositionFinder = prizePositionFinder;
 		}
 
 		[HttpGet]
@@ -82,7 +86,7 @@ namespace hrvster.Web.Controllers
 				SweepName = sweep.Name,
 				SweepUid = sweep.SweepUid,
 				SweepId = sweep.SweepId,
-				Position = prizes.Count() + 1,
+				Position = _prizePositionFinder.GetNextPrizePosition(drawRules.WinnerCount, prizes),
 				Prizes = _mapper.Map<IEnumerable<Prize>>(prizes)
 			};
 
@@ -134,7 +138,10 @@ namespace hrvster.Web.Controllers
 				messages);
 
 			_notificationService.AddErrorToastMessage(messages);
-
+			form.Prizes = _mapper.Map<IEnumerable<Prize>>(prizes);
+			form.Position = prizesList.Count() + 1;
+			form.SweepName = sweep.Name;
+			
 			return View(form);
 		}
 
@@ -164,7 +171,8 @@ namespace hrvster.Web.Controllers
 			var model = new ViewSweepPrizes
 			{
 				Prizes = prizes.OrderBy(c => c.PrizePosition),
-				Sweep = sweep
+				Sweep = sweep,
+				WinnerCount = drawRules.WinnerCount
 			};
 
 			return View(model);
@@ -174,28 +182,172 @@ namespace hrvster.Web.Controllers
 		[Route("/CreateSweepPrizes/EditPrize/Sweep/{sweepUid:Guid}/Prize/{prizeUid:Guid}")]
 		public async Task<IActionResult> EditPrize(Guid sweepUid, Guid prizeUid)
 		{
-			return new OkObjectResult(new { sweepUid, prizeUid });
+			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
+			if (sweep == null)
+			{
+				_logger.LogWarning("Could not find the sweepstake with uid {sweepsUid}", sweepUid);
+
+				_notificationService.AddWarningToastMessage($"Could not find sweepstake with uid: {sweepUid}.");
+
+				return RedirectToAction("View", "Sweeps", new { sweepsUid = sweepUid });
+			}
+
+			if (sweep.Account.AccountUid != _hrvsterUser.UserUid)
+				return RedirectToAction("Index", "Sweeps");
+
+			var prizes = await _mediator.Send(new GetSweepPrizes(sweepUid));
+			if(!prizes.Any(c => c.PrizeUid == prizeUid))
+			{
+				_logger.LogWarning("Could not find the prize with uid {prizeUid} for sweeps {sweepName} {sweepUid} you were trying to edit.",
+					prizeUid,
+					sweep.Name,
+					sweep.SweepUid);
+
+				_notificationService.AddWarningToastMessage("Could not find the prize you were trying to edit.");
+
+				return RedirectToAction("View", "Sweeps", new { sweepUid = sweepUid });
+			}
+
+			var prize = prizes.FirstOrDefault(p => p.PrizeUid == prizeUid);
+
+			var model = new EditSweepPrize
+			{
+				CampaignUid = sweep.Campaign.CampaignUid,
+				Prize = _mapper.Map<Prize>(prize),
+				PrizeUid = prize.PrizeUid,
+				PrizeName = prize.PrizeName,
+				PrizeDescription = prize.PrizeDescription,
+				MonetaryValue = prize.PrizeValue,
+				Sweep = sweep,
+				SweepId = sweep.SweepId,
+				SweepName = sweep.Name,
+				SweepUid = sweep.SweepUid
+			};
+
+			return View(model);
 		}
 
 		[HttpPost]
 		[Route("/CreateSweepPrizes/EditPrize/Sweep/{sweepUid:Guid}/Prize/{prizeUid:Guid}")]
 		public async Task<IActionResult> EditPrize(Guid sweepUid, Guid prizeUid, EditSweepPrize form)
 		{
-			return new OkObjectResult(new { sweepUid, prizeUid, form });
+			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
+			if (sweep == null)
+			{
+				_logger.LogWarning("Could not find the sweepstake with uid {sweepsUid}", sweepUid);
+
+				_notificationService.AddWarningToastMessage($"Could not find sweepstake with uid: {sweepUid}.");
+
+				return RedirectToAction("View", "Sweeps", new { sweepsUid = sweepUid });
+			}
+
+			if (sweep.Account.AccountUid != _hrvsterUser.UserUid)
+				return RedirectToAction("Index", "Sweeps");
+
+			var prizes = await _mediator.Send(new GetSweepPrizes(sweepUid));
+			if (!prizes.Any(c => c.PrizeUid == prizeUid))
+			{
+				_logger.LogWarning("Could not find the prize with uid {prizeUid} for sweeps {sweepName} {sweepUid} you were trying to edit.",
+					prizeUid,
+					sweep.Name,
+					sweep.SweepUid);
+
+				_notificationService.AddWarningToastMessage("Could not find the prize you were trying to edit.");
+
+				return RedirectToAction("View", "Sweeps", new { sweepUid = sweepUid });
+			}
+
+			await _mediator.Send(new UpdateSweepPrize(sweepUid, prizeUid, form.PrizeName, form.PrizeDescription, form.MonetaryValue));
+
+			_notificationService.AddSuccessToastMessage("Prize updated successfully.");
+
+			return RedirectToAction("View", new { sweepUid = sweepUid });
 		}
 
 		[HttpGet]
 		[Route("/CreateSweepPrizes/DeletePrize/Sweep/{sweepUid:Guid}/Prize/{prizeUid:Guid}")]
 		public async Task<IActionResult> DeletePrize(Guid sweepUid, Guid prizeUid)
 		{
-			return new OkObjectResult(new { sweepUid, prizeUid });
+			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
+			if (sweep == null)
+			{
+				_logger.LogWarning("Could not find the sweepstake with uid {sweepsUid}", sweepUid);
+
+				_notificationService.AddWarningToastMessage($"Could not find sweepstake with uid: {sweepUid}.");
+
+				return RedirectToAction("View", "Sweeps", new { sweepsUid = sweepUid });
+			}
+
+			if (sweep.Account.AccountUid != _hrvsterUser.UserUid)
+				return RedirectToAction("Index", "Sweeps");
+
+			var prizes = await _mediator.Send(new GetSweepPrizes(sweepUid));
+			if (!prizes.Any(c => c.PrizeUid == prizeUid))
+			{
+				_logger.LogWarning("Could not find the prize with uid {prizeUid} for sweeps {sweepName} {sweepUid} you were trying to edit.",
+					prizeUid,
+					sweep.Name,
+					sweep.SweepUid);
+
+				_notificationService.AddWarningToastMessage("Could not find the prize you were trying to edit.");
+
+				return RedirectToAction("View", "Sweeps", new { sweepUid = sweepUid });
+			}
+
+			var prize = prizes.FirstOrDefault(p => p.PrizeUid == prizeUid);
+
+			var model = new DeleteSweepPrize
+			{
+				CampaignUid = sweep.Campaign.CampaignUid,
+				Prize = _mapper.Map<Prize>(prize),
+				PrizeUid = prize.PrizeUid,
+				PrizeName = prize.PrizeName,
+				PrizeDescription = prize.PrizeDescription,
+				MonetaryValue = prize.PrizeValue,
+				Sweep = sweep,
+				SweepId = sweep.SweepId,
+				SweepName = sweep.Name,
+				SweepUid = sweep.SweepUid
+			};
+
+			return View(model);
 		}
 
 		[HttpPost]
 		[Route("/CreateSweepPrizes/DeletePrize/Sweep/{sweepUid:Guid}/Prize/{prizeUid:Guid}")]
 		public async Task<IActionResult> DeletePrize(Guid sweepUid, Guid prizeUid, DeleteSweepPrize form)
 		{
-			return new OkObjectResult(new { sweepUid, prizeUid, form });
+			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
+			if (sweep == null)
+			{
+				_logger.LogWarning("Could not find the sweepstake with uid {sweepsUid}", sweepUid);
+
+				_notificationService.AddWarningToastMessage($"Could not find sweepstake with uid: {sweepUid}.");
+
+				return RedirectToAction("View", "Sweeps", new { sweepsUid = sweepUid });
+			}
+
+			if (sweep.Account.AccountUid != _hrvsterUser.UserUid)
+				return RedirectToAction("Index", "Sweeps");
+
+			var prizes = await _mediator.Send(new GetSweepPrizes(sweepUid));
+			if (!prizes.Any(c => c.PrizeUid == prizeUid))
+			{
+				_logger.LogWarning("Could not find the prize with uid {prizeUid} for sweeps {sweepName} {sweepUid} you were trying to edit.",
+					prizeUid,
+					sweep.Name,
+					sweep.SweepUid);
+
+				_notificationService.AddWarningToastMessage("Could not find the prize you were trying to edit.");
+
+				return RedirectToAction("View", "Sweeps", new { sweepUid = sweepUid });
+			}
+
+			await _mediator.Send(new DeleteSweepPrizeRequest(prizeUid));
+
+			_notificationService.AddSuccessToastMessage("Prize deleted successfully.");
+
+			return RedirectToAction("View", new { sweepUid = sweepUid });
 		}
 	}
 }

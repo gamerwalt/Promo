@@ -7,5 +7,6 @@ namespace hrvster.Web.Models
 	{
 		public IEnumerable<SweepPrize> Prizes { get; set; }
 		public Sweep Sweep { get; set; }
+		public int WinnerCount { get; internal set; }
 	}
 }

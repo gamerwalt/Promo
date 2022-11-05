@@ -29,8 +29,8 @@
 									<td>@prize.PrizeName</td>
 									<td>@prize.PrizeValue</td>
 									<td class="card-toolbar">
-										<button class="btn btn-sm" data-kt-menu-trigger="click" data-kt-menu-placement="bottom-end" data-kt-menu-overflow="true">Action</button>
-									<div class="menu menu-sub menu-sub-dropdown menu-column menu-rounded menu-gray-800 menu-state-bg-light-primary fw-semibold w-200px" data-kt-menu="true" style="">
+										<button class="btn btn-primary btn-sm" data-kt-menu-trigger="click" data-kt-menu-placement="bottom-end" data-kt-menu-overflow="true">Action</button>
+									<div class="px-2 py-2 menu menu-sub menu-sub-dropdown menu-column menu-rounded menu-gray-800 menu-state-bg-light-primary fw-semibold w-200px" data-kt-menu="true" style="">
 										<div class="menu-item px-3">
 											@Html.ActionLink("Edit", "EditPrize", "CreateSweepPrizes", new { sweepUid = Model.Sweep.SweepUid, prizeUid = prize.PrizeUid}, new { @class="menu-link px-3"})
 										</div>
@@ -59,6 +59,14 @@
 						Back
 					</a>
 				</div>
+				@if(Model.Prizes.Count() < Model.WinnerCount)
+				{
+					<div class="me-2">
+						<a class="btn btn-lg btn-light-primary me-3" asp-action="Create" asp-route-sweepUid=@Model.Sweep.SweepUid>
+							Add New Prize
+						</a>
+					</div>
+				}
 				<div>
 					<a type="submit" class="btn btn-lg btn-primary" asp-controller="CreateTweet" asp-action="Create" asp-route-sweepUid="@Model.Sweep.SweepUid">
 						Continue
