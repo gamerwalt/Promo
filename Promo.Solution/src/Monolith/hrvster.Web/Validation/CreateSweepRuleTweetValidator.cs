@@ -68,7 +68,7 @@ namespace hrvster.Web.Validation
 
 		private bool MustBeginWithAHash(string watchValue)
 		{
-			return watchValue.IndexOf("#") == 0;
+			return watchValue?.IndexOf("#") == 0;
 		}
 
 		private bool BeOfTheAllowedExtension(IFormFile c)
@@ -93,12 +93,15 @@ namespace hrvster.Web.Validation
 
 		private bool WatchValueShouldBeWithinTweetText(CreateSweepRuleTweet model)
 		{
-			return model.TweetText.Contains(model.WatchValue);
+			if(!string.IsNullOrWhiteSpace(model.WatchValue) && !string.IsNullOrWhiteSpace(model.TweetText))
+				return model.TweetText.Contains(model.WatchValue);
+
+			return false;
 		}
 
 		private bool BeMaximumTweet(string tweet)
 		{
-			return tweet.Length <= 140;
+			return tweet?.Length <= 140;
 		}
 	}
 }

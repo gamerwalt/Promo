@@ -57,7 +57,7 @@ namespace hrvster.Web.Validation
 
 		private bool HasSpecialCharacters(string s)
 		{
-			var specialCharacters = @"\|!#$%&/()=?»«@£§€{}.-;'\<>_,";
+			var specialCharacters = @"\|!#$%&/()=?»«@£§€{}.-;'\<>_,+";
 			foreach(var c in specialCharacters)
 			{
 				if (s.Contains(c)) return true;

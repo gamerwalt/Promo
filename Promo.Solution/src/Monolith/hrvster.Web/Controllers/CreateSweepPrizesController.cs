@@ -114,19 +114,22 @@ namespace hrvster.Web.Controllers
 			var drawRules = await _mediator.Send(new GetDrawRuleForSweepsRequest(sweepUid));
 			var prizesList = prizes.ToList();
 
-			if (ModelState.IsValid && prizesList.Count < drawRules.WinnerCount)
+			if(ModelState.IsValid)
 			{
-				await _mediator.Send(new CreateASweepPrizeRequest(sweepUid, form.Position, form.PrizeName, form.PrizeDescription, form.MonetaryValue));
+				if (prizesList.Count < drawRules.WinnerCount)
+				{
+					await _mediator.Send(new CreateASweepPrizeRequest(sweepUid, form.Position, form.PrizeName, form.PrizeDescription, form.MonetaryValue));
 
-				_notificationService.AddSuccessToastMessage("Prize created successfully.");
+					_notificationService.AddSuccessToastMessage("Prize created successfully.");
 
-				return RedirectToAction("Create", new { sweepUid = sweepUid });
-			}
-			else if (prizesList.Count >= drawRules.WinnerCount)
-			{
-				_notificationService.AddWarningToastMessage("Unable to continue. It seems we have all the prizes we need.");
+					return RedirectToAction("Create", new { sweepUid = sweepUid });
+				}
+				else if (prizesList.Count >= drawRules.WinnerCount)
+				{
+					_notificationService.AddWarningToastMessage("Unable to continue. It seems we have all the prizes we need.");
 
-				return RedirectToAction("View", "Sweeps", new { sweepUid = sweepUid });
+					return RedirectToAction("View", "Sweeps", new { sweepUid = sweepUid });
+				}
 			}
 
 			var messages = ModelState.BuildMessageFromErrors();

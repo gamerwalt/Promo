@@ -15,6 +15,7 @@ namespace hrvster.Infrastructure
 		Task<IEnumerable<SweepPrize>> GetSweepPrizesAsync(Guid sweepUid);
 		Task UpdateSweepPrize(Guid prizeUid, string prizeName, string prizeDescription, decimal monetaryValue);
 		Task DeleteSweepPrizeAsync(Guid prizeUid);
+		IEnumerable<SweepPrize> GetSweepPrizes(Guid sweepUid);
 	}
 
 	public class SweepPrizesRepository : ISweepPrizesRepository
@@ -80,6 +81,30 @@ namespace hrvster.Infrastructure
 			}
 
 			return sweepPrize;
+		}
+
+		public IEnumerable<SweepPrize> GetSweepPrizes(Guid sweepUid)
+		{
+			var sweepPrizes = new List<SweepPrize>();
+
+			using (var conn = new MySqlConnection(_database.GetConnectionString()))
+			{
+				var command = conn.CreateCommand();
+				command.CommandText = "sweep_prizes_get";
+				command.CommandType = CommandType.StoredProcedure;
+				command.AddParameter(nameof(sweepUid), sweepUid);
+
+				conn.Open();
+				using (var reader = command.ExecuteReader())
+				{
+					while (reader.Read())
+					{
+						sweepPrizes.Add(CreateSweepPrizeFrom(reader));
+					}
+				}
+			}
+
+			return sweepPrizes;
 		}
 
 		public async Task<IEnumerable<SweepPrize>> GetSweepPrizesAsync(Guid sweepUid)
