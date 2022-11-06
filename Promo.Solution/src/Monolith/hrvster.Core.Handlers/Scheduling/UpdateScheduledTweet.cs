@@ -1,4 +1,6 @@
-﻿using hrvster.Core.Requests.WebRequests.Publishing;
+﻿using hrvster.Core.Authentication;
+using hrvster.Core.Requests.WebRequests.Files;
+using hrvster.Core.Requests.WebRequests.Publishing;
 using hrvster.Infrastructure;
 using hrvster.Infrastructure.Scheduling;
 using hrvster.Models;
@@ -7,7 +9,9 @@ using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -18,14 +22,21 @@ namespace hrvster.Core.Handlers.Scheduling
 		private readonly ILogger<UpdateScheduledTweet> _logger;
 		private readonly ISweepTweetSchedulerRepository _repository;
 		private readonly IFileService _fileService;
+		private readonly IMediator _mediator;
+		private readonly HrvsterUser _hrvsterUser;
+
 		public UpdateScheduledTweet(
 			ILoggerFactory loggerFactory,
 			ISweepTweetSchedulerRepository repository,
-			IFileService fileService)
+			IFileService fileService,
+			IMediator mediator,
+			HrvsterUser hrvsterUser)
 		{
 			_logger = loggerFactory.CreateLogger<UpdateScheduledTweet>();
 			_repository = repository;
 			_fileService = fileService;
+			_mediator = mediator;
+			_hrvsterUser = hrvsterUser;
 		}
 
 		protected override async Task Handle(UpdateScheduledTweetRequest request, CancellationToken cancellationToken)
@@ -35,25 +46,49 @@ namespace hrvster.Core.Handlers.Scheduling
 				await _repository.BeginTransaction();
 				await _repository.UpdateScheduledTweetAsync(request.ScheduledUid, request.ScheduledTime, request.Text);
 
-				if (request.PreviousMediaId1 != 0 && request.Media1 != null)
+				if(NoPreviuosMedia(request))
 				{
-					await UpdatePreviousMedia(request.Media1, request.PreviousMediaId1, request.UserUid);
-				}
+					var media = new List<IFormFile>();
+					var mediaLocation = default(IEnumerable<string>);
 
-				if (request.PreviousMediaId2 != 0 && request.Media2 != null)
-				{
-					await UpdatePreviousMedia(request.Media2, request.PreviousMediaId2, request.UserUid);
-				}
+					if (request.Media1 != null) media.Add(request.Media1);
+					if (request.Media2 != null) media.Add(request.Media2);
+					if (request.Media3 != null) media.Add(request.Media3);
+					if (request.Media4 != null) media.Add(request.Media4);
 
-				if (request.PreviousMediaId3 != 0 && request.Media3 != null)
-				{
-					await UpdatePreviousMedia(request.Media3, request.PreviousMediaId3, request.UserUid);
-				}
+					if (media.Count > 0)
+						mediaLocation = await _mediator.Send(new UploadFileToFileServerRequest(media, _hrvsterUser.UserUid, ProfileType.Twitter, _hrvsterUser.Token));
 
-				if (request.PreviousMediaId4 != 0 && request.Media4 != null)
-				{
-					await UpdatePreviousMedia(request.Media4, request.PreviousMediaId4, request.UserUid);
+					foreach(var location in mediaLocation)
+					{
+						await _repository.CreateScheduledSweepRuleImage(request.ScheduledUid, new Models.Scheduling.ScheduledSweepRuleTweetImage
+						{
+							ImageLocation = location
+						});
+					}
 				}
+				else
+				{
+					if (request.PreviousMediaId1 != 0 && request.Media1 != null)
+					{
+						await UpdatePreviousMedia(request.Media1, request.PreviousMediaId1, request.UserUid);
+					}
+
+					if (request.PreviousMediaId2 != 0 && request.Media2 != null)
+					{
+						await UpdatePreviousMedia(request.Media2, request.PreviousMediaId2, request.UserUid);
+					}
+
+					if (request.PreviousMediaId3 != 0 && request.Media3 != null)
+					{
+						await UpdatePreviousMedia(request.Media3, request.PreviousMediaId3, request.UserUid);
+					}
+
+					if (request.PreviousMediaId4 != 0 && request.Media4 != null)
+					{
+						await UpdatePreviousMedia(request.Media4, request.PreviousMediaId4, request.UserUid);
+					}
+				}				
 
 				await _repository.CommitTransaction();
 			}
@@ -69,25 +104,30 @@ namespace hrvster.Core.Handlers.Scheduling
 			}
 		}
 
+		private bool NoPreviuosMedia(UpdateScheduledTweetRequest request)
+		{
+			return request.PreviousMediaId1 == 0 &&
+				request.PreviousMediaId2 == 0 &&
+				request.PreviousMediaId3 == 0 &&
+				request.PreviousMediaId4 == 0;
+		}
+
 		private async Task UpdatePreviousMedia(IFormFile media, int imageId, Guid userUid)
 		{
 			var location = await UploadMediaToServerAsync(media, userUid);
+
 			await _repository.UpdateScheduledTweetImageAsync(imageId, location);
 		}
 
 		private async Task<string> UploadMediaToServerAsync(IFormFile media, Guid userUid)
 		{
-			var filePath = GetFilePath(userUid, ProfileType.Twitter.ToString());
+			var mediaLocation = await _mediator.Send(new UploadFileToFileServerRequest(
+				new List<IFormFile>() { media },
+				_hrvsterUser.UserUid,
+				ProfileType.Twitter,
+				_hrvsterUser.Token));
 
-			Directory.CreateDirectory(filePath);
-			filePath = Path.Combine(filePath, media.FileName);
-
-			using var stream = File.Create(filePath);
-			await media.CopyToAsync(stream);
-
-			return filePath;
-
-			//return await _fileService.UploadToFileServer(media1, ProfileType.Twitter.ToString(), userUid);
+			return mediaLocation.FirstOrDefault();
 		}
 
 		private string GetFilePath(Guid userUid, string addToPath)
