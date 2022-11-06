@@ -9,6 +9,8 @@ namespace hrvster.Web.Validation
 {
 	public class CreateSweepRuleTweetValidator : AbstractValidator<CreateSweepRuleTweet>
 	{
+		private const int FiveMegaBytes = 5 * 1024 * 1024;
+		//private string[] AllowedExtensions = { ".jpeg", ".jpg", ".png", ".gif", ".mp4" };
 		private string[] AllowedExtensions = { ".jpeg", ".jpg", ".png", ".gif" };
 
 		public CreateSweepRuleTweetValidator()
@@ -53,17 +55,41 @@ namespace hrvster.Web.Validation
 				.Must(c => BeOfTheAllowedExtension(c))
 				.WithMessage("Media 1's extension is not allowed.");
 
+			RuleFor(c => c.Media1)
+				.Must(c => BeOfTheAllowedSize(c))
+				.WithMessage("Media 1's size is too large. It has to be less than 5mb in size");
+
 			RuleFor(c => c.Media2)
 				.Must(c => BeOfTheAllowedExtension(c))
 				.WithMessage("Media 2's extension is not allowed.");
+
+			RuleFor(c => c.Media2)
+				.Must(c => BeOfTheAllowedSize(c))
+				.WithMessage("Media 2's size is too large. It has to be less than 5mb in size");
 
 			RuleFor(c => c.Media3)
 				.Must(c => BeOfTheAllowedExtension(c))
 				.WithMessage("Media 3's extension is not allowed.");
 
+			RuleFor(c => c.Media3)
+				.Must(c => BeOfTheAllowedSize(c))
+				.WithMessage("Media 3's size is too large. It has to be less than 5mb in size");
+
 			RuleFor(c => c.Media4)
 				.Must(c => BeOfTheAllowedExtension(c))
 				.WithMessage("Media 4's extension is not allowed.");
+
+			RuleFor(c => c.Media4)
+				.Must(c => BeOfTheAllowedSize(c))
+				.WithMessage("Media 4's size is too large. It has to be less than 5mb in size");
+		}
+
+		private bool BeOfTheAllowedSize(IFormFile media)
+		{
+			if(media != null)
+				return media.Length <= FiveMegaBytes;
+
+			return true;
 		}
 
 		private bool MustBeginWithAHash(string watchValue)

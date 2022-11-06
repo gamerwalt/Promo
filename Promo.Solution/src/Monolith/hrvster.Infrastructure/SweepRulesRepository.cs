@@ -185,16 +185,16 @@ namespace hrvster.Infrastructure
 				{
 					CampaignUid = reader.GetGuid("campaign_uid"),
 					CampaignId = reader.GetInt32("campaign_id"),
-					CampaignName = reader.GetString("campaign_name"),
-					Description = reader.GetString("campaign_description"),
+					CampaignName = reader.GetStringValue("campaign_name"),
+					Description = reader.GetStringValue("campaign_description"),
 					ActiveInd = reader.GetBoolean("campaign_active_ind"),
 					StartDate = reader.GetDateTime("campaign_start_date"),
 					EndDate = reader.GetDateTime("campaign_end_date"),
 					CampaignType = new CampaignType
 					{
-						CampaignTypeName = reader.GetString("campaign_type_name"),
-						CampaignTypeCode = (CampaignTypeCode)Enum.Parse(typeof(CampaignTypeCode), reader.GetString("campaign_type_code")),
-						CamapaignTypeDescription = reader.GetString("campaign_type_description")
+						CampaignTypeName = reader.GetStringValue("campaign_type_name"),
+						CampaignTypeCode = (CampaignTypeCode)Enum.Parse(typeof(CampaignTypeCode), reader.GetStringValue("campaign_type_code")),
+						CamapaignTypeDescription = reader.GetStringValue("campaign_type_description")
 					},
 					Account = new Account
 					{
@@ -205,7 +205,7 @@ namespace hrvster.Infrastructure
 				{
 					SweepUid = reader.GetGuid("sweep_uid"),
 					SweepId = reader.GetInt32("sweep_id"),
-					Name = reader.GetString("sweep_name"),
+					Name = reader.GetStringValue("sweep_name"),
 					RulesUrl = reader.GetStringValue("rules_url"),
 					StartDate = reader.GetDateTime("start_date"),
 					EndDate = reader.GetDateTime("end_date"),
@@ -217,8 +217,8 @@ namespace hrvster.Infrastructure
 					}
 				},
 				RuleUid = reader.GetGuid("rule_uid"),
-				WatchValue = reader.GetString("watch_value"),
-				WatchTypeCode = (WatchTypeCode)Enum.Parse(typeof(WatchTypeCode), reader.GetString("watch_type_code")),
+				WatchValue = reader.GetStringValue("watch_value"),
+				WatchTypeCode = (WatchTypeCode)Enum.Parse(typeof(WatchTypeCode), reader.GetStringValue("watch_type_code")),
 				ExternalId = reader.GetLongValue("external_id"),
 				ActiveInd = reader.GetBoolean("active_ind"),
 				MustBeFollowing = reader.GetBoolean("must_be_following"),

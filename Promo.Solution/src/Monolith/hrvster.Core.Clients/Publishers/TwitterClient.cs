@@ -131,23 +131,59 @@ namespace hrvster.Core.Clients.Publishers
 
 					var fileName = Path.GetFileName(path);
 
-					using (var client = new WebClient())
-					{
-						var byteArray = await client.DownloadDataTaskAsync(new Uri(path));
-						var uploadedImage = await _twitterClient.Upload
-							.UploadTweetImageAsync(byteArray);
+					//if(path.Contains(".mp4"))
+					//{
+					//	using (var client = new WebClient())
+					//	{
+					//		var mediaArray = await client.DownloadDataTaskAsync(new Uri(path));
+					//		try
+					//		{
+					//			var uploadedVideo = await _twitterClient.Upload.UploadTweetVideoAsync(mediaArray);
 
-						if (uploadedImage == null)
+					//			if(uploadedVideo == null)
+					//			{
+					//				_logger.LogError("Was unable to upload the media {path} for the profile with uid {profileUid}",
+					//					path,
+					//					message.Profile.ProfileUid);
+					//			}
+					//			else
+					//			{
+					//				mediaIds.Add(uploadedVideo.Id.GetValueOrDefault());
+					//			}
+					//		}
+					//		catch (Exception ex)
+					//		{
+					//			_logger.LogError(ex.Message);
+					//		}
+					//	}
+					//}
+					//else
+					//{
+						using (var client = new WebClient())
 						{
-							_logger.LogError("Was unable to upload the media {path} for the profile with uid {profileUid}",
-								path,
-								message.Profile.ProfileUid);
+							var byteArray = await client.DownloadDataTaskAsync(new Uri(path));
+							try
+							{
+								var uploadedImage = await _twitterClient.Upload
+								.UploadTweetImageAsync(byteArray);
+
+								if (uploadedImage == null)
+								{
+									_logger.LogError("Was unable to upload the media {path} for the profile with uid {profileUid}",
+										path,
+										message.Profile.ProfileUid);
+								}
+								else
+								{
+									mediaIds.Add(uploadedImage.Id.GetValueOrDefault());
+								}
+							}
+							catch (Exception ex)
+							{
+								_logger.LogError(ex.Message);
+							}
 						}
-						else
-						{
-							mediaIds.Add(uploadedImage.Id.GetValueOrDefault());
-						}
-					}
+					//}
 				}
 			}
 
