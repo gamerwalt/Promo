@@ -3,7 +3,7 @@
     ViewData["Title"] = $"Let's create your hashtag/watch value";
 }
 <div class="card card-borderedd">
-    <form asp-action="Watch" asp-route-sweepUid="@Model.SweepstakeUid">
+    <form asp-action="Watch" asp-route-sweepUid="@Model.SweepstakeUid" enctype="multipart/form-data">
         <div class="card-header">
             <h3 class="card-title">Create/Publish Tweet for @Model.SweepstakeName</h3>
         </div>

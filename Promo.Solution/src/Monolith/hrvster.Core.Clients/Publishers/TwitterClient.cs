@@ -1,6 +1,7 @@
 ﻿using hrvster.Core.Clients.Common;
 using hrvster.Infrastructure.Extensions;
 using hrvster.Models;
+using hrvster.Models.Extensions;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -55,18 +56,47 @@ namespace hrvster.Core.Clients.Publishers
 
 			if(mediaIds.Count == 0)
 			{
-				tweet = await _twitterClient.Tweets.PublishTweetAsync(new PublishTweetParameters
+				try
 				{
-					Text = message.Text
-				});
+					tweet = await _twitterClient.Tweets.PublishTweetAsync(new PublishTweetParameters
+					{
+						Text = message.Text
+					});
+				}
+				catch (Exception ex)
+				{
+					_logger.LogError("An error occurred while trying to publish a tweet with the message {message} for the profile {profileUid}. Error: {errorMessage}. Call Stack: {stack}. Inner Message: {innerMessage}",
+						message.Text,
+						message.Profile.ProfileUid,
+						ex.Message,
+						ex.StackTrace,
+						ex.InnerException?.Message);
+
+					return String.Empty;
+				}
+				
 			}
 			else
 			{
-				tweet = await _twitterClient.Tweets.PublishTweetAsync(new PublishTweetParameters
+				try
 				{
-					Text = message.Text,
-					MediaIds = mediaIds
-				});
+					tweet = await _twitterClient.Tweets.PublishTweetAsync(new PublishTweetParameters
+					{
+						Text = message.Text,
+						MediaIds = mediaIds
+					});
+				}
+				catch (Exception ex)
+				{
+					_logger.LogError("An error occurred while trying to publish a tweet with the message {message} for the profile {profileUid}. Error: {errorMessage}. Call Stack: {stack}. Inner Message: {innerMessage}",
+						message.Text,
+						message.Profile.ProfileUid,
+						ex.Message,
+						ex.StackTrace,
+						ex.InnerException?.Message);
+
+					return String.Empty;
+				}
 			}
 			
 			if (tweet == null)

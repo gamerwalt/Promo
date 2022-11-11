@@ -1,20 +1,26 @@
 ﻿using FluentValidation;
+using hrvster.Infrastructure;
 using hrvster.Web.Models;
 using Microsoft.AspNetCore.Http;
 using System;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 
 namespace hrvster.Web.Validation
 {
 	public class CreateSweepRuleTweetValidator : AbstractValidator<CreateSweepRuleTweet>
 	{
+		private readonly ISweepRulesRepository _sweepRulesRepository;
+
 		private const int FiveMegaBytes = 5 * 1024 * 1024;
 		//private string[] AllowedExtensions = { ".jpeg", ".jpg", ".png", ".gif", ".mp4" };
 		private string[] AllowedExtensions = { ".jpeg", ".jpg", ".png", ".gif" };
 
-		public CreateSweepRuleTweetValidator()
+		public CreateSweepRuleTweetValidator(ISweepRulesRepository sweepRulesRepository)
 		{
+			_sweepRulesRepository = sweepRulesRepository;
+
 			RuleFor(c => c.WatchTypeId)
 				.Must(c => c > 0)
 				.WithMessage("Please select a watch type for the rule.");
@@ -33,6 +39,10 @@ namespace hrvster.Web.Validation
 			RuleFor(c => c.WatchValue)
 				.Must(c => MustBeginWithAHash(c))
 				.WithMessage("The watch value should begin with a hashtag.");
+
+			RuleFor(c => c.WatchValue)
+				.Must(c => MustNotExistAlready(c))
+				.WithMessage("We're sorry. That hashtag is already in use.");
 
 			RuleFor(c => c.TweetText)
 				.NotEmpty()
@@ -82,6 +92,13 @@ namespace hrvster.Web.Validation
 			RuleFor(c => c.Media4)
 				.Must(c => BeOfTheAllowedSize(c))
 				.WithMessage("Media 4's size is too large. It has to be less than 5mb in size");
+		}
+
+		private bool MustNotExistAlready(string watchValue)
+		{
+			var existingRecord = _sweepRulesRepository.GetRuleMatching(watchValue);
+			
+			return !existingRecord.Any(c => c.ActiveInd);
 		}
 
 		private bool BeOfTheAllowedSize(IFormFile media)

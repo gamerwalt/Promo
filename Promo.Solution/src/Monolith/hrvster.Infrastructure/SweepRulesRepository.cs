@@ -21,6 +21,7 @@ namespace hrvster.Infrastructure
 		Task DeleteAsync(Guid ruleUid);
 		Task DeactivateAsync(Guid sweepUid, Guid ruleUid);
 		Task ActivateAsync(Guid sweepUid, Guid ruleUid);
+		IEnumerable<Models.Rule> GetRuleMatching(string watchValue);
 	}
 
 	public class SweepRulesRepository : ISweepRulesRepository
@@ -274,6 +275,28 @@ namespace hrvster.Infrastructure
 
 			await conn.OpenAsync();
 			await command.ExecuteNonQueryAsync();
+		}
+
+		public IEnumerable<Models.Rule> GetRuleMatching(string watchValue)
+		{
+			var rules = new List<Models.Rule>();
+
+			using (var conn = new MySqlConnection(_database.GetConnectionString()))
+			{
+				var command = conn.CreateCommand();
+				command.CommandText = "sweep_rule_get_matching";
+				command.CommandType = CommandType.StoredProcedure;
+				command.AddParameter("watchValue", watchValue);
+
+				conn.Open();
+				using var reader = command.ExecuteReader();
+				while (reader.Read())
+				{
+					rules.Add(CreateRecordFrom(reader));
+				}
+			}
+
+			return rules;
 		}
 	}
 }
