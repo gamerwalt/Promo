@@ -25,7 +25,7 @@ namespace hrvster.Core.Handlers.Sweepstakes
 			_logger.LogInformation("Handling the action {className} for the request {request}.",
 				nameof(CreateSweep),
 				request.ToJsonString());
-			if(request.SweepUid == null)
+			if(request.SweepUid.Equals(Guid.Empty))
 			{
 				await _repository.CreateAsync(new Models.Sweep
 				{
