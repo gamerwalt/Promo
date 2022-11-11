@@ -123,9 +123,7 @@
 											Start Date
 										</label>
 										<input class="form-control form-control-solid"
-											   value="@Model.UpdatePromotion.StartDate.ToString("yyyy-MM-ddThh:mm", CultureInfo.CurrentCulture)"
-											asp-for="@Model.UpdatePromotion.StartDate"
-												asp-format="{0:yyyy-MM-ddThh:mm}" />
+											asp-for="@Model.UpdatePromotion.StartDate" />
 										<span asp-validation-for="StartDate"></span>
 									</div>
 									<div class="fv-row mb-6 w-lg-250px">
@@ -133,9 +131,7 @@
 											End Date
 										</label>
 										<input class="form-control form-control-solid"
-											value="@Model.UpdatePromotion.EndDate.ToString("yyyy-MM-ddThh:mm", CultureInfo.CurrentCulture)"
-											asp-for="@Model.UpdatePromotion.EndDate"
-												asp-format="{0:yyyy-MM-ddThh:mm}" />
+											asp-for="@Model.UpdatePromotion.EndDate" />
 										<span asp-validation-for="EndDate"></span>
 									</div>
 								</div>
