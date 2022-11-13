@@ -40,6 +40,8 @@ namespace hrvster.Twitter.Harvester
 						.MinimumLevel.Debug(), preserveStaticLogger: true)
 				.ConfigureServices((hostContext, services) =>
 				{
+					Log.Information("Starting Host for hrvster");
+
 					services.AddHostedService<HostedService>();
 					services.AddSingleton<IService, TwitterHarvestingService>();
 

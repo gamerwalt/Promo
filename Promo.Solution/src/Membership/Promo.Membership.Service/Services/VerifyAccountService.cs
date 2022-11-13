@@ -112,7 +112,7 @@ namespace Promo.Membership.Service.Services
                 Parameters = new Dictionary<string, string>()
                 {
                     { "DisplayName", account.DisplayName },
-                    { "DashboardLink", _harvesterSettings.hrvsterUrl }
+                    { "DashboardLink", _harvesterSettings.HrvsterUrl }
                 },
                 Status = EmailStatus.New,
                 Template = EmailTemplate.WelcomeEmail

@@ -4,6 +4,7 @@ using hrvster.Core.Requests.ServiceRequests.Notifications;
 using hrvster.Infrastructure;
 using hrvster.Infrastructure.Accounts;
 using hrvster.Models;
+using hrvster.Models.Options;
 using hrvster.Models.Profiles;
 using MediatR;
 using Microsoft.Extensions.Configuration;
@@ -24,19 +25,22 @@ namespace hrvster.Core.Handlers.ServiceHandlers
 		private readonly Func<ExternalClientType, IExternalClient> _publisherResolver;
 		private readonly IConfiguration _config;
 		private readonly IExternalClient _twitterPublisher;
+		private readonly HarvesterSettingsOptions _hrvsterSettings;
 
 		public SendTweetNotificationToUser(
 			ILoggerFactory loggerFactory,
 			ISweepPrizesRepository sweepPrizesRepository,
 			IProfilesRepository profilesRepository,
 			Func<ExternalClientType, IExternalClient> publisherResolver,
-			IConfiguration config)
+			IConfiguration config,
+			HarvesterSettingsOptions hrvsterSettings)
 		{
 			_logger = loggerFactory.CreateLogger<SendTweetNotificationToUser>();
 			_sweepPrizesRepository = sweepPrizesRepository;
 			_profilesRepository = profilesRepository;
 			_publisherResolver = publisherResolver;
 			_config = config;
+			_hrvsterSettings = hrvsterSettings;
 
 			_twitterPublisher = _publisherResolver(ExternalClientType.Twitter);
 		}
@@ -95,7 +99,7 @@ namespace hrvster.Core.Handlers.ServiceHandlers
 		private string GetRuleText(Sweep sweep)
 		{
 			//Todo: We need to do this better
-			var url = _config["hrvsterUrls"];
+			var url = _hrvsterSettings.HrvsterUrl;
 			var uriString = $"{url}/{Constants.GameRulesPath}/{GameTypes.Sweepstake}/NG/en/{sweep.SweepUid}";
 
 			return $"Visit {uriString} to view the official rules of the sweepstake.";

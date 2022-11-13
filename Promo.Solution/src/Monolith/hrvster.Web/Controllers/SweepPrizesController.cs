@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using FluentValidation;
+using hrvster.Core;
 using hrvster.Core.Authentication;
 using hrvster.Core.Requests;
 using hrvster.Core.Requests.WebRequests.Sweeps;
@@ -24,6 +25,7 @@ namespace hrvster.Web.Controllers
 		private readonly IValidator<CreateSweepPrize> _createSweepPrizeValidator;
 		private readonly IValidator<EditSweepPrize> _editSweepPrizeValidator;
 		private readonly HrvsterUser _hrvsterUser;
+		private readonly PrizePositionFinder _prizePositionFinder;
 
 		public SweepPrizesController(
 			ILoggerFactory loggerFactory,
@@ -32,7 +34,8 @@ namespace hrvster.Web.Controllers
 			IToastNotification notificationService,
 			IValidator<CreateSweepPrize> createSweepPrizeValidator,
 			IValidator<EditSweepPrize> editSweepPrizeValidator,
-			HrvsterUser hrvsterUser)
+			HrvsterUser hrvsterUser,
+			PrizePositionFinder prizePositionFinder)
 		{
 			_logger = loggerFactory.CreateLogger<SweepPrizesController>();
 			_mediator = mediator;
@@ -41,6 +44,7 @@ namespace hrvster.Web.Controllers
 			_createSweepPrizeValidator = createSweepPrizeValidator;
 			_editSweepPrizeValidator = editSweepPrizeValidator;
 			_hrvsterUser = hrvsterUser;
+			_prizePositionFinder = prizePositionFinder;
 		}
 
 		[HttpGet]
@@ -107,7 +111,7 @@ namespace hrvster.Web.Controllers
 				CampaignUid = campaignUid,
 				ReturnAction = returnAction ?? "View",
 				ReturnController = returnController ?? "Sweeps",
-				Position = GetNextPosition(currentPrizes)
+				Position = GetNextPosition(currentPrizes, drawRule.WinnerCount)
 			};
 
 			if (currentPrizes.Prizes.Count == drawRule.WinnerCount)
@@ -369,11 +373,11 @@ namespace hrvster.Web.Controllers
 			return RedirectToAction(returnAction ?? "View", returnController ?? "Sweeps", new { sweepUid = sweepUid, campaignUid = campaignUid });
 		}
 
-		private int GetNextPosition(SweepPrize currentPrizes)
+		private int GetNextPosition(SweepPrize currentPrizes, int winnerCount)
 		{
 			if (currentPrizes.Prizes.Count == 0) return 1;
 
-			return currentPrizes.Prizes.Count + 1;
+			return _prizePositionFinder.GetNextPrizePosition(winnerCount, currentPrizes.Prizes);
 		}
 	}
 }

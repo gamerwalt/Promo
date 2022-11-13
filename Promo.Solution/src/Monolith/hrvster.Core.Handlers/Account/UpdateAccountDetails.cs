@@ -78,7 +78,7 @@ namespace hrvster.Core.Handlers.Account
 						{ "DisplayName", account.DisplayName },
 						{ "OldEmailAddress", account.EmailAddress },
 						{ "NewEmailAddress", request.EmailAddress },
-						{ "DashboardLink", new Uri(_harvesterSettings.hrvsterUrl).GenerateUrl(UrlTypes.DashboardLink).ToString() },
+						{ "DashboardLink", new Uri(_harvesterSettings.HrvsterUrl).GenerateUrl(UrlTypes.DashboardLink).ToString() },
 						{ "SupportLink", new Uri("https://support.hrvster.com").ToString() }
 					},
 					Template = EmailTemplate.EmailAddressUpdateRequest

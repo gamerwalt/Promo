@@ -88,7 +88,7 @@ namespace hrvster.ApplicationServices.Accounts
 				Parameters = new Dictionary<string, string>()
 				{
 					{ "DisplayName", account.DisplayName },
-					{ "DashboardLink", new Uri(_harvesterSettings.hrvsterUrl).GenerateUrl(UrlTypes.DashboardLink).ToString() }
+					{ "DashboardLink", new Uri(_harvesterSettings.HrvsterUrl).GenerateUrl(UrlTypes.DashboardLink).ToString() }
 				},
 				Status = EmailStatus.New,
 				Template = EmailTemplate.WelcomeEmail

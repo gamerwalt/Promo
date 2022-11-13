@@ -12,9 +12,23 @@
             <div class="fs-6 text-gray-400">@Model.Prizes.Count() prizes(s) so far</div>
         </div>
         <div class="card-toolbar my-1">
-            <div class="me-6 my-1">
-                <a asp-action="Create" class="btn btn-sm btn-primary me-3">Add Prize</a>
-            </div>
+            @if (Model.Prizes.Count < Model.WinnerCount)
+            {
+                <div class="me-6 my-1">
+                    <a asp-action="Create" class="btn btn-sm btn-primary me-3">Add Prize</a>
+                </div>
+            }
+            else
+            {
+                <div class="me-6 my-1">
+                    <a 
+                        asp-action="@Model.ReturnAction" 
+                        asp-controller="@Model.ReturnController" 
+                        asp-route-sweepUid="@Model.SweepUid"
+                        asp-route-campaignUid="@Model.CampaignUid"
+                        class="btn btn-sm btn-info me-3">Back</a>
+                </div>
+            }
         </div>
     </div>
     <div class="card-body pt-0">
