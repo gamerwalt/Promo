@@ -15,7 +15,7 @@ namespace TestUtilities.Framework
         public static TestServer CreateTestServer(Action<IConfiguration> additionalConfiguration, Action<IServiceCollection> additionalServiceConfiguration = null)
         {
             var testServer = new HostBuilder()
-                .ConfigureWebHost(builder => builder.ConfigureForTest())
+                .ConfigureWebHost(builder => builder.ConfigureForTest(additionalConfiguration, additionalServiceConfiguration))
                 .Start()
                 .GetTestServer();
 

@@ -19,12 +19,12 @@ namespace hrvster.Core.Handlers.Files
 	{
 		private readonly ILogger<UploadFileToFileServer> _logger;
 		private readonly IFileService _fileService;
-		private readonly FirebaseAuthProvider _firebaseAuthProvider;
+		private readonly IFirebaseAuthProvider _firebaseAuthProvider;
 
 		public UploadFileToFileServer(
 			ILoggerFactory loggerFactory, 
 			IFileService fileService,
-			FirebaseAuthProvider firebaseAuthProvider)
+			IFirebaseAuthProvider firebaseAuthProvider)
 		{
 			_logger = loggerFactory.CreateLogger<UploadFileToFileServer>();
 			_fileService = fileService;

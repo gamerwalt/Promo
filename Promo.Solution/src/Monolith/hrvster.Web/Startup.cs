@@ -68,6 +68,12 @@ namespace hrvster.Web
 			}).AddSessionStateTempDataProvider();
 			AddValidators(services);
 
+			services.AddAntiforgery(t =>
+			{
+				t.Cookie.Name = AntiforgeryTokenExtractor.AntiForgeryCookieName;
+				t.FormFieldName = AntiforgeryTokenExtractor.AntiForgeryFieldName;
+			});
+
 			AddAuthentication(services);
 			AddDatabaseAndRepositories(services);
 			AddMediatorAndFluentValidation(services);

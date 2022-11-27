@@ -221,7 +221,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "hrvster.Web.Mvc.Tests", "hr
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Utilities", "Utilities", "{0697EB50-0AED-4D1B-9181-B242AF5864FA}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ProfilesControllerTests", "..\tests\hrvster.Web.Mvc.Tests\ProfilesControllerTests\ProfilesControllerTests.csproj", "{95CFEF88-A5F4-4E30-BA48-7A802FA18301}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ControllerTests", "..\tests\hrvster.Web.Mvc.Tests\ProfilesControllerTests\ControllerTests.csproj", "{95CFEF88-A5F4-4E30-BA48-7A802FA18301}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestUtilities", "..\tests\Utilities\TestUtilities.csproj", "{BCCB9B5C-7571-4683-8902-826F7458AF74}"
 EndProject

@@ -23,5 +23,18 @@
 
         public const int ClientId = 1;
         public const int FuelId = 100;
+
+        public const string EmailAddress = "success@example.com";
+        public const string Password = "somepassword";
+
+        public const string WrongEmailAddress = "failure@example.com";
+        public const string WrongPassword = "somepassword";
+
+        public const string FirebaseToken = "Token";
+        public const int ExpiresIn = 3600;
+        public const string RefreshToken = "RefreshToken";
+        public const string UserUid = "7b681480-0b5f-49a4-ae50-58753e5fa6a8";
+
+        public const string AuthError = "{\r\n  \"error\": {\r\n    \"code\": 400,\r\n    \"message\": \"EMAIL_NOT_FOUND\",\r\n    \"errors\": [\r\n      {\r\n        \"message\": \"EMAIL_NOT_FOUND\",\r\n        \"domain\": \"global\",\r\n        \"reason\": \"invalid\"\r\n      }\r\n    ]\r\n  }\r\n}\r\n";
     }
 }

@@ -17,12 +17,12 @@ namespace hrvster.Web.Controllers
 	{
 		private readonly ILogger<SessionController> _logger;
 		private readonly IToastNotification _notificationService;
-		private readonly FirebaseAuthProvider _firebaseAuthProvider;
+		private readonly IFirebaseAuthProvider _firebaseAuthProvider;
 
 		public SessionController(
 			ILoggerFactory loggerFactory,
 			IToastNotification notificationService,
-			FirebaseAuthProvider firebaseAuthProvider)
+			IFirebaseAuthProvider firebaseAuthProvider)
 		{
 			_logger = loggerFactory.CreateLogger<SessionController>();
 			_notificationService = notificationService;
@@ -69,7 +69,7 @@ namespace hrvster.Web.Controllers
 						HttpContext.Session.SetString(SessionConstants.UserDisplayName, link.User.DisplayName);
 
 						if (string.IsNullOrWhiteSpace(returnUrl))
-							return RedirectToAction(actionName: "Index", controllerName: "Dashboard");
+							return RedirectToActionPermanent(actionName: "Index", controllerName: "Dashboard");
 						else
 							return Redirect(returnUrl);
 					}

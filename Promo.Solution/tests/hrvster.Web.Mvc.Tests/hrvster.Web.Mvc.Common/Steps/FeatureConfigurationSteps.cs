@@ -1,4 +1,5 @@
-﻿using TestUtilities;
+﻿using hrvster.Core;
+using TestUtilities;
 
 namespace hrvster.Web.Mvc.Common.Steps
 {
@@ -11,6 +12,15 @@ namespace hrvster.Web.Mvc.Common.Steps
             feature.DeleteAllTableData();
 
             return feature as TFeature;
+        }
+
+        public static Feature AndExtractTheAntiForgeryValues(this Feature feature)
+        {
+            feature.AntiForgeryToken = AntiforgeryTokenExtractor.ExtractAntiforgeryToken(feature.Response);
+
+            feature.AntiForgeryCookie = AntiforgeryTokenExtractor.ExtractAntiforgeryCookieValue(feature.Response);
+
+            return feature;
         }
     }
 }

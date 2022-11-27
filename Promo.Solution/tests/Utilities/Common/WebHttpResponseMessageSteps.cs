@@ -11,6 +11,16 @@ namespace TestUtilities.Common
 {
     public static class WebHttpResponseMessageSteps
     {
+        public static TFeature ThenTheRedirectedLocationShouldBe<TFeature>(
+            this IWebFeature<TFeature> feature, 
+            string location) where TFeature : class
+        {
+            feature.Response.Should().NotBeNull();
+            feature.Response.Headers.Location.Should().Be(location);
+
+            return feature as TFeature;
+        }
+
         public static TFeature ThenTheResponseShouldReturn<TFeature>(
             this IWebFeature<TFeature> feature,
             HttpStatusCode statusCode) where TFeature : class

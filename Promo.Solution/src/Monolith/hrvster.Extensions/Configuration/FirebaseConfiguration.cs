@@ -28,7 +28,7 @@ namespace hrvster.Extensions.Configuration
 			return services;
 		}
 
-		private static FirebaseAuthProvider BuildFirebaseAuthProvider(IServiceProvider sp, IConfiguration configuration)
+		private static IFirebaseAuthProvider BuildFirebaseAuthProvider(IServiceProvider sp, IConfiguration configuration)
 		{
 			var googleServicesOption = sp.GetService<GoogleServicesOptions>();
 			return new FirebaseAuthProvider(new Firebase.Auth.FirebaseConfig(googleServicesOption.WebApiKey));
