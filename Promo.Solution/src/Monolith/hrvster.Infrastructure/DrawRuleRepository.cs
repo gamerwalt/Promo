@@ -7,7 +7,7 @@ using hrvster.Infrastructure.Extensions;
 
 namespace hrvster.Infrastructure
 {
-	public interface IDrawRuleRepository
+	public interface ISweepDrawRuleRepository
 	{
 		Task<DrawRule> GetSweepDrawRuleAsync(Guid sweepUid);
 		Task CreateAsync(DrawRule drawRule);
@@ -15,11 +15,11 @@ namespace hrvster.Infrastructure
 		Task UpdateDrawRuleAsync(Guid drawRuleUid, int winnerCount, int winnerBackupCount);
 	}
 
-	public class DrawRuleRepository : IDrawRuleRepository
+	public class SweepDrawRuleRepository : ISweepDrawRuleRepository
 	{
 		private readonly IDatabase _database;
 
-		public DrawRuleRepository(IDatabase database)
+		public SweepDrawRuleRepository(IDatabase database)
 		{
 			_database = database;
 		}

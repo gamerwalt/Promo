@@ -55,7 +55,7 @@ namespace hrvster.ApplicationServices.Sweepstakes
 		{
 			var entries = await _mediator.Send(new GetSweepstakeEntriesRequest(rule.Sweep));
 
-			_logger.LogInformation("Retrieved a total of {entriesCount} for the sweepstake {sweepName}",
+			_logger.LogInformation("Retrieved a total of {entriesCount} entries for the sweepstake {sweepName}",
 				entries.Count(),
 				rule.Sweep.Name);
 

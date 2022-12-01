@@ -1,0 +1,63 @@
+﻿using hrvster.Infrastructure;
+using hrvster.Infrastructure.Accounts;
+using hrvster.Infrastructure.Core;
+using hrvster.Infrastructure.Harvester;
+using hrvster.Infrastructure.Scheduling;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace hrvster.Extensions.Configuration
+{
+	public static class DatabaseAndRepositoryConfigurationExtensions
+	{
+		public static IServiceCollection AddDatabaseConfiguration(this IServiceCollection services, IConfiguration configuration)
+			=> services.AddSingleton<IDatabase>(c =>
+				{
+					return new MySqlDatabase(DatabaseNames.Main, configuration, DatabaseNames.Harvester, DatabaseNames.Reporting);
+				});
+
+		public static IServiceCollection AddCampaignRepositories(this IServiceCollection services)
+			=> services.AddTransient<ICampaignRepository, CampaignRepository>()
+				.AddTransient<ICampaignTypesRepository, CampaignTypesRepository>()
+				.AddTransient<IWatchTypeCampaignTypesRepository, WatchTypeCampaignTypesRepository>();
+
+		public static IServiceCollection AddAccountRepositories(this IServiceCollection services)
+			=> services.AddTransient<IAccountsRepository, AccountsRepository>()
+				.AddTransient<IProfilesRepository, ProfilesRepository>()
+				.AddTransient<IAccountUpdateHistoryRepository, AccountUpdateHistoryRepository>();
+
+		public static IServiceCollection AddSweepstakesRepositories(this IServiceCollection services)
+			=> services.AddTransient<ISweepsRepository, SweepsRepository>()
+				.AddTransient<ISweepRulesRepository, SweepRulesRepository>()
+				.AddTransient<ISweepsEntriesRepository, SweepsEntriesRepository>()
+				.AddTransient<ISweepEntryRulesRepository, SweepEntryRulesRepository>()
+				.AddTransient<ISweepDrawRuleRepository, SweepDrawRuleRepository>()
+				.AddTransient<ISweepWinnersRepository, SweepWinnersRepository>()
+				.AddTransient<ISweepPrizesRepository, SweepPrizesRepository>()
+				.AddTransient<ISweepTweetSchedulerRepository, SweepTweetSchedulerRepository>()
+				.AddTransient<IScheduledSweepRuleTweetsRepository, ScheduledSweepRuleTweetsRepository>();
+
+		public static IServiceCollection AddWatchTypeRepositories(this IServiceCollection services)
+			=> services.AddTransient<IWatchTypesRepository, WatchTypesRepository>()
+				.AddTransient<IWatchTypeProvidersRepository, WatchTypeProvidersRepository>();
+
+		public static IServiceCollection AddHarvesterAndReportingRepositories(this IServiceCollection services)
+			=> services.AddTransient<IReportingRepository, ReportingRepository>()
+				.AddTransient<IBlacklistedSweepsUsersRepository, BlacklistedSweepsUsersRepository>()
+				.AddTransient<IHarvesterRepository, HarvesterRepository>()
+				.AddTransient<IIncomingTweetsRepository, IncomingTweetsRepository>()
+				.AddTransient<IUserLimiterRepository, UserLimiterRepository>();
+
+		public static IServiceCollection AddServicesRepositories(this IServiceCollection services)
+			=> services.AddTransient<IServicesRepository, ServicesRepository>();
+
+		public static IServiceCollection AddEmailRepository(this IServiceCollection services)
+			=> services
+				.AddTransient<IMailRepository, MailRepository>();
+	}
+}

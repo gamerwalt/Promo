@@ -3,9 +3,11 @@ using FirebaseAdmin;
 using FirebaseAdmin.Auth;
 using Google.Apis.Auth.OAuth2;
 using hrvster.Infrastructure.Authentication.ConfigurationOptions;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 using System;
 using FirebaseAuth = FirebaseAdmin.Auth.FirebaseAuth;
@@ -15,8 +17,7 @@ namespace hrvster.Extensions.Configuration
 {
 	public static class FirebaseConfiguration
 	{
-		public static IServiceCollection AddFirebaseServices(
-			this IServiceCollection services, IConfiguration configuration)
+		public static IServiceCollection AddFirebaseServices(this IServiceCollection services, IConfiguration configuration)
 		{
 			services.Configure<FirebaseConfig>(configuration);
 			services.Configure<FirebaseConfig>(configuration.GetSection(FirebaseConfig.Firebase));
@@ -25,6 +26,7 @@ namespace hrvster.Extensions.Configuration
 			services.AddSingleton(c => BuildFirebaseApp(c, configuration));
 			services.AddSingleton(c => BuildFirebaseAuth(c, configuration));
 			services.AddSingleton(c => BuildFirebaseAuthProvider(c, configuration));
+
 			return services;
 		}
 
@@ -45,6 +47,47 @@ namespace hrvster.Extensions.Configuration
 			{
 				Credential = GoogleCredential.FromJson(JsonConvert.SerializeObject(sp.GetService<FirebaseConfig>()))
 			});
+		}
+
+		public static IServiceCollection AddHrvsterAuthentication(this IServiceCollection services, IConfiguration configuration)
+		{
+			var googleServicesOptions = configuration.GetSection(GoogleServicesOptions.GoogleServices).Get<GoogleServicesOptions>();
+
+			services.Configure<GoogleServicesOptions>(configuration);
+			services.Configure<GoogleServicesOptions>(configuration.GetSection(GoogleServicesOptions.GoogleServices));
+			services.AddTransient(p => p.GetService<IOptions<GoogleServicesOptions>>().Value);
+			services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+				.AddJwtBearer(options =>
+				{
+					options.Authority = googleServicesOptions.FirebaseAppId;
+					options.TokenValidationParameters = new TokenValidationParameters
+					{
+						ValidateIssuer = true,
+						ValidIssuer = googleServicesOptions.FirebaseAppId,
+						ValidateAudience = true,
+						ValidAudience = googleServicesOptions.ProjectId,
+						ValidateLifetime = true
+					};
+				})
+				.AddCookie(o =>
+				{
+					o.ExpireTimeSpan = TimeSpan.FromMinutes(30);
+					o.SlidingExpiration = true;
+					o.AccessDeniedPath = "/Session/Denied";
+					o.ForwardForbid = o.AccessDeniedPath;
+					o.LoginPath = "/Session/SignIn";
+					o.ReturnUrlParameter = "returnUrl";
+				});
+
+			services.AddSession(options =>
+			{
+				options.IdleTimeout = TimeSpan.FromMinutes(30);
+				options.Cookie.HttpOnly = true;
+				options.Cookie.IsEssential = true;
+				options.Cookie.SecurePolicy = Microsoft.AspNetCore.Http.CookieSecurePolicy.Always;
+			});
+
+			return services;
 		}
 	}
 }

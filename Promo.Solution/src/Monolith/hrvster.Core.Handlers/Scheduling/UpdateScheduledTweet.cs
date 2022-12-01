@@ -21,20 +21,17 @@ namespace hrvster.Core.Handlers.Scheduling
 	{
 		private readonly ILogger<UpdateScheduledTweet> _logger;
 		private readonly ISweepTweetSchedulerRepository _repository;
-		private readonly IFileService _fileService;
 		private readonly IMediator _mediator;
 		private readonly HrvsterUser _hrvsterUser;
 
 		public UpdateScheduledTweet(
 			ILoggerFactory loggerFactory,
 			ISweepTweetSchedulerRepository repository,
-			IFileService fileService,
 			IMediator mediator,
 			HrvsterUser hrvsterUser)
 		{
 			_logger = loggerFactory.CreateLogger<UpdateScheduledTweet>();
 			_repository = repository;
-			_fileService = fileService;
 			_mediator = mediator;
 			_hrvsterUser = hrvsterUser;
 		}

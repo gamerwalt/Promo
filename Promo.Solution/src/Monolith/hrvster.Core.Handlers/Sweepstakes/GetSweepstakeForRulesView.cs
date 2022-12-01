@@ -19,7 +19,7 @@ namespace hrvster.Core.Handlers.Sweepstakes
 		private readonly ISweepsRepository _sweepsRepository;
 		private readonly ISweepRulesRepository _rulesRepository;
 		private readonly ISweepEntryRulesRepository _entryRulesRepository;
-		private readonly IDrawRuleRepository _drawRuleRepository;
+		private readonly ISweepDrawRuleRepository _drawRuleRepository;
 		private readonly ISweepPrizesRepository _sweepPrizesRepository;
 		private readonly IProfilesRepository _profilesRepository;
 		private readonly IMapper _mapper;
@@ -29,7 +29,7 @@ namespace hrvster.Core.Handlers.Sweepstakes
 			ISweepsRepository sweepsRepository,
 			ISweepRulesRepository rulesRepository,
 			ISweepEntryRulesRepository entryRulesRepository,
-			IDrawRuleRepository drawRuleRepository,
+			ISweepDrawRuleRepository drawRuleRepository,
 			ISweepPrizesRepository sweepPrizesRepository,
 			IProfilesRepository profilesRepository,
 			IMapper mapper)

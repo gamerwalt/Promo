@@ -50,10 +50,11 @@ namespace hrvster.Services
 					services.AddSingleton<IService, AccountVerificationService>();
 
 					services
+						.AddDatabaseConfiguration(Configuration)
 						.AddAccountRepositories()
-						.AddScheduledRepositories()
 						.AddServicesRepositories()
-						.AddSweepsRepositories()
+						.AddSweepstakesRepositories()
+						.AddHarvesterAndReportingRepositories()
 						.AddEmailRepository()
 						.AddTwitterClient(Configuration)
 						.AddDrawSettingConfiguration(Configuration)
@@ -64,7 +65,6 @@ namespace hrvster.Services
 						.AddFirebaseServices(Configuration)
 						.AddHarvsterConfigurationOption(Configuration);
 
-					AddDatabases(services);
 					LoadServices(services);
 					AddMediator(services);
 				});
@@ -72,15 +72,7 @@ namespace hrvster.Services
 		private static void AddMediator(IServiceCollection services)
 			=> services.AddMediatR(typeof(Program))
 				.AddMediatR(typeof(GetSweepstakesRequiringADrawRequest), typeof(GetSweepstakesRequiringADraw));
-		
-
-		private static void AddDatabases(IServiceCollection services)
-		{
-			services.AddSingleton<IDatabase>(c =>
-			{
-				return new MySqlDatabase(DatabaseNames.Main, Configuration, DatabaseNames.Harvester, DatabaseNames.Reporting);
-			});
-		}
+	
 
 		private static void LoadServices(IServiceCollection services)
 		{

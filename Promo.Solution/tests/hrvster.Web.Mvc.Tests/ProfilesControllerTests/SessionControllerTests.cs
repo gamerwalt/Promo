@@ -45,7 +45,7 @@ namespace ControllerTests
         }
 
         [Fact]
-        public void When_I_Supply_Empty_Credentials()
+        public void When_I_Supply_Empty_Credentials_I_Should_Be_Redirected_To_The_SignInPage()
         {
             var form = new SigninForm() { Email = string.Empty, Password = string.Empty };
 

@@ -25,9 +25,9 @@ namespace hrvster.Core.Requests
 
 	public class GetSweepDrawRulesHandler : IRequestHandler<GetSweepDrawRules, IEnumerable<DrawRule>>
 	{
-		private readonly IDrawRuleRepository _repository;
+		private readonly ISweepDrawRuleRepository _repository;
 
-		public GetSweepDrawRulesHandler(IDrawRuleRepository repository)
+		public GetSweepDrawRulesHandler(ISweepDrawRuleRepository repository)
 		{
 			_repository = repository;
 		}

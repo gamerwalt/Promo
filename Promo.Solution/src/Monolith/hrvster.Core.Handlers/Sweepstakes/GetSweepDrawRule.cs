@@ -12,12 +12,12 @@ namespace hrvster.Core.Handlers.Sweepstakes
 	public class GetSweepDrawRule : IRequestHandler<GetSweepDrawRuleRequest, DrawRule>
 	{
 		private readonly ILogger<GetSweepDrawRule> _logger;
-		private readonly IDrawRuleRepository _repository;
+		private readonly ISweepDrawRuleRepository _repository;
 		private readonly IMapper _mapper;
 
 		public GetSweepDrawRule(
 			ILoggerFactory loggerFactory,
-			IDrawRuleRepository repository,
+			ISweepDrawRuleRepository repository,
 			IMapper mapper)
 		{
 			_logger = loggerFactory.CreateLogger<GetSweepDrawRule>();

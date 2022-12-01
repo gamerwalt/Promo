@@ -67,9 +67,12 @@ namespace hrvster.Core.Handlers.ServiceHandlers
 									UserIdentifierType = distincts.Key.UserIdentifierType
 								};
 
-			if (distinctUsers.Count() <= (rule.DrawRule.WinnerCount + rule.DrawRule.WinnerBackupCount))
+			var distinctUserCount = distinctUsers.ToList().Count;
+			var winnerAndBackupCount = rule.DrawRule.WinnerCount + rule.DrawRule.WinnerBackupCount;
+
+			if (distinctUserCount < winnerAndBackupCount)
 			{
-				_logger.LogInformation($"Rule: Winner Count: {rule.DrawRule.WinnerCount} + Winner Backup Count: {rule.DrawRule.WinnerBackupCount} is more than the distinct number of users {distinctUsers.Count()} who entered the promo");
+				_logger.LogInformation($"Rule: Total winners count {winnerAndBackupCount} is more than the distinct number of users {distinctUserCount} who entered the sweepstakes.");
 				_logger.LogInformation($"Cannot continue. Please perform this draw manually or update the Winner count and back up winner count for Sweep: {rule.Sweep.Name} under Campaign: {rule.Campaign.CampaignName}");
 
 				return false;

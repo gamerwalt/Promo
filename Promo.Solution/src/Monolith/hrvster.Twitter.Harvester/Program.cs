@@ -47,13 +47,11 @@ namespace hrvster.Twitter.Harvester
 
 					services
 						.AddAccountRepositories()
-						.AddSweepsRepositories()
+						.AddSweepstakesRepositories()
 						.AddHarvesterAndReportingRepositories()
-						.AddBlacklistedRepository()
 						.AddTwitterClient(Configuration)
 						.AddApplicationCronServices()
 						.AddPublishers()
-						.AddUserRateLimiterService()
 						.AddHarvsterConfigurationOption(Configuration);
 
 					AddDatabases(services);

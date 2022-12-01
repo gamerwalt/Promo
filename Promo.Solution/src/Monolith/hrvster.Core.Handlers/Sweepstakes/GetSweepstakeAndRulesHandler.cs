@@ -17,7 +17,7 @@ namespace hrvster.Core.Handlers.Sweepstakes
 		private readonly ISweepsRepository _sweepsRepository;
 		private readonly ISweepRulesRepository _rulesRepository;
 		private readonly ISweepEntryRulesRepository _entryRulesRepository;
-		private readonly IDrawRuleRepository _drawRuleRepository;
+		private readonly ISweepDrawRuleRepository _drawRuleRepository;
 		private readonly IMapper _mapper;
 
 		public GetSweepstakeAndRulesHandler(
@@ -25,7 +25,7 @@ namespace hrvster.Core.Handlers.Sweepstakes
 			ISweepsRepository sweepsRepository,
 			ISweepRulesRepository rulesRepository,
 			ISweepEntryRulesRepository entryRulesRepository,
-			IDrawRuleRepository drawRuleRepository,
+			ISweepDrawRuleRepository drawRuleRepository,
 			IMapper mapper)
 		{
 			_logger = loggerFactory.CreateLogger<GetSweepstakeAndRulesHandler>();

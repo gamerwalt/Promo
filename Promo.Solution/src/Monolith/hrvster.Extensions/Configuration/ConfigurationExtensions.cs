@@ -17,43 +17,5 @@ namespace hrvster.Extensions.Configuration
 
 		private static ServiceContainer BuildServiceContainer(IServiceProvider serviceProvider, ServiceContainer serviceContainer)
 			=> serviceContainer;
-
-		public static IServiceCollection AddServicesRepositories(this IServiceCollection services)
-			=> services.AddTransient<IServicesRepository, ServicesRepository>();
-
-		public static IServiceCollection AddSweepsRepositories(this IServiceCollection services)
-			=> services
-				.AddTransient<ISweepsRepository, SweepsRepository>()
-				.AddTransient<ISweepRulesRepository, SweepRulesRepository>()
-				.AddTransient<ISweepEntryRulesRepository, SweepEntryRulesRepository>()
-				.AddTransient<ISweepPrizesRepository, SweepPrizesRepository>()
-				.AddTransient<ISweepsEntriesRepository, SweepsEntriesRepository>();
-
-		public static IServiceCollection AddScheduledRepositories(this IServiceCollection services)
-			=> services
-				.AddTransient<IScheduledSweepRuleTweetsRepository, ScheduledSweepRuleTweetsRepository>();
-
-		public static IServiceCollection AddAccountRepositories(this IServiceCollection services)
-			=> services
-				.AddTransient<IProfilesRepository, ProfilesRepository>()
-				.AddTransient<IAccountsRepository, AccountsRepository>();
-
-		public static IServiceCollection AddBlacklistedRepository(this IServiceCollection services)
-			=> services
-				.AddTransient<IBlacklistedSweepsUsersRepository, BlacklistedSweepsUsersRepository>();
-
-		public static IServiceCollection AddHarvesterAndReportingRepositories(this IServiceCollection services)
-			=> services
-				.AddTransient<IHarvesterRepository, HarvesterRepository>()
-				.AddTransient<IReportingRepository, ReportingRepository>()
-				.AddTransient<IIncomingTweetsRepository, IncomingTweetsRepository>()
-				.AddTransient<IUserLimiterRepository, UserLimiterRepository>();
-
-		public static IServiceCollection AddEmailRepository(this IServiceCollection services)
-			=> services
-				.AddTransient<IMailRepository, MailRepository>();
-
-		public static IServiceCollection AddUserRateLimiterService(this IServiceCollection services)
-			=> services.AddTransient<IUserRateLimiterService, UserRateLimiterService>();
 	}
 }

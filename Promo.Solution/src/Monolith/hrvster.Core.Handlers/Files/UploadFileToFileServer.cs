@@ -1,34 +1,24 @@
-﻿using hrvster.Core.Requests.WebRequests.Files;
-using hrvster.Infrastructure;
+﻿using Firebase.Auth;
+using Firebase.Storage;
+using hrvster.Core.Requests.WebRequests.Files;
+using hrvster.Core.Storage;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-using Firebase.Auth;
-using hrvster.Core.Storage;
-using Firebase.Storage;
-using System.IO;
 
 namespace hrvster.Core.Handlers.Files
 {
 	public class UploadFileToFileServer : IRequestHandler<UploadFileToFileServerRequest, IEnumerable<string>>
 	{
 		private readonly ILogger<UploadFileToFileServer> _logger;
-		private readonly IFileService _fileService;
-		private readonly IFirebaseAuthProvider _firebaseAuthProvider;
 
-		public UploadFileToFileServer(
-			ILoggerFactory loggerFactory, 
-			IFileService fileService,
-			IFirebaseAuthProvider firebaseAuthProvider)
+		public UploadFileToFileServer(ILoggerFactory loggerFactory)
 		{
 			_logger = loggerFactory.CreateLogger<UploadFileToFileServer>();
-			_fileService = fileService;
-			_firebaseAuthProvider = firebaseAuthProvider;
 		}
 
 		public async Task<IEnumerable<string>> Handle(UploadFileToFileServerRequest request, CancellationToken cancellationToken)
@@ -46,7 +36,7 @@ namespace hrvster.Core.Handlers.Files
 			foreach (var media in request.Media)
 			{
 				var filePath = GetFilePath(request.UserUid, request.ProfileType.ToString());
-				
+
 				Directory.CreateDirectory(filePath);
 				filePath = Path.Combine(filePath, media.FileName);
 
