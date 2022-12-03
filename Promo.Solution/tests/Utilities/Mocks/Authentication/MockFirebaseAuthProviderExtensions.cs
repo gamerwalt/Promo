@@ -1,13 +1,8 @@
 ﻿using Firebase.Auth;
-using hrvster.Infrastructure.Accounts;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Moq;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using TestUtilities.Data;
 
 namespace TestUtilities.Mocks.Authentication

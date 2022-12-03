@@ -21,45 +21,58 @@ namespace hrvster.Core.Authentication
 		public HrvsterUser User { get; set; }
 		private readonly FirebaseAuth _firebaseAuth;
 		private readonly ILogger<FirebaseAuthorizeFilter> _logger;
+		private readonly ISessionManager _sessionManager;
+		private readonly IFirebaseAuthManager _firebaseAuthManager;
 
 		public FirebaseAuthorizeFilter(
 			HrvsterUser hrvsterUser, 
 			FirebaseAuth firebaseAuth,
-			ILoggerFactory loggerFactory)
+			ILoggerFactory loggerFactory,
+			ISessionManager sessionManager,
+			IFirebaseAuthManager firebaseAuthManager)
 		{
 			User = hrvsterUser;
 			_firebaseAuth = firebaseAuth;
 			_logger = loggerFactory.CreateLogger<FirebaseAuthorizeFilter>();
+			_sessionManager = sessionManager;
+			_firebaseAuthManager = firebaseAuthManager;
 		}
 
 		public void OnAuthorization(AuthorizationFilterContext context)
 		{
-			var headerValues = new List<string>();
-			if (context.HttpContext.Request.Headers.ContainsKey(SessionConstants.UserToken))
-				headerValues = context.HttpContext.Request.Headers[SessionConstants.UserToken].ToList();
+			_logger.LogInformation("Attempting to load {path}", context.HttpContext.Request.Path);
 
-			var headerToken = headerValues.FirstOrDefault();
+			var token = string.Empty;
 
-			var token = context.HttpContext.Session.GetString(SessionConstants.UserToken);
+			if(_sessionManager.ContainsKey(SessionConstants.UserToken))
+			{
+				token = _sessionManager.GetValue(SessionConstants.UserToken);
+			}
 
 			if (string.IsNullOrWhiteSpace(token))
 			{
-				if(string.IsNullOrWhiteSpace(headerToken))
-					context.Result = new ForbidResult();
+				_logger.LogWarning("Request forbidden");
+				context.Result = new ForbidResult();
 
 				var displayNameValue = context.HttpContext.Request.Headers[SessionConstants.UserDisplayName].ToList();
 				User.DisplayName = displayNameValue.FirstOrDefault();
 			}
 			else
 			{
+				_logger.LogWarning("Request passed. Contains token");
 				try
 				{
-					var firebaseVerificationTokenResult = _firebaseAuth.VerifyIdTokenAsync(token).Result;
-
-					User.UserUid = Guid.Parse(context.HttpContext.Session.GetString(SessionConstants.UserUid));
-					User.DisplayName = context.HttpContext.Session.GetString(SessionConstants.UserDisplayName);
-					User.Token = context.HttpContext.Session.GetString(SessionConstants.UserToken);
-					User.EmailAddress = context.HttpContext.Session.GetString(SessionConstants.UserEmail);
+					if(_firebaseAuthManager.VerifyToken(token))
+					{
+						User.UserUid = Guid.Parse(_sessionManager.GetValue(SessionConstants.UserUid));
+						User.DisplayName = _sessionManager.GetValue(SessionConstants.UserDisplayName);
+						User.Token = _sessionManager.GetValue(SessionConstants.UserToken);
+						User.EmailAddress = _sessionManager.GetValue(SessionConstants.UserEmail);
+					}
+					else
+					{
+						context.Result = new ForbidResult();
+					}
 				}
 				catch (Exception ex)
 				{

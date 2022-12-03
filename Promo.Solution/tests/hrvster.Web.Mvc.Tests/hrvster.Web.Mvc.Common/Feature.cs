@@ -70,6 +70,8 @@ namespace hrvster.Web.Mvc.Common
             => services =>
             {
                 services.MockFirebaseAuthProvider()
+                    .MockFirebaseAuthManager()
+                    .MockSessionManager()
                     .MockProfileRepository();
             };
 
@@ -84,7 +86,7 @@ namespace hrvster.Web.Mvc.Common
 
         public void DeleteAllTableData()
         {
-            //Delete from all Test table
+            base.DeleteAllTestData();
         }
     }
 }

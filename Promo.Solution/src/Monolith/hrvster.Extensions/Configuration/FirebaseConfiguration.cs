@@ -2,6 +2,7 @@
 using FirebaseAdmin;
 using FirebaseAdmin.Auth;
 using Google.Apis.Auth.OAuth2;
+using hrvster.Core.Authentication;
 using hrvster.Infrastructure.Authentication.ConfigurationOptions;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
@@ -43,11 +44,22 @@ namespace hrvster.Extensions.Configuration
 
 		private static FirebaseApp BuildFirebaseApp(IServiceProvider sp, IConfiguration configuration)
 		{
-			return FirebaseApp.Create(new AppOptions()
+			if(FirebaseApp.DefaultInstance == null)
 			{
-				Credential = GoogleCredential.FromJson(JsonConvert.SerializeObject(sp.GetService<FirebaseConfig>()))
-			});
+				return FirebaseApp.Create(new AppOptions()
+				{
+					Credential = GoogleCredential.FromJson(JsonConvert.SerializeObject(sp.GetService<FirebaseConfig>()))
+				});
+			}
+
+			return FirebaseApp.DefaultInstance;
 		}
+
+		public static IServiceCollection AddFirebaseAuthManager(this IServiceCollection services)
+			=> services.AddTransient<IFirebaseAuthManager, FirebaseAuthManager>();
+
+		public static IServiceCollection AddSessionManager(this IServiceCollection services)
+			=> services.AddTransient<ISessionManager, SessionManager>();
 
 		public static IServiceCollection AddHrvsterAuthentication(this IServiceCollection services, IConfiguration configuration)
 		{

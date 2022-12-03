@@ -1,4 +1,5 @@
 using FluentValidation;
+using FluentValidation.AspNetCore;
 using hrvster.Core;
 using hrvster.Extensions.Configuration;
 using hrvster.Extensions.OptionsConfiguration;
@@ -65,7 +66,12 @@ namespace hrvster.Web
 				.AddPromotionConfigurationOptions(Configuration)
 				.AddNotificationConfigurationOptions(Configuration)
 				.AddUpdateValidators()
-				.AddHarvsterConfigurationOption(Configuration);
+				.AddHarvsterConfigurationOption(Configuration)
+				.AddFluentValidationAutoValidation()
+				.AddUserRateLimiterService()
+				.AddHttpContextAccessor()
+				.AddFirebaseAuthManager()
+				.AddSessionManager();
 		}
 
 

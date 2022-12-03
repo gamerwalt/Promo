@@ -8,6 +8,7 @@ namespace hrvster.Web.Validation
 		public SigninFormValidator()
 		{
 			RuleFor(x => x.Email)
+				.NotNull()
 				.NotEmpty()
 					.WithMessage("Email address is not valid.")
 				.EmailAddress()
@@ -15,6 +16,7 @@ namespace hrvster.Web.Validation
 
 			RuleFor(x => x.Password)
 				.NotEmpty()
+				.NotNull()
 				.WithMessage("Password is not valid.");
 		}
 	}

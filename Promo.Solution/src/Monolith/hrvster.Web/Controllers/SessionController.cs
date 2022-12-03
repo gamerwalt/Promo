@@ -18,15 +18,18 @@ namespace hrvster.Web.Controllers
 		private readonly ILogger<SessionController> _logger;
 		private readonly IToastNotification _notificationService;
 		private readonly IFirebaseAuthProvider _firebaseAuthProvider;
+		private readonly ISessionManager _sessionManager;
 
 		public SessionController(
 			ILoggerFactory loggerFactory,
 			IToastNotification notificationService,
-			IFirebaseAuthProvider firebaseAuthProvider)
+			IFirebaseAuthProvider firebaseAuthProvider,
+			ISessionManager sessionManager)
 		{
 			_logger = loggerFactory.CreateLogger<SessionController>();
 			_notificationService = notificationService;
 			_firebaseAuthProvider = firebaseAuthProvider;
+			_sessionManager = sessionManager;
 		}
 
 		[HttpGet]
@@ -63,10 +66,10 @@ namespace hrvster.Web.Controllers
 							return RedirectToAction("Index", "VerifyEmail");
 						}
 
-						HttpContext.Session.SetString(SessionConstants.UserToken, link.FirebaseToken);
-						HttpContext.Session.SetString(SessionConstants.UserUid, link.User.LocalId);
-						HttpContext.Session.SetString(SessionConstants.UserEmail, link.User.Email);
-						HttpContext.Session.SetString(SessionConstants.UserDisplayName, link.User.DisplayName);
+						_sessionManager.SetKeyValue(SessionConstants.UserToken, link.FirebaseToken);
+						_sessionManager.SetKeyValue(SessionConstants.UserUid, link.User.LocalId);
+						_sessionManager.SetKeyValue(SessionConstants.UserEmail, link.User.Email);
+						_sessionManager.SetKeyValue(SessionConstants.UserDisplayName, link.User.DisplayName);
 
 						if (string.IsNullOrWhiteSpace(returnUrl))
 							return RedirectToActionPermanent(actionName: "Index", controllerName: "Dashboard");

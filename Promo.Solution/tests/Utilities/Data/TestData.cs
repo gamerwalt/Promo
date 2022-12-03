@@ -26,6 +26,7 @@
 
         public const string EmailAddress = "success@example.com";
         public const string Password = "somepassword";
+        public const string DisplayName = "DisplayName";
 
         public const string WrongEmailAddress = "failure@example.com";
         public const string WrongPassword = "somepassword";

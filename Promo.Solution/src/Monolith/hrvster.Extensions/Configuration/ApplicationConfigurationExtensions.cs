@@ -1,4 +1,5 @@
 ﻿using hrvster.ApplicationServices.Accounts;
+using hrvster.ApplicationServices.Common;
 using hrvster.ApplicationServices.Harvesters.Twitter;
 using hrvster.ApplicationServices.Mails;
 using hrvster.ApplicationServices.Processors;
@@ -16,11 +17,16 @@ namespace hrvster.Extensions.Configuration
 				.AddTransient<ITweetProcessor, TweetProcessor>()
 				.AddTransient<IDrawService, DrawService>()
 				.AddTransient<IMailService, MailService>()
-				.AddTransient<IAccountVerificationService, AccountVerificationService>();
+				.AddTransient<IAccountVerificationService, AccountVerificationService>()
+				.AddUserRateLimiterService();
 
 		public static IServiceCollection AddRandomizer(this IServiceCollection services)
 			=> services
 				.AddSingleton<IRandomizer, Randomizer>();
-		
+
+		public static IServiceCollection AddUserRateLimiterService(this IServiceCollection services)
+			=> services.AddTransient<IUserRateLimiterService, UserRateLimiterService>();
+
+
 	}
 }
