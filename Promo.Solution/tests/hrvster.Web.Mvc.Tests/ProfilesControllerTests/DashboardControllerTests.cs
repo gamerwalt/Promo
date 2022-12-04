@@ -36,7 +36,7 @@ namespace ControllerTests
         }
 
         [Fact]
-        public void When_Authorized_We_Load_The_Dashboard_Route()
+        public void When_Authorized_We_Load_The_Dashboard_Page()
         {
             var form = new SigninForm() { Email = TestData.EmailAddress, Password = TestData.Password };
 
@@ -45,7 +45,7 @@ namespace ControllerTests
                 .Initialize(additionalServiceConfiguration:
                 services =>
                 {
-                    services.SetupMockAuthentication();
+                    services.MockAuthenticiation();
                 })
                 .WhenILoadTheDashboardPage()
                 .ThenTheResponseShouldMatch<Feature, string>(HttpStatusCode.OK, view =>

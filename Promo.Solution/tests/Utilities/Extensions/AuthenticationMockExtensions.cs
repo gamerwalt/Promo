@@ -7,7 +7,7 @@ namespace TestUtilities.Extensions
 {
     public static class AuthenticationMockExtensions
     {
-        public static void SetupMockAuthentication(this IServiceCollection services)
+        public static void MockAuthenticiation(this IServiceCollection services)
         {
             services.MockFirebaseAuthManager(mock =>
             {
