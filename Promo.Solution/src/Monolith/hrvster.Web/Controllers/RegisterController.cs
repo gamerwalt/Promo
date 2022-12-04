@@ -1,4 +1,6 @@
-﻿using hrvster.Core.Requests.WebRequests.Accounts;
+﻿using hrvster.Core;
+using hrvster.Core.Requests.WebRequests.Accounts;
+using hrvster.Extensions.ModelExtensions;
 using hrvster.Web.Models;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -45,29 +47,16 @@ namespace hrvster.Web.Controllers
 					form.Password,
 					form.AcceptedTerms));
 
-				_notificationService.AddSuccessToastMessage("Account created successfully.");
+				_notificationService.AddSuccessToastMessage(ToastMessages.AccountCreatedSuccessfully);
 
 				return RedirectToActionPermanent("SignIn", "Session");
 			}
 
-			var errors = ModelState.Select(c => c.Value.Errors)
-				.Where(c => c.Count > 0)
-				.ToList();
+			ModelState.BuildMessageFromErrors();
 
-			_notificationService.AddErrorToastMessage(BuildMessageFromErrors(errors));
+			_notificationService.AddErrorToastMessage(ModelState.BuildMessageFromErrors());
 
 			return View("Create", form);
-		}
-
-		private string BuildMessageFromErrors(List<ModelErrorCollection> errors)
-		{
-			var sb = new StringBuilder();
-			foreach (var error in errors)
-			{
-				sb.Append(error.FirstOrDefault()?.ErrorMessage);
-			}
-
-			return sb.ToString();
 		}
 	}
 }

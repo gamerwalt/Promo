@@ -1,6 +1,8 @@
 ﻿using FirebaseAdmin.Auth;
+using hrvster.Core.Authentication;
 using hrvster.Core.Requests.Notifications;
 using hrvster.Core.Requests.WebRequests.Accounts;
+using hrvster.Models.Extensions;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using System.Threading;
@@ -11,14 +13,14 @@ namespace hrvster.Core.Handlers.Account
 	public class CreateAccount : AsyncRequestHandler<CreateAccountRequest>
 	{
 		private readonly ILogger<CreateAccount> _logger;
-		private readonly FirebaseAuth _firebaseAuth;
+		private readonly IFirebaseAuthManager _firebaseAuth;
 		private readonly IMediator _mediator;
 
 		private const string defaultPin = "123456";
 
 		public CreateAccount(
 			ILoggerFactory loggerFactory,
-			FirebaseAuth firebaseAuth,
+			IFirebaseAuthManager firebaseAuth,
 			IMediator mediator)
 		{
 			_logger = loggerFactory.CreateLogger<CreateAccount>();
@@ -43,13 +45,26 @@ namespace hrvster.Core.Handlers.Account
 
 			var createdUser = await _firebaseAuth.CreateUserAsync(args);
 
-			_logger.LogInformation("User account for {emailAddress} created successfully to Google Firebase", request.EmailAddress);
+			_logger.LogInformation("User account for {emailAddress} created successfully to Google Firebase as {createdUser}",
+				request.EmailAddress,
+				createdUser.ToJsonString());
 
-			_logger.LogInformation("Generating verification link for {emailAddress}.", request.EmailAddress);
+			_logger.LogInformation("Generating verification link for {emailAddress}.", 
+				request.EmailAddress);
 
-			var verificationLink = await _firebaseAuth.GenerateEmailVerificationLinkAsync(createdUser.Email);
+			var verificationLink = await _firebaseAuth.GenerateEmailVerificationLinkAsync(request.EmailAddress);
 
-			await _mediator.Publish(new AccountCreatedViaFirebase(createdUser, defaultPin, request.AcceptedTerms, verificationLink));
+			await _mediator.Publish(
+				new AccountCreatedViaFirebase(
+					request.EmailAddress, 
+					request.UserUid, 
+					request.PhoneNumber, 
+					request.Username, 
+					request.FirstName,
+					request.LastName,
+					defaultPin, 
+					request.AcceptedTerms, 
+					verificationLink));
 		}
 	}
 }

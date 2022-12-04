@@ -1,8 +1,10 @@
-﻿using hrvster.Core.Authentication;
+﻿using FirebaseAdmin.Auth;
+using hrvster.Core.Authentication;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Moq;
 using System;
+using TestUtilities.Data;
 
 namespace TestUtilities.Mocks.Authentication
 {
@@ -27,6 +29,22 @@ namespace TestUtilities.Mocks.Authentication
         {
             mock.Setup(f => f.VerifyToken(It.IsAny<string>()))
                 .Returns(returnValue);
+
+            return mock;
+        }
+
+        public static Mock<IFirebaseAuthManager> SetupCreateuserSuccess(this Mock<IFirebaseAuthManager> mock)
+        {
+            mock.Setup(f => f.CreateUserAsync(It.IsAny<UserRecordArgs>()))
+                .ReturnsAsync(default(UserRecord));
+
+            return mock;
+        }
+
+        public static Mock<IFirebaseAuthManager> SetupGenerateEmailVerificationLinkAsync(this Mock<IFirebaseAuthManager> mock)
+        {
+            mock.Setup(f => f.GenerateEmailVerificationLinkAsync(It.IsAny<string>()))
+                .ReturnsAsync(TestData.VerifyToken);
 
             return mock;
         }

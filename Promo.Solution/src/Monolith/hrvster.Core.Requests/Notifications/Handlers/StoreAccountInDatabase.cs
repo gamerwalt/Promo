@@ -25,16 +25,16 @@ namespace hrvster.Core.Requests.Notifications.Handlers
 		public async Task Handle(AccountCreatedViaFirebase notification, CancellationToken cancellationToken)
 		{
 			_logger.LogInformation("Storing account for {accountUid} {emailAddress} into the database.",
-				notification.CreatedUser.Uid,
-				notification.CreatedUser.Email);
+				notification.UserUid,
+				notification.EmailAddress);
 
 			await _repository.CreateAsync(new Account
 			{
-				AccountUid = Guid.Parse(notification.CreatedUser.Uid),
-				EmailAddress = notification.CreatedUser.Email,
-				EmailVerified = notification.CreatedUser.EmailVerified,
-				PhoneNumber = notification.CreatedUser.PhoneNumber,
-				DisplayName = notification.CreatedUser.DisplayName,
+				AccountUid = notification.UserUid,
+				EmailAddress = notification.EmailAddress,
+				EmailVerified = false,
+				PhoneNumber = notification.PhoneNumber,
+				DisplayName = notification.UserName,
 				PhoneNumberVerified = false,
 				Pin = notification.Pin,
 				TermsAccepted = notification.TermsAccepted,
@@ -43,11 +43,11 @@ namespace hrvster.Core.Requests.Notifications.Handlers
 
 			await _mailRepository.CreateAsync(new Email
 			{
-				EmailAddress = notification.CreatedUser.Email,
+				EmailAddress = notification.EmailAddress,
 				EmailUid = Guid.NewGuid(),
 				Parameters = new Dictionary<string, string>()
 				{
-					{ "DisplayName", notification.CreatedUser.DisplayName },
+					{ "DisplayName", notification.UserName },
 					{ "DashboardLink", "https://app.hrvster/dashboard" },
 					{ "VerificationLink", notification.VerificationLink }
 				},

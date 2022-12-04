@@ -26,14 +26,7 @@ namespace ControllerTests
         {
             _feature
                 .GiveACleanSlate()
-                .Initialize(additionalServiceConfiguration:
-                services =>
-                {
-                    //services.MockFirebaseAuthProvider(mock =>
-                    //{
-                    //    mock.SetupSignInWithEmailAndPasswordAsyncSuccess(TestData.EmailAddress, TestData.Password);
-                    //});
-                })
+                .Initialize()
                 .WhenILoadTheSignInForm()
                 .ThenTheResponseShouldMatch<Feature, string>(HttpStatusCode.OK, view =>
                 {
@@ -51,16 +44,7 @@ namespace ControllerTests
 
             _feature
                 .GiveACleanSlate()
-                .Initialize(additionalServiceConfiguration:
-                services =>
-                {
-                    //services.MockProfileRepository(mock =>
-                    //{
-                    //    mock.GetRecordReturnsException(Guid.NewGuid(), hrvster.Models.ProfileType.Twitter);
-                    //});
-
-                    //we have to mock FirebaseAuthProvider here
-                })
+                .Initialize()
                 .WhenILoadTheSignInForm()
                 .AndExtractTheAntiForgeryValues()
                 .WhenISignInUsing(form)

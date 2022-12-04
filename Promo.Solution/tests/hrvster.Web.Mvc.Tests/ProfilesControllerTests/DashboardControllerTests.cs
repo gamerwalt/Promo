@@ -4,9 +4,11 @@ using hrvster.Core.Requests.WebRequests;
 using hrvster.Web.Mvc.Common;
 using hrvster.Web.Mvc.Common.Steps;
 using hrvster.Web.Mvc.Common.Steps.Authentication;
+using Microsoft.Extensions.DependencyInjection;
 using System.Net;
 using TestUtilities.Common;
 using TestUtilities.Data;
+using TestUtilities.Extensions;
 using TestUtilities.Mocks.Authentication;
 using Xunit;
 
@@ -43,29 +45,8 @@ namespace ControllerTests
                 .Initialize(additionalServiceConfiguration:
                 services =>
                 {
-                    services.MockFirebaseAuthManager(mock =>
-                    {
-                        mock.SetupVerifyToken(true);
-                    });
-
-                    services.MockFirebaseAuthProvider(mock =>
-                    {
-                        mock.SetupSignInWithEmailAndPasswordAsyncSuccess(TestData.EmailAddress, TestData.Password);
-                    });
-
-                    services.MockSessionManager(mock =>
-                    {
-                        mock.SetupContainsKey(SessionConstants.UserToken, true);
-
-                        mock.SetupGetValue(SessionConstants.UserToken, TestData.FirebaseToken);
-                        mock.SetupGetValue(SessionConstants.UserUid, TestData.UserUid);
-                        mock.SetupGetValue(SessionConstants.UserDisplayName, TestData.DisplayName);
-                        mock.SetupGetValue(SessionConstants.UserEmail, TestData.EmailAddress);
-                    });
+                    services.SetupMockAuthentication();
                 })
-                .WhenILoadTheSignInForm()
-                .AndExtractTheAntiForgeryValues()
-                .WhenISignInUsing(form)
                 .WhenILoadTheDashboardPage()
                 .ThenTheResponseShouldMatch<Feature, string>(HttpStatusCode.OK, view =>
                 {
@@ -74,5 +55,28 @@ namespace ControllerTests
                     view.Should().Contain("Dashboard");
                 });
         }
+
+        //[Fact]
+        //public void When_I_Add_A_Promotion_I_Should_Be_Able_To_View_It_On_The_Dashboard_Page()
+        //{
+        //    var form = new SigninForm() { Email = TestData.EmailAddress, Password = TestData.Password };
+
+        //    _feature
+        //        .GiveACleanSlate()
+        //        .Initialize(additionalServiceConfiguration:
+        //        services =>
+        //        {
+        //            services.SetupMockAuthentication();
+        //        })
+        //        .WhenIloadThePromotionCreationPage()
+        //        .WhenILoadTheDashboardPage()
+        //        .ThenTheResponseShouldMatch<Feature, string>(HttpStatusCode.OK, view =>
+        //        {
+        //            view.Should().NotBeNull();
+        //            view.Should().Contain(TestData.DisplayName);
+        //            view.Should().Contain("Dashboard");
+        //            view.Should().Contain(TestData.PromotionName);
+        //        });
+        //}
     }
 }

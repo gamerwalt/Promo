@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using hrvster.Core;
 using hrvster.Core.Authentication;
 using hrvster.Core.Requests;
 using hrvster.Core.Requests.ApiRequests;
@@ -155,6 +156,7 @@ namespace hrvster.Web.Controllers
 		}
 
 		[HttpGet]
+		[Route("/Promotions/Create")]
 		public async Task<IActionResult> Create()
 		{
 			var campaignTypes = await _mediator.Send(new GetCampaignTypesRequest());
@@ -176,6 +178,7 @@ namespace hrvster.Web.Controllers
 		}
 
 		[HttpPost]
+		[Route("/Promotions/Create")]
 		public async Task<IActionResult> Create(CreatePromotion model)
 		{
 			if (ModelState.IsValid)
@@ -191,7 +194,7 @@ namespace hrvster.Web.Controllers
 
 				var promotionUid = await _mediator.Send(new CreateCampaignRequest(newCampaignRequest, _hrvsterUser.UserUid));
 
-				_notificationService.AddSuccessToastMessage("Promotion/Campaign created successfully.");
+				_notificationService.AddSuccessToastMessage(ToastMessages.PromotionCreatedSuccessfully);
 
 				return RedirectToAction("View", new { campaignUid = promotionUid });
 			}

@@ -34,7 +34,7 @@ namespace TestUtilities
 
             using var conn = new MySqlConnection(hrvsterConnectionString);
             var command = conn.CreateCommand();
-            command.CommandText = "Delete FROM accounts WHERE account_id > 0;";
+            command.CommandText = "Delete FROM campaigns WHERE campaign_id > 0; Delete FROM accounts WHERE account_id > 0; Delete From emails where email_id > 0";
             command.CommandType = CommandType.Text;
             conn.Open();
             command.ExecuteNonQuery();

@@ -1,4 +1,6 @@
-﻿namespace TestUtilities.Data
+﻿using System;
+
+namespace TestUtilities.Data
 {
     public static class TestData
     {
@@ -25,8 +27,11 @@
         public const int FuelId = 100;
 
         public const string EmailAddress = "success@example.com";
-        public const string Password = "somepassword";
+        public const string Password = "Somepassword+2+8@";
         public const string DisplayName = "DisplayName";
+        public const string FirstName = "Olawale";
+        public const string LastName = "Adewoyin";
+        public const string PhoneNumber = "+12048885522";
 
         public const string WrongEmailAddress = "failure@example.com";
         public const string WrongPassword = "somepassword";
@@ -34,8 +39,12 @@
         public const string FirebaseToken = "Token";
         public const int ExpiresIn = 3600;
         public const string RefreshToken = "RefreshToken";
+        public const string VerifyToken = "VerifyToken";
         public const string UserUid = "7b681480-0b5f-49a4-ae50-58753e5fa6a8";
 
         public const string AuthError = "{\r\n  \"error\": {\r\n    \"code\": 400,\r\n    \"message\": \"EMAIL_NOT_FOUND\",\r\n    \"errors\": [\r\n      {\r\n        \"message\": \"EMAIL_NOT_FOUND\",\r\n        \"domain\": \"global\",\r\n        \"reason\": \"invalid\"\r\n      }\r\n    ]\r\n  }\r\n}\r\n";
+
+        public const string PromotionName = "Test Promotion";
+        public static Guid CampaignTypeUid = Guid.Parse("3e5431d6-ba17-41f4-8f21-fd2d70245845");
     }
 }

@@ -4,5 +4,10 @@
     {
         public const string Dashboard = "/Dashboard";
         public const string SignIn = "/Session/SignIn";
+        public const string SignUp = "/Register/Create";
+
+        public const string Promotions = "/Promotions";
+        public const string CreatePromotion = "/Promotions/Create";
+        public const string ViewPromotion = "/Promotions/View?campaignUid=";
     }
 }
