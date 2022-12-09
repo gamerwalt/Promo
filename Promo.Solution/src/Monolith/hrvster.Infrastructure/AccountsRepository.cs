@@ -4,6 +4,7 @@ using MySqlConnector;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Net.Mail;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -26,6 +27,7 @@ namespace hrvster.Infrastructure
 		Account GetByPhoneNumber(string phoneNumber);
 		Task UpdateAsync(Guid accountUid, string firstName, string lastName, string displayName);
 		Task UpdateAsync(Guid accountUid, string emailAddress, string phoneNumber);
+		Task UpdateLastLoginAsync(Guid accountUid);
 	}
 
 	public class AccountsRepository : IAccountsRepository
@@ -356,6 +358,19 @@ namespace hrvster.Infrastructure
 				.AddParameter("accountUid", accountUid)
 				.AddParameter("emailAddress", emailAddress)
 				.AddParameter("phoneNumber", phoneNumber);
+
+			await conn.OpenAsync();
+			await command.ExecuteNonQueryAsync();
+		}
+
+		public async Task UpdateLastLoginAsync(Guid accountUid)
+		{
+			using var conn = new MySqlConnection(_database.GetConnectionString());
+			var command = conn.CreateCommand();
+			command.CommandText = "account_update_last_login";
+			command.CommandType = CommandType.StoredProcedure;
+			command
+				.AddParameter("accountUid", accountUid);
 
 			await conn.OpenAsync();
 			await command.ExecuteNonQueryAsync();

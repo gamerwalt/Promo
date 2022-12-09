@@ -9,6 +9,7 @@ namespace hrvster.Core.Authentication
 	{
 		bool ContainsKey(string keyName);
 		string GetValue(string keyName);
+		void RemoveKeyValue(string userToken);
 		void SetKeyValue(string keyName, string value);
 	}
 
@@ -29,6 +30,14 @@ namespace hrvster.Core.Authentication
 		public string GetValue(string keyName)
 		{
 			return _httpContextAccessor.HttpContext.Session.GetString(keyName);
+		}
+
+		public void RemoveKeyValue(string keyName)
+		{
+			if(ContainsKey(keyName))
+			{
+				_httpContextAccessor.HttpContext.Session.Remove(keyName);
+			}
 		}
 
 		public void SetKeyValue(string keyName, string value)

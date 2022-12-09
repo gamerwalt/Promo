@@ -95,5 +95,30 @@ namespace ControllerTests
                 .ThenTheResponseShouldReturn(HttpStatusCode.Moved)
                 .ThenTheRedirectedLocationShouldBe(RouteList.Dashboard);
         }
+
+        [Fact]
+        public void When_I_SignOut_I_Should_Not_Be_Able_To_Visit_The_Dashboard_Page()
+        {
+            var form = new SigninForm() { Email = TestData.EmailAddress, Password = TestData.Password };
+
+            _feature
+                .GiveACleanSlate()
+                .Initialize(additionalServiceConfiguration:
+                services =>
+                {
+                    services.MockFirebaseAuthProvider(mock =>
+                    {
+                        mock.SetupSignInWithEmailAndPasswordAsyncSuccess(TestData.EmailAddress, TestData.Password);
+                    });
+                })
+                .WhenILoadTheSignInForm()
+                .AndExtractTheAntiForgeryValues()
+                .WhenISignInUsing(form)
+                .WhenISignOut()
+                .WhenILoadTheDashboardPage()
+                .ThenTheResponseShouldReturn(HttpStatusCode.Redirect)
+                .ThenTheRedirectedLocationShouldContain(RouteList.SignIn);
+
+        }
     }
 }

@@ -1,9 +1,11 @@
 ﻿using Firebase.Auth;
 using hrvster.Core.Authentication;
 using hrvster.Core.Requests.WebRequests;
+using hrvster.Core.Requests.WebRequests.Accounts;
 using hrvster.Extensions.ModelExtensions;
 using hrvster.Models.Extensions;
 using hrvster.Web.Models;
+using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -19,17 +21,20 @@ namespace hrvster.Web.Controllers
 		private readonly IToastNotification _notificationService;
 		private readonly IFirebaseAuthProvider _firebaseAuthProvider;
 		private readonly ISessionManager _sessionManager;
+		private readonly IMediator _mediator;
 
 		public SessionController(
 			ILoggerFactory loggerFactory,
 			IToastNotification notificationService,
 			IFirebaseAuthProvider firebaseAuthProvider,
-			ISessionManager sessionManager)
+			ISessionManager sessionManager,
+			IMediator mediator)
 		{
 			_logger = loggerFactory.CreateLogger<SessionController>();
 			_notificationService = notificationService;
 			_firebaseAuthProvider = firebaseAuthProvider;
 			_sessionManager = sessionManager;
+			_mediator = mediator;
 		}
 
 		[HttpGet]
@@ -71,6 +76,8 @@ namespace hrvster.Web.Controllers
 						_sessionManager.SetKeyValue(SessionConstants.UserEmail, link.User.Email);
 						_sessionManager.SetKeyValue(SessionConstants.UserDisplayName, link.User.DisplayName);
 
+						await _mediator.Send(new UpdateLastLoginRequest(link.User.LocalId));
+
 						if (string.IsNullOrWhiteSpace(returnUrl))
 							return RedirectToActionPermanent(actionName: "Index", controllerName: "Dashboard");
 						else
@@ -94,9 +101,10 @@ namespace hrvster.Web.Controllers
 			return RedirectToAction("SignIn");
 		}
 
+		[HttpPost]
 		public async Task<ActionResult> SignOut()
 		{
-			HttpContext.Session.Remove("_UserToken");
+			_sessionManager.RemoveKeyValue(SessionConstants.UserToken);
 
 			return RedirectToAction("SignIn");
 		}

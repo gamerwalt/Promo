@@ -1,6 +1,7 @@
 ﻿using hrvster.Core;
 using hrvster.Core.Requests.WebRequests;
 using Microsoft.Net.Http.Headers;
+using TestUtilities.Data;
 
 namespace hrvster.Web.Mvc.Common.Steps.Authentication
 {
@@ -30,6 +31,13 @@ namespace hrvster.Web.Mvc.Common.Steps.Authentication
         public static Feature WhenILoadTheSignInForm(this Feature feature)
         {
             Task.Run(async () => feature.Response = await feature.Client.GetAsync($"/Session/SignIn")).Wait();
+
+            return feature;
+        }
+
+        public static Feature WhenISignOut(this Feature feature)
+        {
+            Task.Run(async () => feature.Response = await feature.Client.PostAsync(RouteList.SignOut, null)).Wait();
 
             return feature;
         }

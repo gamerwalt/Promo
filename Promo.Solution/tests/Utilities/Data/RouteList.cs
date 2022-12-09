@@ -3,7 +3,10 @@
     public static class RouteList
     {
         public const string Dashboard = "/Dashboard";
+
         public const string SignIn = "/Session/SignIn";
+        public const string SignOut = "/Session/SignOut";
+
         public const string SignUp = "/Register/Create";
 
         public const string Promotions = "/Promotions";
