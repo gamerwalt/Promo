@@ -11,5 +11,7 @@
 		public const string ReturnController = "_ReturnController";
 
 		public const string WizardSweepUid = "_WizardSweepUid";
+
+		public const string Subscribed = "_Subscribed";
 	}
 }

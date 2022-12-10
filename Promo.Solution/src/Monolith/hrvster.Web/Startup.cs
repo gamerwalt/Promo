@@ -1,6 +1,7 @@
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using hrvster.Core;
+using hrvster.Core.Authentication;
 using hrvster.Extensions.Configuration;
 using hrvster.Extensions.OptionsConfiguration;
 using hrvster.Web.Mapper;
@@ -46,6 +47,7 @@ namespace hrvster.Web
 				.AddDatabaseConfiguration(Configuration)
 				.AddCampaignRepositories()
 				.AddAccountRepositories()
+				.AddSubscriptionRepositories()
 				.AddSweepstakesRepositories()
 				.AddEmailRepository()
 				.AddWatchTypeRepositories()
@@ -122,7 +124,6 @@ namespace hrvster.Web
 					else
 						response.Redirect($"/Session/SignIn?returnUrl={url}");
 				}
-
 			});
 
 			app.UseEndpoints(endpoints =>

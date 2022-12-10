@@ -66,4 +66,12 @@
 	{
 		UserRateLimiter
 	}
+
+	public enum SubscriptionStatus
+	{
+		Subscribed,
+		UnSubscribed,
+		SubscribedButEndDate,
+		SubscribedButPaymentIssues
+	}
 }

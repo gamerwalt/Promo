@@ -2,6 +2,7 @@
 using hrvster.Core.Authentication;
 using hrvster.Core.Requests;
 using hrvster.Core.Requests.WebRequests;
+using hrvster.Core.Subscriptions;
 using hrvster.Models;
 using hrvster.Web.Models;
 using MediatR;

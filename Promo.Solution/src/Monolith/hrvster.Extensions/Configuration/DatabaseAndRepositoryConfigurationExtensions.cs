@@ -3,6 +3,7 @@ using hrvster.Infrastructure.Accounts;
 using hrvster.Infrastructure.Core;
 using hrvster.Infrastructure.Harvester;
 using hrvster.Infrastructure.Scheduling;
+using hrvster.Infrastructure.Subscriptions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -30,6 +31,9 @@ namespace hrvster.Extensions.Configuration
 			=> services.AddTransient<IAccountsRepository, AccountsRepository>()
 				.AddTransient<IProfilesRepository, ProfilesRepository>()
 				.AddTransient<IAccountUpdateHistoryRepository, AccountUpdateHistoryRepository>();
+
+		public static IServiceCollection AddSubscriptionRepositories(this IServiceCollection services)
+			=> services.AddTransient<IAccountSubscriptionsRepository, AccountSubscriptionsRepository>();
 
 		public static IServiceCollection AddSweepstakesRepositories(this IServiceCollection services)
 			=> services.AddTransient<ISweepsRepository, SweepsRepository>()

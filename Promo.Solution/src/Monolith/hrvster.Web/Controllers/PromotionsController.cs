@@ -4,6 +4,7 @@ using hrvster.Core.Authentication;
 using hrvster.Core.Requests;
 using hrvster.Core.Requests.ApiRequests;
 using hrvster.Core.Requests.WebRequests.Promotions;
+using hrvster.Core.Subscriptions;
 using hrvster.Extensions.ModelExtensions;
 using hrvster.Models;
 using hrvster.Models.WebModels;
@@ -21,6 +22,7 @@ using System.Threading.Tasks;
 namespace hrvster.Web.Controllers
 {
 	[FirebaseAuthorize]
+	[ShouldBeSubscribed]
 	public class PromotionsController : Controller
 	{
 		private readonly IMediator _mediator;
