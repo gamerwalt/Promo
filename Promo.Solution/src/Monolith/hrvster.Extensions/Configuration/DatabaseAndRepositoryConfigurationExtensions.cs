@@ -33,7 +33,8 @@ namespace hrvster.Extensions.Configuration
 				.AddTransient<IAccountUpdateHistoryRepository, AccountUpdateHistoryRepository>();
 
 		public static IServiceCollection AddSubscriptionRepositories(this IServiceCollection services)
-			=> services.AddTransient<IAccountSubscriptionsRepository, AccountSubscriptionsRepository>();
+			=> services.AddTransient<IAccountSubscriptionsRepository, AccountSubscriptionsRepository>()
+				.AddTransient<IPlansRepository, PlansRepository>();
 
 		public static IServiceCollection AddSweepstakesRepositories(this IServiceCollection services)
 			=> services.AddTransient<ISweepsRepository, SweepsRepository>()

@@ -9,11 +9,11 @@
 	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:300,400,500,600,700" />
 	<link href="~/assets/plugins/global/plugins.bundle.css" rel="stylesheet" type="text/css" />
 	<link href="~/assets/css/style.bundle.css" rel="stylesheet" type="text/css" />
-
+	<link rel="stylesheet" href="~/lib/apexcharts/dist/apexcharts.css" />
+	<link rel="stylesheet" href="~/assets/plugins/custom/datatables/datatables.bundle.css" />
 	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat" />
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
 	<link rel="stylesheet" href="~/css/site.css" />
-	<link rel="stylesheet" href="~/lib/apexcharts/dist/apexcharts.css" />
 </head>
 <body id="kt_body" class="header-tablet-and-mobile-fixed aside-enabled">
     <script>
@@ -180,6 +180,10 @@
 	<script src="~/js/site.js" asp-append-version="true"></script>
 	<script src="~/assets/plugins/global/plugins.bundle.js"></script>
 	<script src="~/assets/js/scripts.bundle.js"></script>
+	<script src="~/assets/plugins/custom/datatables/datatables.bundle.js"></script>
+	<script src="~/assets/js/custom/pages/pricing/general.js"></script>
+	<script src="~/assets/js/widgets.bundle.js"></script>
+	<script src="~/assets/js/custom/widgets.js"></script>
 	@await RenderSectionAsync("Scripts", required: false)
 	@await Component.InvokeAsync("NToastNotify")
 </body>

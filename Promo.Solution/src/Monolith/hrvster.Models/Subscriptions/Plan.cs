@@ -11,7 +11,7 @@ namespace hrvster.Models.Subscriptions
 		public int PromotionsPerMonth { get; set; }
 		public int SweepstakesPerMonth { get; set; }
 		public int SweepstakesMaximumEntries { get; set; }
-		public double PricePerMonth { get; set; }
-		public double PricePerYear { get; set; }
+		public decimal PricePerMonth { get; set; }
+		public decimal PricePerYear { get; set; }
 	}
 }
