@@ -56,7 +56,7 @@ namespace hrvster.Core.Handlers.ServiceHandlers
 				{
 					_logger.LogInformation("Attempting to send a message to {screenName}", winner.UserIdentifier);
 
-					var message = $"@{winner.UserIdentifier} - {DateTime.UtcNow.ToString("MMM dd, yyyy hh:mm:ss")} - You are a potential winner for the sweepstakes {sweep.Name} ran by @hrvsterHQ for @{profile.ScreenName}";
+					var message = $"{winner.UserIdentifier} - {DateTime.UtcNow.ToString("MMM dd, yyyy hh:mm:ss")} - You are a potential winner for the sweepstakes {sweep.Name} ran by @hrvsterHQ for @{profile.ScreenName}";
 
 					var twitterPublisher = _publisherResolver(ExternalClientType.Twitter);
 					var tweetId = await twitterPublisher.PublishAsync(new Message
@@ -83,6 +83,8 @@ namespace hrvster.Core.Handlers.ServiceHandlers
 					}
 				}
 			}
+
+			_logger.LogInformation("Not notifying winners. Rules says not to notify winners for sweeps {name}", sweep.Name);
 		}
 	}
 }

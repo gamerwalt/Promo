@@ -223,6 +223,7 @@ namespace hrvster.Infrastructure
 				ExternalId = reader.GetLongValue("external_id"),
 				ActiveInd = reader.GetBoolean("active_ind"),
 				MustBeFollowing = reader.GetBoolean("must_be_following"),
+				NotifyWinners = reader.GetBoolean("notify_winners"),
 				CreatedDate = reader.GetDateTime("created_date"),
 				UpdatedDate = reader.GetNullableDateTimeValue("updated_date")
 			};

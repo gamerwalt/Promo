@@ -1,0 +1,11 @@
+{
+  "profiles": {
+    "hrvster.Twitter.Poster": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "local"
+      },
+      "dotnetRunMessages": true
+    }
+  }
+}

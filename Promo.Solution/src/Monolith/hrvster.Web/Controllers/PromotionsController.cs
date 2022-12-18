@@ -22,7 +22,7 @@ using System.Threading.Tasks;
 namespace hrvster.Web.Controllers
 {
 	[FirebaseAuthorize]
-	[ShouldBeSubscribed]
+	//[ShouldBeSubscribed]
 	public class PromotionsController : Controller
 	{
 		private readonly IMediator _mediator;
