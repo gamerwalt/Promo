@@ -267,6 +267,7 @@ namespace hrvster.Web.Controllers
 			if (ModelState.IsValid)
 			{
 				await _mediator.Send(new UpdateSweepstakeRequest(
+					sweep,
 					sweepUid,
 					form.UpdateSweepstake.Name,
 					form.UpdateSweepstake.StartDate,

@@ -1,5 +1,6 @@
 ﻿using Firebase.Auth;
 using hrvster.Core.Authentication;
+using hrvster.Core.Requests.Notifications;
 using hrvster.Core.Requests.WebRequests;
 using hrvster.Core.Requests.WebRequests.Accounts;
 using hrvster.Extensions.ModelExtensions;
@@ -104,7 +105,11 @@ namespace hrvster.Web.Controllers
 		[HttpPost]
 		public async Task<ActionResult> SignOut()
 		{
+			await _mediator.Publish(new AccountLoggedOut(_sessionManager.GetValue(SessionConstants.UserUid)));
+
 			_sessionManager.RemoveKeyValue(SessionConstants.UserToken);
+			_sessionManager.RemoveKeyValue(SessionConstants.UserUid);
+			_sessionManager.RemoveKeyValue(SessionConstants.UserEmail);
 
 			return RedirectToAction("SignIn");
 		}

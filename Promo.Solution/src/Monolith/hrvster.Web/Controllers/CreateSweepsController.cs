@@ -181,7 +181,7 @@ namespace hrvster.Web.Controllers
 			{
 				if(IsFormDirty(form, sweep))
 				{
-					await _mediator.Send(new UpdateSweepstakeRequest(sweepUid, form.Name, form.StartDate, form.EndDate, form.DrawDate));
+					await _mediator.Send(new UpdateSweepstakeRequest(sweep, sweepUid, form.Name, form.StartDate, form.EndDate, form.DrawDate));
 
 					_notificationService.AddSuccessToastMessage("Sweep updated successfully.");
 				}

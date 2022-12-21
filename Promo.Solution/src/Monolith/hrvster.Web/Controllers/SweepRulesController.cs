@@ -621,8 +621,16 @@ namespace hrvster.Web.Controllers
 						form.TweetText,
 						form.PostNow,
 						form.ScheduledDate,
-						form.MustBeFollowing,
+						true, //default to true now
 						mediaLocation));
+
+				if(!published)
+				{
+					_notificationService.AddErrorToastMessage("Unable to publish the tweet. An error occurred. Rest assured we are looking into it.");
+
+					return RedirectToAction(actionName ?? "View", controllerName ?? "SweepRules", new { sweepUid = sweepUid });
+				}
+
 				var word = form.PostNow ? "created" : "scheduled";
 				_notificationService.AddSuccessToastMessage($"Tweet {word} successfully.");
 

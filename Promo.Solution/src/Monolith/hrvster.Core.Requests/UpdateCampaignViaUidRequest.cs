@@ -66,7 +66,7 @@ namespace hrvster.Core.Requests
 
 			var campaign = await _repository.GetCampaignByUidAsync(request.CampaignUid, request.AccountUid);
 
-			await _mediator.Publish(new CampaignUpdated(request.CampaignUid));
+			await _mediator.Publish(new CampaignUpdated(request.CampaignUid, request.AccountUid));
 
 			return campaign;
 		}

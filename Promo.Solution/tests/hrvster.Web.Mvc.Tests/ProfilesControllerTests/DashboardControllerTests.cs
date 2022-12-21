@@ -6,6 +6,7 @@ using hrvster.Web.Mvc.Common.Steps;
 using hrvster.Web.Mvc.Common.Steps.Authentication;
 using Microsoft.Extensions.DependencyInjection;
 using System.Net;
+using TestUtilities;
 using TestUtilities.Common;
 using TestUtilities.Data;
 using TestUtilities.Extensions;

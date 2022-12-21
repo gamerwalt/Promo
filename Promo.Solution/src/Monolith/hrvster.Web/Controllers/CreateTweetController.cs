@@ -287,7 +287,7 @@ namespace hrvster.Web.Controllers
 						form.TweetText,
 						form.PostNow,
 						form.ScheduledDate,
-						form.MustBeFollowing,
+						true,
 						mediaLocation));
 				var word = form.PostNow ? "created" : "scheduled";
 

@@ -130,7 +130,8 @@ namespace hrvster.Web.Controllers
 					SweepUid = sweepUid,
 					SweepId = model.SweepstakeId,
 					WinnerCount = model.WinnerCount,
-					WinnerBackupCount = model.WinnerBackupCount
+					WinnerBackupCount = model.WinnerBackupCount,
+					AccountUid = sweep.Account.AccountUid
 				};
 
 				await _mediator.Send(request);

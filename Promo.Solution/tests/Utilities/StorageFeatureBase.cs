@@ -1,8 +1,11 @@
 ﻿using hrvster.Extensions.Configuration;
+using MediatR;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using MySqlConnector;
 using System;
 using System.Data;
+using TestUtilities.Mocks.Authentication;
 
 namespace TestUtilities
 {
@@ -13,8 +16,17 @@ namespace TestUtilities
         protected override Action<IServiceCollection> ConfigureServices =>
             services =>
             {
-                //add the services here
-                services.AddFirebaseServices(Configuration);
+                services.AddLogging();
+
+				//add the services here
+				//services.AddFirebaseServices(Configuration);
+                services.AddMediatorAndFluentValidation();
+                services.AddDatabaseConfiguration(Configuration);
+                services.AddSweepstakesRepositories();
+                services.AddAccountRepositories();
+                services.AddEmailRepository();
+
+                services.MockFirebaseAuthManager();
             };
 
         protected virtual Action<IServiceCollection> AdditionalServices { get; } = null;
@@ -34,7 +46,10 @@ namespace TestUtilities
 
             using var conn = new MySqlConnection(hrvsterConnectionString);
             var command = conn.CreateCommand();
-            command.CommandText = "Delete FROM campaigns WHERE campaign_id > 0; Delete FROM accounts WHERE account_id > 0; Delete From emails where email_id > 0";
+            command.CommandText = "Delete FROM campaigns WHERE campaign_id > 0; " +
+                "Delete FROM accounts WHERE account_id > 0; " +
+                "Delete From emails where email_id > 0; " +
+                "DELETE FROM user_activities WHERE activity_id > 0;";
             command.CommandType = CommandType.Text;
             conn.Open();
             command.ExecuteNonQuery();

@@ -6,11 +6,6 @@ using hrvster.Infrastructure.Scheduling;
 using hrvster.Infrastructure.Subscriptions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace hrvster.Extensions.Configuration
 {
@@ -20,7 +15,8 @@ namespace hrvster.Extensions.Configuration
 			=> services.AddSingleton<IDatabase>(c =>
 				{
 					return new MySqlDatabase(DatabaseNames.Main, configuration, DatabaseNames.Harvester, DatabaseNames.Reporting);
-				});
+				})
+				.AddTransient<IActivityRepository, ActivityRepository>();
 
 		public static IServiceCollection AddCampaignRepositories(this IServiceCollection services)
 			=> services.AddTransient<ICampaignRepository, CampaignRepository>()

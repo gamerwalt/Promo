@@ -1,4 +1,5 @@
-﻿using hrvster.Core.Requests.WebRequests.Sweeps;
+﻿using hrvster.Core.Requests.Notifications;
+using hrvster.Core.Requests.WebRequests.Sweeps;
 using hrvster.Infrastructure;
 using MediatR;
 using Microsoft.Extensions.Logging;
@@ -12,13 +13,16 @@ namespace hrvster.Core.Handlers.Sweepstakes
 	{
 		private readonly ILogger<CreateSweepDrawRuleRequestHandler> _logger;
 		private readonly ISweepDrawRuleRepository _repository;
+		private readonly IMediator _mediator;
 
 		public CreateSweepDrawRuleRequestHandler(
 			ILoggerFactory loggerFactory,
-			ISweepDrawRuleRepository repository)
+			ISweepDrawRuleRepository repository,
+			IMediator mediator)
 		{
 			_logger = loggerFactory.CreateLogger<CreateSweepDrawRuleRequestHandler>();
 			_repository = repository;
+			_mediator = mediator;
 		}
 
 		protected async override Task Handle(CreateSweepDrawRuleRequest request, CancellationToken cancellationToken)
@@ -27,17 +31,21 @@ namespace hrvster.Core.Handlers.Sweepstakes
 				nameof(CreateSweepEntryRuleRequestHandler),
 				request.SweepUid);
 
-			await _repository.CreateAsync(new Models.DrawRule
+			var sweepstakeDrawRule = new Models.DrawRule
 			{
 				SweepDrawRuleUid = Guid.NewGuid(),
 				SweepUid = request.SweepUid,
 				WinnerCount = request.WinnerCount,
 				WinnerBackupCount = request.WinnerBackupCount
-			});
+			};
+
+			await _repository.CreateAsync(sweepstakeDrawRule);
 
 			_logger.LogInformation("Finished handling handler for {handlerName} for sweep with uid: {sweepUid}",
 				nameof(CreateSweepEntryRuleRequestHandler),
 				request.SweepUid);
+
+			await _mediator.Publish(new SweepDrawRuleCreated(sweepstakeDrawRule, request.AccountUid));
 		}
 	}
 }

@@ -14,7 +14,15 @@ namespace hrvster.Web.Mvc.Common.Steps
             return feature as TFeature;
         }
 
-        public static Feature AndExtractTheAntiForgeryValues(this Feature feature)
+		public static TFeature GivenACleanSlate<TFeature>(this IFeature<TFeature> feature)
+			where TFeature : class
+		{
+			feature.DeleteAllTableData();
+
+			return feature as TFeature;
+		}
+
+		public static Feature AndExtractTheAntiForgeryValues(this Feature feature)
         {
             feature.AntiForgeryToken = AntiforgeryTokenExtractor.ExtractAntiforgeryToken(feature.Response);
 

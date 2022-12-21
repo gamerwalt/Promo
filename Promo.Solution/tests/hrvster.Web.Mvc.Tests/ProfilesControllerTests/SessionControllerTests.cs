@@ -4,8 +4,11 @@ using hrvster.Web.Mvc.Common;
 using hrvster.Web.Mvc.Common.Steps;
 using hrvster.Web.Mvc.Common.Steps.Authentication;
 using System.Net;
+using TestUtilities;
+using TestUtilities.Builders.Resources;
 using TestUtilities.Common;
 using TestUtilities.Data;
+using TestUtilities.Extensions;
 using TestUtilities.Mocks.Authentication;
 using Xunit;
 
@@ -78,21 +81,39 @@ namespace ControllerTests
         public void When_I_Supply_Valid_Credentials_I_Should_Be_Redirected_To_The_Dashboard()
         {
             var form = new SigninForm() { Email = TestData.EmailAddress, Password = TestData.Password };
+			var registerForm = new RegisterBuilder(TestData.EmailAddress, TestData.UserName, TestData.PhoneNumber, TestData.Password)
+				.WithFirstName(TestData.FirstName)
+				.WithLastName(TestData.LastName)
+				.WithAcceptedTerms(true)
+				.Build();
 
-            _feature
+			_feature
                 .GiveACleanSlate()
                 .Initialize(additionalServiceConfiguration:
                 services =>
                 {
-                    services.MockFirebaseAuthProvider(mock =>
-                    {
-                        mock.SetupSignInWithEmailAndPasswordAsyncSuccess(TestData.EmailAddress, TestData.Password);
-                    });
-                })
-                .WhenILoadTheSignInForm()
+					services.MockFirebaseAuthManager(mock =>
+					{
+						mock.SetupCreateuserSuccess();
+						mock.SetupGenerateEmailVerificationLinkAsync();
+					});
+
+					services.MockFirebaseAuthProvider(mock =>
+					{
+						mock.SetupSignInWithEmailAndPasswordAsyncSuccess(TestData.EmailAddress, TestData.Password);
+					});
+
+					services.MockAuthenticiation();
+				})
+				.WhenILoadTheSignUpPage()
+				.AndExtractTheAntiForgeryValues()
+				.WhenISignUpUsing(registerForm)
+				.AndUpdateTheAccountUid(TestData.UserUid)
+				.WhenILoadTheSignInForm()
                 .AndExtractTheAntiForgeryValues()
-                .WhenISignInUsing(form)
-                .ThenTheResponseShouldReturn(HttpStatusCode.Moved)
+				.AndUpdateTheAccountUid(TestData.UserUid)
+				.WhenISignInUsing(form)
+				.ThenTheResponseShouldReturn(HttpStatusCode.Moved)
                 .ThenTheRedirectedLocationShouldBe(RouteList.Dashboard);
         }
 

@@ -1,0 +1,14 @@
+{
+  "version": "2.0",
+  "name": "hrvster",
+  "id": "4b4e757a-c2e5-46c6-a6fe-24a877022194",
+  "databaseType": "MySql",
+  "development": {
+    "scriptsFolder": "./schema-model"
+  },
+  "deployment": {
+    "flywayConfFiles": [
+      "./flyway.conf"
+    ]
+  }
+}

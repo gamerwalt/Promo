@@ -11,11 +11,13 @@ namespace hrvster.Core.Handlers.Account
 	{
 		private readonly ILogger<UpdateLastLogin> _logger;
 		private readonly IAccountsRepository _repository;
+		private readonly IMediator _mediator;
 
-		public UpdateLastLogin(ILoggerFactory loggerFactory, IAccountsRepository repository)
+		public UpdateLastLogin(ILoggerFactory loggerFactory, IAccountsRepository repository, IMediator mediator)
 		{
 			_logger = loggerFactory.CreateLogger<UpdateLastLogin>();
 			_repository = repository;
+			_mediator = mediator;
 		}
 
 		protected override async Task Handle(UpdateLastLoginRequest request, CancellationToken cancellationToken)
@@ -23,6 +25,8 @@ namespace hrvster.Core.Handlers.Account
 			_logger.LogInformation("Update last login for account with uid: {accountUid}", request.AccountUid);
 
 			await _repository.UpdateLastLoginAsync(request.AccountUid);
+
+			await _mediator.Publish(new AccountLoggedIn(request));
 		}
 	}
 }

@@ -10,6 +10,7 @@ using Moq;
 using NToastNotify;
 using System;
 using System.Net;
+using TestUtilities;
 using TestUtilities.Builders.Resources;
 using TestUtilities.Common;
 using TestUtilities.Common.Steps;

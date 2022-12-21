@@ -74,4 +74,30 @@
 		SubscribedButEndDate,
 		SubscribedButPaymentIssues
 	}
+
+	public enum ActivityType
+	{
+		LoggedIn,
+		LoggedOut,
+		CreatedPromotion,
+		CreatedPromotionByWizard,
+		UpdatedPromotion,
+		CreatedSweepstakes,
+		UpdatedSweepstakes,
+		AddedSweepstakesEntryRule,
+		UpdatedSweepstakesEntryRule,
+		AddedPrize,
+		UpdatedPrize,
+		DeletedPrize,
+		AddedSweepstakesDrawRule,
+		UpdatedSweepstakeDrawRule,
+		CreatedSweepstakesTweet,
+		UpdatedSweepstakesTweet,
+		ActivatedSweepstakesTweet,
+		DeactivatedSweepstakesTweet,
+		ScheduledSweepstakesTweet,
+		LinkedProfileToTwitter,
+		Subscribed,
+		Unsubscribed
+	}
 }

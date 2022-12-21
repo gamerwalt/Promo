@@ -162,7 +162,7 @@ namespace hrvster.Core.Handlers.ServiceHandlers
 		}
 
 		private bool UserIsNotInBlacklistedUsers(ProcessAutoEnterSweepsFromHashtagReplyRequest request)
-			=> request.BlackListed.Any(c => c.Equals(request.Tweet.CreatedBy.Id));
+			=> request.BlackListed.Any(c => c.TweetUserId.Equals(request.Tweet.CreatedBy.Id));
 
 		private bool TweetIsInReplyToRuleTweetId(ProcessAutoEnterSweepsFromHashtagReplyRequest request)
 			=> request.Tweet.InReplyToStatusId.Equals(request.Rule.ExternalId);

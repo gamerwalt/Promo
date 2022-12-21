@@ -370,6 +370,8 @@ namespace hrvster.Infrastructure
 			command.CommandText = "account_update_last_login";
 			command.CommandType = CommandType.StoredProcedure;
 			command
+				.AddParameter("lastLoginDate", DateTime.Now)
+				.AddParameter("lastLoginDateUTC", DateTime.UtcNow)
 				.AddParameter("accountUid", accountUid);
 
 			await conn.OpenAsync();

@@ -6,6 +6,7 @@ using hrvster.Web.Mvc.Common.Steps.Authentication;
 using Moq;
 using NToastNotify;
 using System.Net;
+using TestUtilities;
 using TestUtilities.Builders.Resources;
 using TestUtilities.Common;
 using TestUtilities.Common.Steps;

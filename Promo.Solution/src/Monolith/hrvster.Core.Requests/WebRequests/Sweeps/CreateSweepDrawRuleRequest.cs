@@ -9,5 +9,6 @@ namespace hrvster.Core.Requests.WebRequests.Sweeps
 		public int SweepId { get; set; }
 		public int WinnerCount { get; set; }
 		public int WinnerBackupCount { get; set; }
+		public Guid AccountUid { get; set; }
 	}
 }

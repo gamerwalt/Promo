@@ -1,6 +1,7 @@
 ﻿using hrvster.Core;
 using hrvster.Web.Models;
 using Microsoft.Net.Http.Headers;
+using TestUtilities;
 using TestUtilities.Data;
 
 namespace hrvster.Web.Mvc.Common.Steps.Authentication

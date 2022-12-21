@@ -1,4 +1,6 @@
-﻿namespace hrvster.Web.Mvc.Common.Steps
+﻿using TestUtilities;
+
+namespace hrvster.Web.Mvc.Common.Steps
 {
     public static class DashboardControllerSteps
     {
