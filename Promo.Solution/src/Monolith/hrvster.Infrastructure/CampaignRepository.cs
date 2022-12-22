@@ -39,7 +39,9 @@ namespace hrvster.Infrastructure
 				.AddParameter("campaignName", campaign.CampaignName)
 				.AddParameter("campaignDescription", campaign.Description)
 				.AddParameter("startDate", campaign.StartDate)
+				.AddParameter("startDateUtc", campaign.StartDate.ToUniversalTime())
 				.AddParameter("endDate", campaign.EndDate)
+				.AddParameter("endDateUtc", campaign.EndDate.ToUniversalTime())
 				.AddParameter("campaignTypeUid", campaign.CampaignType.CampaignTypeUid)
 				.AddParameter("accountUid", campaign.Account.AccountUid);
 
@@ -170,7 +172,9 @@ namespace hrvster.Infrastructure
 				.AddParameter("campaignName", campaign.CampaignName)
 				.AddParameter("campaignDescription", campaign.Description)
 				.AddParameter("startDate", campaign.StartDate)
+				.AddParameter("startDateUtc", campaign.StartDate.ToUniversalTime())
 				.AddParameter("endDate", campaign.EndDate)
+				.AddParameter("endDateUtc", campaign.EndDate.ToUniversalTime())
 				.AddParameter("activeInd", campaign.ActiveInd)
 				.AddParameter("campaignTypeUid", campaign.CampaignType?.CampaignTypeUid);
 
@@ -189,7 +193,9 @@ namespace hrvster.Infrastructure
 				.AddParameter("campaignName", campaignName)
 				.AddParameter("campaignDescription", description)
 				.AddParameter("startDate", startDate)
+				.AddParameter("startDateUtc", startDate.ToUniversalTime())
 				.AddParameter("endDate", endDate)
+				.AddParameter("endDateUtc", endDate.ToUniversalTime())
 				.AddParameter("activeInd", true)
 				.AddParameter("campaignTypeUid", campaignTypeUid);
 

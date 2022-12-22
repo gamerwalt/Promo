@@ -22,7 +22,7 @@ namespace hrvster.Core.Requests.WebRequests.Sweeps
 			_endDate = endDate;
 			_drawDate = drawDate;
 		}
-		public Sweep Sweepstake { get; set; }
+		public Sweep Sweepstake { get { return _sweep; } }
 		public Guid SweepUid { get { return _sweepUid; } }
 		public string Name { get { return _name; } }
 		public DateTime StartDate { get { return _startDate; } }

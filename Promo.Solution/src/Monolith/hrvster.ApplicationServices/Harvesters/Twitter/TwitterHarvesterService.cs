@@ -2,6 +2,7 @@
 using hrvster.Core.Requests.ServiceRequests;
 using MediatR;
 using Microsoft.Extensions.Logging;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Tweetinvi;
@@ -65,9 +66,15 @@ namespace hrvster.ApplicationServices.Harvesters.Twitter
 
 		private async void NewTweetReceived(object sender, MatchedTweetReceivedEventArgs @event)
 		{
-			_logger.LogInformation("New Tweet Received");
+			var hashTags = string.Join(",", @event.Tweet.Hashtags.Select(h => h.Text));
+
+			_logger.LogInformation("New Tweet Received with hashtags {hashtags}", hashTags);
+
 			//Task.Run(async () => await _mediator.Send(new ProcessNewTweetRequest(@event.Tweet, @event.Json))).Wait();
 			var incomingTweet = await _mediator.Send(new SaveNewTweetReceivedRequest(@event.Json));
+
+			_logger.LogInformation("Tweet saved for further processing with Guid {tweetGuid}",
+				incomingTweet.IncomingTweetUid);
 
 			await _mediator.Send(new ProcessNewTweetRequest(@event.Tweet, @event.Json, incomingTweet));
 		}

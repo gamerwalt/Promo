@@ -12,6 +12,7 @@ using hrvster.Models;
 using hrvster.Models.Extensions;
 using System.Runtime.CompilerServices;
 using hrvster.ApplicationServices.Common;
+using Org.BouncyCastle.Asn1.X509.Qualified;
 
 namespace hrvster.Core.Handlers.ServiceHandlers
 {
@@ -42,22 +43,24 @@ namespace hrvster.Core.Handlers.ServiceHandlers
 
 		async protected override Task Handle(ProcessNewTweetRequest request, CancellationToken cancellationToken)
 		{
-			_logger.LogInformation("Received the request to process the tweet with Id {tweetId} and text {tweetText}. Json Received: {json}",
+			_logger.LogInformation("Received the request to process the tweet with Id {tweetId} and text {tweetText}. Incoming tweet guid {tweetGuid}",
 				request.Tweet.Id,
 				request.Tweet.Text,
-				request.Json);
+				request.IncomingTweet.IncomingTweetUid);
 
 			if(!await _userRateLimiterService.IsAllowedAsync(
 				request.Tweet.CreatedBy.IdStr, 
 				request.Tweet.Hashtags, 
 				UserIdentifierType.TwitterHandle))
 			{
-				_logger.LogWarning("Cannot continue processing this tweet. User has tweeted to many times.");
+				_logger.LogWarning("Cannot continue processing this tweet {tweetGuid}. User has tweeted to many times.", request.IncomingTweet.IncomingTweetUid);
 
 				await _mediator.Publish(new TweetProcessingStopped(RateLimiter.UserRateLimiter, request, request.IncomingTweet));
 
 				return;
 			}
+
+			_logger.LogInformation("Updating incoming tweet {tweetGuid} status as Processing", request.IncomingTweet.IncomingTweetUid);
 
 			await _incomingTweetsRepository.UpdateStatusAsync(
 				request.IncomingTweet.IncomingTweetUid, 
@@ -68,6 +71,8 @@ namespace hrvster.Core.Handlers.ServiceHandlers
 			//we should have another cron job periodically check and process unprocessed tweets
 			var rules = new List<Rule>();
 			var tasks = new List<Task>();
+
+			_logger.LogInformation("Loading rules and other details for tweet {tweetGuid}", request.IncomingTweet.IncomingTweetUid);
 
 			foreach (var hashtag in request.Tweet.Hashtags)
 			{
@@ -89,44 +94,49 @@ namespace hrvster.Core.Handlers.ServiceHandlers
 
 			try
 			{
-				_logger.LogInformation("Starting a new transaction");
+				_logger.LogInformation("Starting a new transaction for tweet {tweetGuid}", request.IncomingTweet.IncomingTweetUid);
+
 				await _harvesterRepository.BeginTransaction();
 
 				foreach (var rule in rules)
 				{
 					var harvestedUid = Guid.NewGuid();
-					_logger.LogDebug("Creating harvested record for Uid {harvestedUid}, Rule uid {ruleUid}.",
+					_logger.LogDebug("Creating harvested record for Uid {harvestedUid}, Rule uid {ruleUid}. Tweet Uid {tweetGuid}",
 						harvestedUid,
-						rule.RuleUid);
+						rule.RuleUid,
+						request.IncomingTweet.IncomingTweetUid);
 
 					await _harvesterRepository.CreateHarvestedRecordAsync(harvestedUid, rule.RuleUid, request.Json);
 
-					_logger.LogDebug("Creating the tweet for the user with uid {userUid}, actual tweet {tweet}",
+					_logger.LogDebug("Creating the tweet for the user with uid {userUid}, actual tweet {tweet} for tweet uid {tweetGuid}",
 						newUserUid,
-						request.Tweet.Text);
+						request.Tweet.Text,
+						request.IncomingTweet.IncomingTweetUid);
+
 					await _harvesterRepository.CreateTweetUserAsync(newUserUid, request.Tweet.CreatedBy);
 
-					_logger.LogDebug("Creating the tweet record with tweetUid {tweetUid}, harvestedUid {harvestedUid}, rule Uid {ruleUid}",
-						tweetUid,
-						harvestedUid,
-						rule.RuleUid);
-					await _harvesterRepository.CreateTweetRecordAsync(tweetUid, harvestedUid, rule.RuleUid, newUserUid, request.Tweet);
+					_logger.LogDebug("Creating the tweet record for incoming tweet uid {tweetGuid}",
+						request.IncomingTweet.IncomingTweetUid);
 
-					_logger.LogDebug("Publishing that we have received a tweet {tweet}", request.Tweet.Text);
+					await _harvesterRepository.CreateTweetRecordAsync(
+						tweetUid, harvestedUid, rule.RuleUid, newUserUid, request.Tweet);
+
+					_logger.LogDebug("Publishing that we have received a tweet {tweet} for tweet uid {tweetGuid}",
+						request.Tweet.Text,
+						request.IncomingTweet.IncomingTweetUid);
+
 					await _mediator.Publish(new TweetReceived(
-						request.IncomingTweet,
-						rule,
-						harvestedUid,
-						newUserUid,
-						request.Tweet));
+						request.IncomingTweet, rule, harvestedUid, newUserUid, request.Tweet));
 				}
 
-				_logger.LogInformation("Committing transaction");
+				_logger.LogInformation("Committing transaction for tweet uid {tweetUid}", request.IncomingTweet.IncomingTweetUid);
+
 				await _harvesterRepository.CommitTransaction();
 			}
 			catch (Exception ex)
 			{
-				_logger.LogError("An error occurred trying to save the Harvested Tweet. Exception Message: {message}",
+				_logger.LogError("An error occurred trying to save the Harvested Tweet for tweet guid {tweetGuid}. Exception Message: {message}",
+					request.IncomingTweet.IncomingTweetUid,
 					ex.Message);
 
 				_logger.LogInformation("Rolling back transaction");

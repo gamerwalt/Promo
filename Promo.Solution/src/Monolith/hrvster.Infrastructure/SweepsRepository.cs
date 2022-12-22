@@ -43,8 +43,11 @@ namespace hrvster.Infrastructure
 				.AddParameter("campaignUid", sweep.Campaign?.CampaignUid)
 				.AddParameter("sweepName", sweep.Name)
 				.AddParameter("startDate", sweep.StartDate)
+				.AddParameter("startDateUtc", sweep.StartDate.ToUniversalTime())
 				.AddParameter("endDate", sweep.EndDate)
-				.AddParameter("drawDate", sweep.DrawDate);
+				.AddParameter("endDateUtc", sweep.EndDate.ToUniversalTime())
+				.AddParameter("drawDate", sweep.DrawDate.GetValueOrDefault())
+				.AddParameter("drawDateUtc", sweep.DrawDate.GetValueOrDefault().ToUniversalTime());
 
 			await conn.OpenAsync();
 			await command.ExecuteNonQueryAsync();
@@ -211,8 +214,11 @@ namespace hrvster.Infrastructure
 				.AddParameter("sweepUid", sweepUid)
 				.AddParameter("sweepName", sweep.Name)
 				.AddParameter("startDate", sweep.StartDate)
+				.AddParameter("startDateUtc", sweep.StartDate.ToUniversalTime())
 				.AddParameter("endDate", sweep.EndDate)
-				.AddParameter("drawDate", sweep.DrawDate.Value);
+				.AddParameter("endDateUtc", sweep.EndDate.ToUniversalTime())
+				.AddParameter("drawDate", sweep.DrawDate.Value)
+				.AddParameter("drawDateUtc", sweep.DrawDate.GetValueOrDefault().ToUniversalTime());
 
 			await conn.OpenAsync();
 			await command.ExecuteNonQueryAsync();

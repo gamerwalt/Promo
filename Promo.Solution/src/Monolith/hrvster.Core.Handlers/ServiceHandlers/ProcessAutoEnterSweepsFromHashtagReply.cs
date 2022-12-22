@@ -7,6 +7,7 @@ using hrvster.Models;
 using hrvster.Models.Profiles;
 using MediatR;
 using Microsoft.Extensions.Logging;
+using Org.BouncyCastle.Asn1.X509.Qualified;
 using System;
 using System.Linq;
 using System.Threading;
@@ -48,6 +49,9 @@ namespace hrvster.Core.Handlers.ServiceHandlers
 
 			if (CanEnterSweepstakes(request))
 			{
+				_logger.LogInformation("User can enter sweeps with tweet uid {tweetGuid}",
+					request.IncomingTweet.IncomingTweetUid);
+
 				if (await IsFollowing(profile, request))
 				{
 					await EnterSweepstakesAsync(request);
@@ -102,10 +106,11 @@ namespace hrvster.Core.Handlers.ServiceHandlers
 				CampaignIsRunning(request.Rule.Campaign) &&
 				SweepIsRunningAndNotYetDrawn(request.Rule.Sweep))
 			{
-				_logger.LogInformation("Campaign {campaignName} and Sweepstakes {sweepName} is running and User {screenName} can now be entered into the sweepstakes.",
+				_logger.LogInformation("Campaign {campaignName} and Sweepstakes {sweepName} is running and User {screenName} can now be entered into the sweepstakes with tweet Guid {tweetGuid}",
 					request.Rule.Campaign.CampaignName,
 					request.Rule.Sweep.Name,
-					request.Tweet.CreatedBy.ScreenName);
+					request.Tweet.CreatedBy.ScreenName,
+					request.IncomingTweet.IncomingTweetUid);
 
 				var sweepEntryUid = Guid.NewGuid();
 
@@ -128,9 +133,10 @@ namespace hrvster.Core.Handlers.ServiceHandlers
 			}
 			else
 			{
-				_logger.LogWarning("Campaign {campaignName} or Sweepstakes {sweepName} are probably not running right now.",
+				_logger.LogWarning("Campaign {campaignName} or Sweepstakes {sweepName} are probably not running right now. And the tweet with uid {tweetGuid} cannot be entered into the sweepstakes",
 				request.Rule.Campaign.CampaignName,
-				request.Rule.Sweep.Name);
+				request.Rule.Sweep.Name,
+				request.IncomingTweet.IncomingTweetUid);
 
 				await _incomingTweetsRepository.UpdateStatusAsync(
 					request.IncomingTweet.IncomingTweetUid, 

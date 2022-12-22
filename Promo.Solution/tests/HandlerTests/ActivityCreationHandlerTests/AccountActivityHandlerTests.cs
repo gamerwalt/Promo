@@ -31,5 +31,17 @@ namespace ActivityCreationHandlerTests
 			_feature.AccountsTableShouldContain(AccountTableFields.EmailAddress, TestData.EmailAddress);
 			_feature.ActivitiesTableShouldContaine(ActivityTableFields.LinkedUid, TestData.AccountUid.ToString());
 		}
+
+		[Fact]
+		public async Task When_A_User_Logs_In_The_Activity_Is_Stored()
+		{
+			var accountCreateRequest = new CreateAccountRequest(TestData.AccountUid, TestData.EmailAddress, TestData.DisplayName, TestData.PhoneNumber, TestData.FirstName, TestData.LastName, TestData.Password, true);
+
+			var result = await _feature
+				.GivenACleanSlate()
+				.Mediator.Send(accountCreateRequest);
+
+			result.Should().BeOfType<Unit>();
+		}
 	}
 }

@@ -48,9 +48,9 @@ namespace hrvster.ApplicationServices.Processors
 		{
 			if (rule.Campaign == null)
 			{
-				_Logger.LogInformation("Unable to continue in the {action} processing the tweet with Id {tweetId}, UserId {userId} and HarvestedUid {harvestedUid} because the campaign is null.",
+				_Logger.LogInformation("Unable to continue in the {action} processing the tweet with uid {tweetGuid}, UserId {userId} and HarvestedUid {harvestedUid} because the campaign is null.",
 					nameof(TweetProcessor.ProcessTweetAsync),
-					tweet.Id,
+					incomingTweet.IncomingTweetUid,
 					userUid,
 					harvestedUid);
 
@@ -59,9 +59,9 @@ namespace hrvster.ApplicationServices.Processors
 
 			if(rule.Sweep == null)
 			{
-				_Logger.LogInformation("Unable to continue in the {action} processing the tweet with Id {tweetId}, UserId {userId} and HarvestedUid {harvestedUid} because the sweep is null",
+				_Logger.LogInformation("Unable to continue in the {action} processing the tweet with uid {tweetGuid}, UserId {userId} and HarvestedUid {harvestedUid} because the sweep is null",
 					nameof(TweetProcessor.ProcessTweetAsync),
-					tweet.Id,
+					incomingTweet.IncomingTweetUid,
 					userUid,
 					harvestedUid);
 
@@ -97,8 +97,8 @@ namespace hrvster.ApplicationServices.Processors
 					break;
 				case CampaignTypeCode.AutoEnterSweepsFromTweetReplyHashtag:
 					
-					_Logger.LogInformation("Processing the campaign type for the tweet id {tweetId} and campaign name {campaignName}",
-						tweet.Id,
+					_Logger.LogInformation("Processing the campaign type for the tweet uid {tweetGuid} and campaign name {campaignName}",
+						incomingTweet.IncomingTweetUid,
 						rule.Campaign.CampaignName);
 
 					await _mediator.Send( 

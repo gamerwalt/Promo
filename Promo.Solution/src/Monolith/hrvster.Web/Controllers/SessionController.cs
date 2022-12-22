@@ -105,7 +105,12 @@ namespace hrvster.Web.Controllers
 		[HttpPost]
 		public async Task<ActionResult> SignOut()
 		{
-			await _mediator.Publish(new AccountLoggedOut(_sessionManager.GetValue(SessionConstants.UserUid)));
+			var accountUid = _sessionManager.GetValue(SessionConstants.UserUid);
+
+			if(!string.IsNullOrWhiteSpace(accountUid))
+			{
+				await _mediator.Publish(new AccountLoggedOut(accountUid));
+			}
 
 			_sessionManager.RemoveKeyValue(SessionConstants.UserToken);
 			_sessionManager.RemoveKeyValue(SessionConstants.UserUid);

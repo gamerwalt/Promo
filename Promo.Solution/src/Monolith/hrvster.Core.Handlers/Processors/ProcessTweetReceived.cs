@@ -20,9 +20,9 @@ namespace hrvster.Core.Handlers.Processors
 
 		public async Task Handle(TweetReceived notification, CancellationToken cancellationToken)
 		{
-			_logger.LogInformation("{action} handling notification to process tweet with id {tweetId}.",
+			_logger.LogInformation("{action} handling notification to process tweet with uid {tweetGuid}.",
 				nameof(ProcessTweetReceived),
-				notification.Tweet.Id);
+				notification.IncomingTweet.IncomingTweetUid);
 
 			await _tweetProcessor.ProcessTweetAsync(
 				notification.IncomingTweet,
