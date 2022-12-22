@@ -16,7 +16,7 @@ namespace TestUtilities.Common
             string routePath) where TFeature : class
         {
             feature.Response.Should().NotBeNull();
-            feature.Response.Headers.Location.ToString().Should().Contain(routePath);
+            feature.Response.Headers.Location.ToString().ToUpper().Should().Contain(routePath.ToUpper());
 
             return feature as TFeature;
         }

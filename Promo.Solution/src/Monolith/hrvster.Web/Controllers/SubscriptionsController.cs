@@ -25,6 +25,7 @@ namespace hrvster.Web.Controllers
 			return RedirectToAction(subscriptionStatus);
 		}
 
+		[Route("/Subscriptions/Unsubscribed")]
 		public async Task<ActionResult> UnSubscribed()
 		{
 			var plans = await _mediator.Send(new GetPlansRequest());

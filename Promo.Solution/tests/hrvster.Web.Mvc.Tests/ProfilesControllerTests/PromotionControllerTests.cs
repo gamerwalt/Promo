@@ -18,6 +18,7 @@ using TestUtilities.Data;
 using TestUtilities.Extensions;
 using TestUtilities.Mocks.Authentication;
 using TestUtilities.Mocks.Notifications;
+using TestUtilities.Mocks.Subscriptions;
 using Xunit;
 
 namespace ControllerTests
@@ -39,7 +40,9 @@ namespace ControllerTests
                 services =>
                 {
                     services.MockAuthenticiation();
-                })
+                    services.MockIsSubscribedSubscription();
+
+				})
                 .WhenILoadThePromotionsPage()
                 .ThenTheResponseShouldMatch<Feature, string>(HttpStatusCode.OK, view =>
                 {
@@ -59,7 +62,8 @@ namespace ControllerTests
                 services =>
                 {
                     services.MockAuthenticiation();
-                })
+					services.MockIsSubscribedSubscription();
+				})
                 .WhenIloadThePromotionCreationPage()
                 .ThenTheResponseShouldMatch<Feature, string>(HttpStatusCode.OK, view =>
                 {
@@ -98,7 +102,8 @@ namespace ControllerTests
                 .Initialize(additionalServiceConfiguration:
                 services =>
                 {
-                    services.MockFirebaseAuthManager(mock =>
+					services.MockIsSubscribedSubscription();
+					services.MockFirebaseAuthManager(mock =>
                     {
                         mock.SetupCreateuserSuccess();
                         mock.SetupGenerateEmailVerificationLinkAsync();
@@ -157,7 +162,8 @@ namespace ControllerTests
                 .Initialize(additionalServiceConfiguration:
                 services =>
                 {
-                    services.MockFirebaseAuthManager(mock =>
+					services.MockIsSubscribedSubscription();
+					services.MockFirebaseAuthManager(mock =>
                     {
                         mock.SetupCreateuserSuccess();
                         mock.SetupGenerateEmailVerificationLinkAsync();

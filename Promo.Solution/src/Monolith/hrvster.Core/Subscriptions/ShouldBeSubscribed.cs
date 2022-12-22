@@ -1,5 +1,4 @@
 ﻿using hrvster.Core.Authentication;
-using hrvster.Infrastructure.Subscriptions;
 using hrvster.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
@@ -17,23 +16,17 @@ namespace hrvster.Core.Subscriptions
 	public class ShouldBeSubscribedFilter : IAuthorizationFilter
 	{
 		private readonly HrvsterUser _hrvsterUser;
-		private readonly Subscription _subscription;
 		private readonly ILogger<ShouldBeSubscribedFilter> _logger;
-		private readonly IAccountSubscriptionsRepository _repository;
-		private readonly ISessionManager _sessionManager;
+		private readonly ISubscriptionService _subscriptionManager;
 
 		public ShouldBeSubscribedFilter(
 			HrvsterUser hrvsterUser,
-			Subscription subscription,
 			ILoggerFactory loggerFactory,
-			IAccountSubscriptionsRepository repository,
-			ISessionManager sessionManager)
+			ISubscriptionService subscriptionManager)
 		{
 			_hrvsterUser = hrvsterUser;
-			_subscription = subscription;
 			_logger = loggerFactory.CreateLogger<ShouldBeSubscribedFilter>();
-			_repository = repository;
-			_sessionManager = sessionManager;
+			_subscriptionManager = subscriptionManager;
 		}
 
 		public void OnAuthorization(AuthorizationFilterContext context)
@@ -55,31 +48,22 @@ namespace hrvster.Core.Subscriptions
 
 		private void IsAccountSubscribed(AuthorizationFilterContext context)
 		{
-			var result = _repository.GetAccountSubscription(_hrvsterUser.UserUid);
+			var subscriptionStatus = _subscriptionManager.IsAccountSubscribed(_hrvsterUser.UserUid);
 
-			if (result == null)
+			switch (subscriptionStatus)
 			{
-				context.Result = new RedirectToActionResult("Index", "Subscriptions", new { subscriptionStatus = SubscriptionStatus.UnSubscribed.ToString() });
-			}
-			else if(result.EndDate.ToUniversalTime() <= DateTime.UtcNow)
-			{
-				context.Result = new RedirectToActionResult(
-					"Index", 
-					"Subscriptions", 
-					new { subscriptionStatus = SubscriptionStatus.SubscribedButEndDate.ToString() });
-			}
-			else
-			{
-				_logger.LogInformation("Account {accountUid} is subscribed with {subscription}", _hrvsterUser.UserUid, result);
-
-				_subscription.PlanName = result.Plan.PlanName;
-				_subscription.IsDiscounted = result.IsDiscounted;
-				_subscription.DiscountedBy = result.DiscountedBy;
-				_subscription.PromotionsPerMonth = result.Plan.PromotionsPerMonth;
-				_subscription.SweepstakesPerMonth = result.Plan.SweepstakesPerMonth;
-				_subscription.SweepstakesMaximumEntries = result.Plan.SweepstakesMaximumEntries;
-				_subscription.PricePerMonth = result.Plan.PricePerMonth;
-				_subscription.PricePerYear = result.Plan.PricePerYear;
+				case SubscriptionStatus.UnSubscribed:
+					context.Result = new RedirectToActionResult(
+						"Index",
+						"Subscriptions",
+						new { subscriptionStatus = SubscriptionStatus.UnSubscribed.ToString() });
+					break;
+				case SubscriptionStatus.SubscribedButEndDate:
+					context.Result = new RedirectToActionResult(
+						"Index",
+						"Subscriptions",
+						new { subscriptionStatus = SubscriptionStatus.SubscribedButEndDate.ToString() });
+					break;
 			}
 		}
 	}

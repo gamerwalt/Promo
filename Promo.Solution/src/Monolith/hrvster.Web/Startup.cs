@@ -73,7 +73,8 @@ namespace hrvster.Web
 				.AddUserRateLimiterService()
 				.AddHttpContextAccessor()
 				.AddFirebaseAuthManager()
-				.AddSessionManager();
+				.AddSessionManager()
+				.AddSubscriptionService();
 		}
 
 

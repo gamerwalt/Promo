@@ -12,5 +12,8 @@
         public const string Promotions = "/Promotions";
         public const string CreatePromotion = "/Promotions/Create";
         public const string ViewPromotion = "/Promotions/View?campaignUid=";
-    }
+
+        public const string Unsubscribed = "/Subscriptions/Unsubscribed";
+
+	}
 }
