@@ -56,6 +56,18 @@ namespace hrvster.Core.Authentication
 			}
 			else
 			{
+				if(User.UserUid == Guid.Empty && 
+					Guid.Parse(_sessionManager.GetValue(SessionConstants.UserUid)) != Guid.Empty)
+				{
+					User.UserUid = Guid.Parse(_sessionManager.GetValue(SessionConstants.UserUid));
+					User.DisplayName = _sessionManager.GetValue(SessionConstants.UserDisplayName);
+					User.Token = token;
+					User.EmailAddress = _sessionManager.GetValue(SessionConstants.UserEmail);
+					User.Locale = _sessionManager.GetValue(SessionConstants.Locale);
+					User.WindowsTimeZone = _sessionManager.GetValue(SessionConstants.WindowsLocale);
+					User.IsDaylight = bool.Parse(_sessionManager.GetValue(SessionConstants.IsDaylight));
+				}
+
 				_logger.LogWarning("Request passed. Contains token");
 				try
 				{

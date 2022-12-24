@@ -3,6 +3,7 @@ using hrvster.Core.Authentication;
 using hrvster.Core.Requests;
 using hrvster.Core.Requests.ApiRequests;
 using hrvster.Core.Requests.WebRequests.Sweeps;
+using hrvster.Core.Subscriptions;
 using hrvster.Extensions.ModelExtensions;
 using hrvster.Models.Options;
 using hrvster.Models.WebModels.Sweeps;
@@ -23,6 +24,7 @@ using Winner = hrvster.Web.Models.Winner;
 namespace hrvster.Web.Controllers
 {
 	[FirebaseAuthorize]
+	[ShouldBeSubscribed]
 	public class SweepsController : Controller
 	{
 		private readonly ILogger<SweepsController> _logger;

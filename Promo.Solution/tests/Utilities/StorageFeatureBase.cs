@@ -25,6 +25,7 @@ namespace TestUtilities
                 services.AddSweepstakesRepositories();
                 services.AddAccountRepositories();
                 services.AddEmailRepository();
+                services.AddSingletons();
 
                 services.MockFirebaseAuthManager();
             };

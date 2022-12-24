@@ -67,22 +67,33 @@ namespace hrvster.Infrastructure
 		{
 			var account = default(Account);
 
-			using (var conn = new MySqlConnection(_database.GetConnectionString()))
+			try
 			{
-				var command = conn.CreateCommand();
-				command.CommandText = "account_get_by_uid";
-				command.CommandType = CommandType.StoredProcedure;
-				command.AddParameter("accountUid", accountUid);
-
-				await conn.OpenAsync();
-				using (var reader = await command.ExecuteReaderAsync())
+				using (var conn = new MySqlConnection(_database.GetConnectionString()))
 				{
-					while (await reader.ReadAsync())
+					var command = conn.CreateCommand();
+					command.CommandText = "account_get_by_uid";
+					command.CommandType = CommandType.StoredProcedure;
+					command.AddParameter("accountUid", accountUid);
+
+					await conn.OpenAsync();
+					using (var reader = await command.ExecuteReaderAsync())
 					{
-						account = CreateAccountFrom(reader);
+						while (await reader.ReadAsync())
+						{
+							account = CreateAccountFrom(reader);
+						}
 					}
 				}
 			}
+			catch (Exception ex)
+			{
+
+				throw;
+			}
+			
+
+			
 
 			return account;
 		}

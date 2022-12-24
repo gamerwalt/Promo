@@ -13,7 +13,10 @@
         public const string CreatePromotion = "/Promotions/Create";
         public const string ViewPromotion = "/Promotions/View?campaignUid=";
 
-        public const string Unsubscribed = "/Subscriptions/Unsubscribed";
+        public const string SweepsPage = "/Sweeps";
+
+
+		public const string Unsubscribed = "/Subscriptions/Unsubscribed";
 
 	}
 }

@@ -2,6 +2,7 @@
 using hrvster.Core.Requests.WebRequests;
 using hrvster.Web.Mvc.Common.Steps;
 using hrvster.Web.Mvc.Common.Steps.Promotion;
+using hrvster.Web.Mvc.Common.Steps.Sweeps;
 using System.Net;
 using TestUtilities;
 using TestUtilities.Common;
@@ -25,8 +26,6 @@ namespace ControllerTests
 		[Fact]
 		public void When_We_Visit_The_Promotions_Page_And_We_Are_Not_Subscribed_We_Should_Be_Redirected()
 		{
-			var form = new SigninForm() { Email = TestData.EmailAddress, Password = TestData.Password };
-
 			_feature
 				.GiveACleanSlate()
 				.Initialize(additionalServiceConfiguration:
@@ -45,8 +44,6 @@ namespace ControllerTests
 		[Fact]
 		public void When_We_Visit_The_Promotions_Page_And_We_Are_Subscribed_We_Should_Good()
 		{
-			var form = new SigninForm() { Email = TestData.EmailAddress, Password = TestData.Password };
-
 			_feature
 				.GiveACleanSlate()
 				.Initialize(additionalServiceConfiguration:
@@ -64,6 +61,46 @@ namespace ControllerTests
 					view.Should().NotBeNullOrEmpty();
 					view.Should().Contain("Promotions");
 					view.Should().Contain("Add Promotion");
+				});
+		}
+
+		[Fact]
+		public void When_We_Visit_The_Sweeps_Page_And_We_Are_Not_Subscribed_We_Should_Be_Redirected()
+		{
+			_feature
+				.GiveACleanSlate()
+				.Initialize(additionalServiceConfiguration:
+				services =>
+				{
+					services.MockAuthenticiation();
+					services.MockSubscription(mock =>
+					{
+						mock.MockIsNotSubscribed();
+					});
+				})
+				.WhenILoadTheSweepsPage()
+				.ThenTheRedirectedLocationShouldContain("Unsubscribed");
+		}
+
+		[Fact]
+		public void When_We_Visit_The_Sweeps_Page_And_We_Are_Subscribed_We_Should_Be_Good()
+		{
+			_feature
+				.GiveACleanSlate()
+				.Initialize(additionalServiceConfiguration:
+				services =>
+				{
+					services.MockAuthenticiation();
+					services.MockSubscription(mock =>
+					{
+						mock.MockIsSubscribed();
+					});
+				})
+				.WhenILoadTheSweepsPage()
+				.ThenTheResponseShouldMatch<Feature, string>(HttpStatusCode.OK, view =>
+				{
+					view.Should().NotBeNullOrEmpty();
+					view.Should().Contain("Sweepstakes");
 				});
 		}
 	}

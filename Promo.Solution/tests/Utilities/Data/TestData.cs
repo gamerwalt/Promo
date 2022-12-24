@@ -49,5 +49,9 @@ namespace TestUtilities.Data
 
         public const string PromotionName = "Test Promotion";
         public static Guid CampaignTypeUid = Guid.Parse("3e5431d6-ba17-41f4-8f21-fd2d70245845");
-    }
+
+        public const string WindowsTimezone = "W. Central Africa Standard Time";
+        public const string Locale = "Nigeria";
+
+	}
 }
