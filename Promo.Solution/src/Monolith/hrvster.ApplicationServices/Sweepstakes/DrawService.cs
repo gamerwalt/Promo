@@ -1,4 +1,5 @@
-﻿using hrvster.Core.Requests.ServiceRequests;
+﻿using hrvster.Core.Requests;
+using hrvster.Core.Requests.ServiceRequests;
 using hrvster.Models;
 using hrvster.Models.Sweepstakes;
 using MediatR;
@@ -42,8 +43,17 @@ namespace hrvster.ApplicationServices.Sweepstakes
 					rule.Campaign.CampaignName);
 
 				var entries = await PreDrawAsync(rule);
+				var winners = await _mediator.Send(new GetSweepWinners(rule.Sweep.SweepUid));
+
 				if (entries == null || entries.Count() == 0)
 					continue;
+
+				if(winners.Count() >= 0)
+				{
+					_logger.LogWarning("The sweepstake {sweepName} already has winners. Exiting.", rule.Sweep.Name);
+
+					continue;
+				}
 
 				var drawProperties = await _mediator.Send(new GetDrawPropertiesRequest(rule, entries));
 

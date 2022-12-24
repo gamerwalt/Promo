@@ -70,9 +70,9 @@
             NO PURCHASE OR PAYMENT OF ANY KIND IS NECESSARY TO ENTER OR WIN. A PURCHASE WILL NOT INCREASE YOUR CHANCE OF WINNING.
         </p>
         <p>
-            Sweepstake Period: Sweepstake starts @Model.Sweepstake.StartDate.ToUniversalTime().ToString("f") UTC and ends
-            @Model.Sweepstake.EndDate.ToUniversalTime().ToString("f") UTC and will consist of a draw that will take place
-            @Model.Sweepstake.DrawDate.GetValueOrDefault().ToUniversalTime().ToString("f")
+            Sweepstake Period: Sweepstake starts @Model.Sweepstake.StartDate.ToString("MMM dd, yyyy, hh:mm:ss tt") UTC and ends
+            @Model.Sweepstake.EndDate.ToString("MMM dd, yyyy, hh:mm:ss tt") UTC and will consist of a draw that will take place
+            @Model.Sweepstake.DrawDate.GetValueOrDefault().ToString("MMM dd, yyyy, hh:mm:ss tt")
         </p>
         <ol>
             <li>
@@ -96,7 +96,7 @@
             <li>
                 <strong>HOW TO ENTER: No Purchase Necessary</strong>Reply to the tweets below and make sure you at least key in the hashtag.
                 Please ensure your account on twitter is verifiable. All entries must be in the form of a reply to any of the tweets below and must be 
-                twitted by @Model.Sweepstake.EndDate.ToString("f") UTC.
+                twitted by @Model.Sweepstake.EndDate.ToString("MMM dd, yyyy, hh:mm:ss tt") UTC.
                 <table cellpadding="6" cellspacing="6" align="center">
                     <caption><strong>Rules</strong></caption>
                     <thead>

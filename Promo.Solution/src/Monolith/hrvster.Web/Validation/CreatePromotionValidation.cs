@@ -10,11 +10,11 @@ namespace hrvster.Web.Validation
 {
 	public class CreatePromotionValidation : AbstractValidator<CreatePromotion>
 	{
-		private readonly HrvsterUser _hrvsterUser;
+		private readonly hrvster.Models.HrvsterUser _hrvsterUser;
 		private readonly ICampaignRepository _campaignsRepository;
 		private readonly PromotionConfigurationOptions _promotionConfigurationOptions;
 		public CreatePromotionValidation(
-			HrvsterUser hrvsterUser,
+			hrvster.Models.HrvsterUser hrvsterUser,
 			ICampaignRepository campaignsRepository,
 			PromotionConfigurationOptions promotionConfigurationOptions)
 		{
@@ -33,11 +33,11 @@ namespace hrvster.Web.Validation
 				.NotEmpty()
 				.NotNull()
 				.Must(x => BeGreaterThanConfiguredNumberOfDays(x))
-					.WithMessage($"The promotion start date must be from {minDate.ToString("f")}");
+					.WithMessage($"The promotion start date must be from {minDate.ToString("MMM dd, yyyy, hh:mm:ss tt")}");
 
 			RuleFor(x => x)
 				.Must(x => x.EndDate > x.StartDate)
-					.WithMessage(x => $"The start date {x.StartDate.ToString("f")} must come before the end date {x.EndDate.ToString("f")}.");
+					.WithMessage(x => $"The start date {x.StartDate.ToString("MMM dd, yyyy, hh:mm:ss tt")} must come before the end date {x.EndDate.ToString("MMM dd, yyyy, hh:mm:ss tt")}.");
 
 			RuleFor(x => x.CampaignTypeUid)
 				.NotEmpty()

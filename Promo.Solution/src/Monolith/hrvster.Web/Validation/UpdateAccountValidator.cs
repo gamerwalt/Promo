@@ -7,10 +7,10 @@ namespace hrvster.Web.Validation
 {
 	public class UpdateAccountValidator : AbstractValidator<UpdateAccount>
 	{
-		private readonly HrvsterUser _hrvsterUser;
+		private readonly hrvster.Models.HrvsterUser _hrvsterUser;
 		private readonly IAccountsRepository _repository;
 
-		public UpdateAccountValidator(HrvsterUser hrvsterUser, IAccountsRepository repository)
+		public UpdateAccountValidator(hrvster.Models.HrvsterUser hrvsterUser, IAccountsRepository repository)
 		{
 			_hrvsterUser = hrvsterUser;
 			_repository = repository;

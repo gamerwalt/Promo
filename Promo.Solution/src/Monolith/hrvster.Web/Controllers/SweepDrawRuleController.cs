@@ -20,14 +20,14 @@ namespace hrvster.Web.Controllers
 		private readonly IMediator _mediator;
 		private readonly SweepstakeConfiguration _sweepConfig;
 		private readonly IToastNotification _notificationService;
-		private readonly HrvsterUser _hrvsterUser;
+		private readonly hrvster.Models.HrvsterUser _hrvsterUser;
 
 		public SweepDrawRuleController(
 			ILoggerFactory loggerFactory,
 			IMediator mediator,
 			SweepstakeConfiguration sweepConfig,
 			IToastNotification notificationService,
-			HrvsterUser hrvsterUser)
+			hrvster.Models.HrvsterUser hrvsterUser)
 		{
 			_logger = loggerFactory.CreateLogger<SweepDrawRuleController>();
 			_mediator = mediator;

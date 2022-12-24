@@ -13,17 +13,21 @@ namespace hrvster.Core.Requests
     public class CreateSweep : IRequest<Sweep>
     {
         private NewSweepRequest request;
+		private string _timezoneId;
 
-        public CreateSweep(NewSweepRequest request)
+        public CreateSweep(NewSweepRequest request, string timezoneId)
         {
             this.request = request;
+			_timezoneId= timezoneId;
         }
 
         public NewSweepRequest Sweep
         {
             get { return request; }
         }
-    }
+		public string TimeZoneId { get { return _timezoneId; } }
+
+	}
 
     public class CreateSweepRequestHandler : IRequestHandler<CreateSweep, Sweep>
     {
@@ -62,7 +66,7 @@ namespace hrvster.Core.Requests
                 StartDate = request.Sweep.StartDate,
                 EndDate = request.Sweep.EndDate,
 				DrawDate = request.Sweep.DrawDate
-            });
+            }, request.TimeZoneId );
 
 			var sweep = await _repository.GetAsync(sweepUid);
 

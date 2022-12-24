@@ -17,6 +17,7 @@ namespace hrvster.Core.Requests.WebRequests.Publishing
 		private Sweep _sweep;
 		private IEnumerable<string> _mediaLocation;
 		private bool _mustBeFollowing;
+		private string _timeZoneId;
 
 		public PublishSweepRuleTweetRequest(
 			Sweep sweep,
@@ -27,7 +28,8 @@ namespace hrvster.Core.Requests.WebRequests.Publishing
 			bool postNow,
 			DateTime scheduledDate,
 			bool mustBeFollowing,
-			IEnumerable<string> mediaLocation)
+			IEnumerable<string> mediaLocation,
+			string timeZoneId)
 		{
 			_profile = profile;
 			_watchTypeId = watchTypeId;
@@ -38,7 +40,10 @@ namespace hrvster.Core.Requests.WebRequests.Publishing
 			_sweep = sweep;
 			_mediaLocation = mediaLocation;
 			_mustBeFollowing = mustBeFollowing;
+			_timeZoneId = timeZoneId;
 		}
+
+		public string TimeZoneId { get { return _timeZoneId; } }
 
 		public Profile Profile
 		{

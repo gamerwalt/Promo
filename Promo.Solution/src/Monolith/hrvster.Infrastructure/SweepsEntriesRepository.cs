@@ -192,8 +192,11 @@ namespace hrvster.Infrastructure
 					SweepUid = reader.GetGuid("sweep_uid"),
 					Name = reader.GetString("sweep_name"),
 					StartDate = reader.GetDateTime("start_date"),
+					StartDateUtc = reader.GetDateTime("start_date_utc"),
 					EndDate = reader.GetDateTime("end_date"),
+					EndDateUtc = reader.GetDateTime("end_date_utc"),
 					DrawDate = reader.GetDateTime("draw_date"),
+					DrawDateUtc = reader.GetDateTime("draw_date_utc"),
 					CreatedDate = reader.GetDateTime("sweep_created_date")
 				}
 			};

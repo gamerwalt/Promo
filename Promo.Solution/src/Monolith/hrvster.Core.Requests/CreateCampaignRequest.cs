@@ -16,23 +16,28 @@ namespace hrvster.Core.Requests
         private NewCampaignRequest request;
         private ClaimsPrincipal user;
 		private Guid accountUid;
+		private string timezoneId;
 
-		public CreateCampaignRequest(NewCampaignRequest request, ClaimsPrincipal user)
+		public CreateCampaignRequest(NewCampaignRequest request, ClaimsPrincipal user, string timezoneId)
         {
             this.request = request;
             this.user = user;
+			this.timezoneId = timezoneId;
         }
 
-		public CreateCampaignRequest(NewCampaignRequest newCampaignRequest, Guid userUid)
+		public CreateCampaignRequest(NewCampaignRequest newCampaignRequest, Guid userUid, string timezoneId)
 		{
-			request = newCampaignRequest;
-			accountUid = userUid;
+			this.request = newCampaignRequest;
+			this.accountUid = userUid;
+			this.timezoneId = timezoneId;
 		}
 
 		public NewCampaignRequest NewCampaign
         {
             get { return request; }
         }
+
+		public string TimezoneId { get { return timezoneId; } }
 
         public Guid AccountUid
         {
@@ -75,7 +80,7 @@ namespace hrvster.Core.Requests
 				{
 					AccountUid = request.AccountUid
 				}
-            });
+            }, request.TimezoneId);
 
             await _mediator.Publish(new CampaignCreated(request.NewCampaign, request.AccountUid, campaignUid));
 

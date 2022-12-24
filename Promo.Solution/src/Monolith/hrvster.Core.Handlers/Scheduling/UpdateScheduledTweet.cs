@@ -41,7 +41,7 @@ namespace hrvster.Core.Handlers.Scheduling
 			try
 			{
 				await _repository.BeginTransaction();
-				await _repository.UpdateScheduledTweetAsync(request.ScheduledUid, request.ScheduledTime, request.Text);
+				await _repository.UpdateScheduledTweetAsync(request.ScheduledUid, request.ScheduledTime, request.Text, request.TimeZoneId);
 
 				if(NoPreviuosMedia(request))
 				{

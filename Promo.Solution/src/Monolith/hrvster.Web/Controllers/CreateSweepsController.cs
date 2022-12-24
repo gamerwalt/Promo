@@ -107,7 +107,8 @@ namespace hrvster.Web.Controllers
 					form.EndDate,
 					form.DrawDate,
 					campaignUid,
-					_hrvsterUser.UserUid));
+					_hrvsterUser.UserUid,
+					_hrvsterUser.WindowsTimeZone));
 
 				_notificationService.AddSuccessToastMessage("Sweepstake created successfully.");
 
@@ -181,7 +182,7 @@ namespace hrvster.Web.Controllers
 			{
 				if(IsFormDirty(form, sweep))
 				{
-					await _mediator.Send(new UpdateSweepstakeRequest(sweep, sweepUid, form.Name, form.StartDate, form.EndDate, form.DrawDate));
+					await _mediator.Send(new UpdateSweepstakeRequest(sweep, sweepUid, form.Name, form.StartDate, form.EndDate, form.DrawDate, _hrvsterUser.WindowsTimeZone));
 
 					_notificationService.AddSuccessToastMessage("Sweep updated successfully.");
 				}

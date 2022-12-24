@@ -209,8 +209,11 @@ namespace hrvster.Infrastructure
 					Name = reader.GetStringValue("sweep_name"),
 					RulesUrl = reader.GetStringValue("rules_url"),
 					StartDate = reader.GetDateTime("start_date"),
+					StartDateUtc = reader.GetDateTime("start_date_utc"),
 					EndDate = reader.GetDateTime("end_date"),
+					EndDateUtc = reader.GetDateTime("end_date_utc"),
 					DrawDate = reader.GetDateTime("draw_date"),
+					DrawDateUtc =reader.GetDateTime("draw_date_utc"),
 					DateDrawn = reader.GetNullableDateTimeValue("date_drawn"),
 					Account = new Account
 					{

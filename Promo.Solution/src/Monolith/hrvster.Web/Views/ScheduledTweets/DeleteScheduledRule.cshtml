@@ -41,7 +41,7 @@
 								<label class="required d-flex align-items-center fs-6 fw-semibold form-label mb-2">
 									Scheduled Time
 								</label>
-								<label class="fs-6 fw-semibold">@Model.ScheduledTime.ToString("f")</label>
+								<label class="fs-6 fw-semibold">@Model.ScheduledTime.ToString("MMM dd, yyyy, hh:mm:ss tt")</label>
 							</div>
 							<div class="fv-row mb-8">
 								<label class="required d-flex align-items-center fs-6 fw-semibold form-label mb-2">
@@ -108,9 +108,9 @@
 						<div class="mb-7">
 							<h5 class="mb-3">Dates</h5>
 							<div class="mb-0">
-								<span class="badge badge-light-info me-2 fs-6">Start Date: @Model.Sweepstake.StartDate.ToString("f")</span>
-								<span class="badge badge-light-info me-2 fs-6">End Date: @Model.Sweepstake.EndDate.ToString("f")</span>
-                                <span class="badge badge-light-info me-2 fs-6">End Date: @Model.Sweepstake.DrawDate.GetValueOrDefault().ToString("f")</span>
+								<span class="badge badge-light-info me-2 fs-6">Start Date: @Model.Sweepstake.StartDate.ToString("MMM dd, yyyy, hh:mm:ss tt")</span>
+								<span class="badge badge-light-info me-2 fs-6">End Date: @Model.Sweepstake.EndDate.ToString("MMM dd, yyyy, hh:mm:ss tt")</span>
+                                <span class="badge badge-light-info me-2 fs-6">End Date: @Model.Sweepstake.DrawDate.GetValueOrDefault().ToString("MMM dd, yyyy, hh:mm:ss tt")</span>
 							</div>
 						</div>
 						<div class="separator separator-dashed mb-7"></div>

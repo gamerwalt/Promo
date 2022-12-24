@@ -7,13 +7,13 @@ namespace hrvster.Extensions.ModelExtensions
 	{
 		public static bool IsActive(this Sweep sweep)
 		{
-			return DateTime.UtcNow >= sweep.StartDate.ToUniversalTime() &&
-				DateTime.UtcNow <= sweep.EndDate.ToUniversalTime();
+			return DateTime.UtcNow >= sweep.StartDateUtc &&
+				DateTime.UtcNow <= sweep.EndDateUtc;
 		}
 
 		public static bool WillBeActiveInTheFuture(this Sweep sweep)
 		{
-			return DateTime.UtcNow <= sweep.StartDate.ToUniversalTime();
+			return DateTime.UtcNow <= sweep.StartDateUtc;
 		}
 	}
 }

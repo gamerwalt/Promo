@@ -7,6 +7,7 @@ using System.Data;
 using System.Net.Mail;
 using System.Threading;
 using System.Threading.Tasks;
+using Tweetinvi.Core.Models.Properties;
 
 namespace hrvster.Infrastructure
 {
@@ -33,9 +34,12 @@ namespace hrvster.Infrastructure
 	public class AccountsRepository : IAccountsRepository
 	{
 		private readonly IDatabase _database;
-		public AccountsRepository(IDatabase database)
+		private readonly HrvsterUser _hrvsterUser;
+
+		public AccountsRepository(IDatabase database, HrvsterUser hrvsterUser)
 		{
 			_database = database;
+			_hrvsterUser = hrvsterUser;
 		}
 
 		public async Task CreateAsync(Account account)
@@ -123,7 +127,8 @@ namespace hrvster.Infrastructure
 				TermsAccepted = reader.GetBoolean("terms_accepted"),
 				TwitterUserName = reader.GetStringValue("twitter_user_name"),
 				CreatedDate = reader.GetDateTime("created_date"),
-				UpdatedDate = GetNullableDateTimeValue(reader, "updated_date")
+				UpdatedDate = GetNullableDateTimeValue(reader, "updated_date"),
+				Locale = reader.GetStringValue("locale")
 			};
 		}
 
@@ -365,13 +370,20 @@ namespace hrvster.Infrastructure
 
 		public async Task UpdateLastLoginAsync(Guid accountUid)
 		{
+			var lastLoginDateUtc = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.Now, TimeZoneInfo.Local.Id, _hrvsterUser.WindowsTimeZone);
+
+			if (!_hrvsterUser.IsDaylight)
+			{
+				lastLoginDateUtc = lastLoginDateUtc.AddHours(-2);
+			}
+
 			using var conn = new MySqlConnection(_database.GetConnectionString());
 			var command = conn.CreateCommand();
 			command.CommandText = "account_update_last_login";
 			command.CommandType = CommandType.StoredProcedure;
 			command
 				.AddParameter("lastLoginDate", DateTime.Now)
-				.AddParameter("lastLoginDateUTC", DateTime.UtcNow)
+				.AddParameter("lastLoginDateUTC", lastLoginDateUtc)
 				.AddParameter("accountUid", accountUid);
 
 			await conn.OpenAsync();

@@ -11,6 +11,7 @@ namespace hrvster.Core.Requests.WebRequests.Promotions
 		private Guid _campaignTypeUid;
 		private DateTime _startDate;
 		private DateTime _endDate;
+		private string _timezone;
 
 		public UpdatePromotionRequest(
 			Guid campaignUid,
@@ -18,7 +19,8 @@ namespace hrvster.Core.Requests.WebRequests.Promotions
 			string description,
 			Guid campaignTypeUid,
 			DateTime startDate,
-			DateTime endDate)
+			DateTime endDate,
+			string timezone)
 		{
 			_campaignUid = campaignUid;
 			_campaignName = campaignName;
@@ -26,6 +28,7 @@ namespace hrvster.Core.Requests.WebRequests.Promotions
 			_campaignTypeUid = campaignTypeUid;
 			_startDate = startDate;
 			_endDate = endDate;
+			_timezone = timezone;
 		}
 
 		public Guid CampaignUid { get { return _campaignUid; } }
@@ -34,5 +37,6 @@ namespace hrvster.Core.Requests.WebRequests.Promotions
 		public Guid CampaignTypeUid { get { return _campaignTypeUid; } }
 		public DateTime StartDate { get { return _startDate; } }
 		public DateTime EndDate { get { return _endDate; } }
+		public string TimeZone { get { return _timezone;} }
 	}
 }

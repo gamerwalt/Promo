@@ -29,7 +29,7 @@ namespace hrvster.Core.Handlers.Promotions
 		{
 			var model = CreateCampaignModel(request);
 
-			await _repository.CreateCampaignAsync(model);
+			await _repository.CreateCampaignAsync(model, request.TimeZone);
 
 			await _mediator.Publish(new PromotionCreated(model));
 		}

@@ -187,7 +187,7 @@ namespace hrvster.Web.Controllers
 
 			if (ModelState.IsValid)
 			{
-				await _mediator.Send(new UpdateScheduledTweetRequest(_hrvsterUser.UserUid, rule, sweep, scheduledUid, form.Text, form.ScheduledTime, form.PreviousMediaId1, form.Media1, form.PreviousMediaId2, form.Media2, form.PreviousMediaId3, form.Media3, form.PreviousMediaId4, form.Media4));
+				await _mediator.Send(new UpdateScheduledTweetRequest(_hrvsterUser.UserUid, rule, sweep, scheduledUid, form.Text, form.ScheduledTime, form.PreviousMediaId1, form.Media1, form.PreviousMediaId2, form.Media2, form.PreviousMediaId3, form.Media3, form.PreviousMediaId4, form.Media4, _hrvsterUser.WindowsTimeZone));
 
 				_notificationService.AddSuccessToastMessage("Scheduled tweet updated successfully.");
 			}

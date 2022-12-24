@@ -59,7 +59,7 @@ namespace hrvster.Core.Handlers.Publishing
 
 			if (!request.PostNow)
 			{
-				return await SaveScheduledTweetAsync(message, request.MustBeFollowing);
+				return await SaveScheduledTweetAsync(message, request.MustBeFollowing, request.TimeZoneId);
 			}
 
 			var twitterPublisher = _publisherResolver(ExternalClientType.Twitter);
@@ -82,14 +82,14 @@ namespace hrvster.Core.Handlers.Publishing
 			return true;
 		}
 
-		private async Task<bool> SaveScheduledTweetAsync(Message message, bool mustBeFollowing)
+		private async Task<bool> SaveScheduledTweetAsync(Message message, bool mustBeFollowing, string timeZoneId)
 		{
 			try
 			{
 				await _repository.BeginTransaction();
 
 				var ruleUid = await SaveRule(message, mustBeFollowing);
-				var uid = await SaveScheduledTweet(ruleUid, message);
+				var uid = await SaveScheduledTweet(ruleUid, message, timeZoneId);
 				await SaveScheduledTweetImages(uid, message);
 
 				await _repository.CommitTransaction();
@@ -121,7 +121,7 @@ namespace hrvster.Core.Handlers.Publishing
 			}
 		}
 
-		private async Task<Guid> SaveScheduledTweet(Guid ruleUid, Message message)
+		private async Task<Guid> SaveScheduledTweet(Guid ruleUid, Message message, string timeZoneId)
 		{
 			var scheduledUid = Guid.NewGuid();
 
@@ -140,7 +140,7 @@ namespace hrvster.Core.Handlers.Publishing
 				ScheduledTimeUtc = message.ScheduledDate.ToUniversalTime(),
 				Status = ScheduledStatus.New,
 				Text = message.Text
-			});
+			}, timeZoneId);
 
 			return scheduledUid;
 		}

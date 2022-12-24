@@ -11,12 +11,12 @@ namespace hrvster.Web.Validation
 	{
 		private readonly ICampaignRepository _campaignRepository;
 		private readonly ISweepsRepository _sweepsRepository;
-		private readonly HrvsterUser _hrvsterUser;
+		private readonly hrvster.Models.HrvsterUser _hrvsterUser;
 
 		public CreateSweepValidator(
 			ICampaignRepository campaignRepository,
 			ISweepsRepository sweepsRepository,
-			HrvsterUser hrvsterUser)
+			hrvster.Models.HrvsterUser hrvsterUser)
 		{
 			_campaignRepository = campaignRepository;
 			_sweepsRepository = sweepsRepository;
@@ -38,7 +38,7 @@ namespace hrvster.Web.Validation
 				.WithMessage("The sweepstake start date should be between the promotion dates.");
 
 			RuleFor(sweepStake => sweepStake)
-				.Must(sweepStake => sweepStake.EndDate.ToUniversalTime() > sweepStake.StartDate.ToUniversalTime())
+				.Must(sweepStake => sweepStake.EndDate > sweepStake.StartDate)
 				.WithMessage(sweepStake => $"The start date {sweepStake.StartDate.ToString("d")} must come before the end date {sweepStake.EndDate.ToString("d")}");
 
 			RuleFor(sweepStake => sweepStake.EndDate)
@@ -82,13 +82,13 @@ namespace hrvster.Web.Validation
 
 			if (campaign == null) return true;
 
-			return inputDate.ToUniversalTime() > campaign.StartDate.ToUniversalTime() &&
-				inputDate.ToUniversalTime() <= campaign.EndDate.ToUniversalTime();
+			return inputDate > campaign.StartDate &&
+				inputDate <= campaign.EndDate;
 		}
 
 		private bool BeGreaterThanToday(DateTime startDate)
 		{
-			return startDate.ToUniversalTime() > DateTime.UtcNow;
+			return startDate > DateTime.Now;
 		}
 	}
 }

@@ -10,26 +10,38 @@ namespace hrvster.Infrastructure
 {
 	public interface ICampaignRepository
 	{
-		Task CreateCampaignAsync(Models.Campaign campaign);
+		Task CreateCampaignAsync(Campaign campaign, string timezoneId);
 		Task<Campaign> GetCampaignByUidAsync(Guid campaignUid, Guid accountUid);
-		Task UpdateCampaignAsync(Guid campaignUid, Models.Campaign campaign);
+		Task UpdateCampaignAsync(Guid campaignUid, Campaign campaign, string timezoneId);
 		Task<List<Campaign>> GetAccountCampaignsAsync(Guid accountUid);
 		List<Campaign> GetAccountCampaigns(Guid userUid);
 		Task<Campaign> GetCampaignByUidAsync(Guid campaignUid);
-		Task UpdateCampaignAsync(Guid campaignUid, string campaignName, string description, Guid campaignTypeUid, DateTime startDate, DateTime endDate);
+		Task UpdateCampaignAsync(Guid campaignUid, string campaignName, string description, Guid campaignTypeUid, DateTime startDate, DateTime endDate, string timezoneId);
 		Campaign GetCampaignByUid(Guid campaignUid, Guid userUid);
 	}
 
 	public class CampaignRepository : ICampaignRepository
 	{
 		private readonly IDatabase _database;
-		public CampaignRepository(IDatabase database)
+		private readonly HrvsterUser _hrvsterUser;
+
+		public CampaignRepository(IDatabase database, HrvsterUser hrvsterUser)
 		{
 			_database = database;
+			_hrvsterUser = hrvsterUser;
 		}
 
-		public async Task CreateCampaignAsync(Campaign campaign)
+		public async Task CreateCampaignAsync(Campaign campaign, string timezoneId)
 		{
+			var startDateUtc = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(campaign.StartDate, TimeZoneInfo.Local.Id, timezoneId);
+			var endDateUtc = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(campaign.EndDate, TimeZoneInfo.Local.Id, timezoneId);
+
+			if(!_hrvsterUser.IsDaylight)
+			{
+				startDateUtc = startDateUtc.AddHours(-2);
+				endDateUtc = endDateUtc.AddHours(-2);
+			}
+
 			using var conn = new MySqlConnection(_database.GetConnectionString());
 			var command = conn.CreateCommand();
 			command.CommandText = "campaign_create";
@@ -39,9 +51,9 @@ namespace hrvster.Infrastructure
 				.AddParameter("campaignName", campaign.CampaignName)
 				.AddParameter("campaignDescription", campaign.Description)
 				.AddParameter("startDate", campaign.StartDate)
-				.AddParameter("startDateUtc", campaign.StartDate.ToUniversalTime())
+				.AddParameter("startDateUtc", startDateUtc)
 				.AddParameter("endDate", campaign.EndDate)
-				.AddParameter("endDateUtc", campaign.EndDate.ToUniversalTime())
+				.AddParameter("endDateUtc", endDateUtc)
 				.AddParameter("campaignTypeUid", campaign.CampaignType.CampaignTypeUid)
 				.AddParameter("accountUid", campaign.Account.AccountUid);
 
@@ -161,8 +173,17 @@ namespace hrvster.Infrastructure
 			return campaign;
 		}
 
-		public async Task UpdateCampaignAsync(Guid campaignUid, Campaign campaign)
+		public async Task UpdateCampaignAsync(Guid campaignUid, Campaign campaign, string timezoneId)
 		{
+			var startDateUtc = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(campaign.StartDate, TimeZoneInfo.Local.Id, timezoneId);
+			var endDateUtc = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(campaign.EndDate, TimeZoneInfo.Local.Id, timezoneId);
+
+			if (!_hrvsterUser.IsDaylight)
+			{
+				startDateUtc = startDateUtc.AddHours(-2);
+				endDateUtc = endDateUtc.AddHours(-2);
+			}
+
 			using var conn = new MySqlConnection(_database.GetConnectionString());
 			var command = conn.CreateCommand();
 			command.CommandText = "campaign_update_via_uid";
@@ -172,9 +193,9 @@ namespace hrvster.Infrastructure
 				.AddParameter("campaignName", campaign.CampaignName)
 				.AddParameter("campaignDescription", campaign.Description)
 				.AddParameter("startDate", campaign.StartDate)
-				.AddParameter("startDateUtc", campaign.StartDate.ToUniversalTime())
+				.AddParameter("startDateUtc", startDateUtc)
 				.AddParameter("endDate", campaign.EndDate)
-				.AddParameter("endDateUtc", campaign.EndDate.ToUniversalTime())
+				.AddParameter("endDateUtc", endDateUtc)
 				.AddParameter("activeInd", campaign.ActiveInd)
 				.AddParameter("campaignTypeUid", campaign.CampaignType?.CampaignTypeUid);
 
@@ -182,8 +203,17 @@ namespace hrvster.Infrastructure
 			await command.ExecuteNonQueryAsync();
 		}
 
-		public async Task UpdateCampaignAsync(Guid campaignUid, string campaignName, string description, Guid campaignTypeUid, DateTime startDate, DateTime endDate)
+		public async Task UpdateCampaignAsync(Guid campaignUid, string campaignName, string description, Guid campaignTypeUid, DateTime startDate, DateTime endDate, string timezoneId)
 		{
+			var startDateUtc = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(startDate, TimeZoneInfo.Local.Id, timezoneId);
+			var endDateUtc = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(endDate, TimeZoneInfo.Local.Id, timezoneId);
+
+			if (!_hrvsterUser.IsDaylight)
+			{
+				startDateUtc = startDateUtc.AddHours(-2);
+				endDateUtc = endDateUtc.AddHours(-2);
+			}
+
 			using var conn = new MySqlConnection(_database.GetConnectionString());
 			var command = conn.CreateCommand();
 			command.CommandText = "campaign_update_via_uid";
@@ -193,9 +223,9 @@ namespace hrvster.Infrastructure
 				.AddParameter("campaignName", campaignName)
 				.AddParameter("campaignDescription", description)
 				.AddParameter("startDate", startDate)
-				.AddParameter("startDateUtc", startDate.ToUniversalTime())
+				.AddParameter("startDateUtc", startDateUtc)
 				.AddParameter("endDate", endDate)
-				.AddParameter("endDateUtc", endDate.ToUniversalTime())
+				.AddParameter("endDateUtc", endDateUtc)
 				.AddParameter("activeInd", true)
 				.AddParameter("campaignTypeUid", campaignTypeUid);
 
@@ -212,7 +242,9 @@ namespace hrvster.Infrastructure
 				CampaignName = reader.GetString("campaign_name"),
 				Description = reader.GetStringValue("campaign_description"),
 				StartDate = reader.GetDateTime("start_date"),
+				StartDateUtc = reader.GetDateTime("start_date_utc"),
 				EndDate = reader.GetDateTime("end_date"),
+				EndDateUtc = reader.GetDateTime("end_date_utc"),
 				CreatedDate = reader.GetDateTime("created_date"),
 				ActiveInd = reader.GetBoolean("active_ind"),
 				Account = GetAccount(reader),

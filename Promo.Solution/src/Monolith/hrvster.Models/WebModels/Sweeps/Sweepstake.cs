@@ -12,18 +12,21 @@ namespace hrvster.Models.WebModels.Sweeps
 		public string Name { get; set; }
 		public string RulesUrl { get; set; }
 		public DateTime StartDate { get; set; }
+		public DateTime StartDateUtc { get; set; }
 		public DateTime EndDate { get; set; }
+		public DateTime EndDateUtc { get; set; }
 		public DateTime? DrawDate { get; set; }
+		public DateTime DrawDateUtc { get; set; }
 		public bool Drawn { get; set; }
 		public DateTime? DateDrawn { get; set; }
 		public IEnumerable<SweepEntry> SweepEntries { get; set; }
 		public IEnumerable<Harvested> Harvested { get; set; }
 
 		public bool IsActive()
-			=> DateTime.UtcNow >= StartDate.ToUniversalTime() &&
-				DateTime.UtcNow <= EndDate.ToUniversalTime();
+			=> DateTime.UtcNow >= StartDateUtc &&
+				DateTime.UtcNow <= EndDateUtc;
 
 		public bool WillBeInProgress()
-			=> DateTime.UtcNow <= StartDate.ToUniversalTime();
+			=> DateTime.UtcNow <= StartDateUtc;
 	}
 }

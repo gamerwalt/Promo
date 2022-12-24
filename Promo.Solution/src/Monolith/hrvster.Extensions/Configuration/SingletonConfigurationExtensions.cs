@@ -1,6 +1,6 @@
 ﻿using hrvster.Core;
-using hrvster.Core.Authentication;
 using hrvster.Core.Subscriptions;
+using hrvster.Models;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace hrvster.Extensions.Configuration

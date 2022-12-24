@@ -13,13 +13,18 @@ namespace hrvster.Core.Requests
         private Guid sweepUid;
         private Sweep sweep;
         private UpdateSweepRequest request;
+		private string _timeZoneId;
 
-        public UpdateSweep(Guid sweepUid, Sweep sweep, UpdateSweepRequest request)
+
+		public UpdateSweep(Guid sweepUid, Sweep sweep, UpdateSweepRequest request, string timeZoneId)
         {
             this.sweepUid = sweepUid;
             this.sweep = sweep;
             this.request = request;
+			_timeZoneId = timeZoneId;
         }
+
+		public string TimeZoneId { get { return _timeZoneId; } }
 
         public Guid SweepUid
         {
@@ -53,7 +58,7 @@ namespace hrvster.Core.Requests
             request.Sweep.EndDate = request.Request.EndDate;
             request.Sweep.DrawDate = request.Request.DrawDate;
 
-            await _repository.UpdateAsync(request.SweepUid, request.Sweep);
+            await _repository.UpdateAsync(request.SweepUid, request.Sweep, request.TimeZoneId);
 
             return await _repository.GetAsync(request.SweepUid);
         }

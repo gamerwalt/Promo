@@ -11,6 +11,7 @@ using hrvster.Models.WebModels;
 using hrvster.Models.WebModels.Sweeps;
 using hrvster.Web.Models;
 using MediatR;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using NToastNotify;
@@ -72,6 +73,8 @@ namespace hrvster.Web.Controllers
 				Sweepstakes = _mapper.Map<List<Sweepstake>>(sweeps),
 				StartDate = campaign.StartDate,
 				EndDate = campaign.EndDate,
+				StartDateUtc = campaign.StartDateUtc,
+				EndDateUtc = campaign.EndDateUtc,
 				UpdatePromotion = new UpdatePromotion
 				{
 					CampaignUid = campaign.CampaignUid,
@@ -124,7 +127,8 @@ namespace hrvster.Web.Controllers
 					form.UpdatePromotion.Description,
 					form.UpdatePromotion.CampaignTypeUid,
 					form.UpdatePromotion.StartDate,
-					form.UpdatePromotion.EndDate));
+					form.UpdatePromotion.EndDate,
+					_hrvsterUser.WindowsTimeZone));
 
 				_notificationService.AddSuccessToastMessage("Promotion updated.");
 
@@ -148,6 +152,8 @@ namespace hrvster.Web.Controllers
 			form.Sweepstakes = _mapper.Map<List<Sweepstake>>(sweeps);
 			form.StartDate = campaign.StartDate;
 			form.EndDate = campaign.EndDate;
+			form.EndDateUtc = campaign.EndDateUtc;
+			form.StartDateUtc = campaign.StartDateUtc;
 			form.UpdatePromotion.CampaignTypes = campaignTypes
 					.Where(a => a.IsActive)
 					.Select(a => new SelectListItem()
@@ -162,11 +168,12 @@ namespace hrvster.Web.Controllers
 		public async Task<IActionResult> Create()
 		{
 			var campaignTypes = await _mediator.Send(new GetCampaignTypesRequest());
+			var startDate = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.Now, TimeZoneInfo.Local.Id, _hrvsterUser.WindowsTimeZone);
 
 			var createPromotion = new CreatePromotion()
 			{
-				StartDate = DateTime.UtcNow,
-				EndDate = DateTime.UtcNow
+				StartDate = startDate,
+				EndDate = startDate.AddDays(30)
 			};
 			createPromotion.CampaignTypes = campaignTypes
 				.Where(a => a.IsActive)
@@ -194,7 +201,7 @@ namespace hrvster.Web.Controllers
 					EndDate = model.EndDate
 				};
 
-				var promotionUid = await _mediator.Send(new CreateCampaignRequest(newCampaignRequest, _hrvsterUser.UserUid));
+				var promotionUid = await _mediator.Send(new CreateCampaignRequest(newCampaignRequest, _hrvsterUser.UserUid, _hrvsterUser.WindowsTimeZone));
 
 				_notificationService.AddSuccessToastMessage(ToastMessages.PromotionCreatedSuccessfully);
 

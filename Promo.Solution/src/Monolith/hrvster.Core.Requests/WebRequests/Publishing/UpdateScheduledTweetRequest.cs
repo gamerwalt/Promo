@@ -21,6 +21,7 @@ namespace hrvster.Core.Requests.WebRequests.Publishing
 		private IFormFile media3;
 		private int previousMediaId4;
 		private IFormFile media4;
+		private string _timeZoneId;
 
 		public UpdateScheduledTweetRequest(
 			Guid userUid,
@@ -36,7 +37,8 @@ namespace hrvster.Core.Requests.WebRequests.Publishing
 			int previousMediaId3, 
 			IFormFile media3, 
 			int previousMediaId4, 
-			IFormFile media4)
+			IFormFile media4,
+			string timeZoneId)
 		{
 			this.userUid = userUid;
 			this.rule = rule;
@@ -52,8 +54,9 @@ namespace hrvster.Core.Requests.WebRequests.Publishing
 			this.media3 = media3;
 			this.previousMediaId4 = previousMediaId4;
 			this.media4 = media4;
+			_timeZoneId = timeZoneId;
 		}
-
+		public string TimeZoneId { get { return _timeZoneId; } }
 		public Guid UserUid { get { return userUid; } }
 		public Rule Rule { get { return rule; } }
 		public Sweep Sweepstake { get { return sweep; } }

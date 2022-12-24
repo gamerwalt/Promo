@@ -29,7 +29,7 @@ namespace hrvster.Core.Handlers.Promotions
 				request.ToJsonString());
 
 			await _repository.UpdateCampaignAsync(request.CampaignUid, request.CampaignName,
-				request.Description, request.CampaignTypeUid, request.StartDate, request.EndDate);
+				request.Description, request.CampaignTypeUid, request.StartDate, request.EndDate, request.TimeZone);
 		}
 	}
 }

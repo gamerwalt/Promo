@@ -8,23 +8,23 @@ namespace hrvster.Extensions.ModelExtensions
 	{
 		public static bool IsActive(this Campaign campaign)
 		{
-			return DateTime.UtcNow >= campaign.StartDate.ToUniversalTime() && DateTime.UtcNow <= campaign.EndDate.ToUniversalTime();
+			return DateTime.UtcNow >= campaign.StartDateUtc && DateTime.UtcNow <= campaign.EndDateUtc;
 		}
 
 		public static bool WillBeInProgress(this Campaign campaign)
 		{
-			return DateTime.UtcNow <= campaign.StartDate.ToUniversalTime();
+			return DateTime.UtcNow <= campaign.StartDateUtc;
 		}
 
 		public static bool IsActive(this Promotion promotion)
 		{
-			return DateTime.UtcNow >= promotion.StartDate.ToUniversalTime() && 
-				DateTime.UtcNow <= promotion.EndDate.ToUniversalTime();
+			return DateTime.UtcNow >= promotion.StartDateUtc && 
+				DateTime.UtcNow <= promotion.EndDateUtc;
 		}
 
 		public static bool WillBeInProgress(this Promotion promotion)
 		{
-			return DateTime.UtcNow <= promotion.StartDate.ToUniversalTime();
+			return DateTime.UtcNow <= promotion.StartDateUtc;
 		}
 	}
 }

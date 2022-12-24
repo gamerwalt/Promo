@@ -13,29 +13,23 @@ namespace hrvster.Core.Requests
 	{
 		private Guid _campaignUid;
 		private Guid _accountUid;
+		private string _timezoneId;
 		private UpdateCampaignRequest _request;
 
-		public UpdateCampaignViaUidRequest(Guid campaignUid, Guid accountUid, UpdateCampaignRequest request)
+		public UpdateCampaignViaUidRequest(Guid campaignUid, Guid accountUid, UpdateCampaignRequest request, string timezoneId)
 		{
 			_campaignUid = campaignUid;
 			_request = request;
 			_accountUid = accountUid;
+			_timezoneId = timezoneId;
 		}
 
-		public Guid AccountUid
-		{
-			get { return _accountUid; }
-		}
+		public Guid AccountUid { get { return _accountUid; } }
 
-		public Guid CampaignUid
-		{
-			get { return _campaignUid; }
-		}
+		public Guid CampaignUid { get { return _campaignUid; } }
 
-		public UpdateCampaignRequest Request
-		{
-			get { return _request; }
-		}
+		public UpdateCampaignRequest Request { get { return _request; } }
+		public string Timezone { get { return _timezoneId; } }
 	}
 
 	public class UpdateCampaignViaUidRequestHandler : IRequestHandler<UpdateCampaignViaUidRequest, Campaign>
@@ -62,7 +56,7 @@ namespace hrvster.Core.Requests
 				{
 					CampaignTypeUid = request.Request.CampaignTypeUid
 				}
-			});
+			}, request.Timezone);
 
 			var campaign = await _repository.GetCampaignByUidAsync(request.CampaignUid, request.AccountUid);
 

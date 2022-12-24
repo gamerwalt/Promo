@@ -23,6 +23,7 @@ namespace hrvster.Models
 		public string VerificationLink { get; set; }
 		public IEnumerable<Profile> Profiles { get; set; }
 		public string FullName { get { return $"{FirstName} {LastName}"; } }
+		public string Locale { get; set; }
 		public string GetDisplayName()
 		{
 			return DisplayName ?? FullName ?? EmailAddress;

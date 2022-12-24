@@ -10,12 +10,12 @@ namespace hrvster.Web.Validation
 {
 	public class ViewPromotionValidation : AbstractValidator<ViewPromotion>
 	{
-		private readonly HrvsterUser _hrvsterUser;
+		private readonly hrvster.Models.HrvsterUser _hrvsterUser;
 		private readonly ICampaignRepository _campaignsRepository;
 		private readonly ISweepsRepository _sweepsRepository;
 		
 		public ViewPromotionValidation(
-			HrvsterUser hrvsterUser,
+			hrvster.Models.HrvsterUser hrvsterUser,
 			ICampaignRepository campaignsRepository,
 			ISweepsRepository sweepsRepository)
 		{
@@ -35,8 +35,8 @@ namespace hrvster.Web.Validation
 				.NotEmpty().WithMessage("Please select a Promotion type.");
 
 			RuleFor(viewPromotion => viewPromotion.UpdatePromotion)
-				.Must(updatePromotion => updatePromotion.EndDate.ToUniversalTime() > updatePromotion.StartDate.ToUniversalTime())
-					.WithMessage(viewPromotion => $"The start date {viewPromotion.UpdatePromotion.StartDate.ToString("f")} must come before the end date {viewPromotion.UpdatePromotion.EndDate.ToString("f")}.")
+				.Must(updatePromotion => updatePromotion.EndDate > updatePromotion.StartDate)
+					.WithMessage(viewPromotion => $"The start date {viewPromotion.UpdatePromotion.StartDate.ToString("MMM dd, yyyy, hh:mm:ss tt")} must come before the end date {viewPromotion.UpdatePromotion.EndDate.ToString("MMM dd, yyyy, hh:mm:ss tt")}.")
 				.Must(updatePromotion => StartDateMustNotComeAfterGames(updatePromotion))
 					.WithMessage("The promotion's start date cannot come after any game's start date. Update the start date of your games before updating your promotion's start date.")
 				.Must(updatePromotion => EndDateMustNotBeAfterGames(updatePromotion))
@@ -47,6 +47,8 @@ namespace hrvster.Web.Validation
 		{
 			var games = _sweepsRepository.GetAllForCampaign(updatePromotion.CampaignUid);
 
+			if (games.Count() == 0) { return true; }
+
 			var result = games.Any(g => g.EndDate < updatePromotion.EndDate);
 
 			return result;
@@ -55,6 +57,8 @@ namespace hrvster.Web.Validation
 		private bool StartDateMustNotComeAfterGames(UpdatePromotion updatePromotion)
 		{
 			var games = _sweepsRepository.GetAllForCampaign(updatePromotion.CampaignUid);
+
+			if (games.Count() == 0) { return true; }
 
 			var result = games.Any(g => g.StartDate > updatePromotion.StartDate);
 

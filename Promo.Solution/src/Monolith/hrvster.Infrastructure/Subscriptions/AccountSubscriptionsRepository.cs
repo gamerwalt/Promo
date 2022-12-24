@@ -67,7 +67,9 @@ namespace hrvster.Infrastructure.Subscriptions
 				IsDiscounted = reader.GetBoolean("is_discounted"),
 				DiscountedBy = reader.GetInt32("discounted_by"),
 				StartDate = reader.GetDateTime("start_date"),
-				EndDate = reader.GetDateTime("end_date")
+				StartDateUtc = reader.GetDateTime("start_date_utc"),
+				EndDate = reader.GetDateTime("end_date"),
+				EndDateUtc = reader.GetDateTime("end_date_utc")
 			};
 		}
 	}

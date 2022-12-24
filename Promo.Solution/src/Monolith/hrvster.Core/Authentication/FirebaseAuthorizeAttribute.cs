@@ -1,4 +1,5 @@
 ﻿using FirebaseAdmin.Auth;
+using hrvster.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Logging;
@@ -58,14 +59,7 @@ namespace hrvster.Core.Authentication
 				_logger.LogWarning("Request passed. Contains token");
 				try
 				{
-					if (_firebaseAuthManager.VerifyToken(token))
-					{
-						User.UserUid = Guid.Parse(_sessionManager.GetValue(SessionConstants.UserUid));
-						User.DisplayName = _sessionManager.GetValue(SessionConstants.UserDisplayName);
-						User.Token = _sessionManager.GetValue(SessionConstants.UserToken);
-						User.EmailAddress = _sessionManager.GetValue(SessionConstants.UserEmail);
-					}
-					else
+					if (!_firebaseAuthManager.VerifyToken(token))
 					{
 						context.Result = new ForbidResult();
 					}

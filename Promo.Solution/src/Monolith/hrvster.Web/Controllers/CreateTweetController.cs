@@ -288,7 +288,8 @@ namespace hrvster.Web.Controllers
 						form.PostNow,
 						form.ScheduledDate,
 						true,
-						mediaLocation));
+						mediaLocation,
+						_hrvsterUser.WindowsTimeZone));
 				var word = form.PostNow ? "created" : "scheduled";
 
 				_notificationService.AddSuccessToastMessage($"Tweet {word} successfully.");

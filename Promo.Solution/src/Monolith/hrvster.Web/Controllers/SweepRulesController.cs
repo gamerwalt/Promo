@@ -622,7 +622,8 @@ namespace hrvster.Web.Controllers
 						form.PostNow,
 						form.ScheduledDate,
 						true, //default to true now
-						mediaLocation));
+						mediaLocation,
+						_hrvsterUser.WindowsTimeZone));
 
 				if(!published)
 				{

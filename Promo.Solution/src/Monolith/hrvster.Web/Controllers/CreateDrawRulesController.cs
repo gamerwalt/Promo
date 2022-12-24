@@ -19,13 +19,13 @@ namespace hrvster.Web.Controllers
 		private readonly ILogger<CreateDrawRulesController> _logger;
 		private readonly IMediator _mediator;
 		private readonly IToastNotification _notificationService;
-		private readonly HrvsterUser _hrvsterUser;
+		private readonly hrvster.Models.HrvsterUser _hrvsterUser;
 
 		public CreateDrawRulesController(
 			ILoggerFactory loggerFactory,
 			IMediator mediator,
 			IToastNotification notificationService,
-			HrvsterUser hrvsterUser)
+			hrvster.Models.HrvsterUser hrvsterUser)
 		{
 			_logger = loggerFactory.CreateLogger<CreateDrawRulesController>();
 			_mediator = mediator;
@@ -102,7 +102,8 @@ namespace hrvster.Web.Controllers
 					SweepId = sweep.SweepId,
 					SweepUid = sweep.SweepUid,
 					WinnerCount = form.WinnerCount,
-					WinnerBackupCount = form.WinnerBackupCount
+					WinnerBackupCount = form.WinnerBackupCount,
+					AccountUid = _hrvsterUser.UserUid
 				});
 
 				_notificationService.AddSuccessToastMessage("Draw rules added successfully. Now we create the prizes for the winners.");

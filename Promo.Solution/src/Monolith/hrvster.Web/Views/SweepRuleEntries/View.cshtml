@@ -30,7 +30,7 @@
 									<tr>
 										<td>@entry.UserIdentifier</td>
 										<td>@entry.UserIdentifierType</td>
-										<td>@entry.CreatedDate.ToString("f")</td>
+										<td>@entry.CreatedDate.ToString("MMM dd, yyyy, hh:mm:ss tt")</td>
 									</tr>
 								}
 							}
@@ -72,9 +72,9 @@
 						<div class="mb-7">
 							<h5 class="mb-3">Dates</h5>
 							<div class="mb-0">
-								<span class="badge badge-light-primary me-2 fs-6">Start Date: @Model.Sweepstake.StartDate.ToString("f")</span>
-								<span class="badge badge-light-primary me-2 fs-6">End Date: @Model.Sweepstake.EndDate.ToString("f")</span>
-								<span class="badge badge-light-primary me-2 fs-6">End Date: @Model.Sweepstake.DrawDate.GetValueOrDefault().ToString("f")</span>
+								<span class="badge badge-light-primary me-2 fs-6">Start Date: @Model.Sweepstake.StartDate.ToString("MMM dd, yyyy, hh:mm:ss tt")</span>
+								<span class="badge badge-light-primary me-2 fs-6">End Date: @Model.Sweepstake.EndDate.ToString("MMM dd, yyyy, hh:mm:ss tt")</span>
+								<span class="badge badge-light-primary me-2 fs-6">End Date: @Model.Sweepstake.DrawDate.GetValueOrDefault().ToString("MMM dd, yyyy, hh:mm:ss tt")</span>
 							</div>
 						</div>
 						<div class="separator separator-dashed mb-7"></div>

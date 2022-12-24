@@ -1,4 +1,4 @@
-﻿@using hrvster.Core.Authentication
+﻿@using hrvster.Models
 @inject HrvsterUser hrvsterUser
 <!DOCTYPE html>
 <html lang="en">
@@ -108,6 +108,11 @@
 					</div>
 				</div>
 				<div class="aside-footer flex-column-auto py-5" id="kt_aside_footer">
+					<span>@TimeZoneInfo.ConvertTimeToUtc(DateTime.Now).ToString("MMM dd, yyyy, hh:mm:ss tt")</span>
+					<div class="separator my-2"></div>
+					<span>@TimeZoneInfo.FindSystemTimeZoneById(hrvsterUser.WindowsTimeZone)</span>
+					<div class="separator my-2"></div>
+					<span>@TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.Now, TimeZoneInfo.Local.Id , hrvsterUser.WindowsTimeZone).ToString("MMM dd, yyyy, hh:mm:ss tt")</span>
 					<form asp-action="SignOut" asp-controller="Session">
 						<button type="submit" class="btn btn-custom btn-primary w-100" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-dismiss-="click" title="Sign Out">
 							<span class="btn-label">Sign Out</span>

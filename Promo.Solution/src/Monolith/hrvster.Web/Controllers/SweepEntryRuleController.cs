@@ -22,7 +22,7 @@ namespace hrvster.Web.Controllers
 		private readonly SweepstakeConfiguration _sweepConfig;
 		private readonly IToastNotification _notificationService;
 		private readonly ISweepRuleUpdateValidator _sweepRuleValidator;
-		private readonly HrvsterUser _hrvsterUser;
+		private readonly hrvster.Models.HrvsterUser _hrvsterUser;
 
 		public SweepEntryRuleController(
 			ILoggerFactory loggerFactory,
@@ -30,7 +30,7 @@ namespace hrvster.Web.Controllers
 			SweepstakeConfiguration sweepConfig,
 			IToastNotification notificationService,
 			ISweepRuleUpdateValidator sweepRuleValidator,
-			HrvsterUser hrvsterUser)
+			hrvster.Models.HrvsterUser hrvsterUser)
 		{
 			_logger = loggerFactory.CreateLogger<SweepEntryRuleController>();
 			_mediator = mediator;

@@ -6,6 +6,10 @@
 		public const string UserUid = "_UserUid";
 		public const string UserEmail = "_UserEmail";
 		public const string UserDisplayName = "_UserDisplayName";
+		public const string Locale = "User_Locale";
+		public const string WindowsLocale = "User_WindowsLocale";
+		public const string IsDaylight = "User_IsDaylight";
+
 		public const string SweepUid = "_SweepUid";
 		public const string ReturnAction = "_ReturnAction";
 		public const string ReturnController = "_ReturnController";

@@ -48,7 +48,7 @@ namespace hrvster.Web.Validation
 		private bool ScheduledTimeShouldBeInTheFuture(CreateWatch model)
 		{
 			if (!model.PostNow)
-				return model.ScheduledDate.ToUniversalTime() >= DateTime.UtcNow;
+				return model.ScheduledDate >= DateTime.Now;
 
 			return true;
 		}

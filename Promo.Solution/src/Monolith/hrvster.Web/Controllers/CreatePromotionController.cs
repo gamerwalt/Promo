@@ -38,6 +38,8 @@ namespace hrvster.Web.Controllers
 		[HttpGet]
 		public async Task<IActionResult> Create()
 		{
+			var startDate = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.Now, TimeZoneInfo.Local.Id, _hrvsterUser.WindowsTimeZone);
+
 			var campaignTypes = await _mediator.Send(new GetCampaignTypesRequest());
 
 			var model = new CreatePromotion
@@ -49,8 +51,8 @@ namespace hrvster.Web.Controllers
 						Text = a.CampaignTypeName,
 						Value = a.CampaignTypeUid.ToString()
 					}).ToList(),
-				StartDate = DateTime.UtcNow,
-				EndDate = DateTime.UtcNow.AddDays(30)
+				StartDate = startDate,
+				EndDate = startDate.AddDays(30)
 			};
 
 			return View(model);
@@ -71,7 +73,8 @@ namespace hrvster.Web.Controllers
 						form.CampaignTypeUid,
 						form.StartDate,
 						form.EndDate,
-						_hrvsterUser.UserUid
+						_hrvsterUser.UserUid,
+						_hrvsterUser.WindowsTimeZone
 					));
 
 				_notificationService.AddSuccessToastMessage("Promotion created successfully. Let's create a Game now.");
@@ -176,7 +179,7 @@ namespace hrvster.Web.Controllers
 			{
 				if(IsFormDirty(campaign, form))
 				{
-					await _mediator.Send(new UpdatePromotionRequest(promotionUid, form.CampaignName, form.Description, form.CampaignTypeUid, form.StartDate, form.EndDate));
+					await _mediator.Send(new UpdatePromotionRequest(promotionUid, form.CampaignName, form.Description, form.CampaignTypeUid, form.StartDate, form.EndDate, _hrvsterUser.WindowsTimeZone));
 
 					_notificationService.AddSuccessToastMessage("Promotion updated successfully.");
 				}

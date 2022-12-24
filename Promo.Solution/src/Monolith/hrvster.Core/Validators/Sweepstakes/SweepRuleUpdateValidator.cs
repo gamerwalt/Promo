@@ -52,8 +52,8 @@ namespace hrvster.Core.Validators.Sweepstakes
 
 		private static bool IsLive(Sweep sweep)
 		{
-			return DateTime.UtcNow <= sweep.StartDate.ToUniversalTime() &&
-							DateTime.UtcNow >= sweep.EndDate.ToUniversalTime();
+			return DateTime.UtcNow <= sweep.StartDateUtc &&
+							DateTime.UtcNow >= sweep.EndDateUtc;
 		}
 	}
 }

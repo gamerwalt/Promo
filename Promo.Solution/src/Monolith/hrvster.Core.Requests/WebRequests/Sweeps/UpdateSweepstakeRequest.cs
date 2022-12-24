@@ -12,8 +12,9 @@ namespace hrvster.Core.Requests.WebRequests.Sweeps
 		private DateTime _endDate;
 		private DateTime _drawDate;
 		private Sweep _sweep;
+		private string _timezoneId;
 
-		public UpdateSweepstakeRequest(Models.Sweep sweep, Guid sweepUid, string name, DateTime startDate, DateTime endDate, DateTime drawDate)
+		public UpdateSweepstakeRequest(Models.Sweep sweep, Guid sweepUid, string name, DateTime startDate, DateTime endDate, DateTime drawDate, string timeZoneId)
 		{
 			_sweep = sweep;
 			_sweepUid = sweepUid;
@@ -21,6 +22,7 @@ namespace hrvster.Core.Requests.WebRequests.Sweeps
 			_startDate = startDate;
 			_endDate = endDate;
 			_drawDate = drawDate;
+			_timezoneId = timeZoneId;
 		}
 		public Sweep Sweepstake { get { return _sweep; } }
 		public Guid SweepUid { get { return _sweepUid; } }
@@ -28,5 +30,6 @@ namespace hrvster.Core.Requests.WebRequests.Sweeps
 		public DateTime StartDate { get { return _startDate; } }
 		public DateTime EndDate { get { return _endDate; } }
 		public DateTime DrawDate { get { return _drawDate; } }
+		public string TimeZoneId { get { return _timezoneId;} }
 	}
 }

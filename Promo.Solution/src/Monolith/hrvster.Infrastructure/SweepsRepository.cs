@@ -11,10 +11,10 @@ namespace hrvster.Infrastructure
 {
 	public interface ISweepsRepository
 	{
-		Task CreateAsync(Sweep sweep);
+		Task CreateAsync(Sweep sweep, string timezoneId);
 		Task<Sweep> GetAsync(Guid sweepUid);
 		Task<IEnumerable<Sweep>> GetAllForCampaignAsync(Guid campaignUid);
-		Task UpdateAsync(Guid sweepUid, Sweep sweep);
+		Task UpdateAsync(Guid sweepUid, Sweep sweep, string timezoneId);
 		Task<IEnumerable<SweepDrawPropertiesAndRule>> GetSweepsRequiringADrawAsync();
 		Task UpdateSweepAsDrawnAsync(Guid sweepUid);
 		Task<IEnumerable<Sweep>> GetAllForAccountAsync(Guid accountUid);
@@ -25,14 +25,27 @@ namespace hrvster.Infrastructure
 	public class SweepsRepository : ISweepsRepository
 	{
 		private readonly IDatabase _database;
+		private readonly HrvsterUser _hrvsterUser;
 
-		public SweepsRepository(IDatabase database)
+		public SweepsRepository(IDatabase database, HrvsterUser hrvsterUser)
 		{
 			_database = database;
+			_hrvsterUser = hrvsterUser;
 		}
 
-		public async Task CreateAsync(Sweep sweep)
+		public async Task CreateAsync(Sweep sweep, string timezoneId)
 		{
+			var startDateUtc = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(sweep.StartDate, TimeZoneInfo.Local.Id, timezoneId);
+			var endDateUtc = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(sweep.EndDate, TimeZoneInfo.Local.Id, timezoneId);
+			var drawDateUtc = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(sweep.DrawDate.GetValueOrDefault(), TimeZoneInfo.Local.Id, timezoneId);
+
+			if (!_hrvsterUser.IsDaylight)
+			{
+				startDateUtc = startDateUtc.AddHours(-2);
+				endDateUtc = endDateUtc.AddHours(-2);
+				drawDateUtc = drawDateUtc.AddHours(-2);
+			}
+
 			using var conn = new MySqlConnection(_database.GetConnectionString());
 			var command = conn.CreateCommand();
 			command.CommandText = "sweep_create";
@@ -43,11 +56,11 @@ namespace hrvster.Infrastructure
 				.AddParameter("campaignUid", sweep.Campaign?.CampaignUid)
 				.AddParameter("sweepName", sweep.Name)
 				.AddParameter("startDate", sweep.StartDate)
-				.AddParameter("startDateUtc", sweep.StartDate.ToUniversalTime())
+				.AddParameter("startDateUtc", startDateUtc)
 				.AddParameter("endDate", sweep.EndDate)
-				.AddParameter("endDateUtc", sweep.EndDate.ToUniversalTime())
+				.AddParameter("endDateUtc", endDateUtc)
 				.AddParameter("drawDate", sweep.DrawDate.GetValueOrDefault())
-				.AddParameter("drawDateUtc", sweep.DrawDate.GetValueOrDefault().ToUniversalTime());
+				.AddParameter("drawDateUtc", drawDateUtc);
 
 			await conn.OpenAsync();
 			await command.ExecuteNonQueryAsync();
@@ -159,8 +172,11 @@ namespace hrvster.Infrastructure
 					Name = reader.GetStringValue("sweep_name"),
 					RulesUrl = reader.GetStringValue("sweep_rule_url"),
 					StartDate = reader.GetNullableDateTimeValue("sweep_start_date").GetValueOrDefault(),
+					StartDateUtc = reader.GetNullableDateTimeValue("sweep_start_date_utc").GetValueOrDefault(),
 					EndDate = reader.GetNullableDateTimeValue("sweep_end_date").GetValueOrDefault(),
+					EndDateUtc = reader.GetNullableDateTimeValue("sweep_end_date_utc").GetValueOrDefault(),
 					DrawDate = reader.GetNullableDateTimeValue("sweep_draw_date").GetValueOrDefault(),
+					DrawDateUtc = reader.GetNullableDateTimeValue("sweep_draw_date_utc").GetValueOrDefault(),
 					Drawn = reader.GetBoolean("sweep_drawn_indicator"),
 					DateDrawn = reader.GetNullableDateTimeValue("sweep_date_drawn")
 				},
@@ -204,8 +220,19 @@ namespace hrvster.Infrastructure
 			};
 		}
 
-		public async Task UpdateAsync(Guid sweepUid, Sweep sweep)
+		public async Task UpdateAsync(Guid sweepUid, Sweep sweep, string timezoneId)
 		{
+			var startDateUtc = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(sweep.StartDate, TimeZoneInfo.Local.Id, timezoneId);
+			var endDateUtc = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(sweep.EndDate, TimeZoneInfo.Local.Id, timezoneId);
+			var drawDateUtc = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(sweep.DrawDate.GetValueOrDefault(), TimeZoneInfo.Local.Id, timezoneId);
+
+			if (!_hrvsterUser.IsDaylight)
+			{
+				startDateUtc = startDateUtc.AddHours(-2);
+				endDateUtc = endDateUtc.AddHours(-2);
+				drawDateUtc = drawDateUtc.AddHours(-2);
+			}
+
 			using var conn = new MySqlConnection(_database.GetConnectionString());
 			var command = conn.CreateCommand();
 			command.CommandText = "sweep_update";
@@ -214,11 +241,11 @@ namespace hrvster.Infrastructure
 				.AddParameter("sweepUid", sweepUid)
 				.AddParameter("sweepName", sweep.Name)
 				.AddParameter("startDate", sweep.StartDate)
-				.AddParameter("startDateUtc", sweep.StartDate.ToUniversalTime())
+				.AddParameter("startDateUtc", startDateUtc)
 				.AddParameter("endDate", sweep.EndDate)
-				.AddParameter("endDateUtc", sweep.EndDate.ToUniversalTime())
+				.AddParameter("endDateUtc", endDateUtc)
 				.AddParameter("drawDate", sweep.DrawDate.Value)
-				.AddParameter("drawDateUtc", sweep.DrawDate.GetValueOrDefault().ToUniversalTime());
+				.AddParameter("drawDateUtc", drawDateUtc);
 
 			await conn.OpenAsync();
 			await command.ExecuteNonQueryAsync();
@@ -262,8 +289,11 @@ namespace hrvster.Infrastructure
 				Name = reader.GetString("sweep_name"),
 				RulesUrl = GetStringValue(reader, "rules_url"),
 				StartDate = reader.GetDateTime("start_date"),
+				StartDateUtc = reader.GetDateTime("start_date_utc"),
 				EndDate = reader.GetDateTime("end_date"),
-				DrawDate = GetNullableDateTimeValue(reader, "draw_date")
+				EndDateUtc = reader.GetDateTime("end_date_utc"),
+				DrawDate = GetNullableDateTimeValue(reader, "draw_date"),
+				DrawDateUtc = reader.GetNullableDateTimeValue("draw_date_utc").GetValueOrDefault()
 			};
 		}
 

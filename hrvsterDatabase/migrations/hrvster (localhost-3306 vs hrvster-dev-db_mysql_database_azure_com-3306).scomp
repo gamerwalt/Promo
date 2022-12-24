@@ -85,12 +85,7 @@
     <IgnoreObjectTypeFilter>false</IgnoreObjectTypeFilter>
   </ComparisonOptions>
   <ObjectFilter />
-  <ModifiedObjects>
-    <Object Name="accountsTable" Type="Table" Include="False" Operation="None" />
-    <Object Name="user_activitiesTable" Type="Table" Include="False" Operation="None" />
-    <Object Name="account_update_last_loginProcedure" Type="Procedure" Include="False" Operation="None" />
-    <Object Name="activity_addProcedure" Type="Procedure" Include="False" Operation="None" />
-  </ModifiedObjects>
+  <ModifiedObjects />
   <ScriptsFolderOptions>
     <ScriptsFolderSynchronization>
       <FolderStructure>
@@ -141,7 +136,7 @@
     <PropertyValue Name="SynchronizationFileName" xml:space="preserve">D:\Promo\hrvsterDatabase\migrations\hrvster (localhost-3306 vs hrvster-dev-db_mysql_database_azure_com-3306).sql</PropertyValue>
     <PropertyValue Name="SynchronizationEditorFileName" xml:space="preserve" />
     <PropertyValue Name="OpenScriptInEditor">false</PropertyValue>
-    <PropertyValue Name="RefreshAfterSynchronization">true</PropertyValue>
+    <PropertyValue Name="RefreshAfterSynchronization">false</PropertyValue>
     <PropertyValue Name="OpenScriptsFolder">false</PropertyValue>
     <PropertyValue Name="RemoveControlChars">false</PropertyValue>
     <PropertyValue Name="PureScript">false</PropertyValue>

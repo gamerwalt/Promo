@@ -38,13 +38,13 @@
 						<div class="border border-gray-300 border-dashed rounded min-w-125px py-3 px-4 me-6 mb-3">
 							<div class="fw-semibold fs-6 text-gray-400">Start Date</div>
 							<div class="d-flex align-items-center">
-								<div class="fs-4 fw-bold">@Model.Sweepstake.StartDate.ToString("f")</div>
+								<div class="fs-4 fw-bold">@Model.Sweepstake.StartDate.ToString("MMM dd, yyyy, hh:mm:ss tt")</div>
 							</div>
 						</div>
 						<div class="border border-gray-300 border-dashed rounded min-w-125px py-3 px-4 me-6 mb-3">
 							<div class="fw-semibold fs-6 text-gray-400">End Date</div>
 							<div class="d-flex align-items-center">
-								<div class="fs-4 fw-bold">@Model.Sweepstake.EndDate.ToString("f")</div>
+								<div class="fs-4 fw-bold">@Model.Sweepstake.EndDate.ToString("MMM dd, yyyy, hh:mm:ss tt")</div>
 							</div>
 						</div>
 						<div class="border border-gray-300 border-dashed rounded min-w-125px py-3 px-4 me-6 mb-3">
@@ -126,9 +126,7 @@
 											Start Date
 										</label>
 										<input class="form-control form-control-solid"
-											   value="@Model.UpdateSweepstake.StartDate.ToString("yyyy-MM-ddThh:mm:ss")"
-											   asp-for="@Model.UpdateSweepstake.StartDate"
-											   asp-format="{0:yyyy-MM-ddThh:mm:ss}" />
+											   asp-for="@Model.UpdateSweepstake.StartDate" />
 										<span asp-validation-for="@Model.UpdateSweepstake.StartDate"></span>
 									</div>
 									<div class="fv-row mb-6 w-lg-250px">
@@ -136,9 +134,7 @@
 											End Date
 										</label>
 										<input class="form-control form-control-solid"
-											   value="@Model.UpdateSweepstake.EndDate.ToString("yyyy-MM-ddThh:mm:ss")"
-											   asp-for="@Model.UpdateSweepstake.EndDate"
-											   asp-format="{0:yyyy-MM-ddThh:mm:ss}" />
+											   asp-for="@Model.UpdateSweepstake.EndDate" />
 										<span asp-validation-for="@Model.UpdateSweepstake.EndDate"></span>
 									</div>
 									<div class="fv-row mb-6 w-lg-250px">
@@ -146,9 +142,7 @@
 											Draw Date
 										</label>
 										<input class="form-control form-control-solid"
-											   value="@Model.UpdateSweepstake.DrawDate.ToString("yyyy-MM-ddThh:mm:ss")"
-											   asp-for="@Model.UpdateSweepstake.DrawDate"
-											   asp-format="{0:yyyy-MM-ddThh:mm:ss}" />
+											   asp-for="@Model.UpdateSweepstake.DrawDate"/>
 										<span asp-validation-for="@Model.UpdateSweepstake.DrawDate"></span>
 									</div>
 								</div>
@@ -543,7 +537,7 @@
 												}
 											</td>
 											<td>@item.UserIdentifierType</td>
-											<td>@item.CreatedDate.ToString("f")</td>
+											<td>@item.CreatedDate.ToString("MMM dd, yyyy, hh:mm:ss tt")</td>
 										</tr>
 									}
 								</tbody>

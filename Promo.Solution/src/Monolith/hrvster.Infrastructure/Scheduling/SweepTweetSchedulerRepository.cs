@@ -3,12 +3,8 @@ using hrvster.Models;
 using hrvster.Models.Scheduling;
 using MySqlConnector;
 using System;
-using System.Collections.Generic;
 using System.Data;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using Tweetinvi.Models;
 
 namespace hrvster.Infrastructure.Scheduling
 {
@@ -18,9 +14,9 @@ namespace hrvster.Infrastructure.Scheduling
 		Task CommitTransaction();
 		Task RollbackTransaction();
 		Task CreateRuleAsync(Models.Rule rule);
-		Task CreateScheduledSweepRuleTweetAsync(ScheduledSweepRuleTweet scheduledSweepRuleTweet);
+		Task CreateScheduledSweepRuleTweetAsync(ScheduledSweepRuleTweet scheduledSweepRuleTweet, string timezoneId);
 		Task CreateScheduledSweepRuleImage(Guid scheduledUid, ScheduledSweepRuleTweetImage image);
-		Task UpdateScheduledTweetAsync(Guid scheduledUid, DateTime scheduledTime, string text);
+		Task UpdateScheduledTweetAsync(Guid scheduledUid, DateTime scheduledTime, string text, string timezoneId);
 		Task UpdateScheduledTweetImageAsync(int scheduledImageId, string location);
 		Task DeleteScheduledSweepRuleTweetAsync(Guid scheduledUid);
 		Task DeleteRuleAsync(Guid ruleUid);
@@ -29,13 +25,15 @@ namespace hrvster.Infrastructure.Scheduling
 	public class SweepTweetSchedulerRepository : ISweepTweetSchedulerRepository
 	{
 		private readonly IDatabase _database;
+		private readonly HrvsterUser _hrvsterUser;
 
 		private MySqlConnection myConnection;
 		private MySqlTransaction myTransaction;
 
-		public SweepTweetSchedulerRepository(IDatabase database)
+		public SweepTweetSchedulerRepository(IDatabase database, HrvsterUser hrvsterUser)
 		{
 			_database = database;
+			_hrvsterUser = hrvsterUser;
 		}
 
 		public async Task BeginTransaction()
@@ -53,14 +51,21 @@ namespace hrvster.Infrastructure.Scheduling
 
 		public async Task RollbackTransaction()
 		{
-			if(myTransaction != null)
+			if (myTransaction != null)
 			{
 				await myTransaction.RollbackAsync();
 			}
 		}
 
-		public async Task CreateScheduledSweepRuleTweetAsync(ScheduledSweepRuleTweet model)
+		public async Task CreateScheduledSweepRuleTweetAsync(ScheduledSweepRuleTweet model, string timezoneId)
 		{
+			var scheduledTimeUtc = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(model.ScheduledTime, TimeZoneInfo.Local.Id, timezoneId);
+
+			if (!_hrvsterUser.IsDaylight)
+			{
+				scheduledTimeUtc = scheduledTimeUtc.AddHours(-2);
+			}
+
 			var command = myConnection.CreateCommand();
 			command.Transaction = myTransaction;
 			command.CommandText = "scheduled_sweep_rule_tweet_create";
@@ -71,7 +76,7 @@ namespace hrvster.Infrastructure.Scheduling
 				.AddParameter("scheduledUid", model.ScheduledUid)
 				.AddParameter("tweetText", model.Text)
 				.AddParameter("scheduledTime", model.ScheduledTime)
-				.AddParameter("scheduledTimeUtc", model.ScheduledTimeUtc)
+				.AddParameter("scheduledTimeUtc", scheduledTimeUtc)
 				.AddParameter("status", model.Status.ToString());
 
 			//await myConnection.OpenAsync();
@@ -111,15 +116,22 @@ namespace hrvster.Infrastructure.Scheduling
 			await command.ExecuteNonQueryAsync();
 		}
 
-		public async Task UpdateScheduledTweetAsync(Guid scheduledUid, DateTime scheduledTime, string text)
+		public async Task UpdateScheduledTweetAsync(Guid scheduledUid, DateTime scheduledTime, string text, string timezoneId)
 		{
+			var scheduledTimeUtc = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(scheduledTime, TimeZoneInfo.Local.Id, timezoneId);
+
+			if (!_hrvsterUser.IsDaylight)
+			{
+				scheduledTimeUtc = scheduledTimeUtc.AddHours(-2);
+			}
+
 			var command = myConnection.CreateCommand();
 			command.Transaction = myTransaction;
 			command.CommandText = "scheduled_sweep_rule_tweet_update";
 			command.CommandType = CommandType.StoredProcedure;
 			command.AddParameter("scheduledUid", scheduledUid)
 				.AddParameter("scheduledTime", scheduledTime)
-				.AddParameter("scheduledTimeUtc", scheduledTime.ToUniversalTime())
+				.AddParameter("scheduledTimeUtc", scheduledTimeUtc)
 				.AddParameter("tweetText", text);
 
 			await command.ExecuteNonQueryAsync();

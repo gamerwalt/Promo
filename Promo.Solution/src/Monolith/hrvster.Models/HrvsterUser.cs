@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace hrvster.Core.Authentication
+namespace hrvster.Models
 {
 	public class HrvsterUser
 	{
@@ -9,5 +9,8 @@ namespace hrvster.Core.Authentication
 		public string Token { get; set; }
 		public string DisplayName { get; set; }
 		public string TwitterUserName { get; set; }
+		public string Locale { get; set; }
+		public string WindowsTimeZone { get; set; }
+		public bool IsDaylight { get; set; }
 	}
 }

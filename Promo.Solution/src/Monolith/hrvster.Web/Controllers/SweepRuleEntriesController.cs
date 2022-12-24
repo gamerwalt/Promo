@@ -19,14 +19,14 @@ namespace hrvster.Web.Controllers
 		private readonly IMediator _mediator;
 		private readonly IMapper _mapper;
 		private readonly IToastNotification _notificationService;
-		private readonly HrvsterUser _hrvsterUser;
+		private readonly hrvster.Models.HrvsterUser _hrvsterUser;
 
 		public SweepRuleEntriesController(
 			ILoggerFactory loggerFactory,
 			IMediator mediator,
 			IMapper mapper,
 			IToastNotification notificationService,
-			HrvsterUser hrvsterUser)
+			hrvster.Models.HrvsterUser hrvsterUser)
 		{
 			_logger = loggerFactory.CreateLogger<SweepRuleEntriesController>();
 			_mediator = mediator;

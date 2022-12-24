@@ -93,7 +93,7 @@
                                 <label class="required d-flex align-items-center fs-6 fw-semibold form-label mb-2">
                                     Date
                                 </label>
-                                <input asp-for="ScheduledDate" class="form-control form-control-lg" asp-format="{0:yyyy-MM-ddTHH:mm}" />
+                                <input asp-for="ScheduledDate" class="form-control form-control-lg" />
                                 <span asp-validation-for="ScheduledDate"></span>
                             </div>
                         </div>
@@ -161,9 +161,9 @@
                             <div class="mb-7">
                                 <h5 class="mb-3">Dates</h5>
                                 <div class="mb-0">
-                                    <span class="badge badge-light-info me-2">Start Date: @Model.SweepstakeStartDate.ToString("f")</span>
-                                    <span class="badge badge-light-info me-2">End Date: @Model.SweepstakeEndDate.ToString("f")</span>
-                                    <span class="badge badge-light-info me-2">Draw Date: @Model.SweepstakeDrawDate.GetValueOrDefault().ToString("f")</span>
+                                    <span class="badge badge-light-info me-2">Start Date: @Model.SweepstakeStartDate.ToString("MMM dd, yyyy, hh:mm:ss tt")</span>
+                                    <span class="badge badge-light-info me-2">End Date: @Model.SweepstakeEndDate.ToString("MMM dd, yyyy, hh:mm:ss tt")</span>
+                                    <span class="badge badge-light-info me-2">Draw Date: @Model.SweepstakeDrawDate.GetValueOrDefault().ToString("MMM dd, yyyy, hh:mm:ss tt")</span>
                                 </div>
                             </div>
                             <div class="separator separator-dashed mb-7"></div>

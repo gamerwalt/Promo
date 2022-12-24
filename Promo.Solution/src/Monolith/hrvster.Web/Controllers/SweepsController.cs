@@ -27,7 +27,7 @@ namespace hrvster.Web.Controllers
 	{
 		private readonly ILogger<SweepsController> _logger;
 		private readonly IMediator _mediator;
-		private readonly HrvsterUser _hrvsterUser;
+		private readonly hrvster.Models.HrvsterUser _hrvsterUser;
 		private readonly IMapper _mapper;
 		private readonly IToastNotification _notificationService;
 		private readonly SweepstakeConfiguration _sweepstakeConfiguration;
@@ -35,7 +35,7 @@ namespace hrvster.Web.Controllers
 		public SweepsController(
 			ILoggerFactory loggerFactory,
 			IMediator mediator,
-			HrvsterUser hrvsterUser,
+			hrvster.Models.HrvsterUser hrvsterUser,
 			IMapper mapper,
 			IToastNotification notificationService,
 			SweepstakeConfiguration sweepstakeConfiguration)
@@ -92,7 +92,7 @@ namespace hrvster.Web.Controllers
 
 			if (ModelState.IsValid)
 			{
-				await _mediator.Send(new CreateSweepRequest(form.Name, form.StartDate, form.EndDate, form.DrawDate, form.Campaign.CampaignUid, _hrvsterUser.UserUid));
+				await _mediator.Send(new CreateSweepRequest(form.Name, form.StartDate, form.EndDate, form.DrawDate, form.Campaign.CampaignUid, _hrvsterUser.UserUid, _hrvsterUser.WindowsTimeZone));
 
 				_notificationService.AddSuccessToastMessage("Sweepstake created successfully.");
 
@@ -172,7 +172,7 @@ namespace hrvster.Web.Controllers
 					DrawDate = form.DrawDate
 				};
 
-				var sweep = await _mediator.Send(new Core.Requests.CreateSweep(request));
+				var sweep = await _mediator.Send(new Core.Requests.CreateSweep(request, _hrvsterUser.WindowsTimeZone));
 
 				if (sweep == null)
 				{
@@ -272,7 +272,8 @@ namespace hrvster.Web.Controllers
 					form.UpdateSweepstake.Name,
 					form.UpdateSweepstake.StartDate,
 					form.UpdateSweepstake.EndDate,
-					form.UpdateSweepstake.DrawDate));
+					form.UpdateSweepstake.DrawDate,
+					_hrvsterUser.WindowsTimeZone));
 
 				_notificationService.AddSuccessToastMessage("Sweepstake updated successfully.");
 

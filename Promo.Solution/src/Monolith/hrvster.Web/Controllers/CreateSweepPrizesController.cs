@@ -23,7 +23,7 @@ namespace hrvster.Web.Controllers
 		private readonly IMediator _mediator;
 		private readonly IMapper _mapper;
 		private readonly IToastNotification _notificationService;
-		private readonly HrvsterUser _hrvsterUser;
+		private readonly hrvster.Models.HrvsterUser _hrvsterUser;
 		private readonly PrizePositionFinder _prizePositionFinder;
 
 		public CreateSweepPrizesController(
@@ -31,7 +31,7 @@ namespace hrvster.Web.Controllers
 			IMediator mediator,
 			IMapper mapper,
 			IToastNotification notificationService,
-			HrvsterUser hrvsterUser,
+			hrvster.Models.HrvsterUser hrvsterUser,
 			PrizePositionFinder prizePositionFinder)
 		{
 			_logger = loggerFactory.CreateLogger<CreateSweepPrizesController>();

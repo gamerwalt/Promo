@@ -24,7 +24,7 @@ namespace hrvster.Web.Controllers
 		private readonly IToastNotification _notificationService;
 		private readonly IValidator<CreateSweepPrize> _createSweepPrizeValidator;
 		private readonly IValidator<EditSweepPrize> _editSweepPrizeValidator;
-		private readonly HrvsterUser _hrvsterUser;
+		private readonly hrvster.Models.HrvsterUser _hrvsterUser;
 		private readonly PrizePositionFinder _prizePositionFinder;
 
 		public SweepPrizesController(
@@ -34,7 +34,7 @@ namespace hrvster.Web.Controllers
 			IToastNotification notificationService,
 			IValidator<CreateSweepPrize> createSweepPrizeValidator,
 			IValidator<EditSweepPrize> editSweepPrizeValidator,
-			HrvsterUser hrvsterUser,
+			hrvster.Models.HrvsterUser hrvsterUser,
 			PrizePositionFinder prizePositionFinder)
 		{
 			_logger = loggerFactory.CreateLogger<SweepPrizesController>();
