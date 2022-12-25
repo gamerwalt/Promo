@@ -1,9 +1,15 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace hrvster.Models
 {
     public class Sweep
     {
+		public Sweep()
+		{
+			Rules = new List<Rule>();
+		}
+
         public int SweepId { get; set; }
         public Guid SweepUid { get; set; }
         public Campaign Campaign { get; set; }
@@ -20,5 +26,7 @@ namespace hrvster.Models
 		public DateTime? DateDrawn { get; set; }
 		public DateTime CreatedDate { get; set; }
         public DateTime? UpdatedDate { get; set; }
+
+		public List<Rule> Rules { get; set; }
 	}
 }

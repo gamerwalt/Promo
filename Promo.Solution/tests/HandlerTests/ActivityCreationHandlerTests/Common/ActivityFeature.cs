@@ -1,4 +1,5 @@
 ﻿using FluentAssertions.Common;
+using hrvster.Extensions.Configuration;
 using MediatR;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.Configuration;
@@ -55,7 +56,7 @@ namespace ActivityCreationHandlerTests.Common
 		protected override Action<IServiceCollection> AdditionalServices
 			=> services =>
 			{
-				//services.MockFirebaseAuthProvider()
+				services.AddSingletons();
 				//	.MockFirebaseAuthManager()
 				//	.MockSessionManager()
 				//	.MockToastNotification()

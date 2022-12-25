@@ -91,8 +91,8 @@ namespace ControllerTests
             var createPromotionForm = new CreatePromotion
             {
                 CampaignTypeUid = TestData.CampaignTypeUid,
-                Name = TestData.PromotionName,
-                Description = TestData.PromotionName,
+                Name = TestData.CampaignName,
+                Description = TestData.CampaignName,
                 StartDate = DateTime.Now.AddDays(2),
                 EndDate = DateTime.Now.AddDays(30)
             };
@@ -151,8 +151,8 @@ namespace ControllerTests
             var createPromotionForm = new CreatePromotion
             {
                 CampaignTypeUid = TestData.CampaignTypeUid,
-                Name = TestData.PromotionName,
-                Description = TestData.PromotionName,
+                Name = TestData.CampaignName,
+                Description = TestData.CampaignName,
                 StartDate = DateTime.Now.AddDays(2),
                 EndDate = DateTime.Now.AddDays(30)
             };

@@ -1,4 +1,6 @@
-﻿namespace hrvster.Models.Sweepstakes
+﻿using System.Collections;
+
+namespace hrvster.Models.Sweepstakes
 {
 	public class SweepDrawPropertiesAndRule
 	{

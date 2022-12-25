@@ -63,6 +63,7 @@ namespace hrvster.Services
 						.AddSendGrid(Configuration)
 						.AddRandomizer()
 						.AddFirebaseServices(Configuration)
+						.AddSingletons()
 						.AddHarvsterConfigurationOption(Configuration);
 
 					LoadServices(services);

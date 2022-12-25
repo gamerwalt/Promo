@@ -34,9 +34,9 @@ namespace hrvster.ApplicationServices.Sweepstakes
 		{
 			var sweepsDrawPropertiesRules = await _mediator.Send(new GetSweepstakesRequiringADrawRequest(), token);
 
-			var drawTasks = new List<Task>();
+			var sweepsAndRules = AggregateSweepAndRules(sweepsDrawPropertiesRules);
 
-			foreach(var rule in sweepsDrawPropertiesRules)
+			foreach(var rule in sweepsAndRules)
 			{
 				_logger.LogInformation("Performing the draw for the sweepstakes {sweepName} under the campaign {campaignName}",
 					rule.Sweep.Name,
@@ -48,7 +48,7 @@ namespace hrvster.ApplicationServices.Sweepstakes
 				if (entries == null || entries.Count() == 0)
 					continue;
 
-				if(winners.Count() >= 0)
+				if(winners.Count() > 0)
 				{
 					_logger.LogWarning("The sweepstake {sweepName} already has winners. Exiting.", rule.Sweep.Name);
 
@@ -59,6 +59,35 @@ namespace hrvster.ApplicationServices.Sweepstakes
 
 				await _mediator.Send(new PerformDrawRequest(drawProperties));
 			}
+		}
+
+		private List<SweepDrawPropertiesAndRule> AggregateSweepAndRules(IEnumerable<SweepDrawPropertiesAndRule> sweepsDrawPropertiesRules)
+		{
+			var newSweepDrawPropertiesAndRule = new List<SweepDrawPropertiesAndRule>();
+			var rules = new List<Rule>();
+
+			foreach(var rule in sweepsDrawPropertiesRules)
+			{
+				var sweepSameNameCount = sweepsDrawPropertiesRules.Where(s => s.Sweep.Name.Equals(rule.Sweep.Name)).Count();
+
+				if(sweepSameNameCount == 1)
+				{
+					rule.Sweep.Rules.Add(rule.SweepRule);
+					newSweepDrawPropertiesAndRule.Add(rule);
+					continue;
+				}
+
+				var properties = sweepsDrawPropertiesRules.Where(c => c.Sweep.Name.Equals(rule.Sweep.Name));
+				foreach(var property in properties)
+				{
+					rule.Sweep.Rules.Add(property.SweepRule);
+				}
+
+				if(!newSweepDrawPropertiesAndRule.Any(s => s.Sweep.Name.Equals(rule.Sweep.Name)))
+					newSweepDrawPropertiesAndRule.Add(rule);
+			}
+
+			return newSweepDrawPropertiesAndRule;
 		}
 
 		private async Task<IEnumerable<SweepEntry>> PreDrawAsync(SweepDrawPropertiesAndRule rule)
