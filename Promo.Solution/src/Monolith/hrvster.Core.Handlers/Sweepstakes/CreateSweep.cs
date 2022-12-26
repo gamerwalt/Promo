@@ -53,13 +53,13 @@ namespace hrvster.Core.Handlers.Sweepstakes
 
 			if(request.SweepUid.Equals(Guid.Empty))
 			{
-				await _repository.CreateAsync(sweep, request.TimeZoneId);
+				await _repository.CreateAsync(sweep);
 			}
 			else
 			{
 				sweep.SweepUid = request.SweepUid;
 
-				await _repository.CreateAsync(sweep, request.TimeZoneId);
+				await _repository.CreateAsync(sweep);
 			}
 
 			await _mediator.Publish(new SweepCreated(sweep));

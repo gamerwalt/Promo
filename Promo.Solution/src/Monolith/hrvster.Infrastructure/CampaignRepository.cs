@@ -10,7 +10,7 @@ namespace hrvster.Infrastructure
 {
 	public interface ICampaignRepository
 	{
-		Task CreateCampaignAsync(Campaign campaign, string timezoneId);
+		Task CreateCampaignAsync(Campaign campaign);
 		Task<Campaign> GetCampaignByUidAsync(Guid campaignUid, Guid accountUid);
 		Task UpdateCampaignAsync(Guid campaignUid, Campaign campaign, string timezoneId);
 		Task<List<Campaign>> GetAccountCampaignsAsync(Guid accountUid);
@@ -31,10 +31,10 @@ namespace hrvster.Infrastructure
 			_hrvsterUser = hrvsterUser;
 		}
 
-		public async Task CreateCampaignAsync(Campaign campaign, string timezoneId)
+		public async Task CreateCampaignAsync(Campaign campaign)
 		{
-			var startDateUtc = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(campaign.StartDate, TimeZoneInfo.Local.Id, timezoneId);
-			var endDateUtc = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(campaign.EndDate, TimeZoneInfo.Local.Id, timezoneId);
+			var startDateUtc = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(campaign.StartDate, TimeZoneInfo.Local.Id, _hrvsterUser.WindowsTimeZone);
+			var endDateUtc = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(campaign.EndDate, TimeZoneInfo.Local.Id, _hrvsterUser.WindowsTimeZone);
 
 			if(!_hrvsterUser.IsDaylight)
 			{

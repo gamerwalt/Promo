@@ -80,7 +80,7 @@ namespace hrvster.Core.Requests
 				{
 					AccountUid = request.AccountUid
 				}
-            }, request.TimezoneId);
+            });
 
             await _mediator.Publish(new CampaignCreated(request.NewCampaign, request.AccountUid, campaignUid));
 

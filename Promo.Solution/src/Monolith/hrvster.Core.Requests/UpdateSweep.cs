@@ -58,7 +58,7 @@ namespace hrvster.Core.Requests
             request.Sweep.EndDate = request.Request.EndDate;
             request.Sweep.DrawDate = request.Request.DrawDate;
 
-            await _repository.UpdateAsync(request.SweepUid, request.Sweep, request.TimeZoneId);
+            await _repository.UpdateAsync(request.SweepUid, request.Sweep);
 
             return await _repository.GetAsync(request.SweepUid);
         }

@@ -1,6 +1,6 @@
-﻿namespace hrvster.Core.Subscriptions
+﻿namespace hrvster.Models
 {
-	public class Subscription
+	public class SubscriptionModel
 	{
 		public string PlanName { get; set; }
 		public bool IsDiscounted { get; set; }

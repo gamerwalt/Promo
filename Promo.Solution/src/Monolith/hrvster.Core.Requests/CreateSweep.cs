@@ -66,7 +66,7 @@ namespace hrvster.Core.Requests
                 StartDate = request.Sweep.StartDate,
                 EndDate = request.Sweep.EndDate,
 				DrawDate = request.Sweep.DrawDate
-            }, request.TimeZoneId );
+            });
 
 			var sweep = await _repository.GetAsync(sweepUid);
 

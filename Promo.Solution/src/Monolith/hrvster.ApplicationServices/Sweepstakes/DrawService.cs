@@ -46,11 +46,23 @@ namespace hrvster.ApplicationServices.Sweepstakes
 				var winners = await _mediator.Send(new GetSweepWinners(rule.Sweep.SweepUid));
 
 				if (entries == null || entries.Count() == 0)
+				{
+					_logger.LogWarning("The sweepstake {sweepName} does not have any entries.", rule.Sweep.Name);
+
+					await _mediator.Send(new MarkSweepAsDrawAttemptedRequest(rule.Sweep.SweepUid));
+
+					//Send notification and email
+
 					continue;
+				}
 
 				if(winners.Count() > 0)
 				{
 					_logger.LogWarning("The sweepstake {sweepName} already has winners. Exiting.", rule.Sweep.Name);
+
+					await _mediator.Send(new MarkSweepAsDrawAttemptedRequest(rule.Sweep.SweepUid));
+
+					//send notification and email
 
 					continue;
 				}

@@ -17,7 +17,7 @@ namespace hrvster.Extensions.Configuration
 			=> services.AddSingleton<HrvsterUser>();
 
 		public static IServiceCollection AddSubscription(this IServiceCollection services)
-			=> services.AddSingleton<Subscription>();
+			=> services.AddSingleton<SubscriptionModel>();
 
 		public static IServiceCollection AddLinkBuilder(this IServiceCollection services)
 			=> services.AddSingleton<LinkBuilder>();

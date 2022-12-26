@@ -6,20 +6,22 @@ using System.Data;
 using System.Threading.Tasks;
 using hrvster.Infrastructure.Extensions;
 using hrvster.Models.Sweepstakes;
+using System.Threading;
 
 namespace hrvster.Infrastructure
 {
 	public interface ISweepsRepository
 	{
-		Task CreateAsync(Sweep sweep, string timezoneId);
+		Task CreateAsync(Sweep sweep);
 		Task<Sweep> GetAsync(Guid sweepUid);
 		Task<IEnumerable<Sweep>> GetAllForCampaignAsync(Guid campaignUid);
-		Task UpdateAsync(Guid sweepUid, Sweep sweep, string timezoneId);
+		Task UpdateAsync(Guid sweepUid, Sweep sweep);
 		Task<IEnumerable<SweepDrawPropertiesAndRule>> GetSweepsRequiringADrawAsync();
 		Task UpdateSweepAsDrawnAsync(Guid sweepUid);
 		Task<IEnumerable<Sweep>> GetAllForAccountAsync(Guid accountUid);
 		IEnumerable<Sweep> GetAllForAccount(Guid accountUid);
 		IEnumerable<Sweep> GetAllForCampaign(Guid campaignUid);
+		Task MarkSweepAsDrawAttemptedAsync(Guid sweepUid, CancellationToken cancellationToken);
 	}
 
 	public class SweepsRepository : ISweepsRepository
@@ -33,11 +35,11 @@ namespace hrvster.Infrastructure
 			_hrvsterUser = hrvsterUser;
 		}
 
-		public async Task CreateAsync(Sweep sweep, string timezoneId)
+		public async Task CreateAsync(Sweep sweep)
 		{
-			var startDateUtc = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(sweep.StartDate, TimeZoneInfo.Local.Id, timezoneId);
-			var endDateUtc = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(sweep.EndDate, TimeZoneInfo.Local.Id, timezoneId);
-			var drawDateUtc = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(sweep.DrawDate.GetValueOrDefault(), TimeZoneInfo.Local.Id, timezoneId);
+			var startDateUtc = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(sweep.StartDate, TimeZoneInfo.Local.Id, _hrvsterUser.WindowsTimeZone);
+			var endDateUtc = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(sweep.EndDate, TimeZoneInfo.Local.Id, _hrvsterUser.WindowsTimeZone);
+			var drawDateUtc = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(sweep.DrawDate.GetValueOrDefault(), TimeZoneInfo.Local.Id, _hrvsterUser.WindowsTimeZone);
 
 			if (!_hrvsterUser.IsDaylight)
 			{
@@ -220,11 +222,11 @@ namespace hrvster.Infrastructure
 			};
 		}
 
-		public async Task UpdateAsync(Guid sweepUid, Sweep sweep, string timezoneId)
+		public async Task UpdateAsync(Guid sweepUid, Sweep sweep)
 		{
-			var startDateUtc = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(sweep.StartDate, TimeZoneInfo.Local.Id, timezoneId);
-			var endDateUtc = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(sweep.EndDate, TimeZoneInfo.Local.Id, timezoneId);
-			var drawDateUtc = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(sweep.DrawDate.GetValueOrDefault(), TimeZoneInfo.Local.Id, timezoneId);
+			var startDateUtc = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(sweep.StartDate, TimeZoneInfo.Local.Id, _hrvsterUser.WindowsTimeZone);
+			var endDateUtc = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(sweep.EndDate, TimeZoneInfo.Local.Id, _hrvsterUser.WindowsTimeZone);
+			var drawDateUtc = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(sweep.DrawDate.GetValueOrDefault(), TimeZoneInfo.Local.Id, _hrvsterUser.WindowsTimeZone);
 
 			if (!_hrvsterUser.IsDaylight)
 			{
@@ -363,6 +365,18 @@ namespace hrvster.Infrastructure
 			}
 
 			return sweeps;
+		}
+
+		public async Task MarkSweepAsDrawAttemptedAsync(Guid sweepUid, CancellationToken cancellationToken)
+		{
+			using var conn = new MySqlConnection(_database.GetConnectionString());
+			var command = conn.CreateCommand();
+			command.CommandText = "sweep_mark_as_draw_attempted";
+			command.CommandType = CommandType.StoredProcedure;
+			command.AddParameter("sweepUid", sweepUid);
+
+			await conn.OpenAsync(cancellationToken);
+			await command.ExecuteNonQueryAsync(cancellationToken);
 		}
 	}
 }

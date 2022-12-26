@@ -22,6 +22,7 @@ namespace TestUtilities
 				//services.AddFirebaseServices(Configuration);
                 services.AddMediatorAndFluentValidation();
                 services.AddDatabaseConfiguration(Configuration);
+                services.AddCampaignRepositories();
                 services.AddSweepstakesRepositories();
                 services.AddAccountRepositories();
                 services.AddEmailRepository();

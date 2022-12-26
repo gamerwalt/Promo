@@ -1,33 +1,32 @@
-﻿using hrvster.Core.Authentication;
-using hrvster.Infrastructure.Subscriptions;
+﻿using hrvster.Infrastructure.Subscriptions;
 using hrvster.Models;
 using hrvster.Models.Extensions;
 using Microsoft.Extensions.Logging;
 using System;
 
-namespace hrvster.Core.Subscriptions
+namespace hrvster.ApplicationServices.Subscription
 {
 	public interface ISubscriptionService
 	{
 		SubscriptionStatus IsAccountSubscribed(Guid accountUid);
 	}
 
-	public class SubscriptionService : ISubscriptionService 
+	public class SubscriptionService : ISubscriptionService
 	{
 		private readonly ILogger<SubscriptionService> _logger;
 		private readonly IAccountSubscriptionsRepository _repository;
-		private readonly Subscription _subscription;
+		private readonly SubscriptionModel _subscriptionModel;
 		private readonly HrvsterUser _hrvsterUser;
 
 		public SubscriptionService(
 			ILoggerFactory loggerFactory,
 			IAccountSubscriptionsRepository repository,
-			Subscription subscription,
+			SubscriptionModel subscriptionModel,
 			HrvsterUser hrvsterUser)
 		{
 			_logger = loggerFactory.CreateLogger<SubscriptionService>();
 			_repository = repository;
-			_subscription = subscription;
+			_subscriptionModel = subscriptionModel;
 			_hrvsterUser = hrvsterUser;
 		}
 
@@ -46,14 +45,14 @@ namespace hrvster.Core.Subscriptions
 
 			_logger.LogInformation("Account {accountUid} is subscribed with {subscription}", _hrvsterUser.UserUid, accountSubscription.ToJsonString());
 
-			_subscription.PlanName = accountSubscription.Plan.PlanName;
-			_subscription.IsDiscounted = accountSubscription.IsDiscounted;
-			_subscription.DiscountedBy = accountSubscription.DiscountedBy;
-			_subscription.PromotionsPerMonth = accountSubscription.Plan.PromotionsPerMonth;
-			_subscription.SweepstakesPerMonth = accountSubscription.Plan.SweepstakesPerMonth;
-			_subscription.SweepstakesMaximumEntries = accountSubscription.Plan.SweepstakesMaximumEntries;
-			_subscription.PricePerMonth = accountSubscription.Plan.PricePerMonth;
-			_subscription.PricePerYear = accountSubscription.Plan.PricePerYear;
+			_subscriptionModel.PlanName = accountSubscription.Plan.PlanName;
+			_subscriptionModel.IsDiscounted = accountSubscription.IsDiscounted;
+			_subscriptionModel.DiscountedBy = accountSubscription.DiscountedBy;
+			_subscriptionModel.PromotionsPerMonth = accountSubscription.Plan.PromotionsPerMonth;
+			_subscriptionModel.SweepstakesPerMonth = accountSubscription.Plan.SweepstakesPerMonth;
+			_subscriptionModel.SweepstakesMaximumEntries = accountSubscription.Plan.SweepstakesMaximumEntries;
+			_subscriptionModel.PricePerMonth = accountSubscription.Plan.PricePerMonth;
+			_subscriptionModel.PricePerYear = accountSubscription.Plan.PricePerYear;
 
 			return SubscriptionStatus.Subscribed;
 		}

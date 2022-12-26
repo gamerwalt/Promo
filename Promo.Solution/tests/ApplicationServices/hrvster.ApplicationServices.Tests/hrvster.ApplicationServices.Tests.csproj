@@ -22,10 +22,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Common\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\..\..\src\Monolith\hrvster.Models\hrvster.Models.csproj" />
     <ProjectReference Include="..\..\Utilities\TestUtilities.csproj" />
   </ItemGroup>

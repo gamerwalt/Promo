@@ -13,7 +13,7 @@
       <PropertyValue Name="ConnectionString" xml:space="preserve">User Id=hrvster_user;Host=localhost;Character Set=utf8</PropertyValue>
       <PropertyValue Name="ExecutionTimeout">0</PropertyValue>
     </ConnectionModel>
-    <Schema>promo.harvester</Schema>
+    <Schema>hrvster</Schema>
   </Source>
   <Target Type="Database">
     <ConnectionModel>
@@ -21,7 +21,7 @@
       <PropertyValue Name="ConnectionString" xml:space="preserve">User Id=hrvster_user;Host=hrvster-dev-db.mysql.database.azure.com;Character Set=utf8</PropertyValue>
       <PropertyValue Name="ExecutionTimeout">0</PropertyValue>
     </ConnectionModel>
-    <Schema>promo.harvester</Schema>
+    <Schema>hrvster</Schema>
   </Target>
   <GroupType Value="Status" />
   <ComparisonOptions>
@@ -74,7 +74,7 @@
     <CheckInconsistency>false</CheckInconsistency>
     <SetDelimiter>true</SetDelimiter>
     <UseDelimiter>true</UseDelimiter>
-    <TargetDatabaseName xml:space="preserve">promo.harvester</TargetDatabaseName>
+    <TargetDatabaseName xml:space="preserve">hrvster</TargetDatabaseName>
     <TargetChangeTracking>false</TargetChangeTracking>
     <IsTarget>false</IsTarget>
     <OmitIgnoreOptions>false</OmitIgnoreOptions>
