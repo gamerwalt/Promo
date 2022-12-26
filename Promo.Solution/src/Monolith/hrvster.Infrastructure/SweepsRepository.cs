@@ -180,7 +180,8 @@ namespace hrvster.Infrastructure
 					DrawDate = reader.GetNullableDateTimeValue("sweep_draw_date").GetValueOrDefault(),
 					DrawDateUtc = reader.GetNullableDateTimeValue("sweep_draw_date_utc").GetValueOrDefault(),
 					Drawn = reader.GetBoolean("sweep_drawn_indicator"),
-					DateDrawn = reader.GetNullableDateTimeValue("sweep_date_drawn")
+					DateDrawn = reader.GetNullableDateTimeValue("sweep_date_drawn"),
+					DrawAttempted = reader.GetBoolean("draw_attempted")
 				},
 				SweepRule = new Models.Rule
 				{
@@ -295,7 +296,8 @@ namespace hrvster.Infrastructure
 				EndDate = reader.GetDateTime("end_date"),
 				EndDateUtc = reader.GetDateTime("end_date_utc"),
 				DrawDate = GetNullableDateTimeValue(reader, "draw_date"),
-				DrawDateUtc = reader.GetNullableDateTimeValue("draw_date_utc").GetValueOrDefault()
+				DrawDateUtc = reader.GetNullableDateTimeValue("draw_date_utc").GetValueOrDefault(),
+				DrawAttempted = reader.GetBoolean("draw_attempted")
 			};
 		}
 

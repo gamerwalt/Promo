@@ -1,4 +1,4 @@
-﻿using hrvster.Core.Subscriptions;
+﻿using hrvster.ApplicationServices.Subscription;
 using hrvster.Models;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;

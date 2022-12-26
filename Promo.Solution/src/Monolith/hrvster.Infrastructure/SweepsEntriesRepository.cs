@@ -197,6 +197,7 @@ namespace hrvster.Infrastructure
 					EndDateUtc = reader.GetDateTime("end_date_utc"),
 					DrawDate = reader.GetDateTime("draw_date"),
 					DrawDateUtc = reader.GetDateTime("draw_date_utc"),
+					DrawAttempted = reader.GetBoolean("draw_attempted"),
 					CreatedDate = reader.GetDateTime("sweep_created_date")
 				}
 			};

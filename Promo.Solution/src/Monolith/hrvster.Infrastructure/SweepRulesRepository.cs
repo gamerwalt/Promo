@@ -177,8 +177,6 @@ namespace hrvster.Infrastructure
 
 		private Models.Rule CreateRecordFrom(MySqlDataReader reader)
 		{
-			var watchTypeCode = (WatchTypeCode)Enum.Parse(typeof(WatchTypeCode), reader.GetString("watch_type_code"));
-
 			return new Models.Rule
 			{
 				RuleId = reader.GetInt32("rule_id"),
@@ -215,6 +213,7 @@ namespace hrvster.Infrastructure
 					DrawDate = reader.GetDateTime("draw_date"),
 					DrawDateUtc =reader.GetDateTime("draw_date_utc"),
 					DateDrawn = reader.GetNullableDateTimeValue("date_drawn"),
+					DrawAttempted = reader.GetBoolean("draw_attempted"),
 					Account = new Account
 					{
 						AccountUid = reader.GetGuid("account_uid")
