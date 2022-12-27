@@ -219,6 +219,12 @@ namespace hrvster.Infrastructure
 					WatchTypeId = reader.GetInt32("watch_type_id"),
 					WatchTypeCode = reader.GetString("watch_type_code"),
 					WatchTypeName = reader.GetString("watch_type_name")
+				},
+				Account = new Account
+				{
+					AccountId = reader.GetInt32("account_id"),
+					AccountUid = reader.GetGuid("account_uid"),
+					EmailAddress = reader.GetString("email_address")
 				}
 			};
 		}

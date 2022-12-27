@@ -15,7 +15,7 @@ namespace hrvster.Core.Handlers.Tests.Common
 		public IAccountsRepository AccountRepository { get; private set; }
 		public ICampaignRepository CampaignRepository { get; private set; }
 		public ISweepsRepository SweepsRepository { get; private set; }
-
+		public IMailRepository MailRepository { get; private set; }
 		public RepositoryFeature()
 		{
 			Initialize();
@@ -48,7 +48,13 @@ namespace hrvster.Core.Handlers.Tests.Common
 			AccountRepository = ServiceProvider.GetService<IAccountsRepository>();
 			CampaignRepository = ServiceProvider.GetService<ICampaignRepository>();
 			SweepsRepository = ServiceProvider.GetService<ISweepsRepository>();
+			MailRepository = ServiceProvider.GetService<IMailRepository>();
+			
+			SetupHrvsterUser();
+		}
 
+		private void SetupHrvsterUser()
+		{
 			var hrvsterUser = ServiceProvider.GetService<HrvsterUser>();
 			hrvsterUser.EmailAddress = TestData.EmailAddress;
 			hrvsterUser.UserUid = TestData.AccountUid;

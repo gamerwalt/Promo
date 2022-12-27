@@ -31,7 +31,51 @@ namespace TestUtilities.Common.Steps
             return feature as TFeature;
         }
 
-        private static Email CreateEmailFrom(MySqlDataReader reader)
+		public static TFeature EmailsTableShouldContainFieldEqualTo<TFeature>(this IFeature<TFeature> feature,
+			string fieldName, string value) where TFeature : class
+		{
+			var email = default(Email);
+
+			var hrvsterConnectionString = feature.Configuration["ConnectionStrings:hrvster"];
+			using var conn = new MySqlConnection(hrvsterConnectionString);
+			var command = conn.CreateCommand();
+			command.CommandText = $"SELECT * FROM emails WHERE {fieldName} = '{value}'";
+			command.CommandType = CommandType.Text;
+			conn.Open();
+			using var reader = command.ExecuteReader();
+			while (reader.Read())
+			{
+				email = CreateEmailFrom(reader);
+			}
+
+			email.Should().NotBeNull();
+
+			return feature as TFeature;
+		}
+
+        public static TFeature EmailsTableShouldContain<TFeature>(this IFeature<TFeature> feature,
+            string fieldName, string value) where TFeature : class
+        {
+			var email = default(Email);
+
+			var hrvsterConnectionString = feature.Configuration["ConnectionStrings:hrvster"];
+			using var conn = new MySqlConnection(hrvsterConnectionString);
+			var command = conn.CreateCommand();
+			command.CommandText = $"SELECT * FROM emails WHERE {fieldName} LIKE '%{value}%'";
+			command.CommandType = CommandType.Text;
+			conn.Open();
+			using var reader = command.ExecuteReader();
+			while (reader.Read())
+			{
+				email = CreateEmailFrom(reader);
+			}
+
+			email.Should().NotBeNull();
+
+			return feature as TFeature;
+		}
+
+		private static Email CreateEmailFrom(MySqlDataReader reader)
         {
             return new Email
             {

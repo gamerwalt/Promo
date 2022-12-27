@@ -1,6 +1,4 @@
-﻿using System.Collections;
-
-namespace hrvster.Models.Sweepstakes
+﻿namespace hrvster.Models.Sweepstakes
 {
 	public class SweepDrawPropertiesAndRule
 	{
@@ -9,5 +7,6 @@ namespace hrvster.Models.Sweepstakes
 		public DrawRule DrawRule { get; set; }
 		public WatchType WatchType { get; set; }
 		public Rule SweepRule { get; set; }
+		public Account Account { get; set; }
 	}
 }

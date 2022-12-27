@@ -133,7 +133,7 @@
     <PropertyValue Name="ExcludeDependencies">false</PropertyValue>
     <PropertyValue Name="CanSqlExecutorAddError">true</PropertyValue>
     <PropertyValue Name="SynchronizeType">0</PropertyValue>
-    <PropertyValue Name="SynchronizationFileName" xml:space="preserve">D:\Promo\hrvsterDatabase\migrations\promo_harvester (localhost-3306 vs hrvster-dev-db_mysql_database_azure_com-3306).sql</PropertyValue>
+    <PropertyValue Name="SynchronizationFileName" xml:space="preserve">D:\Promo\hrvsterDatabase\migrations\hrvster (localhost-3306 vs hrvster-dev-db_mysql_database_azure_com-3306).sql</PropertyValue>
     <PropertyValue Name="SynchronizationEditorFileName" xml:space="preserve" />
     <PropertyValue Name="OpenScriptInEditor">false</PropertyValue>
     <PropertyValue Name="RefreshAfterSynchronization">true</PropertyValue>

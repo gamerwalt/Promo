@@ -2,12 +2,7 @@
 using hrvster.Models;
 using hrvster.Models.Options;
 using hrvster.Models.TemplateMailRequest;
-using MailKit.Net.Smtp;
-using MediatR;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-using MimeKit;
-using Org.BouncyCastle.Asn1.Ocsp;
 using SendGrid;
 using SendGrid.Helpers.Mail;
 using System;
@@ -52,18 +47,44 @@ namespace hrvster.ApplicationServices.Mails
 				{
 					switch (email.Template)
 					{
+						case EmailTemplate.NotEnoughSweepstakeDistinctUsers:
+							var sendDistinctUsersNotEnoughResult = await SendSweepsDistinctUsersNotEnoughEmailAsync(new SendSweepsDistinctUsersNotEnoughEmailRequest
+							{
+								EmailTemplate = EmailTemplate.NotEnoughSweepstakeDistinctUsers,
+								EmailAddress = email.Parameters[EmailParameters.EmailAddress],
+								SweepstakeName = email.Parameters[EmailParameters.SweepstakeName]
+							});
+
+							if (sendDistinctUsersNotEnoughResult)
+								await _mailRepository.UpdateAsSentAsync(email);
+
+							break;
+						case EmailTemplate.SweepEntriesNotEnoughEmail:
+							var sendEntriesNotEnough = await SendEntriesNotEnoughEmailAsync(
+								new SweepEntriesNotEnoughRequest
+								{
+									EmailTemplate = EmailTemplate.SweepEntriesNotEnoughEmail,
+									EmailAddress = email.Parameters[EmailParameters.EmailAddress],
+									SweepstakeName = email.Parameters[EmailParameters.SweepstakeName]
+								}
+							);
+
+							if (sendEntriesNotEnough)
+								await _mailRepository.UpdateAsSentAsync(email);
+
+							break;
 						case EmailTemplate.VerificationEmail:
 							var sendVerificationEmailResult = await SendVerificationEmailAsync(new VerificationEmailRequest
 							{
 								EmailAddress = email.EmailAddress,
 								EmailTemplate = EmailTemplate.VerificationEmail,
-								DisplayName = email.Parameters.ContainsKey(EmailParameters.DisplayName) 
-									? email.Parameters[EmailParameters.DisplayName] 
+								DisplayName = email.Parameters.ContainsKey(EmailParameters.DisplayName)
+									? email.Parameters[EmailParameters.DisplayName]
 									: String.Empty,
 								VerificationLink = email.Parameters[EmailParameters.VerificationLink]
 							});
 
-							if(sendVerificationEmailResult)
+							if (sendVerificationEmailResult)
 								await _mailRepository.UpdateAsSentAsync(email);
 
 							break;
@@ -77,7 +98,7 @@ namespace hrvster.ApplicationServices.Mails
 								DashboardLink = email.Parameters[EmailParameters.DashboardLink]
 							});
 
-							if(sendWelcomeEmailResult)
+							if (sendWelcomeEmailResult)
 								await _mailRepository.UpdateAsSentAsync(email);
 
 							break;
@@ -90,7 +111,7 @@ namespace hrvster.ApplicationServices.Mails
 								EmailTemplate = EmailTemplate.PasswordResetEmail
 							});
 
-							if(sendPasswordResetResult)
+							if (sendPasswordResetResult)
 								await _mailRepository.UpdateAsSentAsync(email);
 
 							break;
@@ -122,12 +143,12 @@ namespace hrvster.ApplicationServices.Mails
 		{
 			var client = new SendGridClient(_sendGrid.ApiKey);
 			var msg = MailHelper.CreateSingleEmail(
-				new EmailAddress(_sendGrid.Mail, _sendGrid.DisplayName), 
+				new EmailAddress(_sendGrid.Mail, _sendGrid.DisplayName),
 				new EmailAddress(mailRequest.ToEmailAddress),
-				mailRequest.Subject, 
-				mailRequest.Body, 
+				mailRequest.Subject,
+				mailRequest.Body,
 				mailRequest.Body);
-			
+
 			var response = await client.SendEmailAsync(msg);
 
 			return response.IsSuccessStatusCode;
@@ -149,11 +170,7 @@ namespace hrvster.ApplicationServices.Mails
 
 		private static string ExtractMailText(EmailRequest request)
 		{
-			var filePath = Directory.GetCurrentDirectory() + $"{Path.DirectorySeparatorChar}Templates{Path.DirectorySeparatorChar}{request.EmailTemplate}.html";
-
-			var streamReader = new StreamReader(filePath);
-			var mailText = streamReader.ReadToEnd();
-			streamReader.Close();
+			var mailText = GetMailText(request.EmailTemplate);
 
 			var type = request.GetType();
 
@@ -165,17 +182,35 @@ namespace hrvster.ApplicationServices.Mails
 			return mailText;
 		}
 
-		private async Task<bool> SendPasswordResetEmailLinkAsync(PasswordResetRequest request)
+		private async Task<bool> SendSweepsDistinctUsersNotEnoughEmailAsync(
+			SendSweepsDistinctUsersNotEnoughEmailRequest request)
 		{
-			var filePath = GetFilePath(request);
-
-			var streamReader = new StreamReader(filePath);
-			var mailText = streamReader.ReadToEnd();
-			streamReader.Close();
+			var mailText = GetMailText(request.EmailTemplate);
 
 			var type = request.GetType();
 
-			foreach(var f in type.GetProperties(BindingFlags.Instance | BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public))
+			foreach (var f in type.GetProperties(BindingFlags.Instance | BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public))
+			{
+				mailText = mailText.Replace($"[{f.Name}]", f.GetValue(request).ToString());
+			}
+
+			return await SendEmailAsync(
+				new MailRequest
+				{
+					ToEmailAddress = request.EmailAddress,
+					Body = mailText,
+					Subject = $"Unable to draw a winner for {request.SweepstakeName}"
+				}
+			);
+		}
+
+		private async Task<bool> SendPasswordResetEmailLinkAsync(PasswordResetRequest request)
+		{
+			var mailText = GetMailText(request.EmailTemplate);
+
+			var type = request.GetType();
+
+			foreach (var f in type.GetProperties(BindingFlags.Instance | BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public))
 			{
 				mailText = mailText.Replace($"[{f.Name}]", f.GetValue(request).ToString());
 			}
@@ -195,12 +230,29 @@ namespace hrvster.ApplicationServices.Mails
 			return Directory.GetCurrentDirectory() + $"{Path.DirectorySeparatorChar}Templates{Path.DirectorySeparatorChar}{request.EmailTemplate}.html";
 		}
 
+		private async Task<bool> SendEntriesNotEnoughEmailAsync(SweepEntriesNotEnoughRequest request)
+		{
+			var mailText = GetMailText(request.EmailTemplate);
+
+			Type type = request.GetType();
+
+			foreach (var f in type.GetProperties(BindingFlags.Instance | BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public))
+			{
+				mailText = mailText.Replace($"[{f.Name}]", f.GetValue(request).ToString());
+			}
+
+			return await SendEmailAsync(
+				new MailRequest
+				{
+					ToEmailAddress = request.EmailAddress,
+					Body = mailText,
+					Subject = "Sweepstakes ready for draw - No Entries Available."
+				});
+		}
+
 		private async Task<bool> SendVerificationEmailAsync(VerificationEmailRequest request)
 		{
-			var filePath = Directory.GetCurrentDirectory() + $"{Path.DirectorySeparatorChar}Templates{Path.DirectorySeparatorChar}{request.EmailTemplate}.html";
-			var streamReader = new StreamReader(filePath);
-			var mailText = streamReader.ReadToEnd();
-			streamReader.Close();
+			var mailText = GetMailText(request.EmailTemplate);
 
 			Type type = request.GetType();
 
@@ -221,10 +273,7 @@ namespace hrvster.ApplicationServices.Mails
 
 		private async Task<bool> SendWelcomeEmailAsync(WelcomeEmailRequest request)
 		{
-			var filePath = Directory.GetCurrentDirectory() + $"{Path.DirectorySeparatorChar}Templates{Path.DirectorySeparatorChar}{request.EmailTemplate}.html";
-			var streamReader = new StreamReader(filePath);
-			var mailText = streamReader.ReadToEnd();
-			streamReader.Close();
+			var mailText = GetMailText(request.EmailTemplate);
 
 			Type type = request.GetType();
 
@@ -241,6 +290,19 @@ namespace hrvster.ApplicationServices.Mails
 					Subject = "Let's get you started!"
 				}
 			);
+		}
+
+		private static string GetMailText(EmailTemplate template)
+		{
+			var filePath = Directory.GetCurrentDirectory() + $"{Path.DirectorySeparatorChar}Templates{Path.DirectorySeparatorChar}{template}.html";
+
+			var streamReader = new StreamReader(filePath);
+
+			var mailText = streamReader.ReadToEnd();
+
+			streamReader.Close();
+
+			return mailText;
 		}
 	}
 }

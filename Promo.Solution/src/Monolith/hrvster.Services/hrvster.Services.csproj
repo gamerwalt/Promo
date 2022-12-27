@@ -48,6 +48,9 @@
     <None Update="Templates\VerificationEmail.html">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="Templates\SweepEntriesNotEnoughEmail.html">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="Templates\WelcomeEmail.html">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

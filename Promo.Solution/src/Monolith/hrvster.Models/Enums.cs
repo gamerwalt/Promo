@@ -20,7 +20,9 @@
 		WelcomeEmail,
 		VerificationEmail,
 		PasswordResetEmail,
-		EmailAddressUpdateRequest
+		EmailAddressUpdateRequest,
+		SweepEntriesNotEnoughEmail,
+		NotEnoughSweepstakeDistinctUsers
 	}
 
 	public enum CampaignTypeCode

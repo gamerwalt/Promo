@@ -28,7 +28,7 @@ namespace hrvster.Core.Handlers.ServiceHandlers
 
 		protected override async Task Handle(PerformDrawRequest request, CancellationToken cancellationToken)
 		{
-			if (SatisfiesPreDrawConditions(request.DrawProperties.SweepEntries, request.DrawProperties.SweepDrawPropertiesAndRule))
+			if (await SatisfiesPreDrawConditions(request.DrawProperties.SweepEntries, request.DrawProperties.SweepDrawPropertiesAndRule))
 			{
 				var winners = await _mediator.Send(new DrawWinnersForSweepstakesRequest(request.DrawProperties));
 
@@ -53,7 +53,7 @@ namespace hrvster.Core.Handlers.ServiceHandlers
 				c.UserIdentifierType.ToString().Equals(winner.UserIdentifierType.ToString()));
 		}
 
-		private bool SatisfiesPreDrawConditions(IEnumerable<SweepEntry> sweepEntries, SweepDrawPropertiesAndRule rule)
+		private async Task<bool> SatisfiesPreDrawConditions(IEnumerable<SweepEntry> sweepEntries, SweepDrawPropertiesAndRule rule)
 		{
 			var distinctUsers = from e in sweepEntries
 								group e by new
@@ -74,6 +74,9 @@ namespace hrvster.Core.Handlers.ServiceHandlers
 			{
 				_logger.LogInformation($"Rule: Total winners count {winnerAndBackupCount} is more than the distinct number of users {distinctUserCount} who entered the sweepstakes.");
 				_logger.LogInformation($"Cannot continue. Please perform this draw manually or update the Winner count and back up winner count for Sweep: {rule.Sweep.Name} under Campaign: {rule.Campaign.CampaignName}");
+
+				//send email here also.
+				await _mediator.Send(new SweepsDistinctUsersLessThanWinnerCountMailRequest(rule.Account.EmailAddress, rule.Sweep.Name));
 
 				return false;
 			}
