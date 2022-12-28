@@ -3,6 +3,7 @@ using hrvster.Core.Authentication;
 using hrvster.Core.Requests;
 using hrvster.Core.Requests.ApiRequests;
 using hrvster.Core.Requests.WebRequests.Sweeps;
+using hrvster.Core.Requests.WebRequests.Sweeps.Updates;
 using hrvster.Core.Subscriptions;
 using hrvster.Extensions.ModelExtensions;
 using hrvster.Models.Options;
@@ -298,6 +299,120 @@ namespace hrvster.Web.Controllers
 			return View(model);
 		}
 
+		[HttpGet]
+		[Route("/Sweeps/ManualDraw/{sweepUid:Guid}")]
+		public async Task<IActionResult> PerformDrawManually(Guid sweepUid)
+		{
+			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
+			if (sweep == null) return RedirectToAction("View", new { sweepUid = sweepUid });
+			if (sweep.Account.AccountUid != _hrvsterUser.UserUid) return RedirectToAction("View", new { sweepUid = sweepUid });
+
+			var sweepEntrants = await _mediator.Send(new GetSweepEntriesRequest(sweepUid));
+			var distinctEntrants = sweepEntrants.Distinct().ToList();
+
+			var sweepAndRules = await _mediator.Send(new GetSweepstakeAndRulesRequests(sweepUid));
+			if (sweepAndRules == null)
+			{
+				_logger.LogError("Could not find sweepstake with uid: {sweepUid}", sweepUid);
+
+				_notificationService.AddWarningToastMessage($"Could not find sweepstake with uid: {sweepUid}.");
+
+				return RedirectToAction("View", new { sweepUid = sweepUid });
+			}
+			var sweepWinners = await _mediator.Send(new GetSweepWinners(sweepUid));
+			var winners = sweepWinners.ToList();
+
+			foreach (var winner in winners)
+			{
+				if (distinctEntrants.Any(WinnerExists(winner)))
+				{
+					var entrant = distinctEntrants.FirstOrDefault(WinnerExists(winner));
+
+					distinctEntrants.Remove(entrant);
+				}
+			}
+
+			var model = new PerformDrawManually
+			{
+				SweepstakeAndRules = sweepAndRules,
+				Winners = winners,
+				SweepstakeEntrants = distinctEntrants
+			};
+
+			return View(model);
+		}
+
+		[HttpPost]
+		[Route("/Sweeps/ManualDraw/{sweepUid:Guid}")]
+		public async Task<IActionResult> PerformDrawManually(PerformDrawManually form, Guid sweepUid, string WinnerSelectProcess)
+		{
+			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
+			if (sweep == null) return RedirectToAction("View", new { sweepUid = sweepUid });
+			if (sweep.Account.AccountUid != _hrvsterUser.UserUid) return RedirectToAction("View", new { sweepUid = sweepUid });
+
+			var sweepEntrants = await _mediator.Send(new GetSweepEntriesRequest(sweepUid));
+			var distinctEntrants = sweepEntrants.Distinct().ToList();
+
+			var sweepAndRules = await _mediator.Send(new GetSweepstakeAndRulesRequests(sweepUid));
+			if (sweepAndRules == null)
+			{
+				_logger.LogError("Could not find sweepstake with uid: {sweepUid}", sweepUid);
+
+				_notificationService.AddWarningToastMessage($"Could not find sweepstake with uid: {sweepUid}.");
+
+				return RedirectToAction("View", new { sweepUid = sweepUid });
+			}
+			var sweepWinners = await _mediator.Send(new GetSweepWinners(sweepUid));
+			var winners = sweepWinners.ToList();
+
+			foreach (var winner in winners)
+			{
+				if (distinctEntrants.Any(WinnerExists(winner)))
+				{
+					var entrant = distinctEntrants.FirstOrDefault(WinnerExists(winner));
+
+					distinctEntrants.Remove(entrant);
+				}
+			}
+
+			switch (WinnerSelectProcess)
+			{
+				case "Singular":
+					await _mediator.Send(new SelectWinnerRequest(sweepUid, distinctEntrants, winners));
+
+					await _mediator.Send(new RemoveDrawAttemptAndNotEnoughUniqueEntrantsRequest(sweep));
+
+					_notificationService.AddSuccessToastMessage("A winner has been selected.");
+
+					return RedirectToAction("PerformDrawManually", new { sweepUid = sweepUid });
+				case "All":
+					await _mediator.Send(new SelectWinnerRequest(sweepUid, distinctEntrants, winners, true));
+
+					await _mediator.Send(new RemoveDrawAttemptAndNotEnoughUniqueEntrantsRequest(sweep));
+
+					_notificationService.AddSuccessToastMessage("Winners have been selected safely.");
+
+					break;
+			}
+
+			return RedirectToAction("View", new { sweepUid = sweepUid });
+		}
+
+		[HttpPost]
+		[Route("/Sweeps/ToggleDrawAttempted/{sweepUid:Guid}")]
+		public async Task<IActionResult> ToggleDrawAttempted(Guid sweepUid)
+		{
+			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
+			if (sweep == null) return RedirectToAction("View", new { sweepUid = sweepUid });
+			if (sweep.Account.AccountUid != _hrvsterUser.UserUid) return RedirectToAction("View", new { sweepUid = sweepUid });
+
+			await _mediator.Send(new ToggleSweepstakesDrawAttemptedRequest(sweepUid, false));
+
+			_notificationService.AddSuccessToastMessage("Sweepstake updated successfully.");
+
+			return RedirectToAction("View", new { sweepUid = sweepUid });
+		}
+
 		private CreateNewSweep BuildCreateNewForm(List<Campaign> promotions)
 		{
 			var startDate = DateTime.Now;
@@ -318,6 +433,11 @@ namespace hrvster.Web.Controllers
 				DrawDate = drawDate
 			};
 			return model;
+		}
+
+		private static Func<hrvster.Models.SweepEntry, bool> WinnerExists(hrvster.Models.SweepWinner winner)
+		{
+			return w => w.UserIdentifier.Equals(winner.UserIdentifier) && w.UserIdentifierType.Equals(winner.UserIdentifierType);
 		}
 	}
 }

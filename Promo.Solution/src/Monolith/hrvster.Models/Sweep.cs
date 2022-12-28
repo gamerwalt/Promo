@@ -27,7 +27,7 @@ namespace hrvster.Models
 		public DateTime CreatedDate { get; set; }
         public DateTime? UpdatedDate { get; set; }
 		public bool DrawAttempted { get; set; }
-
+		public bool NotEnoughUniqueEntrants { get; set; }
 		public List<Rule> Rules { get; set; }
 	}
 }

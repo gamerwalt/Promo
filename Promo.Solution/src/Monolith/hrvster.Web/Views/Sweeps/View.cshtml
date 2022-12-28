@@ -66,7 +66,7 @@
 						<div class="d-flex align-items-center">
 							<div class="fs-4 fw-bold text-active-danger">
 								An attempt was made to draw winners for your sweeps. 
-								<br>Click the button below to remove the attempt so the system can perform a raffle draw.
+								<br>To update the system to retry a draw, click the [Remove Attempt] button.
 							</div>
 						</div>
 					</div>
@@ -75,6 +75,26 @@
 							<form asp-action="ToggleDrawAttempted" method="post" asp-route-sweepUid="@Model.Sweepstake.SweepUid">
 								<button class="btn btn-primary mb-4" type="submit">Remove Attempt</button>
 							</form>
+						</div>
+					</div>
+				</div>
+			</div>
+		}
+		@if(Model.Sweepstake.NotEnoughUniqueEntrants)
+		{
+			<div class="d-flex flex-wrap justify-content-start mb-2">
+				<div class="d-flex flex-wrap">
+					<div class="min-w-200px py-3 px-4 me-6 mb-3">
+						<div class="d-flex align-items-center">
+							<div class="fs-4 fw-bold text-active-danger">
+								Your sweepstakes does not have enough entrants.
+								<br>To perform a draw manually, click the [Perform Draw Manually] button.
+							</div>
+						</div>
+					</div>
+					<div class="min-w-125px py-3 px-4 me-6 mb-3">
+						<div class="d-flex align-items-center">
+							<a class="btn btn-primary mb-4" asp-action="PerformDrawManually" asp-route-sweepUid="@Model.Sweepstake.SweepUid">Perform Draw Manually</a>
 						</div>
 					</div>
 				</div>

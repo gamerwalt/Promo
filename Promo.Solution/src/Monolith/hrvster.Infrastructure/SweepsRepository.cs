@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using hrvster.Infrastructure.Extensions;
 using hrvster.Models.Sweepstakes;
 using System.Threading;
+using Newtonsoft.Json.Linq;
 
 namespace hrvster.Infrastructure
 {
@@ -22,6 +23,9 @@ namespace hrvster.Infrastructure
 		IEnumerable<Sweep> GetAllForAccount(Guid accountUid);
 		IEnumerable<Sweep> GetAllForCampaign(Guid campaignUid);
 		Task MarkSweepAsDrawAttemptedAsync(Guid sweepUid, CancellationToken cancellationToken);
+		Task UpdateSweepAsNotEnoughUniqueEntrantsAsync(Guid sweepUid, CancellationToken cancellationToken);
+		Task ToggleSweepDrawAttemptedAsync(Guid sweepUid, bool value, CancellationToken cancellationToken);
+		Task ToggleSweepAsNotEnoughUniqueEntrantsAsync(Guid sweepUid, bool v, CancellationToken cancellationToken);
 	}
 
 	public class SweepsRepository : ISweepsRepository
@@ -303,7 +307,8 @@ namespace hrvster.Infrastructure
 				EndDateUtc = reader.GetDateTime("end_date_utc"),
 				DrawDate = GetNullableDateTimeValue(reader, "draw_date"),
 				DrawDateUtc = reader.GetNullableDateTimeValue("draw_date_utc").GetValueOrDefault(),
-				DrawAttempted = reader.GetBoolean("draw_attempted")
+				DrawAttempted = reader.GetBoolean("draw_attempted"),
+				NotEnoughUniqueEntrants = reader.GetBoolean("not_enough_unique_entrants")
 			};
 		}
 
@@ -382,6 +387,44 @@ namespace hrvster.Infrastructure
 			command.CommandText = "sweep_mark_as_draw_attempted";
 			command.CommandType = CommandType.StoredProcedure;
 			command.AddParameter("sweepUid", sweepUid);
+
+			await conn.OpenAsync(cancellationToken);
+			await command.ExecuteNonQueryAsync(cancellationToken);
+		}
+
+		public async Task UpdateSweepAsNotEnoughUniqueEntrantsAsync(Guid sweepUid, CancellationToken cancellationToken)
+		{
+			using var conn = new MySqlConnection(_database.GetConnectionString());
+			var command = conn.CreateCommand();
+			command.CommandText = "sweep_mark_as_not_enough_unique_entrants";
+			command.CommandType = CommandType.StoredProcedure;
+			command.AddParameter("sweepUid", sweepUid);
+
+			await conn.OpenAsync(cancellationToken);
+			await command.ExecuteNonQueryAsync(cancellationToken);
+		}
+
+		public async Task ToggleSweepDrawAttemptedAsync(Guid sweepUid, bool value, CancellationToken cancellationToken)
+		{
+			using var conn = new MySqlConnection(_database.GetConnectionString());
+			var command = conn.CreateCommand();
+			command.CommandText = "sweep_toggle_draw_attempted";
+			command.CommandType = CommandType.StoredProcedure;
+			command.AddParameter("sweepUid", sweepUid);
+			command.AddParameter("value", value ? 1 : 0);
+
+			await conn.OpenAsync(cancellationToken);
+			await command.ExecuteNonQueryAsync(cancellationToken);
+		}
+
+		public async Task ToggleSweepAsNotEnoughUniqueEntrantsAsync(Guid sweepUid, bool value, CancellationToken cancellationToken)
+		{
+			using var conn = new MySqlConnection(_database.GetConnectionString());
+			var command = conn.CreateCommand();
+			command.CommandText = "sweep_toggle_not_enough_entries";
+			command.CommandType = CommandType.StoredProcedure;
+			command.AddParameter("sweepUid", sweepUid);
+			command.AddParameter("value", value ? 1 : 0);
 
 			await conn.OpenAsync(cancellationToken);
 			await command.ExecuteNonQueryAsync(cancellationToken);

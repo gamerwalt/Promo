@@ -20,6 +20,7 @@ namespace hrvster.Models.WebModels.Sweeps
 		public bool Drawn { get; set; }
 		public DateTime? DateDrawn { get; set; }
 		public bool DrawAttempted { get; set; }
+		public bool NotEnoughUniqueEntrants { get; set; }
 		public IEnumerable<SweepEntry> SweepEntries { get; set; }
 		public IEnumerable<Harvested> Harvested { get; set; }
 
