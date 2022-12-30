@@ -19,6 +19,7 @@ namespace hrvster.Web.Validation
 			ISessionManager sessionManager)
 		{
 			_campaignsRepository = campaignsRepository;
+			_sessionManager = sessionManager;
 
 			var minDate = DateTime.Now.AddDays(1);
 

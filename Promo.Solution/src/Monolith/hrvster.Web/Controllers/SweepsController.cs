@@ -42,13 +42,15 @@ namespace hrvster.Web.Controllers
 			IMediator mediator,
 			IMapper mapper,
 			IToastNotification notificationService,
-			SweepstakeConfiguration sweepstakeConfiguration)
+			SweepstakeConfiguration sweepstakeConfiguration,
+			ISessionManager sessionManager)
 		{
 			_logger = loggerFactory.CreateLogger<SweepsController>();
 			_mediator = mediator;
 			_mapper = mapper;
 			_notificationService = notificationService;
 			_sweepstakeConfiguration = sweepstakeConfiguration;
+			_sessionManager = sessionManager;
 		}
 
 		public async Task<IActionResult> Index()
