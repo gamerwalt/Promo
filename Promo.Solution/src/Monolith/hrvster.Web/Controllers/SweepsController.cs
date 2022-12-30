@@ -30,22 +30,22 @@ namespace hrvster.Web.Controllers
 	{
 		private readonly ILogger<SweepsController> _logger;
 		private readonly IMediator _mediator;
-		private readonly hrvster.Models.HrvsterUser _hrvsterUser;
 		private readonly IMapper _mapper;
 		private readonly IToastNotification _notificationService;
 		private readonly SweepstakeConfiguration _sweepstakeConfiguration;
+		private readonly ISessionManager _sessionManager;
+
+		private hrvster.Models.HrvsterUser _hrvsterUser;
 
 		public SweepsController(
 			ILoggerFactory loggerFactory,
 			IMediator mediator,
-			hrvster.Models.HrvsterUser hrvsterUser,
 			IMapper mapper,
 			IToastNotification notificationService,
 			SweepstakeConfiguration sweepstakeConfiguration)
 		{
 			_logger = loggerFactory.CreateLogger<SweepsController>();
 			_mediator = mediator;
-			_hrvsterUser = hrvsterUser;
 			_mapper = mapper;
 			_notificationService = notificationService;
 			_sweepstakeConfiguration = sweepstakeConfiguration;
@@ -53,6 +53,8 @@ namespace hrvster.Web.Controllers
 
 		public async Task<IActionResult> Index()
 		{
+			_hrvsterUser = _sessionManager.SetUserInformation();
+
 			var sweeps = await _mediator.Send(new GetSweepForAccountUidRequest(_hrvsterUser.UserUid));
 
 			return View(sweeps);
@@ -61,6 +63,8 @@ namespace hrvster.Web.Controllers
 		[HttpGet]
 		public async Task<IActionResult> CreateNew()
 		{
+			_hrvsterUser = _sessionManager.SetUserInformation();
+
 			var promotions = await _mediator.Send(new GetAllCampaignsForAccount(_hrvsterUser.UserUid));
 			var anyActivePromotions = promotions.Any(c => c.IsActive());
 			var anyWillBeInProgress = promotions.Any(c => c.WillBeInProgress());
@@ -81,6 +85,8 @@ namespace hrvster.Web.Controllers
 		[HttpPost]
 		public async Task<IActionResult> CreateNew(CreateNewSweep form)
 		{
+			_hrvsterUser = _sessionManager.SetUserInformation();
+
 			var promotions = await _mediator.Send(new GetAllCampaignsForAccount(_hrvsterUser.UserUid));
 
 			var anyActivePromotions = promotions.Any(c => c.IsActive());
@@ -95,7 +101,7 @@ namespace hrvster.Web.Controllers
 
 			if (ModelState.IsValid)
 			{
-				await _mediator.Send(new CreateSweepRequest(form.Name, form.StartDate, form.EndDate, form.DrawDate, form.Campaign.CampaignUid, _hrvsterUser.UserUid, _hrvsterUser.WindowsTimeZone));
+				await _mediator.Send(new CreateSweepRequest(form.Name, form.StartDate, form.EndDate, form.DrawDate, form.Campaign.CampaignUid, _hrvsterUser.UserUid, _hrvsterUser.WindowsTimeZone, _hrvsterUser.IsDaylight));
 
 				_notificationService.AddSuccessToastMessage("Sweepstake created successfully.");
 
@@ -118,6 +124,8 @@ namespace hrvster.Web.Controllers
 		[HttpGet]
 		public async Task<IActionResult> Create(Guid campaignUid)
 		{
+			_hrvsterUser = _sessionManager.SetUserInformation();
+
 			var campaign = await _mediator.Send(new GetCampaign(campaignUid));
 
 			if (campaign == null)
@@ -126,6 +134,9 @@ namespace hrvster.Web.Controllers
 
 				return RedirectToAction("Index");
 			}
+
+			if (campaign.Account.AccountUid != _hrvsterUser.UserUid)
+				return RedirectToAction("Index");
 
 			if (!campaign.IsActive() && !campaign.WillBeInProgress())
 			{
@@ -147,6 +158,8 @@ namespace hrvster.Web.Controllers
 		[HttpPost]
 		public async Task<IActionResult> Create([FromQuery] Guid campaignUid, CreateSweep form)
 		{
+			_hrvsterUser = _sessionManager.SetUserInformation();
+
 			var campaign = await _mediator.Send(new GetCampaign(campaignUid));
 
 			if (campaign == null)
@@ -175,7 +188,7 @@ namespace hrvster.Web.Controllers
 					DrawDate = form.DrawDate
 				};
 
-				var sweep = await _mediator.Send(new Core.Requests.CreateSweep(request, _hrvsterUser.WindowsTimeZone));
+				var sweep = await _mediator.Send(new Core.Requests.CreateSweep(request, _hrvsterUser.WindowsTimeZone, _hrvsterUser.IsDaylight));
 
 				if (sweep == null)
 				{
@@ -199,6 +212,8 @@ namespace hrvster.Web.Controllers
 		[HttpGet]
 		public async Task<IActionResult> View(Guid sweepUid)
 		{
+			_hrvsterUser = _sessionManager.SetUserInformation();
+
 			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
 			if (sweep == null) return RedirectToAction("Index");
 			if (sweep.Account.AccountUid != _hrvsterUser.UserUid) return RedirectToAction("Index");
@@ -253,6 +268,8 @@ namespace hrvster.Web.Controllers
 		[HttpPost]
 		public async Task<IActionResult> View(ViewSweepstake form, Guid sweepUid)
 		{
+			_hrvsterUser = _sessionManager.SetUserInformation();
+
 			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
 			if (sweep == null) return RedirectToAction("Index");
 			if (sweep.Account.AccountUid != _hrvsterUser.UserUid) return RedirectToAction("Index");
@@ -276,7 +293,8 @@ namespace hrvster.Web.Controllers
 					form.UpdateSweepstake.StartDate,
 					form.UpdateSweepstake.EndDate,
 					form.UpdateSweepstake.DrawDate,
-					_hrvsterUser.WindowsTimeZone));
+					_hrvsterUser.WindowsTimeZone,
+					_hrvsterUser.IsDaylight));
 
 				_notificationService.AddSuccessToastMessage("Sweepstake updated successfully.");
 
@@ -303,6 +321,8 @@ namespace hrvster.Web.Controllers
 		[Route("/Sweeps/ManualDraw/{sweepUid:Guid}")]
 		public async Task<IActionResult> PerformDrawManually(Guid sweepUid)
 		{
+			_hrvsterUser = _sessionManager.SetUserInformation();
+
 			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
 			if (sweep == null) return RedirectToAction("View", new { sweepUid = sweepUid });
 			if (sweep.Account.AccountUid != _hrvsterUser.UserUid) return RedirectToAction("View", new { sweepUid = sweepUid });
@@ -346,6 +366,8 @@ namespace hrvster.Web.Controllers
 		[Route("/Sweeps/ManualDraw/{sweepUid:Guid}")]
 		public async Task<IActionResult> PerformDrawManually(PerformDrawManually form, Guid sweepUid, string WinnerSelectProcess)
 		{
+			_hrvsterUser = _sessionManager.SetUserInformation();
+
 			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
 			if (sweep == null) return RedirectToAction("View", new { sweepUid = sweepUid });
 			if (sweep.Account.AccountUid != _hrvsterUser.UserUid) return RedirectToAction("View", new { sweepUid = sweepUid });
@@ -402,6 +424,8 @@ namespace hrvster.Web.Controllers
 		[Route("/Sweeps/ToggleDrawAttempted/{sweepUid:Guid}")]
 		public async Task<IActionResult> ToggleDrawAttempted(Guid sweepUid)
 		{
+			_hrvsterUser = _sessionManager.SetUserInformation();
+
 			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
 			if (sweep == null) return RedirectToAction("View", new { sweepUid = sweepUid });
 			if (sweep.Account.AccountUid != _hrvsterUser.UserUid) return RedirectToAction("View", new { sweepUid = sweepUid });

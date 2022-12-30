@@ -62,7 +62,8 @@ namespace hrvster.Infrastructure.Subscriptions
 					SweepstakesPerMonth = reader.GetInt32("sweeps_per_month"),
 					SweepstakesMaximumEntries = reader.GetInt32("sweepstakes_maximum_entries"),
 					PricePerMonth = reader.GetDecimal("price_per_month"),
-					PricePerYear = reader.GetDecimal("price_per_year")
+					PricePerYear = reader.GetDecimal("price_per_year"),
+					HashtagsPerMonth = reader.GetInt32("sweep_hashtags_per_month")
 				},
 				IsDiscounted = reader.GetBoolean("is_discounted"),
 				DiscountedBy = reader.GetInt32("discounted_by"),

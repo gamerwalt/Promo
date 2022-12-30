@@ -14,14 +14,15 @@ namespace hrvster.Core.Requests
         private Sweep sweep;
         private UpdateSweepRequest request;
 		private string _timeZoneId;
+		private bool _isDaylight;
 
-
-		public UpdateSweep(Guid sweepUid, Sweep sweep, UpdateSweepRequest request, string timeZoneId)
+		public UpdateSweep(Guid sweepUid, Sweep sweep, UpdateSweepRequest request, string timeZoneId, bool isDaylight)
         {
             this.sweepUid = sweepUid;
             this.sweep = sweep;
             this.request = request;
 			_timeZoneId = timeZoneId;
+			_isDaylight = isDaylight;
         }
 
 		public string TimeZoneId { get { return _timeZoneId; } }
@@ -40,7 +41,9 @@ namespace hrvster.Core.Requests
         {
             get { return request; }
         }
-    }
+
+		public bool IsDaylight { get { return _isDaylight; } }
+	}
 
     public class UpdateSweepRequestHandler : IRequestHandler<UpdateSweep, Sweep>
     {
@@ -58,7 +61,7 @@ namespace hrvster.Core.Requests
             request.Sweep.EndDate = request.Request.EndDate;
             request.Sweep.DrawDate = request.Request.DrawDate;
 
-            await _repository.UpdateAsync(request.SweepUid, request.Sweep);
+            await _repository.UpdateAsync(request.SweepUid, request.Sweep, request.TimeZoneId, request.IsDaylight);
 
             return await _repository.GetAsync(request.SweepUid);
         }

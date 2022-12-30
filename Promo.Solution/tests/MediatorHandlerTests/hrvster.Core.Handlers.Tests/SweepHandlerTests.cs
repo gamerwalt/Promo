@@ -24,11 +24,11 @@ namespace hrvster.Core.Handlers.Tests
 			var account = BuildNewAccount();
 			var campaign = BuildNewCampaign(account, BuildNewCampaignType());
 			await _feature.AccountRepository.CreateAsync(account);
-			await _feature.CampaignRepository.CreateCampaignAsync(campaign);
+			await _feature.CampaignRepository.CreateCampaignAsync(campaign, TestData.WindowsTimezone, false);
 			account = await _feature.AccountRepository.GetAsync(account.AccountUid);
 			campaign = await _feature.CampaignRepository.GetCampaignByUidAsync(campaign.CampaignUid);
 			var sweep = BuildNewSweep(account, campaign);
-			await _feature.SweepsRepository.CreateAsync(sweep);
+			await _feature.SweepsRepository.CreateAsync(sweep, TestData.WindowsTimezone, false);
 
 			var markSweepAsDrawAttemptedRequest = new MarkSweepAsDrawAttemptedRequest(sweep.SweepUid);
 			await _feature.Mediator.Send(markSweepAsDrawAttemptedRequest);

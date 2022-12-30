@@ -13,10 +13,10 @@ namespace hrvster.Infrastructure
 {
 	public interface ISweepsRepository
 	{
-		Task CreateAsync(Sweep sweep);
+		Task CreateAsync(Sweep sweep, string timezone, bool isDaylight);
 		Task<Sweep> GetAsync(Guid sweepUid);
 		Task<IEnumerable<Sweep>> GetAllForCampaignAsync(Guid campaignUid);
-		Task UpdateAsync(Guid sweepUid, Sweep sweep);
+		Task UpdateAsync(Guid sweepUid, Sweep sweep, string timezone, bool isDaylight);
 		Task<IEnumerable<SweepDrawPropertiesAndRule>> GetSweepsRequiringADrawAsync();
 		Task UpdateSweepAsDrawnAsync(Guid sweepUid);
 		Task<IEnumerable<Sweep>> GetAllForAccountAsync(Guid accountUid);
@@ -31,21 +31,19 @@ namespace hrvster.Infrastructure
 	public class SweepsRepository : ISweepsRepository
 	{
 		private readonly IDatabase _database;
-		private readonly HrvsterUser _hrvsterUser;
 
-		public SweepsRepository(IDatabase database, HrvsterUser hrvsterUser)
+		public SweepsRepository(IDatabase database)
 		{
 			_database = database;
-			_hrvsterUser = hrvsterUser;
 		}
 
-		public async Task CreateAsync(Sweep sweep)
+		public async Task CreateAsync(Sweep sweep, string timezone, bool isDaylight)
 		{
-			var startDateUtc = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(sweep.StartDate, TimeZoneInfo.Local.Id, _hrvsterUser.WindowsTimeZone);
-			var endDateUtc = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(sweep.EndDate, TimeZoneInfo.Local.Id, _hrvsterUser.WindowsTimeZone);
-			var drawDateUtc = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(sweep.DrawDate.GetValueOrDefault(), TimeZoneInfo.Local.Id, _hrvsterUser.WindowsTimeZone);
+			var startDateUtc = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(sweep.StartDate, TimeZoneInfo.Local.Id, timezone);
+			var endDateUtc = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(sweep.EndDate, TimeZoneInfo.Local.Id, timezone);
+			var drawDateUtc = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(sweep.DrawDate.GetValueOrDefault(), TimeZoneInfo.Local.Id, timezone);
 
-			if (!_hrvsterUser.IsDaylight)
+			if (!isDaylight)
 			{
 				startDateUtc = startDateUtc.AddHours(-2);
 				endDateUtc = endDateUtc.AddHours(-2);
@@ -233,13 +231,13 @@ namespace hrvster.Infrastructure
 			};
 		}
 
-		public async Task UpdateAsync(Guid sweepUid, Sweep sweep)
+		public async Task UpdateAsync(Guid sweepUid, Sweep sweep, string timezone, bool isDaylight)
 		{
-			var startDateUtc = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(sweep.StartDate, TimeZoneInfo.Local.Id, _hrvsterUser.WindowsTimeZone);
-			var endDateUtc = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(sweep.EndDate, TimeZoneInfo.Local.Id, _hrvsterUser.WindowsTimeZone);
-			var drawDateUtc = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(sweep.DrawDate.GetValueOrDefault(), TimeZoneInfo.Local.Id, _hrvsterUser.WindowsTimeZone);
+			var startDateUtc = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(sweep.StartDate, TimeZoneInfo.Local.Id, timezone);
+			var endDateUtc = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(sweep.EndDate, TimeZoneInfo.Local.Id, timezone);
+			var drawDateUtc = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(sweep.DrawDate.GetValueOrDefault(), TimeZoneInfo.Local.Id, timezone);
 
-			if (!_hrvsterUser.IsDaylight)
+			if (!isDaylight)
 			{
 				startDateUtc = startDateUtc.AddHours(-2);
 				endDateUtc = endDateUtc.AddHours(-2);

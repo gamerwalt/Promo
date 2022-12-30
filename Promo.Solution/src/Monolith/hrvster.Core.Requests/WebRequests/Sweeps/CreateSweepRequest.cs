@@ -13,8 +13,9 @@ namespace hrvster.Core.Requests.WebRequests.Sweeps
 		private Guid _accountUid;
 		private Guid _sweepUid;
 		private string _timezoneId;
+		private bool _isDaylight;
 
-		public CreateSweepRequest(string name, DateTime startDate, DateTime endDate, DateTime drawDate, Guid campaignUid, Guid accountUid, string timezoneId)
+		public CreateSweepRequest(string name, DateTime startDate, DateTime endDate, DateTime drawDate, Guid campaignUid, Guid accountUid, string timezoneId, bool isDaylight)
 		{
 			_name = name;
 			_startDate = startDate;
@@ -23,9 +24,10 @@ namespace hrvster.Core.Requests.WebRequests.Sweeps
 			_campaignUid = campaignUid;
 			_accountUid = accountUid;
 			_timezoneId = timezoneId;
+			_isDaylight = isDaylight;
 		}
 
-		public CreateSweepRequest(Guid sweepUid, string name, DateTime startDate, DateTime endDate, DateTime drawDate, Guid campaignUid, Guid userUid, string timezoneId)
+		public CreateSweepRequest(Guid sweepUid, string name, DateTime startDate, DateTime endDate, DateTime drawDate, Guid campaignUid, Guid userUid, string timezoneId, bool isDaylight)
 		{
 			_name = name;
 			_startDate = startDate;
@@ -35,6 +37,7 @@ namespace hrvster.Core.Requests.WebRequests.Sweeps
 			_accountUid = userUid;
 			_sweepUid = sweepUid;
 			_timezoneId = timezoneId;
+			_isDaylight = isDaylight;
 		}
 
 		public string Name { get { return _name; } }
@@ -45,5 +48,6 @@ namespace hrvster.Core.Requests.WebRequests.Sweeps
 		public Guid AccountUid { get { return _accountUid; } }
 		public Guid SweepUid { get { return _sweepUid; } }
 		public string TimeZoneId { get { return _timezoneId;} }
+		public bool IsDaylight { get { return _isDaylight; } }
 	}
 }

@@ -22,26 +22,30 @@ namespace hrvster.Core.Handlers.Scheduling
 		private readonly ILogger<UpdateScheduledTweet> _logger;
 		private readonly ISweepTweetSchedulerRepository _repository;
 		private readonly IMediator _mediator;
-		private readonly HrvsterUser _hrvsterUser;
+		private readonly ISessionManager _sessionManager;
+
+		private HrvsterUser _hrvsterUser;
 
 		public UpdateScheduledTweet(
 			ILoggerFactory loggerFactory,
 			ISweepTweetSchedulerRepository repository,
 			IMediator mediator,
-			HrvsterUser hrvsterUser)
+			ISessionManager sessionManager)
 		{
 			_logger = loggerFactory.CreateLogger<UpdateScheduledTweet>();
 			_repository = repository;
 			_mediator = mediator;
-			_hrvsterUser = hrvsterUser;
+			_sessionManager = sessionManager;
 		}
 
 		protected override async Task Handle(UpdateScheduledTweetRequest request, CancellationToken cancellationToken)
 		{
+			_hrvsterUser = _sessionManager.SetUserInformation();
+
 			try
 			{
 				await _repository.BeginTransaction();
-				await _repository.UpdateScheduledTweetAsync(request.ScheduledUid, request.ScheduledTime, request.Text, request.TimeZoneId);
+				await _repository.UpdateScheduledTweetAsync(request.ScheduledUid, request.ScheduledTime, request.Text, request.TimeZoneId, request.IsDaylight);
 
 				if(NoPreviuosMedia(request))
 				{

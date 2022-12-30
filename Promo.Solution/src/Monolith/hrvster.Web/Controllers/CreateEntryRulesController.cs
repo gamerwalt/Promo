@@ -24,24 +24,28 @@ namespace hrvster.Web.Controllers
 		private readonly ILogger<CreateEntryRulesController> _logger;
 		private readonly IMediator _mediator;
 		private readonly IToastNotification _notificationService;
-		private readonly HrvsterUser _hrvsterUser;
+		private readonly ISessionManager _sessionManager;
+
+		private HrvsterUser _hrvsterUser;
 
 		public CreateEntryRulesController(
 			ILoggerFactory loggerFactory,
 			IMediator mediator,
 			IToastNotification notificationService,
-			HrvsterUser hrvsterUser)
+			ISessionManager sessionManager)
 		{
 			_logger = loggerFactory.CreateLogger<CreateEntryRulesController>();
 			_mediator = mediator;
 			_notificationService = notificationService;
-			_hrvsterUser = hrvsterUser;
+			_sessionManager = sessionManager;
 		}
 
 		[HttpGet]
 		[Route("/CreateEntryRules/Create/Sweep/{sweepUid:Guid}")]
 		public async Task<IActionResult> Create(Guid sweepUid)
 		{
+			_hrvsterUser = _sessionManager.SetUserInformation();
+
 			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
 			if (sweep == null)
 			{
@@ -87,6 +91,8 @@ namespace hrvster.Web.Controllers
 		[Route("/CreateEntryRules/Create/Sweep/{sweepUid:Guid}")]
 		public async Task<IActionResult> Create(Guid sweepUid, CreateSweepEntryRule form)
 		{
+			_hrvsterUser = _sessionManager.SetUserInformation();
+
 			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
 			if (sweep == null)
 			{
@@ -142,6 +148,8 @@ namespace hrvster.Web.Controllers
 		[Route("/CreateEntryRules/View/Sweep/{sweepUid:Guid}")]
 		public async Task<IActionResult> View(Guid sweepUid)
 		{
+			_hrvsterUser = _sessionManager.SetUserInformation();
+
 			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
 			if (sweep == null)
 			{
@@ -178,6 +186,8 @@ namespace hrvster.Web.Controllers
 		[Route("/CreateEntryRules/View/Sweep/{sweepUid:Guid}")]
 		public async Task<IActionResult> View(Guid sweepUid, UpdateSweepEntryRule form)
 		{
+			_hrvsterUser = _sessionManager.SetUserInformation();
+
 			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
 			if (sweep == null)
 			{

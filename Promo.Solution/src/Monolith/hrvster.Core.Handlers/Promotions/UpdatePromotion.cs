@@ -3,9 +3,6 @@ using hrvster.Infrastructure;
 using hrvster.Models.Extensions;
 using MediatR;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -29,7 +26,7 @@ namespace hrvster.Core.Handlers.Promotions
 				request.ToJsonString());
 
 			await _repository.UpdateCampaignAsync(request.CampaignUid, request.CampaignName,
-				request.Description, request.CampaignTypeUid, request.StartDate, request.EndDate, request.TimeZone);
+				request.Description, request.CampaignTypeUid, request.StartDate, request.EndDate, request.TimeZone, request.IsDaylight);
 		}
 	}
 }

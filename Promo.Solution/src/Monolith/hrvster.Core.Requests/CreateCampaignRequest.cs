@@ -17,12 +17,14 @@ namespace hrvster.Core.Requests
         private ClaimsPrincipal user;
 		private Guid accountUid;
 		private string timezoneId;
+		private bool isDaylight;
 
-		public CreateCampaignRequest(NewCampaignRequest request, ClaimsPrincipal user, string timezoneId)
+		public CreateCampaignRequest(NewCampaignRequest request, ClaimsPrincipal user, string timezoneId, bool isDaylight)
         {
             this.request = request;
             this.user = user;
 			this.timezoneId = timezoneId;
+			this.isDaylight = isDaylight;
         }
 
 		public CreateCampaignRequest(NewCampaignRequest newCampaignRequest, Guid userUid, string timezoneId)
@@ -30,6 +32,7 @@ namespace hrvster.Core.Requests
 			this.request = newCampaignRequest;
 			this.accountUid = userUid;
 			this.timezoneId = timezoneId;
+			this.isDaylight = isDaylight;
 		}
 
 		public NewCampaignRequest NewCampaign
@@ -49,6 +52,7 @@ namespace hrvster.Core.Requests
 					: Guid.Parse(user.Claims.FirstOrDefault(c => c.Type.Equals("user_id", StringComparison.OrdinalIgnoreCase)).Value); 
 			}
         }
+		public bool IsDaylight { get { return isDaylight; } }
     }
 
     public class CreateCampaignRequestHandler : IRequestHandler<CreateCampaignRequest, Guid>
@@ -80,7 +84,7 @@ namespace hrvster.Core.Requests
 				{
 					AccountUid = request.AccountUid
 				}
-            });
+            }, request.TimezoneId, request.IsDaylight);
 
             await _mediator.Publish(new CampaignCreated(request.NewCampaign, request.AccountUid, campaignUid));
 

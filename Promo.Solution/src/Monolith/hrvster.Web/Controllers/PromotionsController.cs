@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using hrvster.ApplicationServices.Payments;
 using hrvster.Core;
 using hrvster.Core.Authentication;
 using hrvster.Core.Requests;
@@ -27,21 +28,32 @@ namespace hrvster.Web.Controllers
 	public class PromotionsController : Controller
 	{
 		private readonly IMediator _mediator;
-		private readonly HrvsterUser _hrvsterUser;
+		private readonly ISessionManager _sessionManager;
 		private readonly IMapper _mapper;
 		private readonly IToastNotification _notificationService;
+		private readonly IPaymentService _paymentService;
 
-		public PromotionsController(IMediator mediator, HrvsterUser hrvsterUser, IMapper mapper, IToastNotification notificationService)
+		private HrvsterUser _hrvsterUser;
+
+		public PromotionsController(
+			IMediator mediator, 
+			ISessionManager sessionManager,
+			IMapper mapper, 
+			IToastNotification notificationService,
+			IPaymentService paymentService)
 		{
 			_mediator = mediator;
-			_hrvsterUser = hrvsterUser;
+			_sessionManager = sessionManager;
 			_mapper = mapper;
 			_notificationService = notificationService;
+			_paymentService = paymentService;
 		}
 
 		[HttpGet]
 		public async Task<IActionResult> Index()
 		{
+			_hrvsterUser = _sessionManager.SetUserInformation();
+
 			var campaigns = await _mediator.Send(new GetAllCampaignsForAccount(_hrvsterUser.UserUid));
 			var promotions = _mapper.Map<IEnumerable<Promotion>>(campaigns.OrderBy(c => c.EndDate));
 
@@ -51,6 +63,8 @@ namespace hrvster.Web.Controllers
 		[HttpGet]
 		public async Task<IActionResult> View(Guid campaignUid)
 		{
+			_hrvsterUser = _sessionManager.SetUserInformation();
+
 			var campaign = await _mediator.Send(new GetCampaign(campaignUid));
 
 			if (campaign == null)
@@ -105,6 +119,8 @@ namespace hrvster.Web.Controllers
 		[HttpPost]
 		public async Task<IActionResult> Update([FromQuery] Guid campaignUid, ViewPromotion form)
 		{
+			_hrvsterUser = _sessionManager.SetUserInformation();
+
 			var campaign = await _mediator.Send(new GetCampaign(campaignUid));
 
 			if (campaign == null)
@@ -128,7 +144,8 @@ namespace hrvster.Web.Controllers
 					form.UpdatePromotion.CampaignTypeUid,
 					form.UpdatePromotion.StartDate,
 					form.UpdatePromotion.EndDate,
-					_hrvsterUser.WindowsTimeZone));
+					_hrvsterUser.WindowsTimeZone,
+					_hrvsterUser.IsDaylight));
 
 				_notificationService.AddSuccessToastMessage("Promotion updated.");
 
@@ -167,6 +184,8 @@ namespace hrvster.Web.Controllers
 		[Route("/Promotions/Create")]
 		public async Task<IActionResult> Create()
 		{
+			_hrvsterUser = _sessionManager.SetUserInformation();
+
 			var campaignTypes = await _mediator.Send(new GetCampaignTypesRequest());
 			var startDate = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.Now, TimeZoneInfo.Local.Id, _hrvsterUser.WindowsTimeZone);
 
@@ -190,6 +209,8 @@ namespace hrvster.Web.Controllers
 		[Route("/Promotions/Create")]
 		public async Task<IActionResult> Create(CreatePromotion model)
 		{
+			_hrvsterUser = _sessionManager.SetUserInformation();
+
 			if (ModelState.IsValid)
 			{
 				var newCampaignRequest = new NewCampaignRequest

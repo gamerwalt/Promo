@@ -11,16 +11,19 @@ namespace hrvster.Web.Validation
 	{
 		private readonly ICampaignRepository _campaignRepository;
 		private readonly ISweepsRepository _sweepsRepository;
-		private readonly hrvster.Models.HrvsterUser _hrvsterUser;
+		private readonly ISessionManager _sessionManager;
+
+		private hrvster.Models.HrvsterUser _hrvsterUser;
 
 		public CreateNewSweepValidator(
 			ICampaignRepository campaignRepository,
 			ISweepsRepository sweepsRepository,
-			hrvster.Models.HrvsterUser hrvsterUser)
+			ISessionManager sessionManager)
 		{
 			_campaignRepository = campaignRepository;
 			_sweepsRepository = sweepsRepository;
-			_hrvsterUser = hrvsterUser;
+			
+			_sessionManager = sessionManager;
 
 			RuleFor(c => c.Name)
 				.NotEmpty().WithMessage("The sweepstake name is required.");
@@ -63,6 +66,8 @@ namespace hrvster.Web.Validation
 
 		private bool ShouldNotExistAlready(string name)
 		{
+			_hrvsterUser = _sessionManager.SetUserInformation();
+
 			var accountUid = _hrvsterUser.UserUid;
 			var sweeps = _sweepsRepository.GetAllForAccount(accountUid);
 
@@ -78,6 +83,8 @@ namespace hrvster.Web.Validation
 
 		private bool BeBetweenPromotionDates(CreateNewSweep sweepStake, DateTime inputDate)
 		{
+			_hrvsterUser = _sessionManager.SetUserInformation();
+
 			var campaign = _campaignRepository.GetCampaignByUid(sweepStake.Campaign.CampaignUid, _hrvsterUser.UserUid);
 
 			if (campaign == null) return true;

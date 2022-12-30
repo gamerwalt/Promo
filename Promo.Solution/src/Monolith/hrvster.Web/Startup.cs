@@ -74,7 +74,8 @@ namespace hrvster.Web
 				.AddHttpContextAccessor()
 				.AddFirebaseAuthManager()
 				.AddSessionManager()
-				.AddSubscriptionService();
+				.AddSubscriptionService()
+				.AddPaymentServices(Configuration);
 		}
 
 

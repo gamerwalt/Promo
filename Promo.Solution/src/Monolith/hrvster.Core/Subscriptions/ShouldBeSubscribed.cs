@@ -16,22 +16,26 @@ namespace hrvster.Core.Subscriptions
 
 	public class ShouldBeSubscribedFilter : IAuthorizationFilter
 	{
-		private readonly HrvsterUser _hrvsterUser;
+		private HrvsterUser _hrvsterUser;
+
 		private readonly ILogger<ShouldBeSubscribedFilter> _logger;
 		private readonly ISubscriptionService _subscriptionManager;
+		private readonly ISessionManager _sessionManager;
 
 		public ShouldBeSubscribedFilter(
-			HrvsterUser hrvsterUser,
 			ILoggerFactory loggerFactory,
-			ISubscriptionService subscriptionManager)
+			ISubscriptionService subscriptionManager,
+			ISessionManager sessionManager)
 		{
-			_hrvsterUser = hrvsterUser;
+			_sessionManager = sessionManager;
 			_logger = loggerFactory.CreateLogger<ShouldBeSubscribedFilter>();
 			_subscriptionManager = subscriptionManager;
 		}
 
 		public void OnAuthorization(AuthorizationFilterContext context)
 		{
+			_hrvsterUser = _sessionManager.SetUserInformation();
+
 			_logger.LogInformation("Attempting to check if user {userUid} is subscribed", _hrvsterUser.UserUid);
 
 			if (_hrvsterUser.UserUid == Guid.Empty)

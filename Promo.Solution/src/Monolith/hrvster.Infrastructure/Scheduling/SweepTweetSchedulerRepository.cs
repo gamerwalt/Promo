@@ -14,9 +14,9 @@ namespace hrvster.Infrastructure.Scheduling
 		Task CommitTransaction();
 		Task RollbackTransaction();
 		Task CreateRuleAsync(Models.Rule rule);
-		Task CreateScheduledSweepRuleTweetAsync(ScheduledSweepRuleTweet scheduledSweepRuleTweet, string timezoneId);
+		Task CreateScheduledSweepRuleTweetAsync(ScheduledSweepRuleTweet scheduledSweepRuleTweet, string timezoneId, bool isDaylight);
 		Task CreateScheduledSweepRuleImage(Guid scheduledUid, ScheduledSweepRuleTweetImage image);
-		Task UpdateScheduledTweetAsync(Guid scheduledUid, DateTime scheduledTime, string text, string timezoneId);
+		Task UpdateScheduledTweetAsync(Guid scheduledUid, DateTime scheduledTime, string text, string timezoneId, bool isDaylight);
 		Task UpdateScheduledTweetImageAsync(int scheduledImageId, string location);
 		Task DeleteScheduledSweepRuleTweetAsync(Guid scheduledUid);
 		Task DeleteRuleAsync(Guid ruleUid);
@@ -25,15 +25,13 @@ namespace hrvster.Infrastructure.Scheduling
 	public class SweepTweetSchedulerRepository : ISweepTweetSchedulerRepository
 	{
 		private readonly IDatabase _database;
-		private readonly HrvsterUser _hrvsterUser;
 
 		private MySqlConnection myConnection;
 		private MySqlTransaction myTransaction;
 
-		public SweepTweetSchedulerRepository(IDatabase database, HrvsterUser hrvsterUser)
+		public SweepTweetSchedulerRepository(IDatabase database)
 		{
 			_database = database;
-			_hrvsterUser = hrvsterUser;
 		}
 
 		public async Task BeginTransaction()
@@ -57,11 +55,11 @@ namespace hrvster.Infrastructure.Scheduling
 			}
 		}
 
-		public async Task CreateScheduledSweepRuleTweetAsync(ScheduledSweepRuleTweet model, string timezoneId)
+		public async Task CreateScheduledSweepRuleTweetAsync(ScheduledSweepRuleTweet model, string timezoneId, bool isDaylight)
 		{
 			var scheduledTimeUtc = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(model.ScheduledTime, TimeZoneInfo.Local.Id, timezoneId);
 
-			if (!_hrvsterUser.IsDaylight)
+			if (!isDaylight)
 			{
 				scheduledTimeUtc = scheduledTimeUtc.AddHours(-2);
 			}
@@ -116,11 +114,11 @@ namespace hrvster.Infrastructure.Scheduling
 			await command.ExecuteNonQueryAsync();
 		}
 
-		public async Task UpdateScheduledTweetAsync(Guid scheduledUid, DateTime scheduledTime, string text, string timezoneId)
+		public async Task UpdateScheduledTweetAsync(Guid scheduledUid, DateTime scheduledTime, string text, string timezoneId, bool isDaylight)
 		{
 			var scheduledTimeUtc = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(scheduledTime, TimeZoneInfo.Local.Id, timezoneId);
 
-			if (!_hrvsterUser.IsDaylight)
+			if (isDaylight)
 			{
 				scheduledTimeUtc = scheduledTimeUtc.AddHours(-2);
 			}

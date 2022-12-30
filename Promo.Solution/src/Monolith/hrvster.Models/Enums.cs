@@ -7,6 +7,21 @@
 		Instagram
 	}
 
+	public enum FlutterwaveEventStatus
+	{
+		New,
+		Proecssing,
+		Success,
+		Failed
+	}
+
+	public enum PaymentClientEnum
+	{
+		Flutterwave,
+		Paystack,
+		Okra
+	}
+
 	public enum EmailStatus
 	{
 		New,
@@ -74,7 +89,8 @@
 		Subscribed,
 		UnSubscribed,
 		SubscribedButEndDate,
-		SubscribedButPaymentIssues
+		SubscribedButPaymentIssues,
+		PendingPayment
 	}
 
 	public enum ActivityType

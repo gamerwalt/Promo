@@ -1,7 +1,6 @@
 ﻿using FluentValidation;
 using hrvster.Core.Authentication;
 using hrvster.Infrastructure;
-using hrvster.Models.Options;
 using hrvster.Web.Models;
 using System;
 using System.Linq;
@@ -10,17 +9,16 @@ namespace hrvster.Web.Validation
 {
 	public class CreatePromotionValidation : AbstractValidator<CreatePromotion>
 	{
-		private readonly hrvster.Models.HrvsterUser _hrvsterUser;
+		private hrvster.Models.HrvsterUser _hrvsterUser;
+
 		private readonly ICampaignRepository _campaignsRepository;
-		private readonly PromotionConfigurationOptions _promotionConfigurationOptions;
+		private readonly ISessionManager _sessionManager;
+
 		public CreatePromotionValidation(
-			hrvster.Models.HrvsterUser hrvsterUser,
 			ICampaignRepository campaignsRepository,
-			PromotionConfigurationOptions promotionConfigurationOptions)
+			ISessionManager sessionManager)
 		{
-			_hrvsterUser = hrvsterUser;
 			_campaignsRepository = campaignsRepository;
-			_promotionConfigurationOptions = promotionConfigurationOptions;
 
 			var minDate = DateTime.Now.AddDays(1);
 
@@ -55,6 +53,8 @@ namespace hrvster.Web.Validation
 
 		private bool PromotionDoesNotExist(string promotionName)
 		{
+			_hrvsterUser = _sessionManager.SetUserInformation();
+
 			var result = _campaignsRepository.GetAccountCampaigns(_hrvsterUser.UserUid);
 
 			return !result.Any(c => c.CampaignName == promotionName);

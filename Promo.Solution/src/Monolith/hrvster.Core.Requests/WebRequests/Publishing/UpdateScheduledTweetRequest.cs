@@ -22,6 +22,7 @@ namespace hrvster.Core.Requests.WebRequests.Publishing
 		private int previousMediaId4;
 		private IFormFile media4;
 		private string _timeZoneId;
+		private bool _isDaylight;
 
 		public UpdateScheduledTweetRequest(
 			Guid userUid,
@@ -38,7 +39,8 @@ namespace hrvster.Core.Requests.WebRequests.Publishing
 			IFormFile media3, 
 			int previousMediaId4, 
 			IFormFile media4,
-			string timeZoneId)
+			string timeZoneId,
+			bool isDaylight)
 		{
 			this.userUid = userUid;
 			this.rule = rule;
@@ -55,7 +57,9 @@ namespace hrvster.Core.Requests.WebRequests.Publishing
 			this.previousMediaId4 = previousMediaId4;
 			this.media4 = media4;
 			_timeZoneId = timeZoneId;
+			_isDaylight = isDaylight;
 		}
+
 		public string TimeZoneId { get { return _timeZoneId; } }
 		public Guid UserUid { get { return userUid; } }
 		public Rule Rule { get { return rule; } }
@@ -71,5 +75,6 @@ namespace hrvster.Core.Requests.WebRequests.Publishing
 		public IFormFile Media2 { get { return media2; } }
 		public IFormFile Media3 { get { return media3; } }
 		public IFormFile Media4 { get { return media4; } }
+		public bool IsDaylight { get { return _isDaylight; } }
 	}
 }

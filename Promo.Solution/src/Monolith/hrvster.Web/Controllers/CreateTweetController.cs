@@ -30,32 +30,36 @@ namespace hrvster.Web.Controllers
 		private readonly IMediator _mediator;
 		private readonly IMapper _mapper;
 		private readonly IToastNotification _notificationService;
-		private readonly HrvsterUser _hrvsterUser;
 		private readonly IWatchTypeProvider _watchTypeProvider;
 		private readonly SweepstakeConfiguration _sweepstakeConfiguration;
+		private readonly ISessionManager _sessionManager;
+
+		private HrvsterUser _hrvsterUser;
 
 		public CreateTweetController(
 			ILoggerFactory loggerFactory,
 			IMediator mediator,
 			IMapper mapper,
 			IToastNotification notificationService,
-			HrvsterUser hrvsterUser,
 			IWatchTypeProvider watchTypeProvider,
-			SweepstakeConfiguration sweepstakeConfiguration)
+			SweepstakeConfiguration sweepstakeConfiguration,
+			ISessionManager sessionManager)
 		{
 			_logger = loggerFactory.CreateLogger<CreateTweetController>();
 			_mediator = mediator;
 			_mapper = mapper;
 			_notificationService = notificationService;
-			_hrvsterUser = hrvsterUser;
 			_watchTypeProvider = watchTypeProvider;
 			_sweepstakeConfiguration = sweepstakeConfiguration;
+			_sessionManager = sessionManager;
 		}
 
 		[HttpGet]
 		[Route("/CreateTweet/SelectProvider/Sweep/{sweepUid:Guid}")]
 		public async Task<IActionResult> SelectProvider(Guid sweepUid)
 		{
+			_hrvsterUser = _sessionManager.SetUserInformation();
+
 			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
 			if (sweep == null)
 			{
@@ -95,6 +99,8 @@ namespace hrvster.Web.Controllers
 			Guid sweepUid,
 			SelectWatchTypeProvider form)
 		{
+			_hrvsterUser = _sessionManager.SetUserInformation();
+
 			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
 			if (sweep == null)
 			{
@@ -122,6 +128,8 @@ namespace hrvster.Web.Controllers
 		[Route("/CreateTweet/Profile/Sweep/{sweepUid:Guid}/Provider/{providerCode}")]
 		public async Task<IActionResult> CreateProfile(Guid sweepUid, string providerCode)
 		{
+			_hrvsterUser = _sessionManager.SetUserInformation();
+
 			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
 			if (sweep == null)
 			{
@@ -175,6 +183,8 @@ namespace hrvster.Web.Controllers
 		[HttpGet]
 		public async Task<IActionResult> ValidateTwitterAuth()
 		{
+			_hrvsterUser = _sessionManager.SetUserInformation();
+
 			if (Request.Query["denied"].Count > 0)
 			{
 				//log some information here
@@ -198,6 +208,8 @@ namespace hrvster.Web.Controllers
 		[Route("/CreateTweet/Watch/Sweep/{sweepUid:Guid}")]
 		public async Task<IActionResult> Watch(Guid sweepUid)
 		{
+			_hrvsterUser = _sessionManager.SetUserInformation();
+
 			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
 			if (sweep == null)
 			{
@@ -240,6 +252,8 @@ namespace hrvster.Web.Controllers
 		[Route("/CreateTweet/Watch/Sweep/{sweepUid:Guid}")]
 		public async Task<IActionResult> Watch(Guid sweepUid, CreateSweepRuleTweet form)
 		{
+			_hrvsterUser = _sessionManager.SetUserInformation();
+
 			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
 			if (sweep == null)
 			{
@@ -289,7 +303,8 @@ namespace hrvster.Web.Controllers
 						form.ScheduledDate,
 						true,
 						mediaLocation,
-						_hrvsterUser.WindowsTimeZone));
+						_hrvsterUser.WindowsTimeZone,
+						_hrvsterUser.IsDaylight));
 				var word = form.PostNow ? "created" : "scheduled";
 
 				_notificationService.AddSuccessToastMessage($"Tweet {word} successfully.");

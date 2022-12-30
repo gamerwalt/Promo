@@ -16,18 +16,19 @@ namespace hrvster.Web.Controllers
 	public class ProfileController : Controller
 	{
 		private readonly ILogger<ProfileController> _logger;
-		private readonly HrvsterUser _hrvsterUser;
 		private readonly IMediator _mediator;
 		private readonly IToastNotification _notificationService;
+		private readonly ISessionManager _sessionManager;
+
+		private HrvsterUser _hrvsterUser;
 
 		public ProfileController(
 			ILoggerFactory loggerFactory,
-			HrvsterUser hrvsterUser,
 			IMediator mediator,
-			IToastNotification notificationService)
+			IToastNotification notificationService,
+			ISessionManager sessionManager)
 		{
 			_logger = loggerFactory.CreateLogger<ProfileController>();
-			_hrvsterUser = hrvsterUser;
 			_mediator = mediator;
 			_notificationService = notificationService;
 		}
@@ -35,6 +36,8 @@ namespace hrvster.Web.Controllers
 		[HttpGet]
 		public async Task<IActionResult> Index()
 		{
+			_hrvsterUser = _sessionManager.SetUserInformation();
+
 			var account = await _mediator.Send(new GetAccountAndProfileRequest(_hrvsterUser.UserUid));
 			var totalsPerAccount = await _mediator.Send(new GetTotalResourcesRequest(_hrvsterUser.UserUid));
 
@@ -68,6 +71,8 @@ namespace hrvster.Web.Controllers
 
 		private async Task<UpdateAccount> BuildProfileModel()
 		{
+			_hrvsterUser = _sessionManager.SetUserInformation();
+
 			var account = await _mediator.Send(new GetAccountAndProfileRequest(_hrvsterUser.UserUid));
 			var totalsPerAccount = await _mediator.Send(new GetTotalResourcesRequest(_hrvsterUser.UserUid));
 
@@ -93,6 +98,8 @@ namespace hrvster.Web.Controllers
 		[HttpPost]
 		public async Task<IActionResult> UpdateAccount(UpdateAccount form)
 		{
+			_hrvsterUser = _sessionManager.SetUserInformation();
+
 			if (ModelState.IsValid)
 			{
 				await _mediator.Send(new UpdateAccountRequest(_hrvsterUser.UserUid, form.DisplayName, form.FirstName, form.LastName));
@@ -116,6 +123,8 @@ namespace hrvster.Web.Controllers
 		[HttpGet]
 		public async Task<IActionResult> UpdateAccountDetails()
 		{
+			_hrvsterUser = _sessionManager.SetUserInformation();
+
 			var account = await _mediator.Send(new GetAccountAndProfileRequest(_hrvsterUser.UserUid));
 			var totalsPerAccount = await _mediator.Send(new GetTotalResourcesRequest(_hrvsterUser.UserUid));
 
@@ -142,6 +151,8 @@ namespace hrvster.Web.Controllers
 		[HttpPost]
 		public async Task<IActionResult> UpdateAccountDetails(UpdateAccount form)
 		{
+			_hrvsterUser = _sessionManager.SetUserInformation();
+
 			if (ModelState.IsValid)
 			{
 				await _mediator.Send(new UpdateAccountDetailsRequest(_hrvsterUser.UserUid, form.EmailAddress, form.PhoneNumber));
@@ -162,6 +173,8 @@ namespace hrvster.Web.Controllers
 		[HttpPost]
 		public async Task<IActionResult> Unlink(ProfileType profileType)
 		{
+			_hrvsterUser = _sessionManager.SetUserInformation();
+
 			await _mediator.Send(new UnlinkProfileRequest(_hrvsterUser.UserUid, profileType));
 
 			return RedirectToAction("Index");

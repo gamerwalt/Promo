@@ -42,7 +42,7 @@ namespace hrvster.Core.Handlers.Sweepstakes
 				StartDate = request.StartDate,
 				EndDate = request.EndDate,
 				DrawDate = request.DrawDate
-			});
+			}, request.TimeZoneId, request.IsDaylight);
 
 			await _mediator.Publish(new SweepstakeUpdated(request.Sweepstake));
 		}

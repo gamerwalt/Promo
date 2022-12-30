@@ -20,24 +20,28 @@ namespace hrvster.Web.Controllers
 	{
 		private readonly ILogger<WatchTypeProviderController> _logger;
 		private readonly IMediator _mediator;
-		private readonly HrvsterUser _hrvsterUser;
 		private readonly IToastNotification _notificationService;
+		private readonly ISessionManager _sessionManager;
+
+		private HrvsterUser _hrvsterUser;
 
 		public WatchTypeProviderController(
 			ILoggerFactory loggerFactory,
 			IMediator mediator,
-			HrvsterUser hrvsterUser,
-			IToastNotification notificationService)
+			IToastNotification notificationService,
+			ISessionManager sessionManager)
 		{
 			_logger = loggerFactory.CreateLogger<WatchTypeProviderController>();
 			_mediator = mediator;
-			_hrvsterUser = hrvsterUser;
 			_notificationService = notificationService;
+			_sessionManager = sessionManager;
 		}
 
 		[HttpGet]
 		public async Task<IActionResult> Select(Guid sweepUid, string actionName, string controllerName)
 		{
+			_hrvsterUser = _sessionManager.SetUserInformation();
+
 			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
 			if (sweep == null)
 			{
@@ -74,6 +78,8 @@ namespace hrvster.Web.Controllers
 		[HttpPost]
 		public async Task<IActionResult> Select(Guid sweepUid, SelectWatchTypeProvider form)
 		{
+			_hrvsterUser = _sessionManager.SetUserInformation();
+
 			if (ModelState.IsValid)
 			{
 				var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));

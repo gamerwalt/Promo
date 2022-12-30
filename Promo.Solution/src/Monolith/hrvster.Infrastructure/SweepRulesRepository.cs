@@ -188,7 +188,9 @@ namespace hrvster.Infrastructure
 					Description = reader.GetStringValue("campaign_description"),
 					ActiveInd = reader.GetBoolean("campaign_active_ind"),
 					StartDate = reader.GetDateTime("campaign_start_date"),
+					StartDateUtc = reader.GetDateTime("campaign_start_date_utc"),
 					EndDate = reader.GetDateTime("campaign_end_date"),
+					EndDateUtc = reader.GetDateTime("campaign_end_date_utc"),
 					CampaignType = new CampaignType
 					{
 						CampaignTypeName = reader.GetStringValue("campaign_type_name"),

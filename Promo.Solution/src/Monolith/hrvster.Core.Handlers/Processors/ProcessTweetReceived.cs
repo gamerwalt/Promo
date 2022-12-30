@@ -2,6 +2,7 @@
 using hrvster.Core.Requests.ServiceRequests.Notifications;
 using MediatR;
 using Microsoft.Extensions.Logging;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -20,9 +21,10 @@ namespace hrvster.Core.Handlers.Processors
 
 		public async Task Handle(TweetReceived notification, CancellationToken cancellationToken)
 		{
-			_logger.LogInformation("{action} handling notification to process tweet with uid {tweetGuid}.",
+			_logger.LogInformation("{action} handling notification to process tweet with uid {tweetGuid} and hashtags {hashtags}.",
 				nameof(ProcessTweetReceived),
-				notification.IncomingTweet.IncomingTweetUid);
+				notification.IncomingTweet.IncomingTweetUid,
+				string.Join(", ", notification.Tweet.Hashtags.Select(c => c.Text)));
 
 			await _tweetProcessor.ProcessTweetAsync(
 				notification.IncomingTweet,

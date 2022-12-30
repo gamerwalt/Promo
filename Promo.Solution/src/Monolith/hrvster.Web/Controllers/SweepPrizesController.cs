@@ -24,8 +24,9 @@ namespace hrvster.Web.Controllers
 		private readonly IToastNotification _notificationService;
 		private readonly IValidator<CreateSweepPrize> _createSweepPrizeValidator;
 		private readonly IValidator<EditSweepPrize> _editSweepPrizeValidator;
-		private readonly hrvster.Models.HrvsterUser _hrvsterUser;
+		private hrvster.Models.HrvsterUser _hrvsterUser;
 		private readonly PrizePositionFinder _prizePositionFinder;
+		private readonly ISessionManager _sessionManager;
 
 		public SweepPrizesController(
 			ILoggerFactory loggerFactory,
@@ -34,7 +35,7 @@ namespace hrvster.Web.Controllers
 			IToastNotification notificationService,
 			IValidator<CreateSweepPrize> createSweepPrizeValidator,
 			IValidator<EditSweepPrize> editSweepPrizeValidator,
-			hrvster.Models.HrvsterUser hrvsterUser,
+			ISessionManager sessionManager,
 			PrizePositionFinder prizePositionFinder)
 		{
 			_logger = loggerFactory.CreateLogger<SweepPrizesController>();
@@ -43,13 +44,15 @@ namespace hrvster.Web.Controllers
 			_notificationService = notificationService;
 			_createSweepPrizeValidator = createSweepPrizeValidator;
 			_editSweepPrizeValidator = editSweepPrizeValidator;
-			_hrvsterUser = hrvsterUser;
+			_sessionManager = sessionManager;
 			_prizePositionFinder = prizePositionFinder;
 		}
 
 		[HttpGet]
 		public async Task<IActionResult> View(Guid sweepUid, Guid campaignUid, string returnAction, string returnController)
 		{
+			_hrvsterUser = _sessionManager.SetUserInformation();
+
 			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
 			if (sweep == null)
 			{
@@ -82,6 +85,8 @@ namespace hrvster.Web.Controllers
 		[HttpGet]
 		public async Task<IActionResult> Create(Guid sweepUid, Guid campaignUid, string returnAction, string returnController)
 		{
+			_hrvsterUser = _sessionManager.SetUserInformation();
+
 			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
 			if (sweep == null)
 			{
@@ -135,6 +140,8 @@ namespace hrvster.Web.Controllers
 		[HttpPost]
 		public async Task<IActionResult> Create(Guid sweepUid, Guid campaignUid, string returnAction, string returnController, CreateSweepPrize form)
 		{
+			_hrvsterUser = _sessionManager.SetUserInformation();
+
 			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
 			if (sweep == null)
 			{
@@ -188,6 +195,8 @@ namespace hrvster.Web.Controllers
 		[HttpGet]
 		public async Task<IActionResult> DeletePrize(Guid prizeUid, Guid sweepUid, Guid campaignUid, string actionName, string controllerName)
 		{
+			_hrvsterUser = _sessionManager.SetUserInformation();
+
 			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
 			if (sweep == null)
 			{
@@ -234,6 +243,8 @@ namespace hrvster.Web.Controllers
 			string controllerName,
 			DeleteSweepPrize form)
 		{
+			_hrvsterUser = _sessionManager.SetUserInformation();
+
 			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
 			if (sweep == null)
 			{
@@ -274,6 +285,8 @@ namespace hrvster.Web.Controllers
 			string actionName,
 			string controllerName)
 		{
+			_hrvsterUser = _sessionManager.SetUserInformation();
+
 			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
 			if (sweep == null)
 			{
@@ -320,6 +333,8 @@ namespace hrvster.Web.Controllers
 			string controllerName,
 			EditSweepPrize form)
 		{
+			_hrvsterUser = _sessionManager.SetUserInformation();
+
 			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
 			if (sweep == null)
 			{

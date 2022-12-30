@@ -7,6 +7,7 @@ using MediatR;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Tweetinvi.Models;
 
@@ -70,6 +71,15 @@ namespace hrvster.ApplicationServices.Processors
 
 			var blacklisted = await _blacklistedSweepsUserRepository.GetBlacklistedSweepUsersAsync(rule.Sweep.SweepUid);
 			var entryRules = await _sweepEntryRulesRepository.GetSweepEntryRuleAsync(rule.Sweep.SweepUid);
+
+			if(entryRules == null)
+			{
+				_Logger.LogInformation("There are no entry rules for the sweep {sweepName} and will not be able to continue to process the tweet received for hashtag {hashTag}",
+					rule.Sweep.Name,
+					string.Join(",", tweet.Hashtags.Select(c => c.Text)));
+
+				return;
+			}
 
 			var userReport = await _reportingRepository.GetCampaignSweepUserReportAsync(
 				tweet.CreatedBy.ScreenName,

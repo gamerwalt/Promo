@@ -27,22 +27,21 @@ namespace hrvster.Web.Controllers
 		private readonly IFirebaseAuthProvider _firebaseAuthProvider;
 		private readonly ISessionManager _sessionManager;
 		private readonly IMediator _mediator;
-		private readonly HrvsterUser _hrvsterUser;
+		
+		private HrvsterUser _hrvsterUser;
 
 		public SessionController(
 			ILoggerFactory loggerFactory,
 			IToastNotification notificationService,
 			IFirebaseAuthProvider firebaseAuthProvider,
 			ISessionManager sessionManager,
-			IMediator mediator,
-			HrvsterUser hrvsterUser)
+			IMediator mediator)
 		{
 			_logger = loggerFactory.CreateLogger<SessionController>();
 			_notificationService = notificationService;
 			_firebaseAuthProvider = firebaseAuthProvider;
 			_sessionManager = sessionManager;
 			_mediator = mediator;
-			_hrvsterUser = hrvsterUser;
 		}
 
 		[HttpGet]
@@ -110,15 +109,9 @@ namespace hrvster.Web.Controllers
 						var isDaylight = TimeZoneInfo.Local.IsDaylightSavingTime(DateTime.Now);
 						_sessionManager.SetKeyValue(SessionConstants.IsDaylight, isDaylight.ToString());
 
-						_hrvsterUser.UserUid = Guid.Parse(link.User.LocalId);
-						_hrvsterUser.DisplayName = link.User.DisplayName;
-						_hrvsterUser.Token = link.FirebaseToken;
-						_hrvsterUser.EmailAddress = link.User.Email;
-						_hrvsterUser.Locale = account.Locale;
-						_hrvsterUser.WindowsTimeZone = timezone;
-						_hrvsterUser.IsDaylight = isDaylight;
+						_hrvsterUser = _sessionManager.SetUserInformation();
 
-						await _mediator.Send(new UpdateLastLoginRequest(link.User.LocalId));
+						await _mediator.Send(new UpdateLastLoginRequest(link.User.LocalId, _hrvsterUser));
 
 						if (string.IsNullOrWhiteSpace(returnUrl))
 							return RedirectToActionPermanent(actionName: "Index", controllerName: "Dashboard");

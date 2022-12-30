@@ -1,14 +1,20 @@
-﻿using hrvster.Infrastructure.Subscriptions;
+﻿using hrvster.Core.Requests;
+using hrvster.Infrastructure.Subscriptions;
 using hrvster.Models;
+using hrvster.Models.Core;
 using hrvster.Models.Extensions;
+using hrvster.Models.Subscriptions;
+using MediatR;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Threading.Tasks;
 
 namespace hrvster.ApplicationServices.Subscription
 {
 	public interface ISubscriptionService
 	{
 		SubscriptionStatus IsAccountSubscribed(Guid accountUid);
+		Task<ServiceOperation<AccountSubscription>> SubscribeUserToAsync(Plan plan, Guid accountUid);
 	}
 
 	public class SubscriptionService : ISubscriptionService
@@ -16,18 +22,18 @@ namespace hrvster.ApplicationServices.Subscription
 		private readonly ILogger<SubscriptionService> _logger;
 		private readonly IAccountSubscriptionsRepository _repository;
 		private readonly SubscriptionModel _subscriptionModel;
-		private readonly HrvsterUser _hrvsterUser;
+		private readonly IMediator _mediator;
 
 		public SubscriptionService(
 			ILoggerFactory loggerFactory,
 			IAccountSubscriptionsRepository repository,
 			SubscriptionModel subscriptionModel,
-			HrvsterUser hrvsterUser)
+			IMediator mediator)
 		{
 			_logger = loggerFactory.CreateLogger<SubscriptionService>();
 			_repository = repository;
 			_subscriptionModel = subscriptionModel;
-			_hrvsterUser = hrvsterUser;
+			_mediator = mediator;
 		}
 
 		public SubscriptionStatus IsAccountSubscribed(Guid accountUid)
@@ -43,7 +49,7 @@ namespace hrvster.ApplicationServices.Subscription
 				return SubscriptionStatus.SubscribedButEndDate;
 			}
 
-			_logger.LogInformation("Account {accountUid} is subscribed with {subscription}", _hrvsterUser.UserUid, accountSubscription.ToJsonString());
+			_logger.LogInformation("Account {accountUid} is subscribed with {subscription}", accountUid, accountSubscription.ToJsonString());
 
 			_subscriptionModel.PlanName = accountSubscription.Plan.PlanName;
 			_subscriptionModel.IsDiscounted = accountSubscription.IsDiscounted;
@@ -55,6 +61,11 @@ namespace hrvster.ApplicationServices.Subscription
 			_subscriptionModel.PricePerYear = accountSubscription.Plan.PricePerYear;
 
 			return SubscriptionStatus.Subscribed;
+		}
+
+		public async Task<ServiceOperation<AccountSubscription>> SubscribeUserToAsync(Plan plan, Guid accountUid)
+		{
+			return await _mediator.Send(new SubscribeUserToPlanRequest(accountUid, plan));
 		}
 	}
 }

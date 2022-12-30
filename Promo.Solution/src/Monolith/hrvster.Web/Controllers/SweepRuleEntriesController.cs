@@ -19,24 +19,28 @@ namespace hrvster.Web.Controllers
 		private readonly IMediator _mediator;
 		private readonly IMapper _mapper;
 		private readonly IToastNotification _notificationService;
-		private readonly hrvster.Models.HrvsterUser _hrvsterUser;
+		private readonly ISessionManager _sessionManager;
+
+		private hrvster.Models.HrvsterUser _hrvsterUser;
 
 		public SweepRuleEntriesController(
 			ILoggerFactory loggerFactory,
 			IMediator mediator,
 			IMapper mapper,
 			IToastNotification notificationService,
-			hrvster.Models.HrvsterUser hrvsterUser)
+			ISessionManager sessionManager)
 		{
 			_logger = loggerFactory.CreateLogger<SweepRuleEntriesController>();
 			_mediator = mediator;
 			_mapper = mapper;
 			_notificationService = notificationService;
-			_hrvsterUser = hrvsterUser;
+			_sessionManager = sessionManager;
 		}
 
 		public async Task<IActionResult> View(Guid sweepUid, Guid ruleUid, string actionName, string controllerName)
 		{
+			_hrvsterUser = _sessionManager.SetUserInformation();
+
 			var sweepEntries = await _mediator.Send(new GetSweepRuleEntriesRequest(sweepUid, ruleUid));
 			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
 			var rule = await _mediator.Send(new GetSweepRuleByUidRequest(ruleUid));

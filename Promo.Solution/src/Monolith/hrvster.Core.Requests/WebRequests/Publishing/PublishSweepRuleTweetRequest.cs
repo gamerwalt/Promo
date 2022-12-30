@@ -18,6 +18,7 @@ namespace hrvster.Core.Requests.WebRequests.Publishing
 		private IEnumerable<string> _mediaLocation;
 		private bool _mustBeFollowing;
 		private string _timeZoneId;
+		private bool _isDaylight;
 
 		public PublishSweepRuleTweetRequest(
 			Sweep sweep,
@@ -29,7 +30,8 @@ namespace hrvster.Core.Requests.WebRequests.Publishing
 			DateTime scheduledDate,
 			bool mustBeFollowing,
 			IEnumerable<string> mediaLocation,
-			string timeZoneId)
+			string timeZoneId,
+			bool isDaylight)
 		{
 			_profile = profile;
 			_watchTypeId = watchTypeId;
@@ -41,6 +43,7 @@ namespace hrvster.Core.Requests.WebRequests.Publishing
 			_mediaLocation = mediaLocation;
 			_mustBeFollowing = mustBeFollowing;
 			_timeZoneId = timeZoneId;
+			_isDaylight = isDaylight;
 		}
 
 		public string TimeZoneId { get { return _timeZoneId; } }
@@ -89,5 +92,7 @@ namespace hrvster.Core.Requests.WebRequests.Publishing
 		{
 			get { return _mustBeFollowing; }
 		}
+
+		public bool IsDaylight { get { return _isDaylight; } }
 	}
 }

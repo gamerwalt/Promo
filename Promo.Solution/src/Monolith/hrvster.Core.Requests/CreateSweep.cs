@@ -14,11 +14,13 @@ namespace hrvster.Core.Requests
     {
         private NewSweepRequest request;
 		private string _timezoneId;
+		private bool _isDaylight;
 
-        public CreateSweep(NewSweepRequest request, string timezoneId)
+        public CreateSweep(NewSweepRequest request, string timezoneId, bool isDaylight)
         {
             this.request = request;
 			_timezoneId= timezoneId;
+			_isDaylight = isDaylight;
         }
 
         public NewSweepRequest Sweep
@@ -26,6 +28,7 @@ namespace hrvster.Core.Requests
             get { return request; }
         }
 		public string TimeZoneId { get { return _timezoneId; } }
+		public bool IsDaylight { get { return _isDaylight; } }
 
 	}
 
@@ -66,7 +69,7 @@ namespace hrvster.Core.Requests
                 StartDate = request.Sweep.StartDate,
                 EndDate = request.Sweep.EndDate,
 				DrawDate = request.Sweep.DrawDate
-            });
+            }, request.TimeZoneId, request.IsDaylight);
 
 			var sweep = await _repository.GetAsync(sweepUid);
 

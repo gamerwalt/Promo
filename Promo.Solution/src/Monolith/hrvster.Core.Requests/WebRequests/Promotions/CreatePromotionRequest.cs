@@ -13,6 +13,7 @@ namespace hrvster.Core.Requests.WebRequests.Promotions
 		private DateTime _endDate;
 		private Guid _accountUid;
 		private string _timezone;
+		private bool _isDaylight;
 
 		public CreatePromotionRequest(
 			Guid promotionUid,
@@ -22,7 +23,8 @@ namespace hrvster.Core.Requests.WebRequests.Promotions
 			DateTime startDate,
 			DateTime endDate,
 			Guid userUid,
-			string timezone)
+			string timezone,
+			bool isDayLight)
 		{
 			_promotionUid = promotionUid;
 			_name = name;
@@ -32,6 +34,7 @@ namespace hrvster.Core.Requests.WebRequests.Promotions
 			_endDate = endDate;
 			_accountUid = userUid;
 			_timezone = timezone;
+			_isDaylight = isDayLight;
 		}
 
 		public Guid PromotionUid { get { return _promotionUid; } }
@@ -42,5 +45,6 @@ namespace hrvster.Core.Requests.WebRequests.Promotions
 		public DateTime EndDate { get { return _endDate; } }
 		public Guid AccountUid { get { return _accountUid; } }
 		public string TimeZone { get { return _timezone;} }
+		public bool IsDaylight { get { return _isDaylight; } }
 	}
 }

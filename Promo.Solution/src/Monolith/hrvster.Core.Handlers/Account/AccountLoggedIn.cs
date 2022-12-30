@@ -1,4 +1,5 @@
 ﻿using hrvster.Core.Requests.WebRequests.Accounts;
+using hrvster.Models;
 using MediatR;
 
 namespace hrvster.Core.Handlers.Account

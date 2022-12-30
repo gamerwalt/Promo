@@ -15,13 +15,15 @@ namespace hrvster.Core.Requests
 		private Guid _accountUid;
 		private string _timezoneId;
 		private UpdateCampaignRequest _request;
+		private bool _isDaylight;
 
-		public UpdateCampaignViaUidRequest(Guid campaignUid, Guid accountUid, UpdateCampaignRequest request, string timezoneId)
+		public UpdateCampaignViaUidRequest(Guid campaignUid, Guid accountUid, UpdateCampaignRequest request, string timezoneId, bool isDaylight)
 		{
 			_campaignUid = campaignUid;
 			_request = request;
 			_accountUid = accountUid;
 			_timezoneId = timezoneId;
+			_isDaylight = isDaylight;
 		}
 
 		public Guid AccountUid { get { return _accountUid; } }
@@ -30,6 +32,7 @@ namespace hrvster.Core.Requests
 
 		public UpdateCampaignRequest Request { get { return _request; } }
 		public string Timezone { get { return _timezoneId; } }
+		public bool IsDaylight { get { return _isDaylight; } }
 	}
 
 	public class UpdateCampaignViaUidRequestHandler : IRequestHandler<UpdateCampaignViaUidRequest, Campaign>
@@ -56,7 +59,7 @@ namespace hrvster.Core.Requests
 				{
 					CampaignTypeUid = request.Request.CampaignTypeUid
 				}
-			}, request.Timezone);
+			}, request.Timezone, request.IsDaylight);
 
 			var campaign = await _repository.GetCampaignByUidAsync(request.CampaignUid, request.AccountUid);
 

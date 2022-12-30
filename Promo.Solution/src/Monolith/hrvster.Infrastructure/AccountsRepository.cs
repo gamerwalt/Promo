@@ -28,18 +28,16 @@ namespace hrvster.Infrastructure
 		Account GetByPhoneNumber(string phoneNumber);
 		Task UpdateAsync(Guid accountUid, string firstName, string lastName, string displayName);
 		Task UpdateAsync(Guid accountUid, string emailAddress, string phoneNumber);
-		Task UpdateLastLoginAsync(Guid accountUid);
+		Task UpdateLastLoginAsync(Guid accountUid, HrvsterUser hrvsterUser);
 	}
 
 	public class AccountsRepository : IAccountsRepository
 	{
 		private readonly IDatabase _database;
-		private readonly HrvsterUser _hrvsterUser;
 
-		public AccountsRepository(IDatabase database, HrvsterUser hrvsterUser)
+		public AccountsRepository(IDatabase database)
 		{
 			_database = database;
-			_hrvsterUser = hrvsterUser;
 		}
 
 		public async Task CreateAsync(Account account)
@@ -368,11 +366,11 @@ namespace hrvster.Infrastructure
 			await command.ExecuteNonQueryAsync();
 		}
 
-		public async Task UpdateLastLoginAsync(Guid accountUid)
+		public async Task UpdateLastLoginAsync(Guid accountUid, HrvsterUser hrvsterUser)
 		{
-			var lastLoginDateUtc = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.Now, TimeZoneInfo.Local.Id, _hrvsterUser.WindowsTimeZone);
+			var lastLoginDateUtc = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.Now, TimeZoneInfo.Local.Id, hrvsterUser.WindowsTimeZone);
 
-			if (!_hrvsterUser.IsDaylight)
+			if (!hrvsterUser.IsDaylight)
 			{
 				lastLoginDateUtc = lastLoginDateUtc.AddHours(-2);
 			}

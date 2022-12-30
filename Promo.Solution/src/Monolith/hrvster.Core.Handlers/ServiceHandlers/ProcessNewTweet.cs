@@ -13,6 +13,7 @@ using hrvster.Models.Extensions;
 using System.Runtime.CompilerServices;
 using hrvster.ApplicationServices.Common;
 using Org.BouncyCastle.Asn1.X509.Qualified;
+using System.Linq;
 
 namespace hrvster.Core.Handlers.ServiceHandlers
 {
@@ -94,7 +95,8 @@ namespace hrvster.Core.Handlers.ServiceHandlers
 
 			try
 			{
-				_logger.LogInformation("Starting a new transaction for tweet {tweetGuid}", request.IncomingTweet.IncomingTweetUid);
+				_logger.LogInformation("Starting a new transaction for tweet {tweetGuid} with hashtags {hashtags}", request.IncomingTweet.IncomingTweetUid,
+					string.Join(", ", request.Tweet.Hashtags.Select(c => c.Text)));
 
 				await _harvesterRepository.BeginTransaction();
 

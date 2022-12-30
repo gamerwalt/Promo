@@ -1,27 +1,27 @@
 ﻿using FluentValidation;
 using hrvster.Core.Authentication;
 using hrvster.Infrastructure;
-using hrvster.Models.Options;
 using hrvster.Web.Models;
-using System;
 using System.Linq;
 
 namespace hrvster.Web.Validation
 {
 	public class ViewPromotionValidation : AbstractValidator<ViewPromotion>
 	{
-		private readonly hrvster.Models.HrvsterUser _hrvsterUser;
+		private hrvster.Models.HrvsterUser _hrvsterUser;
+
 		private readonly ICampaignRepository _campaignsRepository;
 		private readonly ISweepsRepository _sweepsRepository;
-		
+		private readonly ISessionManager _sessionManager;
+
 		public ViewPromotionValidation(
-			hrvster.Models.HrvsterUser hrvsterUser,
 			ICampaignRepository campaignsRepository,
-			ISweepsRepository sweepsRepository)
+			ISweepsRepository sweepsRepository,
+			ISessionManager sessionManager)
 		{
-			_hrvsterUser = hrvsterUser;
 			_campaignsRepository = campaignsRepository;
 			_sweepsRepository = sweepsRepository;
+			_sessionManager = sessionManager;
 
 			RuleFor(viewPromotion => viewPromotion.UpdatePromotion.CampaignName)
 				.Must((viewPromotion, campaignName) => PromotionDoesNotExist(viewPromotion, campaignName))
@@ -67,6 +67,8 @@ namespace hrvster.Web.Validation
 
 		private bool PromotionDoesNotExist(ViewPromotion viewPromotionName, string promotionName)
 		{
+			_hrvsterUser = _sessionManager.SetUserInformation();
+
 			var result = _campaignsRepository.GetAccountCampaigns(_hrvsterUser.UserUid);
 
 			var returnResult = result.Any(

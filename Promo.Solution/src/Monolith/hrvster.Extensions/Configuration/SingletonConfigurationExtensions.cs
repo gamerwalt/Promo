@@ -14,7 +14,7 @@ namespace hrvster.Extensions.Configuration
 				.AddPrizePositionFinder();
 
 		public static IServiceCollection AddHrvsterUser(this IServiceCollection services)
-			=> services.AddSingleton<HrvsterUser>();
+			=> services.AddTransient<HrvsterUser>();
 
 		public static IServiceCollection AddSubscription(this IServiceCollection services)
 			=> services.AddSingleton<SubscriptionModel>();

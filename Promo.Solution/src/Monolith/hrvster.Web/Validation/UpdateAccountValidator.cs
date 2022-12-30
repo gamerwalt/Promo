@@ -7,13 +7,17 @@ namespace hrvster.Web.Validation
 {
 	public class UpdateAccountValidator : AbstractValidator<UpdateAccount>
 	{
-		private readonly hrvster.Models.HrvsterUser _hrvsterUser;
-		private readonly IAccountsRepository _repository;
+		private hrvster.Models.HrvsterUser _hrvsterUser;
 
-		public UpdateAccountValidator(hrvster.Models.HrvsterUser hrvsterUser, IAccountsRepository repository)
+		private readonly IAccountsRepository _repository;
+		private readonly ISessionManager _sessionManager;
+
+		public UpdateAccountValidator(
+			ISessionManager sessionManager, 
+			IAccountsRepository repository)
 		{
-			_hrvsterUser = hrvsterUser;
 			_repository = repository;
+			_sessionManager = sessionManager;
 
 			RuleFor(updateAccount => updateAccount.DisplayName)
 				.NotEmpty()
@@ -48,6 +52,8 @@ namespace hrvster.Web.Validation
 
 		private bool EmailAddressMustNotExist(string emailAddress)
 		{
+			_hrvsterUser = _sessionManager.SetUserInformation();
+
 			if (string.IsNullOrWhiteSpace(emailAddress)) return false;
 
 			var existingUser = _repository.GetUserByEmail(emailAddress);
@@ -60,6 +66,8 @@ namespace hrvster.Web.Validation
 
 		private bool PhoneNumberMustNotExist(string phoneNumber)
 		{
+			_hrvsterUser = _sessionManager.SetUserInformation();
+
 			if (string.IsNullOrWhiteSpace(phoneNumber)) return false;
 
 			var existingUser = _repository.GetByPhoneNumber(phoneNumber);
@@ -72,6 +80,8 @@ namespace hrvster.Web.Validation
 
 		private bool DisplayNameMustNotExist(string userName)
 		{
+			_hrvsterUser = _sessionManager.SetUserInformation();
+
 			if (string.IsNullOrWhiteSpace(userName)) return false;
 
 			var existingUser = _repository.GetUserByUserName(userName);
@@ -84,6 +94,8 @@ namespace hrvster.Web.Validation
 
 		private bool MustNotExist(string displayName)
 		{
+			_hrvsterUser = _sessionManager.SetUserInformation();
+
 			var account = _repository.GetUserByUserName(displayName);
 
 			if(account != null)

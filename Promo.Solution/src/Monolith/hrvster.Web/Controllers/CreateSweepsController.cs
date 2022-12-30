@@ -22,25 +22,29 @@ namespace hrvster.Web.Controllers
 		private readonly IMediator _mediator;
 		private readonly IToastNotification _notificationService;
 		private readonly SweepstakeConfiguration _sweepstakeConfiguration;
-		private readonly HrvsterUser _hrvsterUser;
+		private readonly ISessionManager _sessionManager;
+
+		private HrvsterUser _hrvsterUser;
 
 		public CreateSweepsController(
 			ILoggerFactory loggerFactory,
 			IMediator mediator,
 			IToastNotification notificationService,
 			SweepstakeConfiguration sweepstakeConfiguration,
-			HrvsterUser hrvsterUser)
+			ISessionManager sessionManager)
 		{
 			_logger = loggerFactory.CreateLogger<CreateSweepsController>();
 			_mediator = mediator;
 			_notificationService = notificationService;
 			_sweepstakeConfiguration = sweepstakeConfiguration;
-			_hrvsterUser = hrvsterUser;
+			_sessionManager = sessionManager;
 		}
 
 		[HttpGet]
 		public async Task<IActionResult> Create([FromQuery] Guid campaignUid)
 		{
+			_hrvsterUser = _sessionManager.SetUserInformation();
+
 			var campaign = await _mediator.Send(new GetCampaign(campaignUid));
 
 			if (campaign == null)
@@ -77,6 +81,8 @@ namespace hrvster.Web.Controllers
 		[HttpPost]
 		public async Task<IActionResult> Create([FromQuery] Guid campaignUid, Models.CreateSweep form)
 		{
+			_hrvsterUser = _sessionManager.SetUserInformation();
+
 			var campaign = await _mediator.Send(new GetCampaign(campaignUid));
 
 			if (campaign == null)
@@ -108,7 +114,8 @@ namespace hrvster.Web.Controllers
 					form.DrawDate,
 					campaignUid,
 					_hrvsterUser.UserUid,
-					_hrvsterUser.WindowsTimeZone));
+					_hrvsterUser.WindowsTimeZone,
+					_hrvsterUser.IsDaylight));
 
 				_notificationService.AddSuccessToastMessage("Sweepstake created successfully.");
 
@@ -133,6 +140,8 @@ namespace hrvster.Web.Controllers
 		[Route("/CreateSweeps/View/{sweepUid:Guid}")]
 		public async Task<IActionResult> View(Guid sweepUid)
 		{
+			_hrvsterUser = _sessionManager.SetUserInformation();
+
 			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
 			if (sweep == null)
 			{
@@ -165,6 +174,8 @@ namespace hrvster.Web.Controllers
 		[Route("/CreateSweeps/View/{sweepUid:Guid}")]
 		public async Task<IActionResult> View(Guid sweepUid, UpdateSweepstake form)
 		{
+			_hrvsterUser = _sessionManager.SetUserInformation();
+
 			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
 			if (sweep == null)
 			{
@@ -182,7 +193,7 @@ namespace hrvster.Web.Controllers
 			{
 				if(IsFormDirty(form, sweep))
 				{
-					await _mediator.Send(new UpdateSweepstakeRequest(sweep, sweepUid, form.Name, form.StartDate, form.EndDate, form.DrawDate, _hrvsterUser.WindowsTimeZone));
+					await _mediator.Send(new UpdateSweepstakeRequest(sweep, sweepUid, form.Name, form.StartDate, form.EndDate, form.DrawDate, _hrvsterUser.WindowsTimeZone, _hrvsterUser.IsDaylight));
 
 					_notificationService.AddSuccessToastMessage("Sweep updated successfully.");
 				}

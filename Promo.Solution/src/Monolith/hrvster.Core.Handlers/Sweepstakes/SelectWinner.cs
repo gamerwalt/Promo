@@ -113,6 +113,7 @@ namespace hrvster.Core.Handlers.Sweepstakes
 				}
 
 				winner = await PickndWinnerAsync(distinctEntrants, entrantIndex, sweep, winners);
+
 				await NotifyWinnerAsync(winner, sweep);
 			}
 		}

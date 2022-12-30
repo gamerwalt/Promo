@@ -22,19 +22,21 @@ namespace hrvster.Web.Controllers
 		private readonly ILogger<ScheduledTweetsController> _logger;
 		private readonly IMediator _mediator;
 		private readonly IToastNotification _notificationService;
-		private readonly HrvsterUser _hrvsterUser;
+		private readonly ISessionManager _sessionManager;
+
+		private HrvsterUser _hrvsterUser;
 
 		public ScheduledTweetsController(
 			ILoggerFactory loggerFactory,
 			IMediator mediator,
 			IToastNotification notificationService,
 			NotificationServiceOptions notificationServiceOptions,
-			HrvsterUser hrvsterUser)
+			ISessionManager sessionManager)
 		{
 			_logger = loggerFactory.CreateLogger<ScheduledTweetsController>();
 			_mediator = mediator;
 			_notificationService = notificationService;
-			_hrvsterUser = hrvsterUser;
+			_sessionManager = sessionManager;
 		}
 
 		public async Task<IActionResult> Index()
@@ -44,6 +46,8 @@ namespace hrvster.Web.Controllers
 
 		public async Task<IActionResult> View(Guid ruleUid, Guid sweepUid, string actionName, string controllerName)
 		{
+			_hrvsterUser = _sessionManager.SetUserInformation();
+
 			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
 			if (sweep == null)
 			{
@@ -105,6 +109,8 @@ namespace hrvster.Web.Controllers
 			string actionName,
 			string controllerName)
 		{
+			_hrvsterUser = _sessionManager.SetUserInformation();
+
 			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
 			if (sweep == null)
 			{
@@ -187,7 +193,24 @@ namespace hrvster.Web.Controllers
 
 			if (ModelState.IsValid)
 			{
-				await _mediator.Send(new UpdateScheduledTweetRequest(_hrvsterUser.UserUid, rule, sweep, scheduledUid, form.Text, form.ScheduledTime, form.PreviousMediaId1, form.Media1, form.PreviousMediaId2, form.Media2, form.PreviousMediaId3, form.Media3, form.PreviousMediaId4, form.Media4, _hrvsterUser.WindowsTimeZone));
+				await _mediator.Send(
+					new UpdateScheduledTweetRequest(
+						_hrvsterUser.UserUid, 
+						rule, 
+						sweep, 
+						scheduledUid, 
+						form.Text, 
+						form.ScheduledTime, 
+						form.PreviousMediaId1, 
+						form.Media1, 
+						form.PreviousMediaId2, 
+						form.Media2, 
+						form.PreviousMediaId3, 
+						form.Media3, 
+						form.PreviousMediaId4, 
+						form.Media4, 
+						_hrvsterUser.WindowsTimeZone, 
+						_hrvsterUser.IsDaylight));
 
 				_notificationService.AddSuccessToastMessage("Scheduled tweet updated successfully.");
 			}
@@ -208,6 +231,8 @@ namespace hrvster.Web.Controllers
 			string controllerName,
 			string actionName)
 		{
+			_hrvsterUser = _sessionManager.SetUserInformation();
+
 			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
 			if (sweep == null)
 			{
@@ -292,6 +317,8 @@ namespace hrvster.Web.Controllers
 			string controllerName,
 			string actionName)
 		{
+			_hrvsterUser = _sessionManager.SetUserInformation();
+
 			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
 			if (sweep == null)
 			{

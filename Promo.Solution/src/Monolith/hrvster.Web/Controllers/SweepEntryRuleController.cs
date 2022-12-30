@@ -22,7 +22,9 @@ namespace hrvster.Web.Controllers
 		private readonly SweepstakeConfiguration _sweepConfig;
 		private readonly IToastNotification _notificationService;
 		private readonly ISweepRuleUpdateValidator _sweepRuleValidator;
-		private readonly hrvster.Models.HrvsterUser _hrvsterUser;
+		private readonly ISessionManager _sessionManager;
+
+		private hrvster.Models.HrvsterUser _hrvsterUser;
 
 		public SweepEntryRuleController(
 			ILoggerFactory loggerFactory,
@@ -30,19 +32,21 @@ namespace hrvster.Web.Controllers
 			SweepstakeConfiguration sweepConfig,
 			IToastNotification notificationService,
 			ISweepRuleUpdateValidator sweepRuleValidator,
-			hrvster.Models.HrvsterUser hrvsterUser)
+			ISessionManager sessionManager)
 		{
 			_logger = loggerFactory.CreateLogger<SweepEntryRuleController>();
 			_mediator = mediator;
 			_sweepConfig = sweepConfig;
 			_notificationService = notificationService;
 			_sweepRuleValidator = sweepRuleValidator;
-			_hrvsterUser = hrvsterUser;
+			_sessionManager = sessionManager;
 		}
 
 		[HttpGet]
 		public async Task<ActionResult> Create(Guid sweepUid, string actionName, string controllerName)
 		{
+			_hrvsterUser = _sessionManager.SetUserInformation();
+
 			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
 			if (sweep == null)
 			{
@@ -72,6 +76,8 @@ namespace hrvster.Web.Controllers
 		[HttpPost]
 		public async Task<ActionResult> Create(Guid sweepUid, Models.CreateSweepEntryRule model, string actionName, string controllerName)
 		{
+			_hrvsterUser = _sessionManager.SetUserInformation();
+
 			if (ModelState.IsValid)
 			{
 				var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
@@ -107,6 +113,8 @@ namespace hrvster.Web.Controllers
 		[HttpGet]
 		public async Task<ActionResult> Update(Guid sweepUid, Guid entryRuleUid, string actionName, string controllerName)
 		{
+			_hrvsterUser = _sessionManager.SetUserInformation();
+
 			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
 			if (sweep == null)
 			{
@@ -158,6 +166,8 @@ namespace hrvster.Web.Controllers
 		[HttpPost]
 		public async Task<ActionResult> Update(Guid sweepUid, Guid entryRuleUid, UpdateSweepEntryRule form, string actionName, string controllerName)
 		{
+			_hrvsterUser = _sessionManager.SetUserInformation();
+
 			if (ModelState.IsValid)
 			{
 				var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));

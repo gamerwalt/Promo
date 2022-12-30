@@ -16,27 +16,31 @@ namespace hrvster.Web.Controllers
 	[FirebaseAuthorize]
 	public class CreateDrawRulesController : Controller
 	{
+		private hrvster.Models.HrvsterUser _hrvsterUser;
+
 		private readonly ILogger<CreateDrawRulesController> _logger;
 		private readonly IMediator _mediator;
 		private readonly IToastNotification _notificationService;
-		private readonly hrvster.Models.HrvsterUser _hrvsterUser;
+		private readonly ISessionManager _sessionManager;
 
 		public CreateDrawRulesController(
 			ILoggerFactory loggerFactory,
 			IMediator mediator,
 			IToastNotification notificationService,
-			hrvster.Models.HrvsterUser hrvsterUser)
+			ISessionManager sessionManager)
 		{
 			_logger = loggerFactory.CreateLogger<CreateDrawRulesController>();
 			_mediator = mediator;
 			_notificationService = notificationService;
-			_hrvsterUser = hrvsterUser;
+			_sessionManager = sessionManager;
 		}
 
 		[HttpGet]
 		[Route("/CreateDrawRules/Create/Sweep/{sweepUid:Guid}")]
 		public async Task<IActionResult> Create(Guid sweepUid)
 		{
+			_hrvsterUser = _sessionManager.SetUserInformation();
+
 			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
 			if (sweep == null)
 			{
@@ -73,6 +77,8 @@ namespace hrvster.Web.Controllers
 		[Route("/CreateDrawRules/Create/Sweep/{sweepUid:Guid}")]
 		public async Task<IActionResult> Create(Guid sweepUid, CreateSweepDrawRule form)
 		{
+			_hrvsterUser = _sessionManager.SetUserInformation();
+
 			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
 			if (sweep == null)
 			{
@@ -132,6 +138,8 @@ namespace hrvster.Web.Controllers
 		[Route("/CreateDrawRules/View/Sweep/{sweepUid:Guid}")]
 		public async Task<IActionResult> View(Guid sweepUid)
 		{
+			_hrvsterUser = _sessionManager.SetUserInformation();
+
 			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
 			if (sweep == null)
 			{
@@ -168,6 +176,8 @@ namespace hrvster.Web.Controllers
 		[Route("/CreateDrawRules/View/Sweep/{sweepUid:Guid}")]
 		public async Task<IActionResult> View(Guid sweepUid, UpdateSweepDrawRule form)
 		{
+			_hrvsterUser = _sessionManager.SetUserInformation();
+
 			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
 			if (sweep == null)
 			{

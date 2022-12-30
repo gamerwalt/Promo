@@ -24,7 +24,7 @@ namespace hrvster.Core.Handlers.Account
 		{
 			_logger.LogInformation("Update last login for account with uid: {accountUid}", request.AccountUid);
 
-			await _repository.UpdateLastLoginAsync(request.AccountUid);
+			await _repository.UpdateLastLoginAsync(request.AccountUid, request.HrvsterUser);
 
 			await _mediator.Publish(new AccountLoggedIn(request));
 		}

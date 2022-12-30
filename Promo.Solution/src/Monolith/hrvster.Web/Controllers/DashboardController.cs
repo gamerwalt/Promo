@@ -21,20 +21,29 @@ namespace hrvster.Web.Controllers
 	public class DashboardController : Controller
 	{
 		private readonly ILogger<DashboardController> _logger;
-		private readonly HrvsterUser _hrvsterUser;
 		private readonly IMediator _mediator;
 		private readonly IMapper _mapper;
-		public DashboardController(ILoggerFactory loggerFactory, HrvsterUser hrvsterUser, IMediator mediator, IMapper mapper)
+		private readonly ISessionManager _sessionManager;
+
+		private HrvsterUser _hrvsterUser;
+
+		public DashboardController(
+			ILoggerFactory loggerFactory, 
+			IMediator mediator, 
+			IMapper mapper,
+			ISessionManager sessionManager)
 		{
 			_logger = loggerFactory.CreateLogger<DashboardController>();
-			_hrvsterUser = hrvsterUser;
 			_mediator = mediator;
 			_mapper = mapper;
+			_sessionManager = sessionManager;
 		}
 
 		[HttpGet]
 		public async Task<ActionResult> Index()
 		{
+			_hrvsterUser = _sessionManager.SetUserInformation();
+
 			var tasks = new List<Task>();
 			var accountTask = _mediator.Send(new GetAccountRequest(_hrvsterUser.UserUid));
 			var promotionsTask = _mediator.Send(new GetAllCampaignsAndPropertiesRequest(_hrvsterUser.UserUid));
@@ -56,6 +65,8 @@ namespace hrvster.Web.Controllers
 		[HttpGet]
 		public async Task<IActionResult> GetTweets([FromQuery] string campaignUid)
 		{
+			_hrvsterUser = _sessionManager.SetUserInformation();
+
 			_logger.LogInformation("Request to retrieve tweets and entries.");
 
 			var promotions = await _mediator.Send(new GetAllCampaignsForAccount(_hrvsterUser.UserUid));
@@ -74,6 +85,8 @@ namespace hrvster.Web.Controllers
 		[HttpGet]
 		public async Task<IActionResult> GetSweepEntries([FromQuery] string campaignUid)
 		{
+			_hrvsterUser = _sessionManager.SetUserInformation();
+
 			_logger.LogInformation("Request to retrieve tweets and entries.");
 
 			var promotions = await _mediator.Send(new GetAllCampaignsForAccount(_hrvsterUser.UserUid));

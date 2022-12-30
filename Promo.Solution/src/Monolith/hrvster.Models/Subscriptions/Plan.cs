@@ -1,4 +1,5 @@
-﻿using System;
+﻿using hrvster.Models.Subscriptions.Flutterwave;
+using System;
 
 namespace hrvster.Models.Subscriptions
 {
@@ -11,7 +12,9 @@ namespace hrvster.Models.Subscriptions
 		public int PromotionsPerMonth { get; set; }
 		public int SweepstakesPerMonth { get; set; }
 		public int SweepstakesMaximumEntries { get; set; }
+		public int HashtagsPerMonth { get; set; }
 		public decimal PricePerMonth { get; set; }
 		public decimal PricePerYear { get; set; }
+		public FlutterwavePlan FlutterwavePlan { get; set; }
 	}
 }

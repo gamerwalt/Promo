@@ -13,8 +13,9 @@ namespace hrvster.Core.Requests.WebRequests.Sweeps
 		private DateTime _drawDate;
 		private Sweep _sweep;
 		private string _timezoneId;
+		private bool _isDaylight;
 
-		public UpdateSweepstakeRequest(Models.Sweep sweep, Guid sweepUid, string name, DateTime startDate, DateTime endDate, DateTime drawDate, string timeZoneId)
+		public UpdateSweepstakeRequest(Models.Sweep sweep, Guid sweepUid, string name, DateTime startDate, DateTime endDate, DateTime drawDate, string timeZoneId, bool isDaylight)
 		{
 			_sweep = sweep;
 			_sweepUid = sweepUid;
@@ -23,6 +24,7 @@ namespace hrvster.Core.Requests.WebRequests.Sweeps
 			_endDate = endDate;
 			_drawDate = drawDate;
 			_timezoneId = timeZoneId;
+			_isDaylight = isDaylight;
 		}
 		public Sweep Sweepstake { get { return _sweep; } }
 		public Guid SweepUid { get { return _sweepUid; } }
@@ -31,5 +33,6 @@ namespace hrvster.Core.Requests.WebRequests.Sweeps
 		public DateTime EndDate { get { return _endDate; } }
 		public DateTime DrawDate { get { return _drawDate; } }
 		public string TimeZoneId { get { return _timezoneId;} }
+		public bool IsDaylight { get { return _isDaylight; } }
 	}
 }

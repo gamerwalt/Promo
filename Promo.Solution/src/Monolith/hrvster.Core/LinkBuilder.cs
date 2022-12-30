@@ -10,24 +10,29 @@ namespace hrvster.Core
 {
 	public class LinkBuilder
 	{
-		private readonly HrvsterUser _hrvsterUser;
+		private HrvsterUser _hrvsterUser;
+
 		private readonly IAccountsRepository _accountsRepository;
 		private readonly IProfilesRepository _profilesRepository;
 		private readonly Services _services;
+		private readonly ISessionManager _sessionManager;
 
-		public LinkBuilder(HrvsterUser hrvsterUser,
+		public LinkBuilder(
 			IAccountsRepository accountsRepository,
 			IProfilesRepository profilesRepository,
-			Services services)
+			Services services,
+			ISessionManager sessionManager)
 		{
-			_hrvsterUser = hrvsterUser;
 			_accountsRepository = accountsRepository;
 			_profilesRepository = profilesRepository;
 			_services = services;
+			_sessionManager = sessionManager;
 		}
 
 		public async Task<Uri> BuildTwitterLink(string tweetId, Guid ruleUid)
 		{
+			_hrvsterUser = _sessionManager.SetUserInformation();
+
 			if (string.IsNullOrWhiteSpace(_hrvsterUser.TwitterUserName))
 			{
 				var profile = await _profilesRepository.GetProfileAsync(_hrvsterUser.UserUid, Models.ProfileType.Twitter);

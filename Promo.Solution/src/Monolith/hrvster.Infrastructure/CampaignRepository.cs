@@ -10,33 +10,31 @@ namespace hrvster.Infrastructure
 {
 	public interface ICampaignRepository
 	{
-		Task CreateCampaignAsync(Campaign campaign);
+		Task CreateCampaignAsync(Campaign campaign, string timezone, bool isDayLight);
 		Task<Campaign> GetCampaignByUidAsync(Guid campaignUid, Guid accountUid);
-		Task UpdateCampaignAsync(Guid campaignUid, Campaign campaign, string timezoneId);
+		Task UpdateCampaignAsync(Guid campaignUid, Campaign campaign, string timezoneId, bool isDaylight);
 		Task<List<Campaign>> GetAccountCampaignsAsync(Guid accountUid);
 		List<Campaign> GetAccountCampaigns(Guid userUid);
 		Task<Campaign> GetCampaignByUidAsync(Guid campaignUid);
-		Task UpdateCampaignAsync(Guid campaignUid, string campaignName, string description, Guid campaignTypeUid, DateTime startDate, DateTime endDate, string timezoneId);
+		Task UpdateCampaignAsync(Guid campaignUid, string campaignName, string description, Guid campaignTypeUid, DateTime startDate, DateTime endDate, string timezoneId, bool isDaylight);
 		Campaign GetCampaignByUid(Guid campaignUid, Guid userUid);
 	}
 
 	public class CampaignRepository : ICampaignRepository
 	{
 		private readonly IDatabase _database;
-		private readonly HrvsterUser _hrvsterUser;
 
-		public CampaignRepository(IDatabase database, HrvsterUser hrvsterUser)
+		public CampaignRepository(IDatabase database)
 		{
 			_database = database;
-			_hrvsterUser = hrvsterUser;
 		}
 
-		public async Task CreateCampaignAsync(Campaign campaign)
+		public async Task CreateCampaignAsync(Campaign campaign, string timezone, bool isDayLight)
 		{
-			var startDateUtc = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(campaign.StartDate, TimeZoneInfo.Local.Id, _hrvsterUser.WindowsTimeZone);
-			var endDateUtc = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(campaign.EndDate, TimeZoneInfo.Local.Id, _hrvsterUser.WindowsTimeZone);
+			var startDateUtc = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(campaign.StartDate, TimeZoneInfo.Local.Id, timezone);
+			var endDateUtc = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(campaign.EndDate, TimeZoneInfo.Local.Id, timezone);
 
-			if(!_hrvsterUser.IsDaylight)
+			if(!isDayLight)
 			{
 				startDateUtc = startDateUtc.AddHours(-2);
 				endDateUtc = endDateUtc.AddHours(-2);
@@ -173,12 +171,12 @@ namespace hrvster.Infrastructure
 			return campaign;
 		}
 
-		public async Task UpdateCampaignAsync(Guid campaignUid, Campaign campaign, string timezoneId)
+		public async Task UpdateCampaignAsync(Guid campaignUid, Campaign campaign, string timezoneId, bool isDaylight)
 		{
 			var startDateUtc = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(campaign.StartDate, TimeZoneInfo.Local.Id, timezoneId);
 			var endDateUtc = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(campaign.EndDate, TimeZoneInfo.Local.Id, timezoneId);
 
-			if (!_hrvsterUser.IsDaylight)
+			if (!isDaylight)
 			{
 				startDateUtc = startDateUtc.AddHours(-2);
 				endDateUtc = endDateUtc.AddHours(-2);
@@ -203,12 +201,12 @@ namespace hrvster.Infrastructure
 			await command.ExecuteNonQueryAsync();
 		}
 
-		public async Task UpdateCampaignAsync(Guid campaignUid, string campaignName, string description, Guid campaignTypeUid, DateTime startDate, DateTime endDate, string timezoneId)
+		public async Task UpdateCampaignAsync(Guid campaignUid, string campaignName, string description, Guid campaignTypeUid, DateTime startDate, DateTime endDate, string timezoneId, bool isDaylight)
 		{
 			var startDateUtc = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(startDate, TimeZoneInfo.Local.Id, timezoneId);
 			var endDateUtc = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(endDate, TimeZoneInfo.Local.Id, timezoneId);
 
-			if (!_hrvsterUser.IsDaylight)
+			if (!isDaylight)
 			{
 				startDateUtc = startDateUtc.AddHours(-2);
 				endDateUtc = endDateUtc.AddHours(-2);

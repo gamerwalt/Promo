@@ -33,33 +33,37 @@ namespace hrvster.Web.Controllers
 		private readonly IMediator _mediator;
 		private readonly IWatchTypeProvider _watchTypeProvider;
 		private readonly Func<ExternalClientType, Core.Clients.Publishers.IExternalClient> _publisherResolver;
-		private readonly HrvsterUser _hrvsterUser;
 		private readonly IMapper _mapper;
 		private readonly IToastNotification _notificationService;
 		private readonly SweepstakeConfiguration _sweepstakeConfiguration;
+		private readonly ISessionManager _sessionManager;
+
+		private HrvsterUser _hrvsterUser;
 
 		public SweepRulesController(
 			ILoggerFactory loggerFactory,
 			IMediator mediator,
 			IWatchTypeProvider watchTypeProvider,
 			Func<ExternalClientType, Core.Clients.Publishers.IExternalClient> publisherResolver,
-			HrvsterUser hrvsterUser,
 			IMapper mapper,
 			IToastNotification notificationService,
-			SweepstakeConfiguration sweepstakeConfiguration)
+			SweepstakeConfiguration sweepstakeConfiguration,
+			ISessionManager sessionManager)
 		{
 			_logger = loggerFactory.CreateLogger<SweepRulesController>();
 			_mediator = mediator;
 			_watchTypeProvider = watchTypeProvider;
 			_publisherResolver = publisherResolver;
-			_hrvsterUser = hrvsterUser;
 			_mapper = mapper;
 			_notificationService = notificationService;
 			_sweepstakeConfiguration = sweepstakeConfiguration;
+			_sessionManager = sessionManager;
 		}
 
 		public async Task<IActionResult> View(Guid sweepUid)
 		{
+			_hrvsterUser = _sessionManager.SetUserInformation();
+
 			var sweepRule = await _mediator.Send(new GetSweepstakeAndRulesRequests(sweepUid));
 
 			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
@@ -85,6 +89,8 @@ namespace hrvster.Web.Controllers
 			string actionName,
 			string controllerName)
 		{
+			_hrvsterUser = _sessionManager.SetUserInformation();
+
 			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
 			if (sweep == null)
 			{
@@ -139,6 +145,8 @@ namespace hrvster.Web.Controllers
 		public async Task<IActionResult> Activate(
 			Guid sweepUid, Guid ruleUid, string actionName, string controllerName, ActivateSweepRule form)
 		{
+			_hrvsterUser = _sessionManager.SetUserInformation();
+
 			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
 			if (sweep == null)
 			{
@@ -193,6 +201,8 @@ namespace hrvster.Web.Controllers
 			string actionName,
 			string controllerName)
 		{
+			_hrvsterUser = _sessionManager.SetUserInformation();
+
 			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
 			if (sweep == null)
 			{
@@ -246,6 +256,8 @@ namespace hrvster.Web.Controllers
 		[HttpPost]
 		public async Task<IActionResult> Deactivate(Guid sweepUid, Guid ruleUid, string actionName, string controllerName, DeactivateSweepRule form)
 		{
+			_hrvsterUser = _sessionManager.SetUserInformation();
+
 			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
 			if (sweep == null)
 			{
@@ -296,6 +308,8 @@ namespace hrvster.Web.Controllers
 		[HttpGet]
 		public async Task<IActionResult> DeleteRule(Guid sweepUid, Guid ruleUid, string actionName, string controllerName)
 		{
+			_hrvsterUser = _sessionManager.SetUserInformation();
+
 			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
 			if (sweep == null)
 			{
@@ -349,6 +363,8 @@ namespace hrvster.Web.Controllers
 		[HttpPost]
 		public async Task<IActionResult> DeleteRule(Guid sweepUid, Guid ruleUid, string returnAction, string returnController, DeleteSweepRule form)
 		{
+			_hrvsterUser = _sessionManager.SetUserInformation();
+
 			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
 			if (sweep == null)
 			{
@@ -402,6 +418,8 @@ namespace hrvster.Web.Controllers
 		[HttpGet]
 		public async Task<IActionResult> SelectProvider(Guid sweepUid, string actionName, string controllerName)
 		{
+			_hrvsterUser = _sessionManager.SetUserInformation();
+
 			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
 			if (sweep == null)
 			{
@@ -442,6 +460,8 @@ namespace hrvster.Web.Controllers
 			string controllerName,
 			SelectWatchTypeProvider form)
 		{
+			_hrvsterUser = _sessionManager.SetUserInformation();
+
 			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
 			if (sweep == null)
 			{
@@ -510,6 +530,8 @@ namespace hrvster.Web.Controllers
 
 		public async Task<IActionResult> ValidateTwitterAuth()
 		{
+			_hrvsterUser = _sessionManager.SetUserInformation();
+
 			if (Request.Query["denied"].Count > 0)
 			{
 				return RedirectToAction("FailedAuthValidation");
@@ -544,6 +566,8 @@ namespace hrvster.Web.Controllers
 		[HttpGet]
 		public async Task<IActionResult> CreateTweet(Guid sweepUid, string actionName, string controllerName)
 		{
+			_hrvsterUser = _sessionManager.SetUserInformation();
+
 			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
 			if (sweep == null)
 			{
@@ -579,6 +603,8 @@ namespace hrvster.Web.Controllers
 		[HttpPost]
 		public async Task<IActionResult> CreateTweet(Guid sweepUid, string actionName, string controllerName, CreateSweepRuleTweet form)
 		{
+			_hrvsterUser = _sessionManager.SetUserInformation();
+
 			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
 			if (sweep == null)
 			{
@@ -623,7 +649,8 @@ namespace hrvster.Web.Controllers
 						form.ScheduledDate,
 						true, //default to true now
 						mediaLocation,
-						_hrvsterUser.WindowsTimeZone));
+						_hrvsterUser.WindowsTimeZone,
+						_hrvsterUser.IsDaylight));
 
 				if(!published)
 				{

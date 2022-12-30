@@ -20,24 +20,27 @@ namespace hrvster.Web.Controllers
 	{
 		private readonly ILogger<CreatePromotionController> _logger;
 		private readonly IToastNotification _notificationService;
-		private readonly HrvsterUser _hrvsterUser;
 		private readonly IMediator _mediator;
+		private readonly ISessionManager _sessionManager;
+
+		private HrvsterUser _hrvsterUser;
 
 		public CreatePromotionController(
 			ILoggerFactory loggerFactory,
 			IToastNotification notificationService,
 			IMediator mediator,
-			HrvsterUser hrvsterUser)
+			ISessionManager sessionManager)
 		{
 			_logger = loggerFactory.CreateLogger<CreatePromotionController>();
 			_notificationService = notificationService;
 			_mediator = mediator;
-			_hrvsterUser = hrvsterUser;
 		}
 
 		[HttpGet]
 		public async Task<IActionResult> Create()
 		{
+			_hrvsterUser = _sessionManager.SetUserInformation();
+
 			var startDate = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.Now, TimeZoneInfo.Local.Id, _hrvsterUser.WindowsTimeZone);
 
 			var campaignTypes = await _mediator.Send(new GetCampaignTypesRequest());
@@ -61,6 +64,8 @@ namespace hrvster.Web.Controllers
 		[HttpPost]
 		public async Task<IActionResult> Create(CreatePromotion form)
 		{
+			_hrvsterUser = _sessionManager.SetUserInformation();
+
 			if (ModelState.IsValid)
 			{
 				var promotionUid = Guid.NewGuid();
@@ -74,7 +79,8 @@ namespace hrvster.Web.Controllers
 						form.StartDate,
 						form.EndDate,
 						_hrvsterUser.UserUid,
-						_hrvsterUser.WindowsTimeZone
+						_hrvsterUser.WindowsTimeZone,
+						_hrvsterUser.IsDaylight
 					));
 
 				_notificationService.AddSuccessToastMessage("Promotion created successfully. Let's create a Game now.");
@@ -153,6 +159,8 @@ namespace hrvster.Web.Controllers
 		[Route("/CreatePromotion/View/{promotionUid:Guid}")]
 		public async Task<IActionResult> View(Guid promotionUid, UpdatePromotion form)
 		{
+			_hrvsterUser = _sessionManager.SetUserInformation();
+
 			var campaign = await _mediator.Send(new GetCampaign(promotionUid));
 
 			if (campaign == null)
@@ -179,7 +187,7 @@ namespace hrvster.Web.Controllers
 			{
 				if(IsFormDirty(campaign, form))
 				{
-					await _mediator.Send(new UpdatePromotionRequest(promotionUid, form.CampaignName, form.Description, form.CampaignTypeUid, form.StartDate, form.EndDate, _hrvsterUser.WindowsTimeZone));
+					await _mediator.Send(new UpdatePromotionRequest(promotionUid, form.CampaignName, form.Description, form.CampaignTypeUid, form.StartDate, form.EndDate, _hrvsterUser.WindowsTimeZone, _hrvsterUser.IsDaylight));
 
 					_notificationService.AddSuccessToastMessage("Promotion updated successfully.");
 				}

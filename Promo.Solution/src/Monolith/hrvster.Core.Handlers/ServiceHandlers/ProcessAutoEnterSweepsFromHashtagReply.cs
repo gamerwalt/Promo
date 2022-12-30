@@ -145,13 +145,13 @@ namespace hrvster.Core.Handlers.ServiceHandlers
 		}
 
 		private bool SweepIsRunningAndNotYetDrawn(Sweep sweep)
-			=> DateTime.UtcNow < sweep.EndDate &&
-				DateTime.UtcNow > sweep.StartDate &&
-				DateTime.UtcNow < sweep.DrawDate;
+			=> DateTime.UtcNow < sweep.EndDateUtc &&
+				DateTime.UtcNow > sweep.StartDateUtc &&
+				DateTime.UtcNow < sweep.DrawDateUtc;
 
 		private bool CampaignIsRunning(Campaign campaign)
-			=> DateTime.UtcNow < campaign.EndDate &&
-				DateTime.UtcNow > campaign.StartDate;
+			=> DateTime.UtcNow < campaign.EndDateUtc &&
+				DateTime.UtcNow > campaign.StartDateUtc;
 
 		private bool CanEnterSweepstakes(ProcessAutoEnterSweepsFromHashtagReplyRequest request)
 		{

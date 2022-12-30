@@ -1,5 +1,7 @@
 ﻿using hrvster.Infrastructure.Extensions;
+using hrvster.Models;
 using hrvster.Models.Subscriptions;
+using hrvster.Models.Subscriptions.Flutterwave;
 using MySqlConnector;
 using System;
 using System.Collections.Generic;
@@ -77,8 +79,15 @@ namespace hrvster.Infrastructure.Subscriptions
 				PromotionsPerMonth = reader.GetInt32("promotions_per_month"),
 				SweepstakesPerMonth = reader.GetInt32("sweeps_per_month"),
 				SweepstakesMaximumEntries = reader.GetInt32("sweepstakes_maximum_entries"),
+				HashtagsPerMonth = reader.GetInt32("sweep_hashtags_per_month"),
 				PricePerMonth = reader.GetDecimal("price_per_month"),
-				PricePerYear = reader.GetDecimal("price_per_year")
+				PricePerYear = reader.GetDecimal("price_per_year"),
+				FlutterwavePlan = new FlutterwavePlan
+				{
+					FlutterwavePlanId = reader.GetInt32("flutterwave_plan_id"),
+					FlutterwavePlanUid = reader.GetGuid("flutterwave_plan_uid"),
+					ExternalMonthlyPaymentLink = new Uri(reader.GetString("external_monthly_payment_link"))
+				}
 			};
 		}
 	}
