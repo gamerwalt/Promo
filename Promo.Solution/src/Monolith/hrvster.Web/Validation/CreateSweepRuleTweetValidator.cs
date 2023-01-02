@@ -15,7 +15,7 @@ namespace hrvster.Web.Validation
 
 		private const int FiveMegaBytes = 5 * 1024 * 1024;
 		//private string[] AllowedExtensions = { ".jpeg", ".jpg", ".png", ".gif", ".mp4" };
-		private string[] AllowedExtensions = { ".jpeg", ".jpg", ".png", ".gif" };
+		private string[] AllowedExtensions = { ".jpeg", ".JPEG", ".jpg", ".JPG", ".png", ".PNG", ".gif", ".GIF" };
 
 		public CreateSweepRuleTweetValidator(ISweepRulesRepository sweepRulesRepository)
 		{

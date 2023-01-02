@@ -28,7 +28,6 @@ namespace hrvster.Web.Controllers
 	[FirebaseAuthorize]
 	public class SweepRulesController : Controller
 	{
-		private string[] AllowedExtensions = { ".jpeg", ".jpg", ".png", ".gif" };
 		private readonly ILogger<SweepRulesController> _logger;
 		private readonly IMediator _mediator;
 		private readonly IWatchTypeProvider _watchTypeProvider;

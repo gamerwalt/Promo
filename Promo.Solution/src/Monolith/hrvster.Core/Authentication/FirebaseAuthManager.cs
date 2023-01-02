@@ -1,6 +1,7 @@
 ﻿using FirebaseAdmin.Auth;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace hrvster.Core.Authentication
@@ -10,6 +11,8 @@ namespace hrvster.Core.Authentication
 		bool VerifyToken(string token);
 		Task<UserRecord> CreateUserAsync(UserRecordArgs args);
 		Task<string> GenerateEmailVerificationLinkAsync(string email);
+		Task UpdateUserAsync(UserRecordArgs args);
+		Task<UserRecord> GetUserAsync(Guid userUid, CancellationToken cancellationToken);
 	}
 	public class FirebaseAuthManager : IFirebaseAuthManager
 	{
@@ -43,5 +46,11 @@ namespace hrvster.Core.Authentication
 				return false;
 			}
 		}
+
+		public async Task UpdateUserAsync(UserRecordArgs args)
+			=> await _firebaseAuth.UpdateUserAsync(args);
+
+		public async Task<UserRecord> GetUserAsync(Guid userUid, CancellationToken cancellationToken)
+			=> await _firebaseAuth.GetUserAsync(userUid.ToString(), cancellationToken);
 	}
 }

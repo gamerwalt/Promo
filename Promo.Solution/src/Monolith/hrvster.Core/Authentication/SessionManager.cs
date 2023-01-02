@@ -1,8 +1,10 @@
-﻿using hrvster.Models;
+﻿using FirebaseAdmin.Auth;
+using hrvster.Models;
 using Microsoft.AspNetCore.Http;
 using System;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace hrvster.Core.Authentication
 {
@@ -13,6 +15,7 @@ namespace hrvster.Core.Authentication
 		void RemoveKeyValue(string userToken);
 		void SetKeyValue(string keyName, string value);
 		HrvsterUser SetUserInformation();
+		Task UpdateDisplayNameAsync(string displayName);
 	}
 
 	public class SessionManager : ISessionManager
@@ -64,6 +67,16 @@ namespace hrvster.Core.Authentication
 				WindowsTimeZone = GetValue(SessionConstants.WindowsLocale),
 				IsDaylight = bool.Parse(GetValue(SessionConstants.IsDaylight)),
 			};
+		}
+
+		public Task UpdateDisplayNameAsync(string displayName)
+		{
+			if (!ContainsKey(SessionConstants.UserUid))
+				return Task.CompletedTask;
+
+			SetKeyValue(SessionConstants.UserDisplayName, displayName);
+
+			return Task.CompletedTask;
 		}
 	}
 }

@@ -34,6 +34,7 @@ namespace hrvster.Web.Controllers
 			_logger = loggerFactory.CreateLogger<CreatePromotionController>();
 			_notificationService = notificationService;
 			_mediator = mediator;
+			_sessionManager = sessionManager;
 		}
 
 		[HttpGet]

@@ -36,6 +36,7 @@ namespace hrvster.Web.Controllers
 			_logger = loggerFactory.CreateLogger<SubscriptionsController>();
 			_mediator = mediator;
 			_subscriptionService = subscriptionService;
+			_notificationService = notificationService;
 			_sessionManager = sessionManager;
 		}
 
@@ -118,6 +119,8 @@ namespace hrvster.Web.Controllers
 					userUid,
 					emailAddress);
 			}
+
+			_notificationService.AddSuccessToastMessage("Looks like your payment went through properly. We have subscribed you but we will be confirming if payment was successfully made in 24 hours.");
 
 			return RedirectToAction("index", "Dashboard");
 		}

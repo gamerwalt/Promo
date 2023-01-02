@@ -31,6 +31,7 @@ namespace hrvster.Web.Controllers
 			_logger = loggerFactory.CreateLogger<ProfileController>();
 			_mediator = mediator;
 			_notificationService = notificationService;
+			_sessionManager = sessionManager;
 		}
 
 		[HttpGet]
