@@ -160,7 +160,11 @@ namespace hrvster.Web.Controllers
 
 				_notificationService.AddSuccessToastMessage("Account details updated. Please logon.");
 
-				return RedirectToAction("SignOut", "Session");
+				_sessionManager.RemoveKeyValue(SessionConstants.UserToken);
+				_sessionManager.RemoveKeyValue(SessionConstants.UserUid);
+				_sessionManager.RemoveKeyValue(SessionConstants.UserEmail);
+
+				return RedirectToAction("SignIn", "Session");
 			}
 			var errorMessages = ModelState.BuildMessageFromErrors();
 

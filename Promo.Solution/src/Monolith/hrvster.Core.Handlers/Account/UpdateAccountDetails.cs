@@ -7,6 +7,7 @@ using hrvster.Models.Extensions;
 using hrvster.Models.Options;
 using MediatR;
 using Microsoft.Extensions.Logging;
+using NToastNotify;
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -53,6 +54,8 @@ namespace hrvster.Core.Handlers.Account
 		private async Task UpdateAccountDetailsAsync(Models.Account account, UpdateAccountDetailsRequest request)
 		{
 			//update with firebase
+			_logger.LogInformation("Updating the google account for the account with uid {uid}", account.AccountUid);
+
 			await _firebaseAuth.UpdateUserAsync(new UserRecordArgs
 			{
 				Uid = request.AccountUid.ToString(),
@@ -106,6 +109,8 @@ namespace hrvster.Core.Handlers.Account
 			}
 
 			//once successful, we update our own details
+			_logger.LogInformation("Updating our systems for the account with uid {uid}", account.AccountUid);
+
 			await _repository.UpdateAsync(request.AccountUid, request.EmailAddress, request.PhoneNumber);
 		}
 	}
