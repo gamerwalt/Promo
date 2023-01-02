@@ -28,12 +28,6 @@ namespace hrvster.Twitter.Harvester
 			_logger.LogInformation("Starting {serviceName}", nameof(TwitterHarvestingService));
 
 			await _twitterHrvsterService.StartStreamingAsync();
-
-			_logger.LogInformation($"Starting a delay to restart in {_hrvsterSettings.HrvsterRestartMinutes} minute(s) from now.");
-
-			await Task.Delay(TimeSpan.FromMinutes(_hrvsterSettings.HrvsterRestartMinutes), token);
-
-			_logger.LogInformation("Delay has elapsed. Will shut down now and it should restart soon.");
 		}
 	}
 }

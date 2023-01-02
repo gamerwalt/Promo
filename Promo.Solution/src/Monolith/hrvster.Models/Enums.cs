@@ -10,8 +10,14 @@
 	public enum FlutterwaveEventStatus
 	{
 		New,
-		Proecssing,
+		Processing,
 		Success,
+		Failed
+	}
+
+	public enum FlutterwaveCardTransactionStatus
+	{
+		Successful,
 		Failed
 	}
 
@@ -88,8 +94,6 @@
 	{
 		Subscribed,
 		UnSubscribed,
-		SubscribedButEndDate,
-		SubscribedButPaymentIssues,
 		PendingPayment
 	}
 
@@ -117,5 +121,23 @@
 		LinkedProfileToTwitter,
 		Subscribed,
 		Unsubscribed
+	}
+
+	public enum HarvesterServiceCommand
+	{
+		start,
+		stop
+	}
+
+	public enum WebJobStatus
+	{
+		Initializing,
+		Starting,
+		Running,
+		PendingRestart,
+		Stopped,
+		Aborted,
+		Success,
+		Failed
 	}
 }

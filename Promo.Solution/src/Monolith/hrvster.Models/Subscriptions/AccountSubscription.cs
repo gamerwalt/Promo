@@ -6,6 +6,7 @@ namespace hrvster.Models.Subscriptions
 	{
 		public int SubscriptionId { get; set; }
 		public Guid SubscriptionUid { get; set; }
+		public SubscriptionStatus SubscriptionStatus { get; set; }
 		public Account Account { get; set; }
 		public Plan Plan { get; set; }
 		public DateTime StartDate { get; set; }

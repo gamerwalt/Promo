@@ -8,6 +8,7 @@ using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using hrvster.ApplicationServices.Harvesters.Twitter;
 
 namespace hrvster.Core.Requests.Notifications.Handlers
 {
@@ -16,15 +17,18 @@ namespace hrvster.Core.Requests.Notifications.Handlers
 		private readonly ILogger<CreateSweepRuleTweet> _logger;
 		private readonly IWatchTypesRepository _watchTypesRepository;
 		private readonly ISweepRulesRepository _repository;
+		private readonly IHarvesterService _harvesterService;
 
 		public CreateSweepRuleTweet(
 			ILoggerFactory loggerFactory, 
 			IWatchTypesRepository watchTypesRepository,
-			ISweepRulesRepository repository)
+			ISweepRulesRepository repository,
+			IHarvesterService harvesterService)
 		{
 			_logger = loggerFactory.CreateLogger<CreateSweepRuleTweet>();
 			_watchTypesRepository = watchTypesRepository;
 			_repository = repository;
+			_harvesterService = harvesterService;
 		}
 
 		public async Task Handle(SweepRuleTweetPublished notification, CancellationToken cancellationToken)
@@ -48,6 +52,8 @@ namespace hrvster.Core.Requests.Notifications.Handlers
 				MustBeFollowing = notification.MustBeFollowing,
 				ScheduledInd = false
 			});
+
+			await _harvesterService.RestartAsync(cancellationToken);
 		}
 	}
 }

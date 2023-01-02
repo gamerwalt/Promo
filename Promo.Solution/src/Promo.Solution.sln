@@ -133,11 +133,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "RepositoryTests", "Reposito
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ApplicationServices", "ApplicationServices", "{18C1AF2D-C1CF-45BE-ACD1-86379CCD2B34}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "hrvster.ApplicationServices.Tests", "..\tests\ApplicationServices\hrvster.ApplicationServices.Tests\hrvster.ApplicationServices.Tests.csproj", "{7EE417A9-7B07-48D9-9AFF-040B0611C56E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "hrvster.ApplicationServices.Tests", "..\tests\ApplicationServices\hrvster.ApplicationServices.Tests\hrvster.ApplicationServices.Tests.csproj", "{7EE417A9-7B07-48D9-9AFF-040B0611C56E}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "MediatorHandlerTests", "MediatorHandlerTests", "{5B6F1E81-70FD-4E9F-BBC9-8AB355E6B5F2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "hrvster.Core.Handlers.Tests", "..\tests\MediatorHandlerTests\hrvster.Core.Handlers.Tests\hrvster.Core.Handlers.Tests.csproj", "{2D5872CE-2D9B-43D4-A89F-D495CF284DBA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "hrvster.Core.Handlers.Tests", "..\tests\MediatorHandlerTests\hrvster.Core.Handlers.Tests\hrvster.Core.Handlers.Tests.csproj", "{2D5872CE-2D9B-43D4-A89F-D495CF284DBA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

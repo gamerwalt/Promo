@@ -62,7 +62,7 @@ namespace hrvster.Services
 					_logger.LogInformation("{serviceName} is not enabled so we will skip it's run...", service.GetType().FullName);
 				}
 			}
-
+			
 			await Task.WhenAll(tasks.ToArray());
 
 			_appLifeTime.StopApplication();

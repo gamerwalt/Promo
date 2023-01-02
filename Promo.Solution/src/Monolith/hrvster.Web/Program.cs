@@ -1,9 +1,7 @@
-using hrvster.Models.Extensions;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Hosting.StaticWebAssets;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Serilog;
 using System;
 using System.IO;
@@ -20,12 +18,6 @@ namespace hrvster.Web
 				.AddJsonFile($"appsettings.{env}.json")
 				.Build();
 
-			Log.Logger = new LoggerConfiguration()
-				.ReadFrom.Configuration(configuration)
-				.CreateLogger();
-
-			Log.Information("Creating Web Host for hrvster.WEB for environment {env}", env);
-
 			CreateHostBuilder(args).Build().Run();
 		}
 
@@ -40,15 +32,16 @@ namespace hrvster.Web
 						.UseContentRoot(Directory.GetCurrentDirectory())
 						.ConfigureAppConfiguration((context, config) =>
 						{
-							if(!context.HostingEnvironment.IsDevelopment())
+							if (!context.HostingEnvironment.IsDevelopment())
 							{
 								StaticWebAssetsLoader.UseStaticWebAssets(context.HostingEnvironment, context.Configuration);
 							}
 						})
-						.UseSerilog(ConfigureSerilog, preserveStaticLogger: true, true);
+						.UseSerilog((context, configuration)
+							=> configuration.ReadFrom.Configuration(context.Configuration)
+								.Enrich.FromLogContext()
+								.WriteTo.Loggly()
+								.MinimumLevel.Debug(), preserveStaticLogger: true);
 				});
-
-		private static void ConfigureSerilog(WebHostBuilderContext hostingContext, LoggerConfiguration loggerConfiguration)
-			=> loggerConfiguration.ReadFrom.Configuration(hostingContext.Configuration);
 	}
 }

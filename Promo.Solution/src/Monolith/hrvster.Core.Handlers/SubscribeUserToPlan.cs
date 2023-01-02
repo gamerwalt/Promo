@@ -1,13 +1,11 @@
-﻿using hrvster.Core.Requests;
+﻿using hrvster.Core.Authentication;
+using hrvster.Core.Requests;
 using hrvster.Infrastructure.Subscriptions;
 using hrvster.Models.Core;
 using hrvster.Models.Subscriptions;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -17,17 +15,69 @@ namespace hrvster.Core.Handlers
 	{
 		private readonly ILogger<SubscribeUserToPlan> _logger;
 		private readonly IAccountSubscriptionsRepository _repository;
+		private readonly ISessionManager _sessionManager;
 
-		public SubscribeUserToPlan(ILoggerFactory loggerFactory, IAccountSubscriptionsRepository repository)
+		public SubscribeUserToPlan(
+			ILoggerFactory loggerFactory,
+			IAccountSubscriptionsRepository repository,
+			ISessionManager sessionManager)
 		{
 			_logger = loggerFactory.CreateLogger<SubscribeUserToPlan>();
 			_repository = repository;
+			_sessionManager = sessionManager;
 		}
 
-		public Task<ServiceOperation<AccountSubscription>> Handle(
+		public async Task<ServiceOperation<AccountSubscription>> Handle(
 			SubscribeUserToPlanRequest request, CancellationToken cancellationToken)
 		{
-			throw new NotImplementedException();
+			var hrvsterUser = _sessionManager.SetUserInformation();
+			var startDate = DateTime.Now;
+			var endDate = startDate.AddDays(30);
+
+			var startDateUtc = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(startDate, TimeZoneInfo.Local.Id,
+				hrvsterUser.WindowsTimeZone);
+			var endDateUtc = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(endDate, TimeZoneInfo.Local.Id,
+				hrvsterUser.WindowsTimeZone);
+
+			if (!hrvsterUser.IsDaylight)
+			{
+				startDateUtc = startDateUtc.AddHours(-2);
+				endDateUtc = endDateUtc.AddHours(-2);
+			}
+
+			var subscriptionUid = Guid.NewGuid();
+
+			_logger.LogInformation("Account with Uid {accountUid} will be subscribed to the plan {planName}",
+				request.UserUId,
+				request.Plan.PlanName);
+
+			await _repository.CreateAsync(new AccountSubscription
+			{
+				Account = new Models.Account
+				{
+					AccountUid = request.UserUId
+				},
+				Plan = request.Plan,
+				StartDate = startDate,
+				StartDateUtc = startDateUtc,
+				EndDate = endDate,
+				EndDateUtc = endDateUtc,
+				IsDiscounted = false,
+				SubscriptionStatus = Models.SubscriptionStatus.PendingPayment,
+				SubscriptionUid = subscriptionUid
+			});
+
+			_logger.LogInformation("Account subscription created for account with uid {accountUid}",
+				request.UserUId);
+
+			var model = await _repository.GetAsync(subscriptionUid);
+
+			if(model == null)
+			{
+				return ServiceOperation<AccountSubscription>.CreateFailedOperation(null, "Account was not able to be subscribed. Our technicians will be on this.", nameof(SubscribeUserToPlan));
+			}
+
+			return ServiceOperation<AccountSubscription>.CreateSuccessOperation(model, "Account has been subscribed. It is currently pending payment.");
 		}
 	}
 }

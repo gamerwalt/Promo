@@ -9,15 +9,11 @@ namespace hrvster.Extensions.Configuration
 	{
 		public static IServiceCollection AddSingletons(this IServiceCollection services)
 			=> services.AddHrvsterUser()
-				.AddSubscription()
 				.AddLinkBuilder()
 				.AddPrizePositionFinder();
 
 		public static IServiceCollection AddHrvsterUser(this IServiceCollection services)
 			=> services.AddTransient<HrvsterUser>();
-
-		public static IServiceCollection AddSubscription(this IServiceCollection services)
-			=> services.AddSingleton<SubscriptionModel>();
 
 		public static IServiceCollection AddLinkBuilder(this IServiceCollection services)
 			=> services.AddSingleton<LinkBuilder>();

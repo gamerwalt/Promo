@@ -60,5 +60,11 @@ namespace hrvster.Extensions.Configuration
 		public static IServiceCollection AddEmailRepository(this IServiceCollection services)
 			=> services
 				.AddTransient<IMailRepository, MailRepository>();
+
+		public static IServiceCollection AddFlutterwaveEventRepository(this IServiceCollection services)
+			=> services.AddTransient<IFlutterwaveEventRepository, FlutterwaveEventRepository>();
+
+		public static IServiceCollection AddHarvesterServiceCommandRepository(this IServiceCollection services)
+			=> services.AddTransient<IHarvesterServiceCommandRepository, HarvesterServiceCommandRepository>();
 	}
 }

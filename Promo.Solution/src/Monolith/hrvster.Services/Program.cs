@@ -3,12 +3,15 @@ using hrvster.Core.Requests.ServiceRequests;
 using hrvster.Extensions.Configuration;
 using hrvster.Extensions.OptionsConfiguration;
 using hrvster.Infrastructure;
+using hrvster.Models.Options;
 using MediatR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Serilog;
 using System;
+using System.Net.Http.Headers;
+using System.Text;
 
 namespace hrvster.Services
 {
@@ -48,6 +51,8 @@ namespace hrvster.Services
 					services.AddSingleton<IService, SweepstakesDrawService>();
 					services.AddSingleton<IService, EmailNotificationService>();
 					services.AddSingleton<IService, AccountVerificationService>();
+					services.AddSingleton<IService, FlutterwaveEventService>();
+					services.AddSingleton<IService, HarvesterRestarterService>();
 
 					services
 						.AddDatabaseConfiguration(Configuration)
@@ -64,7 +69,12 @@ namespace hrvster.Services
 						.AddRandomizer()
 						.AddFirebaseServices(Configuration)
 						.AddSingletons()
-						.AddHarvsterConfigurationOption(Configuration);
+						.AddHarvsterConfigurationOption(Configuration)
+						.AddSubscriptionService()
+						.AddSubscriptionRepositories()
+						.AddFlutterwaveEventService()
+						.AddHarvesterServiceCommandRepository()
+						.AddHarvesterService();
 
 					LoadServices(services);
 					AddMediator(services);

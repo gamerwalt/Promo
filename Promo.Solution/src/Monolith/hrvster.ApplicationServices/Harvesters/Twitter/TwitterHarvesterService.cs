@@ -60,7 +60,7 @@ namespace hrvster.ApplicationServices.Harvesters.Twitter
 
 				_logger.LogInformation("Started streaming and listening from twitter.");
 
-				stream.StartMatchingAnyConditionAsync();
+				await stream.StartMatchingAnyConditionAsync();
 			}
 		}
 

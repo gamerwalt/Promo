@@ -30,12 +30,13 @@ namespace hrvster.Web
 		// This method gets called by the runtime. Use this method to add services to the container.
 		public void ConfigureServices(IServiceCollection services)
 		{
-			services.AddControllersWithViews().AddNToastNotifyToastr(new NToastNotify.ToastrOptions
-			{
-				ProgressBar = true,
-				TimeOut = 10000,
-				CloseButton = true
-			});
+			services.AddControllersWithViews()
+				.AddNToastNotifyToastr(new NToastNotify.ToastrOptions
+				{
+					ProgressBar = true,
+					TimeOut = 10000,
+					CloseButton = true
+				});
 			services.AddMvc(o =>
 			{
 				o.Filters.Add(new AutoValidateAntiforgeryTokenAttribute());
@@ -52,6 +53,9 @@ namespace hrvster.Web
 				.AddEmailRepository()
 				.AddWatchTypeRepositories()
 				.AddHarvesterAndReportingRepositories()
+				.AddHarvsterConfigurationOption(Configuration)
+				.AddHarvesterService()
+				.AddHarvesterServiceCommandRepository()
 				.AddMediatorAndFluentValidation()
 				.AddTwitterClient(Configuration)
 				.AddServicesOptions(Configuration)
@@ -68,7 +72,6 @@ namespace hrvster.Web
 				.AddPromotionConfigurationOptions(Configuration)
 				.AddNotificationConfigurationOptions(Configuration)
 				.AddUpdateValidators()
-				.AddHarvsterConfigurationOption(Configuration)
 				.AddFluentValidationAutoValidation()
 				.AddUserRateLimiterService()
 				.AddHttpContextAccessor()

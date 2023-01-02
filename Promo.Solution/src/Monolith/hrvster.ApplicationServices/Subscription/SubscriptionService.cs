@@ -1,12 +1,17 @@
 ﻿using hrvster.Core.Requests;
+using hrvster.Core.Requests.Notifications;
 using hrvster.Infrastructure.Subscriptions;
 using hrvster.Models;
 using hrvster.Models.Core;
 using hrvster.Models.Extensions;
 using hrvster.Models.Subscriptions;
+using hrvster.Models.Subscriptions.Flutterwave;
 using MediatR;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
+using Org.BouncyCastle.Asn1.Ocsp;
 using System;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
 namespace hrvster.ApplicationServices.Subscription
@@ -14,6 +19,8 @@ namespace hrvster.ApplicationServices.Subscription
 	public interface ISubscriptionService
 	{
 		SubscriptionStatus IsAccountSubscribed(Guid accountUid);
+		Task ProcessFlutterwaveTransactionAsync(Guid flutterwaveEventUid, FlutterwaveCardTransaction cardTransaction);
+		Task SaveFlutterwaveEventAsync(string flutterwaveEventString);
 		Task<ServiceOperation<AccountSubscription>> SubscribeUserToAsync(Plan plan, Guid accountUid);
 	}
 
@@ -21,18 +28,18 @@ namespace hrvster.ApplicationServices.Subscription
 	{
 		private readonly ILogger<SubscriptionService> _logger;
 		private readonly IAccountSubscriptionsRepository _repository;
-		private readonly SubscriptionModel _subscriptionModel;
+		private readonly IFlutterwaveEventRepository _flutterwaveEventRepository;
 		private readonly IMediator _mediator;
 
 		public SubscriptionService(
 			ILoggerFactory loggerFactory,
 			IAccountSubscriptionsRepository repository,
-			SubscriptionModel subscriptionModel,
+			IFlutterwaveEventRepository flutterwaveEventRepository,
 			IMediator mediator)
 		{
 			_logger = loggerFactory.CreateLogger<SubscriptionService>();
 			_repository = repository;
-			_subscriptionModel = subscriptionModel;
+			_flutterwaveEventRepository = flutterwaveEventRepository;
 			_mediator = mediator;
 		}
 
@@ -44,28 +51,68 @@ namespace hrvster.ApplicationServices.Subscription
 			{
 				return SubscriptionStatus.UnSubscribed;
 			}
-			else if (accountSubscription.EndDate.ToUniversalTime() <= DateTime.UtcNow)
-			{
-				return SubscriptionStatus.SubscribedButEndDate;
-			}
 
 			_logger.LogInformation("Account {accountUid} is subscribed with {subscription}", accountUid, accountSubscription.ToJsonString());
-
-			_subscriptionModel.PlanName = accountSubscription.Plan.PlanName;
-			_subscriptionModel.IsDiscounted = accountSubscription.IsDiscounted;
-			_subscriptionModel.DiscountedBy = accountSubscription.DiscountedBy;
-			_subscriptionModel.PromotionsPerMonth = accountSubscription.Plan.PromotionsPerMonth;
-			_subscriptionModel.SweepstakesPerMonth = accountSubscription.Plan.SweepstakesPerMonth;
-			_subscriptionModel.SweepstakesMaximumEntries = accountSubscription.Plan.SweepstakesMaximumEntries;
-			_subscriptionModel.PricePerMonth = accountSubscription.Plan.PricePerMonth;
-			_subscriptionModel.PricePerYear = accountSubscription.Plan.PricePerYear;
 
 			return SubscriptionStatus.Subscribed;
 		}
 
+		public async Task ProcessFlutterwaveTransactionAsync(Guid flutterwaveEventUid, FlutterwaveCardTransaction cardTransaction)
+		{
+			_logger.LogInformation("FlutterwaveEventUid {eventUid}. Retrieving the account subscription for email {email}",
+				flutterwaveEventUid,
+				cardTransaction.Customer.Email);
+
+			var subscriptionAccount = await _repository.GetAccountSubscriptionByEmailAsync(cardTransaction.Customer.Email);
+
+			if (subscriptionAccount == null)
+			{
+				_logger.LogWarning("FlutterwaveEventUid {eventUid}. Subscription Warning: We received the event {event} from flutterwave, however, the account subscription with email {email} is not within in our system. Card Transaction",
+					flutterwaveEventUid,
+					cardTransaction.ToJsonString(),
+					cardTransaction.Customer.Email);
+
+				return;
+			}
+
+			if (cardTransaction.Status.Equals(
+				FlutterwaveCardTransactionStatus.Successful.ToString(), StringComparison.InvariantCultureIgnoreCase))
+			{
+				switch (subscriptionAccount.SubscriptionStatus)
+				{
+					case SubscriptionStatus.PendingPayment:
+						await _repository.UpdateAccountSubscriptionStatusAsync(subscriptionAccount.SubscriptionUid, SubscriptionStatus.Subscribed);
+						break;
+
+					case SubscriptionStatus.Subscribed:
+						//This is a new Card Transaction
+						//if we are close to the end date, then this means this is a re-subscription
+						//so we update the start dates and end dates
+
+						break;
+				}
+			}
+		}
+
 		public async Task<ServiceOperation<AccountSubscription>> SubscribeUserToAsync(Plan plan, Guid accountUid)
 		{
-			return await _mediator.Send(new SubscribeUserToPlanRequest(accountUid, plan));
+			var result = await _mediator.Send(new SubscribeUserToPlanRequest(accountUid, plan));
+
+			_mediator.Publish(new UserSubscribed(accountUid, plan));
+
+			return result;
+		}
+
+		public async Task SaveFlutterwaveEventAsync(string flutterwaveEventString)
+		{
+			var flutterwaveEvent = new FlutterwaveEvent()
+			{
+				Payload = flutterwaveEventString,
+				FlutterwaveEventUid = Guid.NewGuid(),
+				EventStatus = FlutterwaveEventStatus.New
+			};
+
+			await _flutterwaveEventRepository.CreateAsync(flutterwaveEvent);
 		}
 	}
 }

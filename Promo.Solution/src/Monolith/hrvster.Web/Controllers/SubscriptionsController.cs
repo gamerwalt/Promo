@@ -3,11 +3,13 @@ using hrvster.Core.Authentication;
 using hrvster.Core.Requests.WebRequests.Subscriptions;
 using hrvster.Models;
 using hrvster.Models.Core;
+using hrvster.Models.Extensions;
 using hrvster.Models.Subscriptions;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using NToastNotify;
+using NToastNotify.Helpers;
 using System;
 using System.Threading.Tasks;
 
@@ -54,9 +56,15 @@ namespace hrvster.Web.Controllers
 		[Route("/SelectPlan/{planUid:Guid}")]
 		public async Task<ActionResult> SelectPlanForUser(Guid planUid)
 		{
+			_logger.LogInformation("Posting information for select plan {planUid}", planUid);
+
 			_hrvsterUser = _sessionManager.SetUserInformation();
 
+			_logger.LogInformation("Retrieved user information from session for {email}", _hrvsterUser.EmailAddress);
+
 			var plan = await _mediator.Send(new GetPlanByUidRequest(planUid));
+
+			_logger.LogInformation("Retrieved plan information from database {plan}", plan.ToJsonString());
 
 			if (_hrvsterUser.UserUid == Guid.Empty)
 			{
@@ -65,20 +73,53 @@ namespace hrvster.Web.Controllers
 
 			if (plan == null) return RedirectToAction("Dashboard");
 
+			_logger.LogInformation("Subscribing user {email} to the plan {planName}",
+				_hrvsterUser.EmailAddress,
+				plan.PlanName);
+
 			var operation = await _subscriptionService.SubscribeUserToAsync(plan, _hrvsterUser.UserUid);
 
-			return View(plan);
+			_logger.LogInformation("Finished subscribing user {email} to plan {plan}. Operation: {operation}",
+				_hrvsterUser.EmailAddress,
+				plan.ToJsonString(),
+				operation.ToJsonString());
+
+			if (operation.HasError)
+			{
+				_logger.LogWarning("Error trying to subscribe the user with Uid {userUid} to the plan {planName}. Message received. ",
+					_hrvsterUser.UserUid,
+					plan.PlanName);
+
+				_notificationService.AddErrorToastMessage(operation.Message);
+
+				return RedirectToAction("Index", "Dashboard");
+			}
+
+			_logger.LogInformation("Redirecting user {email} to the link {link} to process payment.",
+				_hrvsterUser.EmailAddress,
+				plan.FlutterwavePlan.ExternalMonthlyPaymentLink);
+
+			return Redirect(plan.FlutterwavePlan.ExternalMonthlyPaymentLink.ToString());
 		}
 
 		[HttpGet]
-		[Route("/subscriptions/flutterwave/completed")]
-		public async Task<ActionResult> Completed(string status, string txRef)
+		[Route("/subscriptions/flutterwave/completed/plan/{planName}")]
+		public async Task<ActionResult> Completed([FromRoute] string planName, [FromQuery] string status, [FromQuery] string txRef)
 		{
-			_logger.LogInformation("Information received on the get route Flutterwave. Status {status} and Transaction Reference {txRef}",
-				status,
-				txRef);
+			_logger.LogInformation("A redirect happened and now with the plan name {planName}", planName);
 
-			return new OkObjectResult(new { message = "Get OK" });
+			if(_sessionManager.ContainsKey(SessionConstants.UserUid) && 
+				_sessionManager.ContainsKey(SessionConstants.UserToken))
+			{
+				var userUid = _sessionManager.ContainsKey(SessionConstants.UserUid);
+				var emailAddress = _sessionManager.ContainsKey(SessionConstants.UserEmail);
+
+				_logger.LogInformation("The user with uid {userUid} and email {emailAddress} is still logged in.",
+					userUid,
+					emailAddress);
+			}
+
+			return RedirectToAction("index", "Dashboard");
 		}
 
 		[HttpPost]

@@ -63,12 +63,6 @@ namespace hrvster.Core.Subscriptions
 						"Subscriptions",
 						new { subscriptionStatus = SubscriptionStatus.UnSubscribed.ToString() });
 					break;
-				case SubscriptionStatus.SubscribedButEndDate:
-					context.Result = new RedirectToActionResult(
-						"Index",
-						"Subscriptions",
-						new { subscriptionStatus = SubscriptionStatus.SubscribedButEndDate.ToString() });
-					break;
 			}
 		}
 	}

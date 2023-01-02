@@ -19,6 +19,7 @@ namespace hrvster.Services.Handlers
 		private readonly Func<ExternalClientType, Core.Clients.Publishers.IExternalClient> _publisherResolver;
 		private readonly IScheduledSweepRuleTweetsRepository _scheduledSweepRuleTweetsRepository;
 		private readonly ISweepRulesRepository _sweepRulesRepository;
+		private readonly IHarvesterServiceCommandRepository _harvesterServiceCommandRepository;
 
 		public PublishScheduledTweets(
 			ILoggerFactory loggerFactory,
@@ -60,6 +61,13 @@ namespace hrvster.Services.Handlers
 					scheduledTweet.Rule.RuleUid);
 
 				await UpdateScheduledTweetAndRuleAsync(scheduledTweet, tweetId);
+
+				_logger.LogInformation("Writing a command to restart the Harvester Service to pick up the new hashtag");
+				await _harvesterServiceCommandRepository.CreateAsync(new HarvesterServiceCommandModel
+				{
+					Uid = Guid.NewGuid(),
+					Command = HarvesterServiceCommand.start.ToString()
+				}, cancellationToken);
 			}
 		}
 
