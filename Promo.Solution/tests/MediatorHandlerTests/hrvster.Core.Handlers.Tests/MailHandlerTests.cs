@@ -8,6 +8,7 @@ using Xunit;
 
 namespace hrvster.Core.Handlers.Tests
 {
+	[Collection("Sequential")]
 	public class MailHandlerTests : BuilderClassAbstract, IClassFixture<RepositoryFeature>
 	{
 		private readonly RepositoryFeature _feature;
