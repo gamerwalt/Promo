@@ -7,7 +7,6 @@ using hrvster.Models.Extensions;
 using hrvster.Models.Options;
 using MediatR;
 using Microsoft.Extensions.Logging;
-using NToastNotify;
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -88,9 +87,9 @@ namespace hrvster.Core.Handlers.Account
 				});
 
 				await _accountUpdateHistoryRepository.CreateRecordAsync(
-					Guid.NewGuid(), 
-					account.AccountId, 
-					account.EmailAddress, 
+					Guid.NewGuid(),
+					account.AccountId,
+					account.EmailAddress,
 					request.EmailAddress);
 			}
 
