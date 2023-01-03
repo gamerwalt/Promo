@@ -88,6 +88,12 @@ namespace hrvster.ApplicationServices.Subscription
 						//This is a new Card Transaction
 						//if we are close to the end date, then this means this is a re-subscription
 						//so we update the start dates and end dates
+						var startDate = subscriptionAccount.EndDate.AddDays(1);
+						var startDateUtc = subscriptionAccount.EndDateUtc.AddDays(1);
+						var endDate = startDate.AddDays(30);
+						var endDateUtc = startDateUtc.AddDays(30);
+
+						await _repository.UpdateNewDatesAsync(subscriptionAccount.SubscriptionUid, startDate, startDateUtc, endDate, endDateUtc);
 
 						break;
 				}

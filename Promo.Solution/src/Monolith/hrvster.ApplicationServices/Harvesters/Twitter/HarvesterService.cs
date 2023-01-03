@@ -68,23 +68,10 @@ namespace hrvster.ApplicationServices.Harvesters.Twitter
 					_logger.LogInformation("Retrieving the commands we have put to restart the web job.");
 					var command = await _repository.GetMostRecent(cancellationToken);
 
-					if(webJob.Status == WebJobStatus.Running.ToString())
+					if(webJob.Status == WebJobStatus.Running.ToString() ||
+						webJob.Status == WebJobStatus.Stopped.ToString())
 					{
-						if(command == null || LastRunGreaterThanMinutes(command.CreatedDate, numMinutes))
-						{
-							await _httpClient.PostAsync(HarvesterServiceCommand.stop.ToString(), default);
-
-							await Task.Delay(TimeSpan.FromSeconds(5));
-
-							await _httpClient.PostAsync(HarvesterServiceCommand.start.ToString(), default);
-							await _repository.CreateAsync(
-								new HarvesterServiceCommandModel 
-								{ 
-									Command = HarvesterServiceCommand.start.ToString(), 
-									Uid = Guid.NewGuid() 
-								}, 
-								cancellationToken);
-						}
+						await RunJobAsync(numMinutes, command, cancellationToken);
 					}
 
 					return;
@@ -92,6 +79,26 @@ namespace hrvster.ApplicationServices.Harvesters.Twitter
 
 
 				return;
+			}
+		}
+
+		private async Task RunJobAsync(
+			int numMinutes, HarvesterServiceCommandModel command, CancellationToken cancellationToken)
+		{
+			if (command == null || LastRunGreaterThanMinutes(command.CreatedDate, numMinutes))
+			{
+				await _httpClient.PostAsync(HarvesterServiceCommand.stop.ToString(), default);
+
+				await Task.Delay(TimeSpan.FromSeconds(5));
+
+				await _httpClient.PostAsync(HarvesterServiceCommand.start.ToString(), default);
+				await _repository.CreateAsync(
+					new HarvesterServiceCommandModel
+					{
+						Command = HarvesterServiceCommand.start.ToString(),
+						Uid = Guid.NewGuid()
+					},
+					cancellationToken);
 			}
 		}
 

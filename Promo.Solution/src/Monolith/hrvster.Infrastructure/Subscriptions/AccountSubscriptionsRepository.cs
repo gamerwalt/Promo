@@ -15,6 +15,7 @@ namespace hrvster.Infrastructure.Subscriptions
 		Task<AccountSubscription> GetAccountSubscriptionByEmailAsync(string email);
 		Task<AccountSubscription> GetAsync(Guid subscriptionUid);
 		Task UpdateAccountSubscriptionStatusAsync(Guid subscriptionUid, SubscriptionStatus subscribed);
+		Task UpdateNewDatesAsync(Guid subscriptionUid, DateTime startDate, DateTime startDateUtc, DateTime endDate, DateTime endDateUtc);
 	}
 
 	public class AccountSubscriptionsRepository : IAccountSubscriptionsRepository
@@ -122,6 +123,24 @@ namespace hrvster.Infrastructure.Subscriptions
 			command
 				.AddParameter("subscriptionUid", subscriptionUid)
 				.AddParameter("subscriptionStatus", status.ToString());
+
+			await conn.OpenAsync();
+			await command.ExecuteNonQueryAsync();
+		}
+
+		public async Task UpdateNewDatesAsync(
+			Guid subscriptionUid, DateTime startDate, DateTime startDateUtc, DateTime endDate, DateTime endDateUtc)
+		{
+			using var conn = new MySqlConnection(_database.GetConnectionString());
+			var command = conn.CreateCommand();
+			command.CommandText = "account_subscription_update_dates";
+			command.CommandType = CommandType.StoredProcedure;
+			command
+				.AddParameter("subscriptionUid", subscriptionUid)
+				.AddParameter("startDate", startDate)
+				.AddParameter("startDateUtc", startDateUtc)
+				.AddParameter("endDate", endDate)
+				.AddParameter("startDateUtc", startDateUtc);
 
 			await conn.OpenAsync();
 			await command.ExecuteNonQueryAsync();
