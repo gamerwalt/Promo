@@ -54,9 +54,11 @@ namespace TestUtilities.Data
         public const int SweepId = 1;
         public static Guid SweepUid = Guid.Parse("938e2599-6fef-45ae-93c3-49bf446658a7");
         public const string SweepName = "Test Sweep 1";
+        public static Guid SweepUid2 = Guid.Parse("938e2599-6fef-45ae-93c3-49bf446658a6");
+		public static Guid SweepUid3 = Guid.Parse("938e2599-6fef-45ae-93c3-49bf446658a9");
 
-        //Campaign
-        public const int CampaignTypeId = 15;
+		//Campaign
+		public const int CampaignTypeId = 15;
 		public static Guid CampaignTypeUid = Guid.Parse("3e5431d6-ba17-41f4-8f21-fd2d70245845");
         public const string CampaignTypeName = "Auto Enter Sweeps From Tweet Reply Hashtag";
         public const string CampaignTypeCode = "AutoEnterSweepsFromTweetReplyHashtag";

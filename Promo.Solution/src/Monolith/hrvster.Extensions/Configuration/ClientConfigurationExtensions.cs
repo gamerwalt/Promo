@@ -1,8 +1,6 @@
 ﻿using hrvster.ApplicationServices.Harvesters.Twitter;
 using hrvster.Core.Authentication;
-using hrvster.Core.Clients;
 using hrvster.Models.Options;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Net.Http.Headers;

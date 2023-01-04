@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using SendGrid;
 using SendGrid.Helpers.Mail;
 using System;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -47,6 +48,23 @@ namespace hrvster.ApplicationServices.Mails
 				{
 					switch (email.Template)
 					{
+						case EmailTemplate.SweepsGoingLiveSoon:
+							var sendSweepsGoingLiveResult = await SendSweepsGoingLiveNotification(new SendSweepsGoingLiveNotificationRequest
+							{
+								EmailTemplate = EmailTemplate.SweepsGoingLiveSoon,
+								EmailAddress = email.Parameters[EmailParameters.EmailAddress],
+								SweepstakeName = email.Parameters[EmailParameters.SweepstakeName],
+								DisplayName = email.Parameters[EmailParameters.DisplayName],
+								HourValue = email.Parameters[EmailParameters.HourValue],
+								DashboardLink = email.Parameters[EmailParameters.DashboardLink],
+								StartDate = email.Parameters[EmailParameters.StartDate],
+								EndDate = email.Parameters[EmailParameters.EndDate]
+							});
+
+							if (sendSweepsGoingLiveResult)
+								await _mailRepository.UpdateAsSentAsync(email);
+
+							break;
 						case EmailTemplate.NotEnoughSweepstakeDistinctUsers:
 							var sendDistinctUsersNotEnoughResult = await SendSweepsDistinctUsersNotEnoughEmailAsync(new SendSweepsDistinctUsersNotEnoughEmailRequest
 							{
@@ -180,6 +198,26 @@ namespace hrvster.ApplicationServices.Mails
 			}
 
 			return mailText;
+		}
+
+		private async Task<bool> SendSweepsGoingLiveNotification(SendSweepsGoingLiveNotificationRequest request)
+		{
+			var mailText = GetMailText(request.EmailTemplate);
+			var type = request.GetType();
+
+			foreach (var f in type.GetProperties(BindingFlags.Instance | BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public))
+			{
+				mailText = mailText.Replace($"[{f.Name}]", f.GetValue(request).ToString());
+			}
+
+			return await SendEmailAsync(
+				new MailRequest
+				{
+					ToEmailAddress = request.EmailAddress,
+					Body = mailText,
+					Subject = $"Your sweepstakes {request.SweepstakeName} is going live."
+				}
+			);
 		}
 
 		private async Task<bool> SendSweepsDistinctUsersNotEnoughEmailAsync(

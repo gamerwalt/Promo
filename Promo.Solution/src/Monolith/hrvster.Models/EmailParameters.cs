@@ -11,6 +11,9 @@
 		public static string SupportLink = "SupportLink";
 		public static string OldEmailAddress = "OldEmailAddress";
 		public static string NewEmailAddress = "NewEmailAddress";
+		public static string HourValue = "HourValue";
+		public static string StartDate = "StartDate";
+		public static string EndDate = "EndDate";
 
 		public const string SweepstakeName = "SweepstakeName";
 	}

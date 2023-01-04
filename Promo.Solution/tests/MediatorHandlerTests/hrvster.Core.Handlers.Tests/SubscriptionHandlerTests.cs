@@ -9,11 +9,11 @@ using Xunit;
 
 namespace hrvster.Core.Handlers.Tests
 {
-	public class SubscriptionHandlerTests : BuilderClassAbstract, IClassFixture<RepositoryFeature>
+	public class SubscriptionHandlerTests : BuilderClassAbstract, IClassFixture<MediatorHandlerFeature>
 	{
-		private readonly RepositoryFeature _feature;
+		private readonly MediatorHandlerFeature _feature;
 
-		public SubscriptionHandlerTests(RepositoryFeature feature)
+		public SubscriptionHandlerTests(MediatorHandlerFeature feature)
 			=> _feature = feature;
 
 	}

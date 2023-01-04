@@ -8,7 +8,7 @@ using TestUtilities.Data;
 
 namespace hrvster.Core.Handlers.Tests.Common
 {
-	public class RepositoryFeature : StorageFeatureBase<RepositoryFeature>, IFeature<RepositoryFeature>
+	public class MediatorHandlerFeature : StorageFeatureBase<MediatorHandlerFeature>, IFeature<MediatorHandlerFeature>
 	{
 		public IMediator Mediator { get; private set; }
 		public IConfiguration Configuration { get; private set; }
@@ -16,12 +16,12 @@ namespace hrvster.Core.Handlers.Tests.Common
 		public ICampaignRepository CampaignRepository { get; private set; }
 		public ISweepsRepository SweepsRepository { get; private set; }
 		public IMailRepository MailRepository { get; private set; }
-		public RepositoryFeature()
+		public MediatorHandlerFeature()
 		{
 			Initialize();
 		}
 
-		public override RepositoryFeature Initialize(
+		public override MediatorHandlerFeature Initialize(
 			Action<IConfiguration> additionalConfiguration = null,
 			Action<IServiceCollection> additionalServiceConfiguration = null)
 		{

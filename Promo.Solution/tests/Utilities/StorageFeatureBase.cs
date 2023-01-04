@@ -1,4 +1,5 @@
 ﻿using hrvster.Extensions.Configuration;
+using hrvster.Extensions.OptionsConfiguration;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -28,8 +29,10 @@ namespace TestUtilities
                 services.AddEmailRepository();
                 services.AddSingletons();
                 services.AddSessionManager();
+                services.AddHarvsterConfigurationOption(Configuration);
 
-                services.MockFirebaseAuthManager();
+
+				services.MockFirebaseAuthManager();
             };
 
         protected virtual Action<IServiceCollection> AdditionalServices { get; } = null;
