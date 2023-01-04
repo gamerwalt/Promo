@@ -26,6 +26,8 @@ namespace hrvster.Infrastructure
 		Task UpdateSweepAsNotEnoughUniqueEntrantsAsync(Guid sweepUid, CancellationToken cancellationToken);
 		Task ToggleSweepDrawAttemptedAsync(Guid sweepUid, bool value, CancellationToken cancellationToken);
 		Task ToggleSweepAsNotEnoughUniqueEntrantsAsync(Guid sweepUid, bool v, CancellationToken cancellationToken);
+		Task<IEnumerable<Sweep>> GetAllGoingLiveInHoursAsync(int hourValue, CancellationToken cancellationToken);
+		Task UpdateSweepsAsNotificationGoingLiveAsync(Guid sweepUid, bool value, CancellationToken cancellationToken);
 	}
 
 	public class SweepsRepository : ISweepsRepository
@@ -306,7 +308,8 @@ namespace hrvster.Infrastructure
 				DrawDate = GetNullableDateTimeValue(reader, "draw_date"),
 				DrawDateUtc = reader.GetNullableDateTimeValue("draw_date_utc").GetValueOrDefault(),
 				DrawAttempted = reader.GetBoolean("draw_attempted"),
-				NotEnoughUniqueEntrants = reader.GetBoolean("not_enough_unique_entrants")
+				NotEnoughUniqueEntrants = reader.GetBoolean("not_enough_unique_entrants"),
+				NotificationSentGoingLive = reader.GetBoolean("notification_sent_going_live")
 			};
 		}
 
@@ -423,6 +426,41 @@ namespace hrvster.Infrastructure
 			command.CommandType = CommandType.StoredProcedure;
 			command.AddParameter("sweepUid", sweepUid);
 			command.AddParameter("value", value ? 1 : 0);
+
+			await conn.OpenAsync(cancellationToken);
+			await command.ExecuteNonQueryAsync(cancellationToken);
+		}
+
+		public async Task<IEnumerable<Sweep>> GetAllGoingLiveInHoursAsync(int hourValue, CancellationToken cancellationToken)
+		{
+			var sweeps = new List<Sweep>();
+
+			using (var conn = new MySqlConnection(_database.GetConnectionString()))
+			{
+				var command = conn.CreateCommand();
+				command.CommandText = "sweeps_going_live_get";
+				command.CommandType = CommandType.StoredProcedure;
+				command.AddParameter(nameof(hourValue), hourValue);
+
+				await conn.OpenAsync(cancellationToken);
+				using var reader = await command.ExecuteReaderAsync(cancellationToken);
+				while (await reader.ReadAsync())
+				{
+					sweeps.Add(CreateSweepFrom(reader));
+				}
+			}
+
+			return sweeps;
+		}
+
+		public async Task UpdateSweepsAsNotificationGoingLiveAsync(Guid sweepUid, bool value, CancellationToken cancellationToken)
+		{
+			using var conn = new MySqlConnection(_database.GetConnectionString());
+			var command = conn.CreateCommand();
+			command.CommandText = "sweep_toggle_notification_going_live_sent";
+			command.CommandType = CommandType.StoredProcedure;
+			command.AddParameter("sweepUid", sweepUid);
+			command.AddParameter("notificationSent", value ? 1 : 0);
 
 			await conn.OpenAsync(cancellationToken);
 			await command.ExecuteNonQueryAsync(cancellationToken);

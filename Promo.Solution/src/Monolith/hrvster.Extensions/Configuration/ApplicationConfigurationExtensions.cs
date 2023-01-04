@@ -5,6 +5,7 @@ using hrvster.ApplicationServices.Mails;
 using hrvster.ApplicationServices.Processors;
 using hrvster.ApplicationServices.Sweepstakes;
 using hrvster.Core;
+using hrvster.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace hrvster.Extensions.Configuration
@@ -27,6 +28,12 @@ namespace hrvster.Extensions.Configuration
 		public static IServiceCollection AddUserRateLimiterService(this IServiceCollection services)
 			=> services.AddTransient<IUserRateLimiterService, UserRateLimiterService>();
 
+		public static IServiceCollection AddSweepstakesServices(this IServiceCollection services)
+			=> services.AddTransient<ISweepstakesService, SweepstakesService>()
+				.AddTransient<IDrawService, DrawService>();
 
+		public static IServiceCollection AddAccountsService(this IServiceCollection services)
+			=> services.AddTransient<IAccountsService, AccountsService>()
+				.AddTransient<IAccountsRepository, AccountsRepository>();
 	}
 }

@@ -9,11 +9,11 @@ using Xunit;
 namespace hrvster.Core.Handlers.Tests
 {
 	[Collection("Sequential")]
-	public class SweepHandlerTests : BuilderClassAbstract, IClassFixture<RepositoryFeature>
+	public class SweepHandlerTests : BuilderClassAbstract, IClassFixture<MediatorHandlerFeature>
 	{
-		private readonly RepositoryFeature _feature;
+		private readonly MediatorHandlerFeature _feature;
 
-		public SweepHandlerTests(RepositoryFeature feature)
+		public SweepHandlerTests(MediatorHandlerFeature feature)
 			=> _feature = feature;
 
 		[Fact]

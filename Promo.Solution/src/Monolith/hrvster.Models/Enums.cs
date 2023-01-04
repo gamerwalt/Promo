@@ -43,7 +43,8 @@
 		PasswordResetEmail,
 		EmailAddressUpdateRequest,
 		SweepEntriesNotEnoughEmail,
-		NotEnoughSweepstakeDistinctUsers
+		NotEnoughSweepstakeDistinctUsers,
+		SweepsGoingLiveSoon
 	}
 
 	public enum CampaignTypeCode

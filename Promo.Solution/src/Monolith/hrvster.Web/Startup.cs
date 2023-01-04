@@ -1,7 +1,5 @@
 using FluentValidation;
 using FluentValidation.AspNetCore;
-using hrvster.Core;
-using hrvster.Core.Authentication;
 using hrvster.Extensions.Configuration;
 using hrvster.Extensions.OptionsConfiguration;
 using hrvster.Web.Mapper;

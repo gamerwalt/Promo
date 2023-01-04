@@ -52,5 +52,31 @@ namespace TestUtilities
 			.WithCampaign(campaign)
 			.WithDrawn(false)
 			.Build();
+
+		public Sweep BuildNewSweep(Account account, Campaign campaign, Guid sweepUid)
+			=> new SweepBuilder(
+				TestData.SweepId,
+				sweepUid,
+				TestData.SweepName)
+			.WithStartDate(DateTime.Now.AddDays(-30))
+			.WithEndDate(DateTime.Now.AddDays(-1))
+			.WithDrawDate(DateTime.Now.AddDays(-1))
+			.WithAccount(account)
+			.WithCampaign(campaign)
+			.WithDrawn(false)
+			.Build();
+
+		public Sweep BuildNewSweep(Account account, Campaign campaign, Guid sweepUid, DateTime startDate, DateTime endDate)
+			=> new SweepBuilder(
+				TestData.SweepId,
+				sweepUid,
+				TestData.SweepName)
+			.WithStartDate(startDate)
+			.WithEndDate(endDate)
+			.WithDrawDate(endDate.AddDays(1))
+			.WithAccount(account)
+			.WithCampaign(campaign)
+			.WithDrawn(false)
+			.Build();
 	}
 }

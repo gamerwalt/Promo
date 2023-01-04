@@ -53,6 +53,7 @@ namespace hrvster.Services
 					services.AddSingleton<IService, AccountVerificationService>();
 					services.AddSingleton<IService, FlutterwaveEventService>();
 					services.AddSingleton<IService, HarvesterRestarterService>();
+					services.AddSingleton<IService, SweepsGoingLiveService>();
 
 					services
 						.AddDatabaseConfiguration(Configuration)
@@ -74,7 +75,9 @@ namespace hrvster.Services
 						.AddSubscriptionRepositories()
 						.AddFlutterwaveEventService()
 						.AddHarvesterServiceCommandRepository()
-						.AddHarvesterService();
+						.AddHarvesterService()
+						.AddSweepstakesServices()
+						.AddAccountsService();
 
 					LoadServices(services);
 					AddMediator(services);
