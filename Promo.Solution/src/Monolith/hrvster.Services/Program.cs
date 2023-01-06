@@ -3,15 +3,12 @@ using hrvster.Core.Requests.ServiceRequests;
 using hrvster.Extensions.Configuration;
 using hrvster.Extensions.OptionsConfiguration;
 using hrvster.Infrastructure;
-using hrvster.Models.Options;
 using MediatR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Serilog;
 using System;
-using System.Net.Http.Headers;
-using System.Text;
 
 namespace hrvster.Services
 {
@@ -31,6 +28,9 @@ namespace hrvster.Services
 
 			Log.Logger = new LoggerConfiguration()
 				.ReadFrom.Configuration(Configuration)
+				.Enrich.FromLogContext()
+				.WriteTo.Loggly()
+				.MinimumLevel.Debug()
 				.CreateLogger();
 
 			CreateHostBuilder(args).Build().Run();
@@ -41,6 +41,7 @@ namespace hrvster.Services
 				.UseSerilog((context, configuration) =>
 					configuration.ReadFrom.Configuration(context.Configuration)
 						.Enrich.FromLogContext()
+						.WriteTo.Loggly()
 						.MinimumLevel.Debug(), preserveStaticLogger: true)
 				.ConfigureServices((hostContext, services) =>
 				{
@@ -86,7 +87,7 @@ namespace hrvster.Services
 		private static void AddMediator(IServiceCollection services)
 			=> services.AddMediatR(typeof(Program))
 				.AddMediatR(typeof(GetSweepstakesRequiringADrawRequest), typeof(GetSweepstakesRequiringADraw));
-	
+
 
 		private static void LoadServices(IServiceCollection services)
 		{

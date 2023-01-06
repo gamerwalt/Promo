@@ -1,9 +1,7 @@
 ﻿using hrvster.Core.Handlers.Tests.Common;
 using hrvster.Core.Requests.ServiceRequests;
 using hrvster.Web.Mvc.Common.Steps;
-using Humanizer;
 using TestUtilities;
-using TestUtilities.Builders.Resources;
 using TestUtilities.Common.Steps;
 using TestUtilities.Data;
 using Xunit;
@@ -47,7 +45,7 @@ namespace hrvster.Core.Handlers.Tests
 			var sweep = BuildNewSweep(account, campaign);
 			await _feature.SweepsRepository.CreateAsync(sweep, TestData.WindowsTimezone, false);
 
-			var request = new NotifyUserSweepsGoingLiveRequest(account.AccountUid, sweep, 1);
+			var request = new NotifyUserSweepsGoingLiveRequest(account.AccountUid, sweep, hourValue);
 
 			await _feature.Mediator.Send(request);
 

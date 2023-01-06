@@ -14,7 +14,13 @@
 		public static string HourValue = "HourValue";
 		public static string StartDate = "StartDate";
 		public static string EndDate = "EndDate";
-
+		public static string RulesCount = "RulesCount";
+		public static string RulesList = "RulesList";
+		public static string PrizesCount = "PrizesCount";
+		public static string PrizeList = "PrizeList";
+		public static string WinnerCount = "WinnerCount";
+		public static string WinnerBackupCount = "WinnerBackupCount";
+		public static string EntryPerUser = "EntryPerUser";
 		public const string SweepstakeName = "SweepstakeName";
 	}
 }

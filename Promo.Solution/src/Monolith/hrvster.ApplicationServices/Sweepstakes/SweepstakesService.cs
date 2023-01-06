@@ -1,5 +1,7 @@
 ﻿using hrvster.Core.Requests.ServiceRequests;
 using hrvster.Models;
+using hrvster.Models.Extensions;
+using hrvster.Models.Sweepstakes;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using System;
@@ -12,6 +14,7 @@ namespace hrvster.ApplicationServices.Sweepstakes
 {
 	public interface ISweepstakesService
 	{
+		Task<SweepProperty> GetSweepDrawPropertiesAndRules(Guid sweepUid, CancellationToken cancellationToken);
 		Task<IEnumerable<Sweep>> GetSweepsGoingLiveInHourAsync(int hour, CancellationToken cancellationToken);
 		Task UpdateAsNotificationGoingLiveSentAsync(Guid sweepUid);
 	}
@@ -26,6 +29,19 @@ namespace hrvster.ApplicationServices.Sweepstakes
 			_logger = loggerFactory.CreateLogger<SweepstakesService>();
 			_mediator = mediator;
 		}
+
+		public async Task<SweepProperty> GetSweepDrawPropertiesAndRules(Guid sweepUid, CancellationToken cancellationToken)
+		{
+			_logger.LogInformation("Retrieving sweep properties for sweep with uid {sweepUid}", sweepUid);
+
+			var properties = await _mediator.Send(new GetSweepPropertiesRequest(sweepUid));
+
+			_logger.LogInformation("Sweep properties for sweep with uid {sweepUid} retrieved.", sweepUid);
+			_logger.LogInformation("Properties received for sweep : {properties}", properties.ToJsonString());
+
+			return properties;
+		}
+			
 
 		public async Task<IEnumerable<Sweep>> GetSweepsGoingLiveInHourAsync(int hour, CancellationToken cancellationToken)
 		{

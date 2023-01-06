@@ -29,17 +29,17 @@ namespace hrvster.Services
 			_mediator = mediator;
 		}
 
-		public async Task ProcessService(CancellationToken token)
+		public async Task ProcessService(CancellationToken cancellationToken)
 		{
 			var hourValue = 1;
-			var sweepsGoingLiveInAnHour = await _sweepstakesService.GetSweepsGoingLiveInHourAsync(hourValue, token);
+			var sweepsGoingLiveInAnHour = await _sweepstakesService.GetSweepsGoingLiveInHourAsync(hourValue, cancellationToken);
 			var accounts = new List<Account>();
 			foreach (var sweep in sweepsGoingLiveInAnHour)
 			{
-				if (sweep.NotificationSentGoingLive) 
+				if (sweep.NotificationSentGoingLive)
 					continue;
 
-				if (token.IsCancellationRequested) 
+				if (cancellationToken.IsCancellationRequested)
 					break;
 
 				_logger.LogInformation("Sending email to user about the sweepstake {sweepName} going live in about an hour.",
@@ -54,11 +54,14 @@ namespace hrvster.Services
 					continue;
 				}
 
+				var sweepProperty = await _sweepstakesService.GetSweepDrawPropertiesAndRules(sweep.SweepUid, cancellationToken);
+
 				_logger.LogInformation("Notfying the user {emailAddress} that sweepstake {sweepName} is going live.",
 					account.EmailAddress,
 					sweep.Name);
 
 				await _mediator.Send(new NotifyUserSweepsGoingLiveRequest(account.AccountUid, sweep, hourValue));
+				await _mediator.Send(new NotifyUserSweepMissingPropertyRequest(sweep, sweepProperty, account));
 
 				_logger.LogInformation("Updating sweepstakes {sweepName} as notification going live sent.", sweep.Name);
 				await _sweepstakesService.UpdateAsNotificationGoingLiveSentAsync(sweep.SweepUid);
