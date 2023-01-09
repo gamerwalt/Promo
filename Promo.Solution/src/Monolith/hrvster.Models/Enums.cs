@@ -45,7 +45,8 @@
 		SweepEntriesNotEnoughEmail,
 		NotEnoughSweepstakeDistinctUsers,
 		SweepsGoingLiveSoon,
-		SweepsGoingLiveSoonMissingProperty
+		SweepsGoingLiveSoonMissingProperty,
+		SweepLive
 	}
 
 	public enum CampaignTypeCode

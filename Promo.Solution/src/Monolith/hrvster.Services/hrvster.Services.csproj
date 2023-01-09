@@ -48,6 +48,9 @@
     <None Update="Templates\PasswordResetEmail.html">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="Templates\SweepLive.html">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="Templates\SweepsGoingLiveSoonMissingProperty.html">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

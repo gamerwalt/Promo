@@ -8,8 +8,10 @@ namespace hrvster.Infrastructure.Tests.Common
 	{
 		public IConfiguration Configuration { get; private set; }
 		public ISweepsRepository SweepsRepository { get; private set; }
+		public ISweepNotificationRepository SweepNotificationRepository { get; private set; }
 		public IAccountsRepository AccountsRepository { get; private set; }
 		public ICampaignRepository CampaignRepository { get; private set; }
+		
 
 		public RepositoryFeature()
 		{
@@ -42,6 +44,7 @@ namespace hrvster.Infrastructure.Tests.Common
 			SweepsRepository = ServiceProvider.GetService<ISweepsRepository>();
 			AccountsRepository = ServiceProvider.GetService<IAccountsRepository>();
 			CampaignRepository = ServiceProvider.GetService<ICampaignRepository>();
+			SweepNotificationRepository = ServiceProvider.GetService<ISweepNotificationRepository>();
 		}
 
 		protected virtual void ApplyAdditionalServiceConfiguration(

@@ -58,7 +58,7 @@
 			</div>
 		</div>
 		<div class="separator"></div>
-		@if (Model.Sweepstake.DrawAttempted)
+		@if (Model.SweepNotification.DrawAttemptHappened)
 		{
 			<div class="d-flex flex-wrap justify-content-start mb-2">
 				<div class="d-flex flex-wrap">
@@ -80,7 +80,7 @@
 				</div>
 			</div>
 		}
-		@if(Model.Sweepstake.NotEnoughUniqueEntrants)
+		@if(Model.SweepNotification.NotEnoughUniqueEntrants)
 		{
 			<div class="d-flex flex-wrap justify-content-start mb-2">
 				<div class="d-flex flex-wrap">

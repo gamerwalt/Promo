@@ -23,6 +23,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\src\Monolith\hrvster.Models\hrvster.Models.csproj" />
+    <ProjectReference Include="..\..\hrvster.Web.Mvc.Tests\hrvster.Web.Mvc.Common\hrvster.Web.Mvc.Common.csproj" />
     <ProjectReference Include="..\..\Utilities\TestUtilities.csproj" />
   </ItemGroup>
 

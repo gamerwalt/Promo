@@ -37,5 +37,14 @@ namespace hrvster.Infrastructure.Extensions
 
 			return reader.GetDateTime(fieldName);
 		}
+
+		public static bool GetBooleanRecord(this MySqlDataReader reader, string fieldName)
+		{
+			var value = reader[fieldName].ToString();
+			if(string.IsNullOrWhiteSpace(value))
+				return false;			
+
+			return reader.GetBoolean(fieldName);
+		}
 	}
 }

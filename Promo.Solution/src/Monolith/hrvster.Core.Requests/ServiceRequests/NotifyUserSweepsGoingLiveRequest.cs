@@ -1,24 +1,26 @@
 ﻿using hrvster.Models;
 using MediatR;
-using System;
 
 namespace hrvster.Core.Requests.ServiceRequests
 {
 	public class NotifyUserSweepsGoingLiveRequest : IRequest
 	{
-		private Guid _accountUid;
+		private Account _account;
 		private Sweep _sweepStake;
+		private SweepProperty _sweepProperty;
 		private int _hourValue;
 
-		public NotifyUserSweepsGoingLiveRequest(Guid accountUid, Sweep sweepStake, int hourValue)
+		public NotifyUserSweepsGoingLiveRequest(Account account, Sweep sweepStake, SweepProperty sweepProperty, int hourValue)
 		{
-			_accountUid = accountUid;
+			_account = account;
 			_sweepStake = sweepStake;
+			_sweepProperty = sweepProperty;
 			_hourValue = hourValue;
 		}
 
-		public Guid AccountUid { get { return _accountUid; } }
+		public Account Account { get { return _account; } }
 		public Sweep Sweepstake { get { return _sweepStake; } }
+		public SweepProperty SweepProperty { get { return _sweepProperty; } }
 		public int HourValue { get { return _hourValue; } }
 	}
 }

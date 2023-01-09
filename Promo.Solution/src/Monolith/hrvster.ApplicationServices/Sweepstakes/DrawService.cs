@@ -1,5 +1,6 @@
 ﻿using hrvster.Core.Requests;
 using hrvster.Core.Requests.ServiceRequests;
+using hrvster.Core.Requests.Sweepstakes;
 using hrvster.Models;
 using hrvster.Models.Sweepstakes;
 using MediatR;
@@ -56,7 +57,7 @@ namespace hrvster.ApplicationServices.Sweepstakes
 				{
 					_logger.LogWarning("The sweepstake {sweepName} does not have any entries.", rule.Sweep.Name);
 
-					await _mediator.Send(new MarkSweepAsDrawAttemptedRequest(rule.Sweep.SweepUid));
+					await _mediator.Send(new UpsertSweepNotificationRequest(rule.Sweep, SweepNotificationType.DrawAttempted));
 
 					_logger.LogInformation("Sending an email to {emailAddress} that the sweepstake {sweepName} has no entries.",
 						rule.Account.EmailAddress,
@@ -71,7 +72,7 @@ namespace hrvster.ApplicationServices.Sweepstakes
 				{
 					_logger.LogWarning("The sweepstake {sweepName} already has winners. Exiting.", rule.Sweep.Name);
 
-					await _mediator.Send(new MarkSweepAsDrawAttemptedRequest(rule.Sweep.SweepUid));
+					await _mediator.Send(new UpsertSweepNotificationRequest(rule.Sweep, SweepNotificationType.DrawAttempted));
 
 					continue;
 				}
@@ -79,7 +80,8 @@ namespace hrvster.ApplicationServices.Sweepstakes
 				var drawProperties = await _mediator.Send(new GetDrawPropertiesRequest(rule, entries));
 
 				await _mediator.Send(new PerformDrawRequest(drawProperties));
-				await _mediator.Send(new MarkSweepAsDrawAttemptedRequest(rule.Sweep.SweepUid));
+				
+				await _mediator.Send(new UpsertSweepNotificationRequest(rule.Sweep, SweepNotificationType.DrawAttempted));
 			}
 		}
 

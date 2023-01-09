@@ -2,6 +2,7 @@
 using hrvster.Models;
 using hrvster.Models.Options;
 using hrvster.Models.TemplateMailRequest;
+using MediatR;
 using Microsoft.Extensions.Logging;
 using Org.BouncyCastle.Asn1.Ocsp;
 using SendGrid;
@@ -49,6 +50,26 @@ namespace hrvster.ApplicationServices.Mails
 				{
 					switch (email.Template)
 					{
+						case EmailTemplate.SweepLive:
+							if (await SendSweepsLiveAsync(new SweepLiveRequest
+							{
+								EmailTemplate = EmailTemplate.SweepLive,
+								EmailAddress = email.Parameters[EmailParameters.EmailAddress],
+								SweepstakeName = email.Parameters[EmailParameters.SweepstakeName],
+								DisplayName = email.Parameters[EmailParameters.DisplayName],								
+								DashboardLink = email.Parameters[EmailParameters.DashboardLink],
+								StartDate = email.Parameters[EmailParameters.StartDate],
+								EndDate = email.Parameters[EmailParameters.EndDate],
+								RulesCount = email.Parameters[EmailParameters.RulesCount],
+								RulesList = email.Parameters[EmailParameters.RulesList],
+								PrizesCount = email.Parameters[EmailParameters.PrizesCount],
+								PrizeList = email.Parameters[EmailParameters.PrizeList],
+								WinnerCount = email.Parameters[EmailParameters.WinnerCount],
+								WinnerBackupCount = email.Parameters[EmailParameters.WinnerBackupCount],
+								EntryPerUser = email.Parameters[EmailParameters.EntryPerUser]
+							}))
+								await _mailRepository.UpdateAsSentAsync(email);
+						break;
 						case EmailTemplate.SweepsGoingLiveSoonMissingProperty:
 							if (await SendSweepsMissingPropertyAsync(
 								new SweepMissingPropertyRequest
@@ -82,7 +103,14 @@ namespace hrvster.ApplicationServices.Mails
 								HourValue = email.Parameters[EmailParameters.HourValue],
 								DashboardLink = email.Parameters[EmailParameters.DashboardLink],
 								StartDate = email.Parameters[EmailParameters.StartDate],
-								EndDate = email.Parameters[EmailParameters.EndDate]
+								EndDate = email.Parameters[EmailParameters.EndDate],
+								RulesCount = email.Parameters[EmailParameters.RulesCount],
+								RulesList = email.Parameters[EmailParameters.RulesList],
+								PrizesCount = email.Parameters[EmailParameters.PrizesCount],
+								PrizeList = email.Parameters[EmailParameters.PrizeList],
+								WinnerCount = email.Parameters[EmailParameters.WinnerCount],
+								WinnerBackupCount = email.Parameters[EmailParameters.WinnerBackupCount],
+								EntryPerUser = email.Parameters[EmailParameters.EntryPerUser]
 							});
 
 							if (sendSweepsGoingLiveResult)
@@ -222,6 +250,26 @@ namespace hrvster.ApplicationServices.Mails
 			}
 
 			return mailText;
+		}
+
+		private async Task<bool> SendSweepsLiveAsync(SweepLiveRequest request)
+		{
+			var mailText = GetMailText(request.EmailTemplate);
+			var type = request.GetType();
+
+			foreach (var f in type.GetProperties(BindingFlags.Instance | BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public))
+			{
+				mailText = mailText.Replace($"[{f.Name}]", f.GetValue(request).ToString());
+			}
+
+			return await SendEmailAsync(
+				new MailRequest
+				{
+					ToEmailAddress = request.EmailAddress,
+					Body = mailText,
+					Subject = $"{request.SweepstakeName} Rules And Prizes."
+				}
+			);
 		}
 
 		private async Task<bool> SendSweepsMissingPropertyAsync(SweepMissingPropertyRequest request)

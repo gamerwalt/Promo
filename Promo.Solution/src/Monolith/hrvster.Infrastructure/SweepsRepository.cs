@@ -8,6 +8,7 @@ using hrvster.Infrastructure.Extensions;
 using hrvster.Models.Sweepstakes;
 using System.Threading;
 using Newtonsoft.Json.Linq;
+using Microsoft.Extensions.Logging;
 
 namespace hrvster.Infrastructure
 {
@@ -22,21 +23,19 @@ namespace hrvster.Infrastructure
 		Task<IEnumerable<Sweep>> GetAllForAccountAsync(Guid accountUid);
 		IEnumerable<Sweep> GetAllForAccount(Guid accountUid);
 		IEnumerable<Sweep> GetAllForCampaign(Guid campaignUid);
-		Task MarkSweepAsDrawAttemptedAsync(Guid sweepUid, CancellationToken cancellationToken);
-		Task UpdateSweepAsNotEnoughUniqueEntrantsAsync(Guid sweepUid, CancellationToken cancellationToken);
-		Task ToggleSweepDrawAttemptedAsync(Guid sweepUid, bool value, CancellationToken cancellationToken);
-		Task ToggleSweepAsNotEnoughUniqueEntrantsAsync(Guid sweepUid, bool v, CancellationToken cancellationToken);
 		Task<IEnumerable<Sweep>> GetAllGoingLiveInHoursAsync(int hourValue, CancellationToken cancellationToken);
-		Task UpdateSweepsAsNotificationGoingLiveAsync(Guid sweepUid, bool value, CancellationToken cancellationToken);
+		Task<IEnumerable<Sweep>> GetLiveSweepsThatHaveNotBeenNotifiedAsync(CancellationToken cancellationToken);
 	}
 
 	public class SweepsRepository : ISweepsRepository
 	{
 		private readonly IDatabase _database;
+		private readonly ILogger<SweepsRepository> _logger;
 
-		public SweepsRepository(IDatabase database)
+		public SweepsRepository(IDatabase database, ILoggerFactory loggerFactory)
 		{
 			_database = database;
+			_logger = loggerFactory.CreateLogger<SweepsRepository>();
 		}
 
 		public async Task CreateAsync(Sweep sweep, string timezone, bool isDaylight)
@@ -246,6 +245,15 @@ namespace hrvster.Infrastructure
 				drawDateUtc = drawDateUtc.AddHours(-2);
 			}
 
+			_logger.LogInformation("Updating the sweepstake {sweepName} with start date of {startDate} and utc {startDateUtc} and end date of {endDate} and utc {endDateUtc}.",
+				sweep.Name,
+				sweep.StartDate,
+				startDateUtc,
+				sweep.EndDate,
+				endDateUtc);
+
+			_logger.LogInformation("Current timezone info is {timezoneInfo}", timezone);
+
 			using var conn = new MySqlConnection(_database.GetConnectionString());
 			var command = conn.CreateCommand();
 			command.CommandText = "sweep_update";
@@ -381,56 +389,6 @@ namespace hrvster.Infrastructure
 			return sweeps;
 		}
 
-		public async Task MarkSweepAsDrawAttemptedAsync(Guid sweepUid, CancellationToken cancellationToken)
-		{
-			using var conn = new MySqlConnection(_database.GetConnectionString());
-			var command = conn.CreateCommand();
-			command.CommandText = "sweep_mark_as_draw_attempted";
-			command.CommandType = CommandType.StoredProcedure;
-			command.AddParameter("sweepUid", sweepUid);
-
-			await conn.OpenAsync(cancellationToken);
-			await command.ExecuteNonQueryAsync(cancellationToken);
-		}
-
-		public async Task UpdateSweepAsNotEnoughUniqueEntrantsAsync(Guid sweepUid, CancellationToken cancellationToken)
-		{
-			using var conn = new MySqlConnection(_database.GetConnectionString());
-			var command = conn.CreateCommand();
-			command.CommandText = "sweep_mark_as_not_enough_unique_entrants";
-			command.CommandType = CommandType.StoredProcedure;
-			command.AddParameter("sweepUid", sweepUid);
-
-			await conn.OpenAsync(cancellationToken);
-			await command.ExecuteNonQueryAsync(cancellationToken);
-		}
-
-		public async Task ToggleSweepDrawAttemptedAsync(Guid sweepUid, bool value, CancellationToken cancellationToken)
-		{
-			using var conn = new MySqlConnection(_database.GetConnectionString());
-			var command = conn.CreateCommand();
-			command.CommandText = "sweep_toggle_draw_attempted";
-			command.CommandType = CommandType.StoredProcedure;
-			command.AddParameter("sweepUid", sweepUid);
-			command.AddParameter("value", value ? 1 : 0);
-
-			await conn.OpenAsync(cancellationToken);
-			await command.ExecuteNonQueryAsync(cancellationToken);
-		}
-
-		public async Task ToggleSweepAsNotEnoughUniqueEntrantsAsync(Guid sweepUid, bool value, CancellationToken cancellationToken)
-		{
-			using var conn = new MySqlConnection(_database.GetConnectionString());
-			var command = conn.CreateCommand();
-			command.CommandText = "sweep_toggle_not_enough_entries";
-			command.CommandType = CommandType.StoredProcedure;
-			command.AddParameter("sweepUid", sweepUid);
-			command.AddParameter("value", value ? 1 : 0);
-
-			await conn.OpenAsync(cancellationToken);
-			await command.ExecuteNonQueryAsync(cancellationToken);
-		}
-
 		public async Task<IEnumerable<Sweep>> GetAllGoingLiveInHoursAsync(int hourValue, CancellationToken cancellationToken)
 		{
 			var sweeps = new List<Sweep>();
@@ -453,17 +411,68 @@ namespace hrvster.Infrastructure
 			return sweeps;
 		}
 
-		public async Task UpdateSweepsAsNotificationGoingLiveAsync(Guid sweepUid, bool value, CancellationToken cancellationToken)
+		public async Task<IEnumerable<Sweep>> GetLiveSweepsThatHaveNotBeenNotifiedAsync(CancellationToken cancellationToken)
 		{
-			using var conn = new MySqlConnection(_database.GetConnectionString());
-			var command = conn.CreateCommand();
-			command.CommandText = "sweep_toggle_notification_going_live_sent";
-			command.CommandType = CommandType.StoredProcedure;
-			command.AddParameter("sweepUid", sweepUid);
-			command.AddParameter("notificationSent", value ? 1 : 0);
+			var sweeps = new List<Sweep>();
 
-			await conn.OpenAsync(cancellationToken);
-			await command.ExecuteNonQueryAsync(cancellationToken);
+			using (var conn = new MySqlConnection(_database.GetConnectionString()))
+			{
+				var command = conn.CreateCommand();
+				command.CommandText = "sweeps_live_not_notified";
+				command.CommandType = CommandType.StoredProcedure;
+
+				await conn.OpenAsync(cancellationToken);
+				using var reader = await command.ExecuteReaderAsync(cancellationToken);
+				while (await reader.ReadAsync())
+				{
+					sweeps.Add(CreateRecordFrom(reader));
+				}
+			}
+
+			return sweeps;
+		}
+
+		private Sweep CreateRecordFrom(MySqlDataReader reader)
+		{
+			return new Sweep
+			{
+				SweepId = reader.GetInt32("sweep_id"),
+				Campaign = new Campaign
+				{
+					CampaignUid = reader.GetGuid("campaign_uid"),
+					CampaignName = reader.GetString("campaign_name"),
+					ActiveInd = reader.GetBoolean("active_ind"),
+					StartDate = reader.GetDateTime("campaign_start_date"),
+					EndDate = reader.GetDateTime("campaign_end_date"),
+					CampaignType = new CampaignType
+					{
+						CampaignTypeCode = (CampaignTypeCode)Enum.Parse(typeof(CampaignTypeCode), reader.GetString("campaign_type_code")),
+						CampaignTypeName = reader.GetString("campaign_type_name")
+					}
+				},
+				Account = new Account
+				{
+					AccountUid = reader.GetGuid("account_uid")
+				},
+				SweepUid = reader.GetGuid("sweep_uid"),
+				Name = reader.GetString("sweep_name"),
+				RulesUrl = GetStringValue(reader, "rules_url"),
+				StartDate = reader.GetDateTime("start_date"),
+				StartDateUtc = reader.GetDateTime("start_date_utc"),
+				EndDate = reader.GetDateTime("end_date"),
+				EndDateUtc = reader.GetDateTime("end_date_utc"),
+				DrawDate = GetNullableDateTimeValue(reader, "draw_date"),
+				DrawDateUtc = reader.GetNullableDateTimeValue("draw_date_utc").GetValueOrDefault(),
+				DrawAttempted = reader.GetBoolean("draw_attempted"),
+				SweepNotification = new SweepNotification
+				{
+					NotEnoughUniqueEntrants = reader.GetBooleanRecord("not_enough_unique_entrants"),
+					SweepsGoingLive = reader.GetBooleanRecord("sweeps_going_live"),
+					SweepsLive = reader.GetBooleanRecord("sweeps_live"),
+					DrawAttemptHappened = reader.GetBooleanRecord("draw_attempted"),
+					DrawHappened = reader.GetBooleanRecord("draw_happened")
+				}
+			};
 		}
 	}
 }

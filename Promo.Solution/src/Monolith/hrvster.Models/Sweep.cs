@@ -30,5 +30,6 @@ namespace hrvster.Models
 		public bool NotEnoughUniqueEntrants { get; set; }
 		public bool NotificationSentGoingLive { get; set; }
 		public List<Rule> Rules { get; set; }
+		public SweepNotification SweepNotification { get; set; }
 	}
 }

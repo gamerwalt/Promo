@@ -1,4 +1,5 @@
-﻿using hrvster.Infrastructure;
+﻿using hrvster.ApplicationServices.Sweepstakes;
+using hrvster.Infrastructure;
 using hrvster.Models;
 using MediatR;
 using Microsoft.Extensions.Configuration;
@@ -13,6 +14,9 @@ namespace hrvster.ApplicationServices.Tests.Common
 		public IMediator Mediator { get; private set; }
 		public IConfiguration Configuration { get; private set; }
 		public ISweepsRepository SweepsRepository { get; private set; }
+		public ISweepstakesService SweepstakesService { get; private set; }
+		public IAccountsRepository AccountRepository { get; private set; }
+		public ICampaignRepository CampaignRepository { get; private set; }
 
 		public SweepsFeature()
 		{
@@ -44,6 +48,11 @@ namespace hrvster.ApplicationServices.Tests.Common
 		{
 			Mediator = ServiceProvider.GetService<IMediator>();
 			SweepsRepository = ServiceProvider.GetService<ISweepsRepository>();
+			AccountRepository = ServiceProvider.GetService<IAccountsRepository>();
+			CampaignRepository = ServiceProvider.GetService<ICampaignRepository>();
+
+			SweepstakesService = ServiceProvider.GetService<ISweepstakesService>();
+
 
 			var hrvsterUser = ServiceProvider.GetService<HrvsterUser>();
 			hrvsterUser.EmailAddress = TestData.EmailAddress;

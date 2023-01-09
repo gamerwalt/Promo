@@ -30,6 +30,7 @@ namespace TestUtilities
                 services.AddSingletons();
                 services.AddSessionManager();
                 services.AddHarvsterConfigurationOption(Configuration);
+                services.AddSweepstakesServices();
 
 
 				services.MockFirebaseAuthManager();
@@ -56,7 +57,9 @@ namespace TestUtilities
 				"DELETE FROM accounts WHERE account_id > 0; " +
 				"DELETE FROM emails where email_id > 0; " +
                 "DELETE FROM user_activities WHERE activity_id > 0;" +
-                "DELETE FROM emails WHERE email_id > 0";
+                "DELETE FROM emails WHERE email_id > 0;" +
+                "DELETE FROM sweep WHERE sweep_id > 0;" +
+                "DELETE FROM sweep_notifications WHERE sweep_notification_id > 0;";
             command.CommandType = CommandType.Text;
             conn.Open();
             command.ExecuteNonQuery();

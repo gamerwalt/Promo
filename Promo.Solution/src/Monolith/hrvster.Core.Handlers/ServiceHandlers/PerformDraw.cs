@@ -1,5 +1,6 @@
 ﻿using hrvster.Core.Requests.Notifications;
 using hrvster.Core.Requests.ServiceRequests;
+using hrvster.Core.Requests.Sweepstakes;
 using hrvster.Infrastructure;
 using hrvster.Models;
 using hrvster.Models.Sweepstakes;
@@ -77,7 +78,7 @@ namespace hrvster.Core.Handlers.ServiceHandlers
 
 				await _mediator.Send(new SweepsDistinctUsersLessThanWinnerCountMailRequest(rule.Account.EmailAddress, rule.Sweep.Name));
 
-				await _mediator.Send(new NotEnoughUniqueEntriesForSweepsUpdateRequest(rule.Sweep.SweepUid));
+				await _mediator.Send(new UpsertSweepNotificationRequest(rule.Sweep, SweepNotificationType.NotEnoughUniqueEntrants));
 
 				return false;
 			}

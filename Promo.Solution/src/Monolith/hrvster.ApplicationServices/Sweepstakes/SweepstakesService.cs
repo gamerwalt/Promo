@@ -1,4 +1,5 @@
 ﻿using hrvster.Core.Requests.ServiceRequests;
+using hrvster.Core.Requests.Sweepstakes;
 using hrvster.Models;
 using hrvster.Models.Extensions;
 using hrvster.Models.Sweepstakes;
@@ -14,9 +15,11 @@ namespace hrvster.ApplicationServices.Sweepstakes
 {
 	public interface ISweepstakesService
 	{
+		Task<IEnumerable<Sweep>> GetLiveSweepsAsync(CancellationToken cancellationToken);
 		Task<SweepProperty> GetSweepDrawPropertiesAndRules(Guid sweepUid, CancellationToken cancellationToken);
 		Task<IEnumerable<Sweep>> GetSweepsGoingLiveInHourAsync(int hour, CancellationToken cancellationToken);
-		Task UpdateAsNotificationGoingLiveSentAsync(Guid sweepUid);
+		Task<SweepNotification> GetSweepsNotificationAsync(Sweep sweep, CancellationToken cancellationToken);
+		Task UpdateSweepNotificationAsync(Sweep sweep, SweepNotificationType notificationType, CancellationToken cancellationToken);
 	}
 
 	public class SweepstakesService : ISweepstakesService
@@ -28,6 +31,18 @@ namespace hrvster.ApplicationServices.Sweepstakes
 		{
 			_logger = loggerFactory.CreateLogger<SweepstakesService>();
 			_mediator = mediator;
+		}
+
+		public async Task<IEnumerable<Sweep>> GetLiveSweepsAsync(CancellationToken cancellationToken)
+		{
+			_logger.LogInformation("Retrieving sweepstakes that are live and we haven't notified their account holders.");
+
+			var sweepsLive = await _mediator.Send(new GetLiveSweepsRequest());
+
+			_logger.LogInformation("Retrieved a total of {count} sweepstakes that are live and we haven't notified their account holders",
+				sweepsLive.Count());
+
+			return sweepsLive;
 		}
 
 		public async Task<SweepProperty> GetSweepDrawPropertiesAndRules(Guid sweepUid, CancellationToken cancellationToken)
@@ -56,9 +71,26 @@ namespace hrvster.ApplicationServices.Sweepstakes
 			return sweepsGoingLiveInAnHour;
 		}
 
-		public async Task UpdateAsNotificationGoingLiveSentAsync(Guid sweepUid)
+		public async Task<SweepNotification> GetSweepsNotificationAsync(Sweep sweep, CancellationToken cancellationToken)
 		{
-			await _mediator.Send(new UpdateSweepsAsNotificationGoingLiveSentRequest(sweepUid));
+			if (cancellationToken.IsCancellationRequested) return default(SweepNotification);
+
+			_logger.LogInformation("Request received to get the sweep notification for sweepstake {sweepName}",
+				sweep.Name);
+
+			return await _mediator.Send(new GetSweepNotificationRequest(sweep));
+		}
+
+		public async Task UpdateSweepNotificationAsync(
+			Sweep sweep, SweepNotificationType notificationType, CancellationToken cancellationToken)
+		{
+			if(cancellationToken.IsCancellationRequested) return;
+
+			_logger.LogInformation("Request received to update the sweep notification {sweepNotification} for {sweepName}",
+				notificationType.ToString(),
+				sweep.Name);
+
+			await _mediator.Send(new UpsertSweepNotificationRequest(sweep, notificationType));
 		}
 	}
 }

@@ -13,5 +13,6 @@ namespace hrvster.Web.Models
 		public IEnumerable<Prize> Prizes { get; set; }
 		public IEnumerable<Winner> Winners { get; set; }
 		public UpdateSweepstake UpdateSweepstake { get; set; }
+		public hrvster.Models.SweepNotification SweepNotification { get; set; }
 	}
 }

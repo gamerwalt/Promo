@@ -2,6 +2,8 @@
 using hrvster.Core.Authentication;
 using hrvster.Core.Requests;
 using hrvster.Core.Requests.ApiRequests;
+using hrvster.Core.Requests.ServiceRequests;
+using hrvster.Core.Requests.Sweepstakes;
 using hrvster.Core.Requests.WebRequests.Sweeps;
 using hrvster.Core.Requests.WebRequests.Sweeps.Updates;
 using hrvster.Core.Subscriptions;
@@ -234,17 +236,25 @@ namespace hrvster.Web.Controllers
 			var entriesTask = _mediator.Send(new GetSweepEntriesRequest(sweepUid));
 			var prizesTask = _mediator.Send(new GetSweepPrizesBySweepUidRequest(sweepUid));
 			var winnersTask = _mediator.Send(new GetSweepWinners(sweepUid));
+			var sweepNotificationTask = _mediator.Send(new GetSweepNotificationRequest(sweep));
 
 			tasks.Add(entriesTask);
 			tasks.Add(prizesTask);
 			tasks.Add(winnersTask);
+			tasks.Add(sweepNotificationTask);
+
 			await Task.WhenAll(tasks);
-			var model = BuildViewSweepstake(sweepAndRules, entriesTask, prizesTask, winnersTask);
+			var model = BuildViewSweepstake(sweepAndRules, entriesTask.Result, prizesTask.Result, winnersTask.Result, sweepNotificationTask.Result);
 
 			return View(model);
 		}
 
-		private ViewSweepstake BuildViewSweepstake(SweepstakeAndRules sweepAndRulles, Task<IEnumerable<hrvster.Models.SweepEntry>> entriesTask, Task<SweepPrize> prizesTask, Task<IEnumerable<hrvster.Models.SweepWinner>> winnersTask)
+		private ViewSweepstake BuildViewSweepstake(
+			SweepstakeAndRules sweepAndRulles, 
+			IEnumerable<hrvster.Models.SweepEntry> entriesTask, 
+			SweepPrize prizesTask, 
+			IEnumerable<hrvster.Models.SweepWinner> winnersTask, 
+			hrvster.Models.SweepNotification sweepNotification)
 		{
 			return new ViewSweepstake()
 			{
@@ -252,9 +262,9 @@ namespace hrvster.Web.Controllers
 				Rules = sweepAndRulles.Rules,
 				DrawRule = sweepAndRulles.DrawRule,
 				EntryRule = sweepAndRulles.EntryRule,
-				SweepEntries = _mapper.Map<IEnumerable<Models.SweepEntry>>(entriesTask.Result),
-				Prizes = _mapper.Map<IEnumerable<Prize>>(prizesTask.Result.Prizes),
-				Winners = _mapper.Map<IEnumerable<Winner>>(winnersTask.Result),
+				SweepEntries = _mapper.Map<IEnumerable<Models.SweepEntry>>(entriesTask),
+				Prizes = _mapper.Map<IEnumerable<Prize>>(prizesTask.Prizes),
+				Winners = _mapper.Map<IEnumerable<Winner>>(winnersTask),
 				UpdateSweepstake = new UpdateSweepstake
 				{
 					CampaignUid = sweepAndRulles.Sweepstake.Campaign.CampaignUid,
@@ -263,7 +273,8 @@ namespace hrvster.Web.Controllers
 					StartDate = sweepAndRulles.Sweepstake.StartDate,
 					EndDate = sweepAndRulles.Sweepstake.EndDate,
 					DrawDate = sweepAndRulles.Sweepstake.DrawDate.GetValueOrDefault()
-				}
+				},
+				SweepNotification = sweepNotification
 			};
 		}
 
@@ -309,12 +320,16 @@ namespace hrvster.Web.Controllers
 			var entriesTask = _mediator.Send(new GetSweepEntriesRequest(sweepUid));
 			var prizesTask = _mediator.Send(new GetSweepPrizesBySweepUidRequest(sweepUid));
 			var winnersTask = _mediator.Send(new GetSweepWinners(sweepUid));
+			var sweepNotificationTask = _mediator.Send(new GetSweepNotificationRequest(sweep));
 
 			tasks.Add(entriesTask);
 			tasks.Add(prizesTask);
 			tasks.Add(winnersTask);
+			tasks.Add(sweepNotificationTask);
+
 			await Task.WhenAll(tasks);
-			var model = BuildViewSweepstake(sweepAndRulles, entriesTask, prizesTask, winnersTask);
+
+			var model = BuildViewSweepstake(sweepAndRulles, entriesTask.Result, prizesTask.Result, winnersTask.Result, sweepNotificationTask.Result);
 
 			return View(model);
 		}
@@ -432,7 +447,7 @@ namespace hrvster.Web.Controllers
 			if (sweep == null) return RedirectToAction("View", new { sweepUid = sweepUid });
 			if (sweep.Account.AccountUid != _hrvsterUser.UserUid) return RedirectToAction("View", new { sweepUid = sweepUid });
 
-			await _mediator.Send(new ToggleSweepstakesDrawAttemptedRequest(sweepUid, false));
+			await _mediator.Send(new UpsertSweepNotificationRequest(sweep, hrvster.Models.Sweepstakes.SweepNotificationType.DrawAttempted));
 
 			_notificationService.AddSuccessToastMessage("Sweepstake updated successfully.");
 
