@@ -195,6 +195,13 @@ namespace hrvster.Core.Handlers.Tests
 
             nextPromotedBackupWinner1.Should().NotBeNull();
             nextPromotedBackupWinner1.UserIdentifier.Should().Be(backupWinner3.UserIdentifier);
+
+            request = new PromoteNextBackupWinnerRequest(sweep, prize1, sweepWinner1, "some other reason");
+            await _feature.Mediator.Send(request);
+
+            var nextPromotedBackupWinner2 = await _feature.SweepWinnersRepository.GetSweepWinnerAsync(TestData.SweepWinnerUid1);
+            nextPromotedBackupWinner2.Should().NotBeNull();
+            nextPromotedBackupWinner2.UserIdentifier.Should().Be(backupWinner3.UserIdentifier);
         }
     }
 }
