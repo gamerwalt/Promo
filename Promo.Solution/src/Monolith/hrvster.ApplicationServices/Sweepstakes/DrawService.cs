@@ -42,10 +42,12 @@ namespace hrvster.ApplicationServices.Sweepstakes
 					rule.Sweep.Name,
 					rule.Campaign.CampaignName);
 
+				var sweepNotifications = await _mediator.Send(new GetSweepNotificationRequest(rule.Sweep));
+
 				var entries = await PreDrawAsync(rule);
 				var winners = await _mediator.Send(new GetSweepWinners(rule.Sweep.SweepUid));
 
-				if (rule.Sweep.DrawAttempted)
+				if(sweepNotifications != null && sweepNotifications.DrawAttemptHappened)
 				{
 					_logger.LogWarning("The sweepstake {sweepName}'s draw has been attempted previously. Will not draw a winner.",
 						rule.Sweep.Name);

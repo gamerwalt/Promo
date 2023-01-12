@@ -29,6 +29,16 @@ namespace hrvster.Core.Handlers.ServiceHandlers
 
 		protected override async Task Handle(PerformDrawRequest request, CancellationToken cancellationToken)
 		{
+			var sweepNotifications = await _mediator.Send(new GetSweepNotificationRequest(request.DrawProperties.SweepDrawPropertiesAndRule.Sweep));
+
+			if(sweepNotifications != null && sweepNotifications.DrawHappened)
+			{
+				_logger.LogWarning("It looks like the sweepstake {sweepName}'s draw has happened.", 
+					request.DrawProperties.SweepDrawPropertiesAndRule.Sweep.Name);
+
+				return;
+			}
+
 			if (await SatisfiesPreDrawConditions(request.DrawProperties.SweepEntries, request.DrawProperties.SweepDrawPropertiesAndRule))
 			{
 				var winners = await _mediator.Send(new DrawWinnersForSweepstakesRequest(request.DrawProperties));
@@ -41,10 +51,12 @@ namespace hrvster.Core.Handlers.ServiceHandlers
 				winners = await _mediator.Send(new DrawBackupWinnersForSweepstakesRequest(request.DrawProperties, winners));
 
 				await _mediator.Send(new SaveSweepstakesDrawnWinnersRequest(winners, request.DrawProperties));
-				
+
 				await _mediator.Publish(new WinnersSaved(winners, request.DrawProperties));
 
-				await _sweepsRepository.UpdateSweepAsDrawnAsync(request.DrawProperties.SweepDrawPropertiesAndRule.Sweep.SweepUid);
+				await _mediator.Send(new NotifyUserOfDrawPerformedAndWinnerPickedRequest(request.DrawProperties.SweepDrawPropertiesAndRule.Sweep));
+
+				await _mediator.Send(new UpsertSweepNotificationRequest(request.DrawProperties.SweepDrawPropertiesAndRule.Sweep, SweepNotificationType.DrawHappened));
 			}
 		}
 

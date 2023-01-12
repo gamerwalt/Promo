@@ -77,5 +77,26 @@ namespace TestUtilities.Data
         public const string WatchValue = "#WatchValue1";
 		public const string WatchValue2 = "#WatchValue2";
 		public const string WatchValue3 = "#WatchValue2";
+
+        public static Guid SweepWinnerUid1 = Guid.Parse("3e5431d6-ba17-41f1-8f21-fd2d70245845");
+        public static Guid SweepWinnerUid2 = Guid.Parse("3e5431d6-ba17-41f2-8f21-fd2d70245845");
+        public static Guid SweepWinnerUid3 = Guid.Parse("3e5431d6-ba17-41f3-8f21-fd2d70245845");
+
+        public const string UserIdentifier1 = "User1";
+        public const string UserIdentifier2 = "User2";
+        public const string UserIdentifier3 = "User3";
+        public const string UserIdentifier4 = "User4";
+
+        public static Guid PrizeUid1 = Guid.Parse("1586018a-4d29-4313-a54d-d517a50e385d");
+		public static Guid PrizeUid2 = Guid.Parse("2586018a-4d29-4313-a54d-d517a50e385d");
+		public static Guid PrizeUid3 = Guid.Parse("3586018a-4d29-4313-a54d-d517a50e385d");
+
+        public const string PrizeName1 = "TestPrize1";
+        public const string PrizeName2 = "TestPrize2";
+        public const string PrizeName3 = "TestPrize3";
+
+        public const decimal PrizeValue1 = 45000.00m;
+		public const decimal PrizeValue2 = 65000.00m;
+		public const decimal PrizeValue3 = 95000.00m;
 	}
 }

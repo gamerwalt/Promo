@@ -59,7 +59,11 @@ namespace TestUtilities
                 "DELETE FROM user_activities WHERE activity_id > 0;" +
                 "DELETE FROM emails WHERE email_id > 0;" +
                 "DELETE FROM sweep WHERE sweep_id > 0;" +
-                "DELETE FROM sweep_notifications WHERE sweep_notification_id > 0;";
+                "DELETE FROM sweep_notifications WHERE sweep_notification_id > 0;" +
+                "DELETE FROM sweep_winners WHERE sweep_winner_id > 0;" +
+                "DELETE FROM sweep_prizes WHERE prize_id > 0;" +
+                "DELETE FROM sweep_winners_backup WHERE sweep_winner_backup_id > 0;" +
+                "DELETE FROM sweep_winners_unfulfilled WHERE sweep_winner_unfulfilled_id > 0;";
             command.CommandType = CommandType.Text;
             conn.Open();
             command.ExecuteNonQuery();

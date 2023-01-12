@@ -46,7 +46,8 @@
 		NotEnoughSweepstakeDistinctUsers,
 		SweepsGoingLiveSoon,
 		SweepsGoingLiveSoonMissingProperty,
-		SweepLive
+		SweepLive,
+		DrawCompleted
 	}
 
 	public enum CampaignTypeCode

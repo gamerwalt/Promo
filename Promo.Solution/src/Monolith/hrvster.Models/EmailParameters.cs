@@ -21,6 +21,7 @@
 		public static string WinnerCount = "WinnerCount";
 		public static string WinnerBackupCount = "WinnerBackupCount";
 		public static string EntryPerUser = "EntryPerUser";
-		public const string SweepstakeName = "SweepstakeName";
+		public static string SweepstakeName = "SweepstakeName";
+		public static string DrawDate = "DrawDate";
 	}
 }

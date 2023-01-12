@@ -3,6 +3,7 @@ using hrvster.Models;
 using MediatR;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -34,7 +35,17 @@ namespace hrvster.Core.Requests
 
 		public async Task<IEnumerable<SweepWinner>> Handle(GetSweepWinners request, CancellationToken cancellationToken)
 		{
-			return await _repository.GetSweepWinnersAsync(request.SweepUid);
+			var winners = await _repository.GetSweepWinnersAsync(request.SweepUid);
+			var backupWinners = await _repository.GetBackupWinnersAsync(request.SweepUid);
+
+			foreach(var backup in backupWinners)
+			{
+				var winner = winners.FirstOrDefault(w => w.SweepWinnerUid == backup.SweepWinnerUid);
+				if(winner != null)
+					winner.BackupWinners.Add(backup);
+			}
+
+			return winners;
 		}
 	}
 }

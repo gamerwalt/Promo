@@ -51,6 +51,9 @@ namespace hrvster.Web.Mapper
 
 			CreateMap<hrvster.Models.SweepWinner, Winner>()
 				.ReverseMap();
+
+			CreateMap<hrvster.Models.SweepBackupWinner, BackupWinner>()
+				.ReverseMap();
 		}
 	}
 }

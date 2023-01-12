@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Threading.Tasks;
 using hrvster.Infrastructure.Extensions;
+using System.Threading;
 
 namespace hrvster.Infrastructure
 {
@@ -15,6 +16,11 @@ namespace hrvster.Infrastructure
 		Task SaveSweepBackupWinnerAsync(SweepWinner sweepWinner);
 		Task<IEnumerable<SweepBackupWinner>> GetSweepBackupWinnersAsync(Guid sweepWinnerUid);
 		Task<IEnumerable<SweepWinner>> GetSweepWinnersAsync(Guid sweepUid);
+		Task<IEnumerable<SweepBackupWinner>> GetBackupWinnersAsync(Guid sweepUid);
+		Task FulfilledAsync(Guid sweepWinnerUid, int prizeId);
+		Task CreateUnfulfilledWinnerAsync(Guid sweepWinnerUid, string reason, CancellationToken cancellationToken);
+		Task PromoteBackupWinnerAsync(Guid sweepWinnerUid, Guid sweepEntryUid, string userIdentifier, string userIdentifierType, CancellationToken cancellationToken);
+		Task SetBackupAsSelectedAsync(int sweepWinnerBackupId, CancellationToken cancellationToken);
 	}
 
 	public class SweepWinnersRepository : ISweepWinnersRepository
@@ -188,6 +194,108 @@ namespace hrvster.Infrastructure
 			}
 
 			return sweepWinners;
+		}
+
+		public async Task<IEnumerable<SweepBackupWinner>> GetBackupWinnersAsync(Guid sweepUid)
+		{
+			var sweepWinners = new List<SweepBackupWinner>();
+
+			using (var conn = new MySqlConnection(_database.GetConnectionString()))
+			{
+				var command = conn.CreateCommand();
+				command.CommandText = "sweep_backup_winners_get";
+				command.CommandType = CommandType.StoredProcedure;
+				command.AddParameter(nameof(sweepUid), sweepUid);
+
+				await conn.OpenAsync();
+				using (var reader = await command.ExecuteReaderAsync())
+				{
+					while (await reader.ReadAsync())
+					{
+						sweepWinners.Add(CreateBackupWinnerFrom(reader));
+					}
+				}
+			}
+
+			return sweepWinners;
+		}
+
+		private SweepBackupWinner CreateBackupWinnerFrom(MySqlDataReader reader)
+		{
+			return new SweepBackupWinner
+			{
+				SweepWinnerBackupId = reader.GetInt32("sweep_winner_backup_id"),
+				SweepWinnerId = reader.GetInt32("sweep_winner_id"),
+				SweepWinnerUid = reader.GetGuid("sweep_winner_uid"),
+				Selected = reader.GetBoolean("selected_ind"),
+				UserIdentifier = reader.GetString("user_identifier"),
+				UserIdentifierType = (UserIdentifierType)Enum.Parse(typeof(UserIdentifierType), reader.GetString("user_identifier_type")),
+				SweepEntry = new SweepEntry
+				{
+					SweepEntryUid = reader.GetGuid("sweep_entry_uid")
+				}
+			};
+		}
+
+		public async Task FulfilledAsync(Guid sweepWinnerUid, int prizeId)
+		{
+			using var conn = new MySqlConnection(_database.GetConnectionString());
+			var command = conn.CreateCommand();
+			command.CommandText = "sweep_winner_fulfill";
+			command.CommandType = CommandType.StoredProcedure;
+			command
+				.AddParameter("sweepWinnerUid", sweepWinnerUid)
+				.AddParameter("prizeId", prizeId);
+
+			await conn.OpenAsync();
+			await command.ExecuteNonQueryAsync();
+		}
+
+		public async Task CreateUnfulfilledWinnerAsync(Guid sweepWinnerUid, string reason, CancellationToken cancellationToken)
+		{
+			using var conn = new MySqlConnection(_database.GetConnectionString());
+			var command = conn.CreateCommand();
+			command.CommandText = "sweep_winner_unfulfilled_create";
+			command.CommandType = CommandType.StoredProcedure;
+			command
+				.AddParameter("sweepWinnerUid", sweepWinnerUid)
+				.AddParameter("reason", reason);
+
+			await conn.OpenAsync(cancellationToken);
+			await command.ExecuteNonQueryAsync(cancellationToken);
+		}
+
+		public async Task PromoteBackupWinnerAsync(
+			Guid sweepWinnerUid, 
+			Guid sweepEntryUid, 
+			string userIdentifier, 
+			string userIdentifierType, 
+			CancellationToken cancellationToken)
+		{
+			using var conn = new MySqlConnection(_database.GetConnectionString());
+			var command = conn.CreateCommand();
+			command.CommandText = "sweep_backup_winner_promote";
+			command.CommandType = CommandType.StoredProcedure;
+			command
+				.AddParameter("sweepWinnerUid", sweepWinnerUid)
+				.AddParameter("sweepEntryUid", sweepEntryUid)
+				.AddParameter("userIdentifier", userIdentifier)
+				.AddParameter("userIdentifierType", userIdentifierType);
+
+			await conn.OpenAsync(cancellationToken);
+			await command.ExecuteNonQueryAsync(cancellationToken);
+		}
+
+		public async Task SetBackupAsSelectedAsync(int sweepWinnerBackupId, CancellationToken cancellationToken)
+		{
+			using var conn = new MySqlConnection(_database.GetConnectionString());
+			var command = conn.CreateCommand();
+			command.CommandText = "sweep_backup_winner_selected";
+			command.CommandType = CommandType.StoredProcedure;
+			command.AddParameter("sweepWinnerBackupId", sweepWinnerBackupId);
+
+			await conn.OpenAsync(cancellationToken);
+			await command.ExecuteNonQueryAsync(cancellationToken);
 		}
 	}
 }

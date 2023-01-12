@@ -16,6 +16,9 @@ namespace hrvster.Core.Handlers.Tests.Common
 		public ICampaignRepository CampaignRepository { get; private set; }
 		public ISweepsRepository SweepsRepository { get; private set; }
 		public IMailRepository MailRepository { get; private set; }
+		public ISweepWinnersRepository SweepWinnersRepository { get; private set; }
+		public ISweepPrizesRepository SweepsPrizesRepository { get; private set; }
+
 		public MediatorHandlerFeature()
 		{
 			Initialize();
@@ -49,7 +52,10 @@ namespace hrvster.Core.Handlers.Tests.Common
 			CampaignRepository = ServiceProvider.GetService<ICampaignRepository>();
 			SweepsRepository = ServiceProvider.GetService<ISweepsRepository>();
 			MailRepository = ServiceProvider.GetService<IMailRepository>();
-			
+			SweepWinnersRepository = ServiceProvider.GetService<ISweepWinnersRepository>();
+			SweepsPrizesRepository = ServiceProvider.GetService<ISweepPrizesRepository>();
+
+
 			SetupHrvsterUser();
 		}
 

@@ -78,5 +78,17 @@ namespace TestUtilities
 			.WithCampaign(campaign)
 			.WithDrawn(false)
 			.Build();
+
+		public SweepWinner BuildNewSweepWinner(Sweep sweep, Guid sweepWinnerUid, string userIdentifier, int assignedId)
+			=> new SweepWinnerBuilder(sweep, sweepWinnerUid, userIdentifier, assignedId)
+				.Build();
+
+		public SweepPrize BuildNewPrize(Guid prizeUid, Guid sweepUid, string prizeName, string prizeDescription, decimal prizeValue, int prizePosition)
+			=> new SweepPrizeBuilder(prizeUid, sweepUid, prizeName, prizeDescription, prizeValue, prizePosition)
+				.Build();
+
+		public SweepBackupWinner BuildNewBackupWinner(int sweepWinnerId, Guid sweepWinnerUid, Sweep sweep, string userIdentifier)
+			=> new SweepBackupWinnerBuilder(sweepWinnerId, sweepWinnerUid, sweep, userIdentifier)
+				.Build();
 	}
 }

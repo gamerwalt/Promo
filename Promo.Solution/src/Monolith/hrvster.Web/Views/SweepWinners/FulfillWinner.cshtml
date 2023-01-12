@@ -1,0 +1,65 @@
+﻿@using hrvster.Core;
+@inject LinkBuilder linkBuilder
+
+@model FulfillWinnerDetails
+@{
+    ViewData["Title"] = "Fulfill Winner";
+    var userLink = linkBuilder.BuildTwitterHandleLink(Model.SweepWinner.UserIdentifier); 
+}
+<div class="card card-bordered">
+    <form asp-controller="SweepWinners"
+          asp-action="FulfillWinner"
+          asp-route-sweepUid=@Model.Sweepstake.SweepUid
+          asp-route-prizeUid=@Model.Prize.PrizeUid
+          asp-route-sweepWinnerUid=@Model.SweepWinner.SweepWinnerUid
+          asp-route-returnAction=@Model.ReturnAction
+          asp-route-returnController=@Model.ReturnController
+          enctype="multipart/form-data"
+          class="form-horizontal form-material mx-2">
+        @Html.HiddenFor(m => m.SweepWinnerUid)
+        @Html.HiddenFor(m => m.PrizeUid)
+        @Html.HiddenFor(m => m.SweepUid)
+        @Html.HiddenFor(m => m.ReturnAction)
+        @Html.HiddenFor(m => m.ReturnController)
+        <div class="card-header">
+            <h3 class="card-title">Winner fulfilled?</h3>
+        </div>
+        <div class="card-body">
+            <div class="fv-row mb-8 text-inverse-primary">
+                By clicking the "User has been fulfilled" button, you agree the prize to this winner has been fulfilled.
+            </div>
+            <div class="fv-row mb-8 w-lg-200px">
+                <label class="d-flex align-items-center fs-7 form-label mb-2">
+                    Sweepstake
+                </label>
+                <label class="d-flex align-items-center fs-4 form-label mb-2">
+                    @Model.Sweepstake.Name
+                </label>
+            </div>
+            <div class="fv-row mb-8">
+                <label class="d-flex align-items-center fs-7 form-label mb-2">
+                    Prize Name
+                </label>
+                <label class="d-flex align-items-center fs-4 fw-semibold form-label mb-2">
+                    @Model.Prize.PrizeName - @Model.Prize.PrizeDescription
+                </label>
+            </div>
+            <div class="fv-row mb-8">
+                <label class="d-flex align-items-center fs-7 form-label mb-2">
+                    Winner
+                </label>
+                <label class="d-flex align-items-center fs-4 fw-semibold form-label mb-2">
+                    <a href="@userLink" target="_blank">@Model.SweepWinner.UserIdentifier</a>
+                </label>
+            </div>
+        </div>
+        <div class="card-footer">
+            <div class="col-lg-12">
+                <button type="submit" class="btn btn-md btn-light btn-primary me-3">
+                    User has been fulfilled
+                </button>
+                <a class="btn btn-light btn-default" href="javascript:history.go(-1)">Back</a>
+            </div>
+        </div>
+    </form>
+</div>

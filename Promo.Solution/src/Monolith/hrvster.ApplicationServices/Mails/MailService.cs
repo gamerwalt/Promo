@@ -50,6 +50,10 @@ namespace hrvster.ApplicationServices.Mails
 				{
 					switch (email.Template)
 					{
+						case EmailTemplate.DrawCompleted:
+							await SendDrawCompletedEmailAsync(email);
+							break;
+
 						case EmailTemplate.SweepLive:
 							if (await SendSweepsLiveAsync(new SweepLiveRequest
 							{
@@ -209,6 +213,40 @@ namespace hrvster.ApplicationServices.Mails
 			_logger.LogInformation($"{nameof(ProcessAnyUnsentEmails)} processing completed.");
 		}
 
+		private async Task SendDrawCompletedEmailAsync(Email email)
+		{
+			var request = new SweepstakeDrawCompletedRequest
+			{
+				EmailTemplate = EmailTemplate.DrawCompleted,
+				EmailAddress = email.Parameters[EmailParameters.EmailAddress],
+				SweepstakeName = email.Parameters[EmailParameters.SweepstakeName],
+				DisplayName = email.Parameters[EmailParameters.DisplayName],
+				DashboardLink = email.Parameters[EmailParameters.DashboardLink],
+				StartDate = email.Parameters[EmailParameters.StartDate],
+				EndDate = email.Parameters[EmailParameters.EndDate],
+				DrawDate = email.Parameters[EmailParameters.DrawDate],
+			};
+
+			var mailText = GetMailText(request.EmailTemplate);
+			var type = request.GetType();
+
+			foreach (var f in type.GetProperties(BindingFlags.Instance | BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public))
+			{
+				mailText = mailText.Replace($"[{f.Name}]", f.GetValue(request).ToString());
+			}
+
+			await SendEmailAsync(
+				new MailRequest
+				{
+					ToEmailAddress = request.EmailAddress,
+					Body = mailText,
+					Subject = $"{request.SweepstakeName}'s  Raffle Draw Completed - Winners Picked."
+				}
+			);
+
+			await _mailRepository.UpdateAsSentAsync(email);
+		}
+
 		private async Task<bool> SendEmailAsync(MailRequest mailRequest)
 		{
 			var client = new SendGridClient(_sendGrid.ApiKey);
@@ -267,7 +305,7 @@ namespace hrvster.ApplicationServices.Mails
 				{
 					ToEmailAddress = request.EmailAddress,
 					Body = mailText,
-					Subject = $"{request.SweepstakeName} Rules And Prizes."
+					Subject = $"{request.SweepstakeName} is live!"
 				}
 			);
 		}

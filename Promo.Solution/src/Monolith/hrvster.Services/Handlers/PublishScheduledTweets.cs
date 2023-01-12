@@ -25,12 +25,14 @@ namespace hrvster.Services.Handlers
 			ILoggerFactory loggerFactory,
 			Func<ExternalClientType, Core.Clients.Publishers.IExternalClient> publisherResolver,
 			IScheduledSweepRuleTweetsRepository scheduledSweepRuleTweetsRepository,
-			ISweepRulesRepository sweepRulesRepository)
+			ISweepRulesRepository sweepRulesRepository,
+			IHarvesterServiceCommandRepository harvesterServiceCommandRepository)
 		{
 			_logger = loggerFactory.CreateLogger<PublishScheduledTweets>();
 			_publisherResolver = publisherResolver;
 			_scheduledSweepRuleTweetsRepository = scheduledSweepRuleTweetsRepository;
 			_sweepRulesRepository = sweepRulesRepository;
+			_harvesterServiceCommandRepository = harvesterServiceCommandRepository;
 		}
 
 		protected override async Task Handle(PublishScheduledTweetsRequest request, CancellationToken cancellationToken)

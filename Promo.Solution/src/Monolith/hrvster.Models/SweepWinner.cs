@@ -28,6 +28,7 @@ namespace hrvster.Models
 	{
 		public int SweepWinnerBackupId { get; set; }
 		public int SweepWinnerId { get; set; }
+		public Guid SweepWinnerUid { get; set; }
 		public Sweep Sweep { get; set; }
 		public SweepEntry SweepEntry { get; set; }
 		public string UserIdentifier { get; set; }

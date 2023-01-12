@@ -2,10 +2,8 @@
 using hrvster.Core.Authentication;
 using hrvster.Core.Requests;
 using hrvster.Core.Requests.ApiRequests;
-using hrvster.Core.Requests.ServiceRequests;
 using hrvster.Core.Requests.Sweepstakes;
 using hrvster.Core.Requests.WebRequests.Sweeps;
-using hrvster.Core.Requests.WebRequests.Sweeps.Updates;
 using hrvster.Core.Subscriptions;
 using hrvster.Extensions.ModelExtensions;
 using hrvster.Models.Options;
@@ -250,10 +248,10 @@ namespace hrvster.Web.Controllers
 		}
 
 		private ViewSweepstake BuildViewSweepstake(
-			SweepstakeAndRules sweepAndRulles, 
-			IEnumerable<hrvster.Models.SweepEntry> entriesTask, 
-			SweepPrize prizesTask, 
-			IEnumerable<hrvster.Models.SweepWinner> winnersTask, 
+			SweepstakeAndRules sweepAndRulles,
+			IEnumerable<hrvster.Models.SweepEntry> entriesTask,
+			SweepPrize prizesTask,
+			IEnumerable<hrvster.Models.SweepWinner> winnersTask,
 			hrvster.Models.SweepNotification sweepNotification)
 		{
 			return new ViewSweepstake()
