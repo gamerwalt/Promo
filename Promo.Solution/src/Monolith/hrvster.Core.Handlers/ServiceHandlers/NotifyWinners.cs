@@ -40,6 +40,13 @@ namespace hrvster.Core.Handlers.ServiceHandlers
 
 			var profile = await _profilesRepository.GetProfileByCampaignUid(campaign.CampaignUid, ProfileType.Twitter);
 
+			if(profile == null)
+			{
+				_logger.LogError("Could not load the twitter account profile for the campaign with Uid {campaignUid}", campaign.CampaignUid);
+
+				return;
+			}
+
 			if(sweepRule.NotifyWinners)
 			{
 				var sweepPrizes = await _sweepPrizesRepository.GetSweepPrizesAsync(sweep.SweepUid);

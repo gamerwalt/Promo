@@ -1,5 +1,8 @@
-﻿using hrvster.Models;
+﻿using Bogus;
+using hrvster.Models;
+using hrvster.Models.Profiles;
 using System;
+using System.Collections.Generic;
 using TestUtilities.Builders.Resources;
 using TestUtilities.Data;
 
@@ -29,7 +32,36 @@ namespace TestUtilities
 				campaignType)
 			.Build();
 
-		public CampaignType BuildNewCampaignType()
+		public Profile BuildNewTwitterProfile(Account account)
+			=> new Profile
+			{
+				Account = account,
+				AccessToken = TestData.AccessToken,
+				AccessTokenSecret = TestData.AccessTokenSecret,
+				ConsumerKey = TestData.ConsumerKey,
+				ConsumerSecret = TestData.ConsumerKeySecret,
+				DisplayName = TestData.DisplayName,
+				ExternalProfileId = TestData.ExternalProfileId,
+				ProfileUid = TestData.ProfileUid,
+				ScreenName = TestData.ScreenName,
+				ProfileType = ProfileType.Twitter,
+				Description = TestData.ProfileDescription
+			};
+
+
+        public SweepEntryRule BuildNewSweepEntryRule(Guid entryRuleUid, Sweep sweep, Campaign campaign, int entryCount)
+			=> new SweepEntryRuleBuilder(entryRuleUid, campaign.CampaignUid, sweep.SweepUid, entryCount)
+			.Build();
+
+		public DrawRule BuildSweepDrawRule(Guid sweepDrawRuleUid, Sweep sweep, int winnerCount, int winnerBackupCount)
+			=> new SweepDrawRuleBuilder(sweepDrawRuleUid, sweep.SweepUid, winnerCount, winnerBackupCount)
+			.Build();
+
+		public Rule BuildRule(Guid ruleUid, Campaign campaign, Sweep sweep, string watchValue)
+			=> new RuleBuilder(ruleUid, campaign, sweep, watchValue)
+			.Build();
+
+        public CampaignType BuildNewCampaignType()
 			=> new CampaignType
 			{
 				CampaignTypeName = TestData.CampaignTypeName,
@@ -66,14 +98,27 @@ namespace TestUtilities
 			.WithDrawn(false)
 			.Build();
 
-		public Sweep BuildNewSweep(Account account, Campaign campaign, Guid sweepUid, DateTime startDate, DateTime endDate)
+        public Sweep BuildNewSweep(Account account, Campaign campaign, Guid sweepUid, DateTime startDate, DateTime endDate)
+            => new SweepBuilder(
+                TestData.SweepId,
+                sweepUid,
+                TestData.SweepName)
+            .WithStartDate(startDate)
+            .WithEndDate(endDate)
+            .WithDrawDate(endDate.AddDays(-1))
+            .WithAccount(account)
+            .WithCampaign(campaign)
+            .WithDrawn(false)
+            .Build();
+
+        public Sweep BuildNewSweep(Account account, Campaign campaign, Guid sweepUid, DateTime startDate, DateTime endDate, DateTime drawDate)
 			=> new SweepBuilder(
 				TestData.SweepId,
 				sweepUid,
 				TestData.SweepName)
 			.WithStartDate(startDate)
 			.WithEndDate(endDate)
-			.WithDrawDate(endDate.AddDays(1))
+			.WithDrawDate(drawDate)
 			.WithAccount(account)
 			.WithCampaign(campaign)
 			.WithDrawn(false)
@@ -90,5 +135,18 @@ namespace TestUtilities
 		public SweepBackupWinner BuildNewBackupWinner(int sweepWinnerId, Guid sweepWinnerUid, Sweep sweep, string userIdentifier)
 			=> new SweepBackupWinnerBuilder(sweepWinnerId, sweepWinnerUid, sweep, userIdentifier)
 				.Build();
-	}
+
+        public IEnumerable<SweepEntry> SeedEntriesFor(Sweep sweep, Rule rule)
+        {
+			var testSweepEntry = new Faker<SweepEntry>()
+				.RuleFor(s => s.Sweep, sweep)
+				.RuleFor(s => s.Rule, rule)
+				.RuleFor(s => s.SweepEntryUid, f => f.Random.Guid())
+				.RuleFor(s => s.UserIdentifier, f => f.Internet.UserName())
+				.RuleFor(s => s.UserIdentifierType, f => UserIdentifierType.TwitterHandle)
+				.RuleFor(s => s.AcceptedTerms, f => true);
+
+			return testSweepEntry.Generate(30);
+        }
+    }
 }

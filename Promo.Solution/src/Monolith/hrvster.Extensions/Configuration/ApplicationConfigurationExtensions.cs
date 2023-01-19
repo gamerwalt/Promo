@@ -30,10 +30,14 @@ namespace hrvster.Extensions.Configuration
 
 		public static IServiceCollection AddSweepstakesServices(this IServiceCollection services)
 			=> services.AddTransient<ISweepstakesService, SweepstakesService>()
-				.AddTransient<IDrawService, DrawService>();
+				.AddTransient<IDrawService, DrawService>()
+				.AddSweepstakeUtility();
 
 		public static IServiceCollection AddAccountsService(this IServiceCollection services)
 			=> services.AddTransient<IAccountsService, AccountsService>()
 				.AddTransient<IAccountsRepository, AccountsRepository>();
+
+		public static IServiceCollection AddSweepstakeUtility(this IServiceCollection services)
+			=> services.AddTransient<SweepstakeUtility>();
 	}
 }

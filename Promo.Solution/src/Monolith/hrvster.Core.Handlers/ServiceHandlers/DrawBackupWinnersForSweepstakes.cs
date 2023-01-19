@@ -64,14 +64,32 @@ namespace hrvster.Core.Handlers.ServiceHandlers
 						if (!IsInWinnersAndBackupWinnersList(request.Winners, sweepEntries, backupWinnerSweepEntryId))
 						{
 							sweepEntry = sweepEntries.FirstOrDefault(c => c.SweepEntryId.Equals(backupWinnerSweepEntryId));
-							if (sweepEntry != null)
+							if (sweepEntry == null)
 								break;
 						}
 
 						drawWinnerCounter++;
 					}
 
-					_logger.LogInformation("Backup Winner for {backupWinnerIndex} drawn. SweepEntryUid: {sweepEntryUid} Picked", backupWinnerIndex, sweepEntry.SweepEntryUid);
+					if(sweepEntry == null)
+					{
+						_logger.LogWarning("Unable to draw a backup winner right now for sweepstakes {sweepName} with Uid {sweepUid}. Support needs to look into this. Continuing on to the next backup.",
+							sweep.Name,
+							sweep.SweepUid);
+
+						backupWinnerIndex++;
+						continue;
+					}
+
+					_logger.LogInformation("Backup Winner for {backupWinnerIndex} drawn. SweepEntryUid: {sweepEntryUid} Picked. User Identifier {userIdentifier}",
+						backupWinnerIndex, 
+						sweepEntry.SweepEntryUid,
+						sweepEntry.UserIdentifier);
+
+					_logger.LogInformation("A backup winner has been drawn for sweepstake {sweepName} with uid {sweepUid}. The sweep entry drawn is {sweepEntryUid}",
+						sweep.Name,
+						sweep.SweepUid,
+						sweepEntry.SweepEntryUid);
 
 					request.DrawProperties.MissingBetween.Add(backupWinnerSweepEntryId);
 

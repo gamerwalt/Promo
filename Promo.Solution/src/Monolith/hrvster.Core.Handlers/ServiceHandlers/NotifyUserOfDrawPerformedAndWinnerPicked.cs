@@ -17,27 +17,37 @@ namespace hrvster.Core.Handlers.ServiceHandlers
 		private readonly ILogger<NotifyUserOfDrawPerformedAndWinnerPicked> _logger;
 		private readonly IAccountsRepository _accountsRepository;
 		private readonly IMailRepository _mailRepository;
+		private readonly ISweepsRepository _sweepsRepository;
 		private readonly HarvesterSettingsOptions _harvesterSettings;
 
 		public NotifyUserOfDrawPerformedAndWinnerPicked(
 			ILoggerFactory loggerFactory,
 			IAccountsRepository accountsRepository,
 			IMailRepository mailRepository,
+			ISweepsRepository sweepsRepository,
 			HarvesterSettingsOptions harvesterSettings)
 		{
 			_logger = loggerFactory.CreateLogger<NotifyUserOfDrawPerformedAndWinnerPicked>();
 			_accountsRepository = accountsRepository;
 			_mailRepository = mailRepository;
+			_sweepsRepository = sweepsRepository;
 			_harvesterSettings = harvesterSettings;
 		}
 
 		protected override async Task Handle(NotifyUserOfDrawPerformedAndWinnerPickedRequest request, CancellationToken cancellationToken)
 		{
+			var accountUid = Guid.Empty;
+			if(request.Sweepstake.Account == null)
+			{
+				var sweep = await _sweepsRepository.GetAsync(request.Sweepstake.SweepUid);
+				accountUid = sweep.Account.AccountUid;
+			}
+
 			_logger.LogInformation("Retrieving account with uid {accountUid} for the sweepstake {sweepName}",
-				request.Sweepstake.Account.AccountUid,
+				accountUid == Guid.Empty ? request.Sweepstake.Account.AccountUid : accountUid,
 				request.Sweepstake.Name);
 
-			var account = await _accountsRepository.GetAsync(request.Sweepstake.Account.AccountUid);
+			var account = await _accountsRepository.GetAsync(accountUid == Guid.Empty ? request.Sweepstake.Account.AccountUid : accountUid);
 
 			if (account == null)
 			{

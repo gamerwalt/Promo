@@ -65,8 +65,8 @@ namespace hrvster.Infrastructure.Accounts
 				AccessTokenSecret = reader.GetString("access_token_secret"),
 				ConsumerKey = GetStringValue(reader, "consumer_key"),
 				ConsumerSecret = GetStringValue(reader, "consumer_secret"),
-				Location = reader.GetString("location"),
-				ProfileImageUrl = reader.GetString("profile_image_url"),
+				Location = reader.GetStringValue("location"),
+				ProfileImageUrl = reader.GetStringValue("profile_image_url"),
 				Account = new Account
 				{
 					AccountId = reader.GetInt32("account_id"),

@@ -43,7 +43,7 @@ namespace hrvster.Core.Clients.Publishers
 			await _twitterClient.Tweets.DestroyTweetAsync(tweet);
 		}
 
-		public async Task<string> PublishAsync(Message message)
+		public virtual async Task<string> PublishAsync(Message message)
 		{
 			_logger.LogInformation("Publishing the tweet {tweet} for Profile with uid {profileUid}",
 				message.Text,
@@ -109,7 +109,7 @@ namespace hrvster.Core.Clients.Publishers
 			return tweet?.IdStr;
 		}
 
-		public async Task<string> PublishResponse(Message message, string responseToId)
+		public virtual async Task<string> PublishResponse(Message message, string responseToId)
 		{
 			_logger.LogInformation("Publishing the tweet {tweet} in response to {tweetId}",
 				message.Text,

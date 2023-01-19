@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Http;
+using System;
 
 namespace TestUtilities.Data
 {
@@ -13,6 +14,15 @@ namespace TestUtilities.Data
         public const string ZipCode = "95442";
         public const string PasswordHash = "lj0998jkj";
         public const int Role = 1;
+
+        public const string AccessToken = "AccessToken";
+        public const string AccessTokenSecret = "AccessTokenSecret";
+        public const string ConsumerKey = "ConsumerKey";
+        public const string ConsumerKeySecret = "ConsumerSecret";
+        public const string ExternalProfileId = "654156156156";
+        public static Guid ProfileUid = Guid.Parse("9720a488-eeef-4661-97bf-b88251386bfb");
+        public const string ScreenName = TestData.DisplayName;
+        public const string ProfileDescription = TestData.DisplayName;
 
         public const string Fullname2 = "First Last2";
         public const string UserName2 = "Username2";
@@ -98,5 +108,9 @@ namespace TestUtilities.Data
         public const decimal PrizeValue1 = 45000.00m;
 		public const decimal PrizeValue2 = 65000.00m;
 		public const decimal PrizeValue3 = 95000.00m;
-	}
+
+        public static Guid EntryRuleUid = Guid.Parse("3586018a-5d29-5313-a64d-d517a50e385d");
+        public static Guid SweepDrawRuleUid = Guid.Parse("24d64283-0974-4612-8818-c4db66cd1f23");
+
+    }
 }

@@ -34,17 +34,17 @@ public class SweepsRepositoryTests : BuilderClassAbstract, IClassFixture<Reposit
 		await _feature.AccountsRepository.CreateAsync(account);
 		var campaignType = BuildNewCampaignType();
 		var campaign = BuildNewCampaign(account, campaignType);
-		await _feature.CampaignRepository.CreateCampaignAsync(campaign, TestData.WindowsTimezone, true);
-		var sweep1 = BuildNewSweep(account, campaign);
-		await _feature.SweepsRepository.CreateAsync(sweep1, TestData.WindowsTimezone, true);
+		await _feature.CampaignRepository.CreateCampaignAsync(campaign, TestData.WindowsTimezone, false);
+		var sweep1 = BuildNewSweep(account, campaign, TestData.SweepUid, DateTime.Now.AddMinutes(50), DateTime.Now.AddDays(30));
+		await _feature.SweepsRepository.CreateAsync(sweep1, TestData.WindowsTimezone, false);
 
-		var sweep2 = BuildNewSweep(account, campaign, TestData.SweepUid2, DateTime.Now, DateTime.Now.AddDays(30));
+		var sweep2 = BuildNewSweep(account, campaign, TestData.SweepUid2, DateTime.Now.AddMinutes(30), DateTime.Now.AddDays(30));
 		sweep2.Name = $"{sweep2.Name}2";
-		await _feature.SweepsRepository.CreateAsync(sweep2, TestData.WindowsTimezone, true);
+		await _feature.SweepsRepository.CreateAsync(sweep2, TestData.WindowsTimezone, false);
 
-		var sweep3 = BuildNewSweep(account, campaign, TestData.SweepUid3, DateTime.Now, DateTime.Now.AddDays(30));
+		var sweep3 = BuildNewSweep(account, campaign, TestData.SweepUid3, DateTime.Now.AddMinutes(121), DateTime.Now.AddDays(30));
 		sweep3.Name = $"{sweep3.Name}3";
-		await _feature.SweepsRepository.CreateAsync(sweep3, TestData.WindowsTimezone, true);
+		await _feature.SweepsRepository.CreateAsync(sweep3, TestData.WindowsTimezone, false);
 
 		var sweeps = await _feature.SweepsRepository.GetAllGoingLiveInHoursAsync(1, default);
 

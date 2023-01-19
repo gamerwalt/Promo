@@ -463,7 +463,7 @@ namespace hrvster.Infrastructure
 				EndDateUtc = reader.GetDateTime("end_date_utc"),
 				DrawDate = GetNullableDateTimeValue(reader, "draw_date"),
 				DrawDateUtc = reader.GetNullableDateTimeValue("draw_date_utc").GetValueOrDefault(),
-				DrawAttempted = reader.GetBoolean("draw_attempted"),
+				DrawAttempted = reader.GetBooleanRecord("draw_attempted"),
 				SweepNotification = new SweepNotification
 				{
 					NotEnoughUniqueEntrants = reader.GetBooleanRecord("not_enough_unique_entrants"),
