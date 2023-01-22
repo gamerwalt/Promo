@@ -112,5 +112,8 @@ namespace TestUtilities.Data
         public static Guid EntryRuleUid = Guid.Parse("3586018a-5d29-5313-a64d-d517a50e385d");
         public static Guid SweepDrawRuleUid = Guid.Parse("24d64283-0974-4612-8818-c4db66cd1f23");
 
+        public static Guid BasicPlanUid = Guid.Parse("e39503df-db14-4988-a9ad-adc6e938988e");
+        public static Guid StarterPlanUid = Guid.Parse("f88e1f57-c2b9-47d0-95c4-3f8e93e619ed");
+        public static Guid AdvancedPlanUid = Guid.Parse("8597b37d-99e4-403a-9b1c-7b75a5e78c50");
     }
 }

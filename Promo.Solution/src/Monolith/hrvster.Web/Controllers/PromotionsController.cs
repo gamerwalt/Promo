@@ -13,6 +13,7 @@ using hrvster.Models.WebModels.Sweeps;
 using hrvster.Web.Models;
 using MediatR;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using NToastNotify;
@@ -223,6 +224,13 @@ namespace hrvster.Web.Controllers
 				};
 
 				var promotionUid = await _mediator.Send(new CreateCampaignRequest(newCampaignRequest, _hrvsterUser.UserUid, _hrvsterUser.WindowsTimeZone));
+
+				if(promotionUid == Guid.Empty)
+				{
+					_notificationService.AddErrorToastMessage("Unable to create promotion. Please speak to support.");
+
+					return RedirectToAction("index");
+				}
 
 				_notificationService.AddSuccessToastMessage(ToastMessages.PromotionCreatedSuccessfully);
 

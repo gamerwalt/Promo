@@ -54,42 +54,4 @@ namespace hrvster.Core.Requests
         }
 		public bool IsDaylight { get { return isDaylight; } }
     }
-
-    public class CreateCampaignRequestHandler : IRequestHandler<CreateCampaignRequest, Guid>
-    {
-        private readonly ICampaignRepository _repository;
-        private readonly IMediator _mediator;
-		
-        public CreateCampaignRequestHandler(ICampaignRepository repository, IMediator mediator)
-        {
-            _repository = repository;
-            _mediator = mediator;
-        }
-
-        public async Task<Guid> Handle(CreateCampaignRequest request, CancellationToken cancellationToken)
-        {
-            var campaignUid = Guid.NewGuid();
-
-            await _repository.CreateCampaignAsync(new Campaign
-            {
-                CampaignUid = campaignUid,
-                CampaignName = request.NewCampaign.Name,
-                Description = request.NewCampaign.Description,
-                StartDate = request.NewCampaign.StartDate,
-                EndDate = request.NewCampaign.EndDate,
-                CampaignType = new CampaignType
-                {
-                    CampaignTypeUid = request.NewCampaign.CampaignTypeUid
-                },
-				Account = new Account
-				{
-					AccountUid = request.AccountUid
-				}
-            }, request.TimezoneId, request.IsDaylight);
-
-            await _mediator.Publish(new CampaignCreated(request.NewCampaign, request.AccountUid, campaignUid));
-
-            return campaignUid;
-        }
-    }
 }

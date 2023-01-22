@@ -1,13 +1,16 @@
-﻿using hrvster.ApplicationServices.Sweepstakes;
+﻿using hrvster.ApplicationServices.Subscription;
+using hrvster.ApplicationServices.Sweepstakes;
 using hrvster.Core.Clients.Publishers;
 using hrvster.Infrastructure;
 using hrvster.Infrastructure.Accounts;
+using hrvster.Infrastructure.Subscriptions;
 using hrvster.Models;
 using MediatR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Moq;
+using NToastNotify;
 using TestUtilities;
 using TestUtilities.Data;
 using TestUtilities.Mocks.Publishers;
@@ -30,12 +33,16 @@ namespace hrvster.Core.Handlers.Tests.Common
 		public ISweepDrawRuleRepository SweepDrawRuleRepository { get; private set; }
 		public ISweepsEntriesRepository SweepEntryRepository { get; private set; }
 		public ISweepRulesRepository SweepRulesRepository { get; private set; }
-		public SweepstakeUtility SweepstakeUtility { get; private set; }
+		public IPlansRepository PlansRepository { get; private set; }
+
 		public IDrawService DrawService { get; private set; }
+		public IAccountSubscriptionService AccountSubscriptionService { get; private set; }
+		public ISubscriptionService SubscriptionService { get; private set; }
+        public SweepstakeUtility SweepstakeUtility { get; private set; }
 
-		public Mock<IExternalClient> MockedExternalClient { get; private set; }
+        public Mock<IExternalClient> MockedExternalClient { get; private set; }
 		public Mock<TwitterClient> MockedTwitterClient { get; private set; }
-
+		public Mock<IToastNotification> MockedToastNotification { get; private set; }
         public MediatorHandlerFeature()
 		{
 			Initialize();
@@ -78,9 +85,13 @@ namespace hrvster.Core.Handlers.Tests.Common
 			SweepRulesRepository = ServiceProvider.GetService<ISweepRulesRepository>();
 			SweepstakeUtility = ServiceProvider.GetService<SweepstakeUtility>();
 			DrawService = ServiceProvider.GetService<IDrawService>();
+			AccountSubscriptionService = ServiceProvider.GetService<IAccountSubscriptionService>();
+            SubscriptionService = ServiceProvider.GetService<ISubscriptionService>();
+            PlansRepository = ServiceProvider.GetService<IPlansRepository>();
 
             MockedExternalClient = ServiceProvider.GetService<Mock<IExternalClient>>();
 			MockedTwitterClient = ServiceProvider.GetService<Mock<TwitterClient>>();
+			MockedToastNotification = ServiceProvider.GetService<Mock<IToastNotification>>();
 
             SetupHrvsterUser();
 		}

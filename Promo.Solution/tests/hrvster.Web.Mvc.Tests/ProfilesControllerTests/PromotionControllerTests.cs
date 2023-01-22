@@ -102,7 +102,11 @@ namespace ControllerTests
                 .Initialize(additionalServiceConfiguration:
                 services =>
                 {
-					services.MockIsSubscribedSubscription();
+                    services.MockAccountSubscriptionService(mock =>
+                    {
+                        mock.SetupGetAccountSubscription();
+                    });
+                    services.MockIsSubscribedSubscription();
 					services.MockFirebaseAuthManager(mock =>
                     {
                         mock.SetupCreateuserSuccess();
@@ -162,7 +166,12 @@ namespace ControllerTests
                 .Initialize(additionalServiceConfiguration:
                 services =>
                 {
-					services.MockIsSubscribedSubscription();
+                    services.MockAccountSubscriptionService(mock =>
+                    {
+                        mock.SetupGetAccountSubscription();
+                    });
+
+                    services.MockIsSubscribedSubscription();
 					services.MockFirebaseAuthManager(mock =>
                     {
                         mock.SetupCreateuserSuccess();

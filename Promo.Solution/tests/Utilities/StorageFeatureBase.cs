@@ -7,7 +7,9 @@ using Microsoft.Extensions.Logging;
 using MySqlConnector;
 using System;
 using System.Data;
+using TestUtilities.Extensions;
 using TestUtilities.Mocks.Authentication;
+using TestUtilities.Mocks.Notifications;
 using TestUtilities.Mocks.Publishers;
 
 namespace TestUtilities
@@ -43,9 +45,13 @@ namespace TestUtilities
                 services.AddSubscriptionService();
                 services.AddPaymentServices(Configuration);
                 services.AddHttpContextAccessor();
+                services.AddSubscriptionService();
+                services.AddSubscriptionRepositories();
 
                 services.MockFirebaseAuthManager();
                 services.MockExternalClient();
+                services.MockToastNotification();
+                services.MockAuthenticiation();
             };
 
         protected virtual Action<IServiceCollection> AdditionalServices { get; } = null;
@@ -80,7 +86,8 @@ namespace TestUtilities
                 "DELETE FROM sweep_winners_unfulfilled WHERE sweep_winner_unfulfilled_id > 0;" +
                 "DELETE FROM sweep_entry_rules WHERE entry_rule_id > 0;" +
                 "DELETE FROM sweep_entry WHERE sweep_entry_id > 0;" +
-                "DELETE FROM sweep_draw_rules WHERE sweep_draw_rule_id > 0;";
+                "DELETE FROM sweep_draw_rules WHERE sweep_draw_rule_id > 0;" +
+                "DELETE FROM account_subscriptions WHERE subscription_id > 0;";
             command.CommandType = CommandType.Text;
             conn.Open();
             command.ExecuteNonQuery();
