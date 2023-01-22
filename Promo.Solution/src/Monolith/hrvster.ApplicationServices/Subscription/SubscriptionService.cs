@@ -8,10 +8,7 @@ using hrvster.Models.Subscriptions;
 using hrvster.Models.Subscriptions.Flutterwave;
 using MediatR;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
-using Org.BouncyCastle.Asn1.Ocsp;
 using System;
-using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
 namespace hrvster.ApplicationServices.Subscription

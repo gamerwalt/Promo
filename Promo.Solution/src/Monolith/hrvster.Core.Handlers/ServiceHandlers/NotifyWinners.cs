@@ -4,6 +4,7 @@ using hrvster.Core.Requests.Notifications;
 using hrvster.Infrastructure;
 using hrvster.Infrastructure.Accounts;
 using hrvster.Models;
+using hrvster.Models.Options;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using System;
@@ -19,17 +20,20 @@ namespace hrvster.Core.Handlers.ServiceHandlers
 		private readonly ISweepPrizesRepository _sweepPrizesRepository;
 		private readonly IProfilesRepository _profilesRepository;
 		private readonly Func<ExternalClientType, IExternalClient> _publisherResolver;
+		private readonly HarvesterSettingsOptions _hrvsterSettings;
 
 		public NotifyWinners(
 			ILoggerFactory loggerFactory, 
 			ISweepPrizesRepository sweepPrizesRepository,
 			IProfilesRepository profilesRepository,
-			Func<ExternalClientType, IExternalClient> publisherResolver)
+			Func<ExternalClientType, IExternalClient> publisherResolver,
+			HarvesterSettingsOptions hrvsterSettings)
 		{
 			_logger = loggerFactory.CreateLogger<NotifyWinners>();
 			_sweepPrizesRepository = sweepPrizesRepository;
 			_profilesRepository = profilesRepository;
 			_publisherResolver = publisherResolver;
+			_hrvsterSettings = hrvsterSettings;
 		}
 
 		public async Task Handle(WinnersSaved notification, CancellationToken cancellationToken)
@@ -47,7 +51,7 @@ namespace hrvster.Core.Handlers.ServiceHandlers
 				return;
 			}
 
-			if(sweepRule.NotifyWinners)
+			if(sweepRule.NotifyWinners && _hrvsterSettings.NotifyWinners)
 			{
 				var sweepPrizes = await _sweepPrizesRepository.GetSweepPrizesAsync(sweep.SweepUid);
 				if(sweepPrizes == null || sweepPrizes.Count() == 0)

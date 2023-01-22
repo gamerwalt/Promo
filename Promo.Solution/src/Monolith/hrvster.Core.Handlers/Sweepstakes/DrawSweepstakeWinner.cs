@@ -102,7 +102,7 @@ namespace hrvster.Core.Handlers.Sweepstakes
 				for (var winnerIndex = 1; winnerIndex <= winners.Count; winnerIndex++)
 				{
 					var min = 1;
-					var max = entries.Count - 1;
+					var max = entries.Count;
 					for (var index = 1; index <= drawRule.WinnerBackupCount; index++)
 					{
 						_logger.LogInformation("Drawing backup winner # {number} for winner {winnerNumber} for sweepstake {sweepName} with uid {sweepUid}",
@@ -111,7 +111,7 @@ namespace hrvster.Core.Handlers.Sweepstakes
 							sweep.Name,
 							sweep.SweepUid);
 
-						var randomNumner = _randomizer.GetRandomNumber(min, max);
+						var randomNumner = _randomizer.GetRandomNumber(min, max) - 1;
 
 						var backupWinnerDrawObject = drawObject[randomNumner];
 
@@ -159,7 +159,7 @@ namespace hrvster.Core.Handlers.Sweepstakes
 
 			var winners = new List<SweepWinner>();
 			var min = 1;
-			var max = entries.Count - 1;
+			var max = entries.Count;
 
 			for (var index = 1; index <= drawRule.WinnerCount; index++)
 			{
@@ -167,8 +167,8 @@ namespace hrvster.Core.Handlers.Sweepstakes
 					index,
 					sweep.Name,
 					sweep.SweepUid);
-
-				var winnerDrawObject = drawObject[_randomizer.GetRandomNumber(min, max)];
+				var winnerIndex = _randomizer.GetRandomNumber(min, max) - 1;
+				var winnerDrawObject = drawObject[winnerIndex];
 
 				_logger.LogInformation("Winner # {number} for sweepstake {sweepName} with uid {sweepUid} is {userIdentifier}.",
 					index,
@@ -203,14 +203,14 @@ namespace hrvster.Core.Handlers.Sweepstakes
 		{
 			drawObject.Remove(winnerDrawObject);
 
-			return max - 1;
+			return max;
 		}
 
 		private int RemoveBackupWInnerFromDrawObject(List<SweepstakeDrawObject> drawObject, int max, SweepstakeDrawObject backupWinnerDrawObject)
 		{
 			drawObject.Remove(backupWinnerDrawObject);
 
-			return max - 1;
+			return max;
 		}
 
 		private SweepBackupWinner GetBackupWinner(Sweep sweep, List<SweepEntry> entries, int index, SweepstakeDrawObject backupWinnerDrawObject)

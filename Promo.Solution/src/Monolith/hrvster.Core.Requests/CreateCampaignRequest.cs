@@ -59,6 +59,7 @@ namespace hrvster.Core.Requests
     {
         private readonly ICampaignRepository _repository;
         private readonly IMediator _mediator;
+		
         public CreateCampaignRequestHandler(ICampaignRepository repository, IMediator mediator)
         {
             _repository = repository;

@@ -78,7 +78,8 @@ namespace hrvster.Services
 						.AddHarvesterServiceCommandRepository()
 						.AddHarvesterService()
 						.AddSweepstakesServices()
-						.AddAccountsService();
+						.AddAccountsService()
+						.AddAutoMapper(typeof(EntityMap));
 
 					LoadServices(services);
 					AddMediator(services);

@@ -28,4 +28,9 @@ $(document).ready(function () {
         var value = "false";
         $("input[name=PostNow][value=" + value + "]").attr('checked', 'checked');
     })
+
+    $("#sweepEntryTable").DataTable({
+        destroy: true,
+        searching: true,
+        });
 });

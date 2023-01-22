@@ -141,7 +141,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "hrvster.Core.Handlers.Tests
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "hrvster.Infrastructure.Tests", "..\tests\RepositoryTests\hrvster.Infrastructure.Tests\hrvster.Infrastructure.Tests.csproj", "{3897DB5F-56D7-449D-85D8-0E482DE57AAC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "hrvster.Admin.Web", "Monolith\hrvster.Admin.Web\hrvster.Admin.Web.csproj", "{085A5CEF-2ED8-4D22-922D-6F9ED292F68A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "hrvster.Admin.Web", "Monolith\hrvster.Admin.Web\hrvster.Admin.Web.csproj", "{085A5CEF-2ED8-4D22-922D-6F9ED292F68A}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "EntrySeeder", "EntrySeeder", "{262E4B0F-9865-4ED0-92F5-812B92F1CFB7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SweepEntrySeeder", "EntrySeeder\SweepEntrySeeder\SweepEntrySeeder.csproj", "{4A44A344-A228-41E9-BBF9-ADF06701A2C0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -237,6 +241,10 @@ Global
 		{085A5CEF-2ED8-4D22-922D-6F9ED292F68A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{085A5CEF-2ED8-4D22-922D-6F9ED292F68A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{085A5CEF-2ED8-4D22-922D-6F9ED292F68A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4A44A344-A228-41E9-BBF9-ADF06701A2C0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4A44A344-A228-41E9-BBF9-ADF06701A2C0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4A44A344-A228-41E9-BBF9-ADF06701A2C0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4A44A344-A228-41E9-BBF9-ADF06701A2C0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -284,6 +292,8 @@ Global
 		{2D5872CE-2D9B-43D4-A89F-D495CF284DBA} = {5B6F1E81-70FD-4E9F-BBC9-8AB355E6B5F2}
 		{3897DB5F-56D7-449D-85D8-0E482DE57AAC} = {00F06FA1-70E5-47C5-8276-CFA8ACD08A81}
 		{085A5CEF-2ED8-4D22-922D-6F9ED292F68A} = {71429F9B-A81B-4A12-98DD-505C0F9FDB34}
+		{262E4B0F-9865-4ED0-92F5-812B92F1CFB7} = {B71190C8-5608-4FFE-8C71-DA20A334CFC6}
+		{4A44A344-A228-41E9-BBF9-ADF06701A2C0} = {262E4B0F-9865-4ED0-92F5-812B92F1CFB7}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {94B46B7F-1545-465E-863A-AAD0C58A8C0F}

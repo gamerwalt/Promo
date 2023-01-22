@@ -62,20 +62,7 @@
     <PropertyValue Name="CheckOnlyInTarget">true</PropertyValue>
     <PropertyValue Name="CheckIdentical">true</PropertyValue>
   </Options>
-  <ModifiedObjects>
-    <Object Name="account_profiles" Type="Table" InSource="False" Different="False" InTarget="False" />
-    <Object Name="account_update_history" Type="Table" InSource="False" Different="False" InTarget="False" />
-    <Object Name="accounts" Type="Table" InSource="False" Different="False" InTarget="False" />
-    <Object Name="campaigns" Type="Table" InSource="False" Different="False" InTarget="False" />
-    <Object Name="cron_services" Type="Table" InSource="False" Different="False" InTarget="False" />
-    <Object Name="emails" Type="Table" InSource="False" Different="False" InTarget="False" />
-    <Object Name="subscribers" Type="Table" InSource="False" Different="False" InTarget="False" />
-    <Object Name="sweep" Type="Table" InSource="False" Different="False" InTarget="False" />
-    <Object Name="sweep_draw_rules" Type="Table" InSource="False" Different="False" InTarget="False" />
-    <Object Name="sweep_entry_rules" Type="Table" InSource="False" Different="False" InTarget="False" />
-    <Object Name="sweep_prizes" Type="Table" InSource="False" Different="False" InTarget="False" />
-    <Object Name="user_activities" Type="Table" InSource="False" Different="False" InTarget="False" />
-  </ModifiedObjects>
+  <ModifiedObjects />
   <SynchronizationOptions>
     <PropertyValue Name="BulkInsert">true</PropertyValue>
     <PropertyValue Name="LimitBulk">true</PropertyValue>
@@ -110,8 +97,8 @@
     <PropertyValue Name="ExternalScriptAfter" xml:space="preserve" />
     <PropertyValue Name="IncludeStatementUSEAfter">false</PropertyValue>
     <PropertyValue Name="UseDelimiter">false</PropertyValue>
-    <PropertyValue Name="SynchronizeType">2</PropertyValue>
-    <PropertyValue Name="SynchronizationFileName" xml:space="preserve" />
+    <PropertyValue Name="SynchronizeType">0</PropertyValue>
+    <PropertyValue Name="SynchronizationFileName" xml:space="preserve">D:\Promo\hrvsterDatabase\migrations\hrvster vs hrvster_test (localhost-3306).sql</PropertyValue>
     <PropertyValue Name="SynchronizationEditorFileName" xml:space="preserve" />
     <PropertyValue Name="OpenScriptInEditor">false</PropertyValue>
     <PropertyValue Name="RefreshAfterSynchronization">true</PropertyValue>
@@ -124,35 +111,42 @@
   </SynchronizationOptions>
   <Mapping>
     <ComparedObjects>
-      <Object SourceName="account_profiles" TargetName="account_profiles" SourceType="Table" TargetType="Table" IncludedInScript="False" />
-      <Object SourceName="account_subscriptions" TargetName="account_subscriptions" SourceType="Table" TargetType="Table" IncludedInScript="False" />
+      <Object SourceName="account_profiles" TargetName="account_profiles" SourceType="Table" TargetType="Table" />
+      <Object SourceName="account_subscriptions" TargetName="account_subscriptions" SourceType="Table" TargetType="Table" />
       <Object SourceName="account_subscriptions_history" TargetName="account_subscriptions_history" SourceType="Table" TargetType="Table" IncludedInScript="False" />
-      <Object SourceName="account_update_history" TargetName="account_update_history" SourceType="Table" TargetType="Table" IncludedInScript="False" />
-      <Object SourceName="accounts" TargetName="accounts" SourceType="Table" TargetType="Table" IncludedInScript="False" />
+      <Object SourceName="account_update_history" TargetName="account_update_history" SourceType="Table" TargetType="Table" />
+      <Object SourceName="accounts" TargetName="accounts" SourceType="Table" TargetType="Table" />
       <Object SourceName="campaign_types" TargetName="campaign_types" SourceType="Table" TargetType="Table" IncludedInScript="False" />
-      <Object SourceName="campaigns" TargetName="campaigns" SourceType="Table" TargetType="Table" IncludedInScript="False" />
+      <Object SourceName="campaigns" TargetName="campaigns" SourceType="Table" TargetType="Table" />
       <Object SourceName="cron_services" TargetName="cron_services" SourceType="Table" TargetType="Table" IncludedInScript="False" />
-      <Object SourceName="emails" TargetName="emails" SourceType="Table" TargetType="Table" IncludedInScript="False" />
-      <Object SourceName="plans" TargetName="plans" SourceType="Table" TargetType="Table" />
+      <Object SourceName="emails" TargetName="emails" SourceType="Table" TargetType="Table" />
+      <Object SourceName="plans" TargetName="plans" SourceType="Table" TargetType="Table" IncludedInScript="False" />
       <Object SourceName="profile_types" TargetName="profile_types" SourceType="Table" TargetType="Table" IncludedInScript="False" />
       <Object SourceName="report_sweep_entries" TargetName="report_sweep_entries" SourceType="Table" TargetType="Table" IncludedInScript="False" />
       <Object SourceName="reporting_sweep_entries" TargetName="reporting_sweep_entries" SourceType="Table" TargetType="Table" IncludedInScript="False" />
       <Object SourceName="scheduled_sweep_rule_tweet_images" TargetName="scheduled_sweep_rule_tweet_images" SourceType="Table" TargetType="Table" IncludedInScript="False" />
       <Object SourceName="scheduled_sweep_rule_tweets" TargetName="scheduled_sweep_rule_tweets" SourceType="Table" TargetType="Table" IncludedInScript="False" />
-      <Object SourceName="subscribers" TargetName="subscribers" SourceType="Table" TargetType="Table" IncludedInScript="False" />
-      <Object SourceName="sweep" TargetName="sweep" SourceType="Table" TargetType="Table" IncludedInScript="False" />
-      <Object SourceName="sweep_draw_rules" TargetName="sweep_draw_rules" SourceType="Table" TargetType="Table" IncludedInScript="False" />
+      <Object SourceName="subscribers" TargetName="subscribers" SourceType="Table" TargetType="Table" />
+      <Object SourceName="sweep" TargetName="sweep" SourceType="Table" TargetType="Table" />
+      <Object SourceName="sweep_draw_rules" TargetName="sweep_draw_rules" SourceType="Table" TargetType="Table" />
       <Object SourceName="sweep_entry" TargetName="sweep_entry" SourceType="Table" TargetType="Table" IncludedInScript="False" />
-      <Object SourceName="sweep_entry_rules" TargetName="sweep_entry_rules" SourceType="Table" TargetType="Table" IncludedInScript="False" />
-      <Object SourceName="sweep_prizes" TargetName="sweep_prizes" SourceType="Table" TargetType="Table" IncludedInScript="False" />
+      <Object SourceName="sweep_entry_rules" TargetName="sweep_entry_rules" SourceType="Table" TargetType="Table" />
+      <Object SourceName="sweep_prizes" TargetName="sweep_prizes" SourceType="Table" TargetType="Table" />
       <Object SourceName="sweep_rules" TargetName="sweep_rules" SourceType="Table" TargetType="Table" IncludedInScript="False" />
       <Object SourceName="sweep_winner_prizes" TargetName="sweep_winner_prizes" SourceType="Table" TargetType="Table" IncludedInScript="False" />
       <Object SourceName="sweep_winners" TargetName="sweep_winners" SourceType="Table" TargetType="Table" IncludedInScript="False" />
       <Object SourceName="sweep_winners_backup" TargetName="sweep_winners_backup" SourceType="Table" TargetType="Table" IncludedInScript="False" />
-      <Object SourceName="user_activities" TargetName="user_activities" SourceType="Table" TargetType="Table" IncludedInScript="False" />
+      <Object SourceName="user_activities" TargetName="user_activities" SourceType="Table" TargetType="Table" />
       <Object SourceName="watch_type_campaign_types" TargetName="watch_type_campaign_types" SourceType="Table" TargetType="Table" IncludedInScript="False" />
       <Object SourceName="watch_type_providers" TargetName="watch_type_providers" SourceType="Table" TargetType="Table" IncludedInScript="False" />
       <Object SourceName="watch_types" TargetName="watch_types" SourceType="Table" TargetType="Table" IncludedInScript="False" />
+      <Object SourceName="flutterwave_card_transactions" TargetName="flutterwave_card_transactions" SourceType="Table" TargetType="Table" IncludedInScript="False" />
+      <Object SourceName="flutterwave_events" TargetName="flutterwave_events" SourceType="Table" TargetType="Table" IncludedInScript="False" />
+      <Object SourceName="flutterwave_plans" TargetName="flutterwave_plans" SourceType="Table" TargetType="Table" IncludedInScript="False" />
+      <Object SourceName="harvester_service_command" TargetName="harvester_service_command" SourceType="Table" TargetType="Table" IncludedInScript="False" />
+      <Object SourceName="payment_services" TargetName="payment_services" SourceType="Table" TargetType="Table" />
+      <Object SourceName="sweep_notifications" TargetName="sweep_notifications" SourceType="Table" TargetType="Table" IncludedInScript="False" />
+      <Object SourceName="sweep_winners_unfulfilled" TargetName="sweep_winners_unfulfilled" SourceType="Table" TargetType="Table" IncludedInScript="False" />
     </ComparedObjects>
   </Mapping>
 </CompareDocument>

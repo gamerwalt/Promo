@@ -96,7 +96,7 @@ namespace hrvster.Core.Handlers.Sweepstakes
 		{
 			_logger.LogInformation("Retrieving backup winners for sweepstake {sweepName}", request.Sweepstake.Name);
 
-			return await _repository.GetBackupWinnersAsync(request.Sweepstake.SweepUid);
+			return await _repository.GetSweepBackupWinnersAsync(request.Winner.SweepWinnerUid);
 		}
 	}
 }

@@ -13,7 +13,7 @@
       <PropertyValue Name="ConnectionString" xml:space="preserve">User Id=hrvster_user;Host=localhost;Character Set=utf8</PropertyValue>
       <PropertyValue Name="ExecutionTimeout">0</PropertyValue>
     </ConnectionModel>
-    <Schema>hrvster</Schema>
+    <Schema>hrvster_test</Schema>
   </Source>
   <Target Type="Database">
     <ConnectionModel>
@@ -21,7 +21,7 @@
       <PropertyValue Name="ConnectionString" xml:space="preserve">User Id=hrvster_user;Host=localhost;Character Set=utf8</PropertyValue>
       <PropertyValue Name="ExecutionTimeout">0</PropertyValue>
     </ConnectionModel>
-    <Schema>hrvster_test</Schema>
+    <Schema>hrvster</Schema>
   </Target>
   <GroupType Value="Status" />
   <ComparisonOptions>
@@ -74,7 +74,7 @@
     <CheckInconsistency>false</CheckInconsistency>
     <SetDelimiter>true</SetDelimiter>
     <UseDelimiter>true</UseDelimiter>
-    <TargetDatabaseName xml:space="preserve">hrvster_test</TargetDatabaseName>
+    <TargetDatabaseName xml:space="preserve">hrvster</TargetDatabaseName>
     <TargetChangeTracking>false</TargetChangeTracking>
     <IsTarget>false</IsTarget>
     <OmitIgnoreOptions>false</OmitIgnoreOptions>
@@ -133,7 +133,7 @@
     <PropertyValue Name="ExcludeDependencies">false</PropertyValue>
     <PropertyValue Name="CanSqlExecutorAddError">true</PropertyValue>
     <PropertyValue Name="SynchronizeType">0</PropertyValue>
-    <PropertyValue Name="SynchronizationFileName" xml:space="preserve">D:\Promo\hrvsterDatabase\migrations\hrvster vs hrvster_test (localhost-3306).sql</PropertyValue>
+    <PropertyValue Name="SynchronizationFileName" xml:space="preserve">D:\Promo\hrvsterDatabase\migrations\hrvster_test vs hrvster (localhost-3306).sql</PropertyValue>
     <PropertyValue Name="SynchronizationEditorFileName" xml:space="preserve">C:\Users\Gamer\AppData\Local\Temp\Devart_e051vqpg.dmu\hrvster vs hrvster_test (localhost-3306).sql</PropertyValue>
     <PropertyValue Name="OpenScriptInEditor">false</PropertyValue>
     <PropertyValue Name="RefreshAfterSynchronization">true</PropertyValue>

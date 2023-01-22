@@ -11,5 +11,6 @@
 		public string ServicePassword { get; set; }
 		public int ServiceWaitInSeconds { get; set; } = 10;
 		public string ServiceUri { get; set; }
+		public bool NotifyWinners { get; set; }
 	}
 }

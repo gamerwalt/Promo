@@ -51,6 +51,13 @@ namespace hrvster.Core
 				.Replace("{tweetId}", tweetId));
 		}
 
+		public async Task<Uri> BuildTwitterLink(string tweetId, Guid ruleUid, string twitterUser)
+		{
+			return new Uri(_services.TweetIdUrl
+				.Replace("{username}", twitterUser)
+				.Replace("{tweetId}", tweetId));
+		}
+
 		public Uri BuildTwitterHandleLink(string userHandle)
 		{
 			var uri = _services.TweetHandleUrl.Replace("{username}", userHandle.Replace("@", ""));

@@ -6,6 +6,7 @@ namespace hrvster.Extensions.Configuration
 	public static class SubscriptionConfigurationExtensions
 	{
 		public static IServiceCollection AddSubscriptionService(this IServiceCollection services)
-			=> services.AddTransient<ISubscriptionService, SubscriptionService>();
+			=> services.AddTransient<ISubscriptionService, SubscriptionService>()
+				.AddTransient<IAccountSubscriptionService, AccountSubscriptionService>();
 	}
 }

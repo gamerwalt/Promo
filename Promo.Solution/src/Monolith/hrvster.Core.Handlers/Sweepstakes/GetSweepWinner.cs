@@ -3,6 +3,7 @@ using hrvster.Infrastructure;
 using hrvster.Models;
 using MediatR;
 using Microsoft.Extensions.Logging;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -20,6 +21,13 @@ namespace hrvster.Core.Handlers.Sweepstakes
 		}
 
 		public async Task<SweepWinner> Handle(GetSweepWinnerRequest request, CancellationToken cancellationToken)
-			=> await _repository.GetSweepWinnerAsync(request.SweepWinnerUid);
+		{
+			var winner = await _repository.GetSweepWinnerAsync(request.SweepWinnerUid);
+			var backups = await _repository.GetSweepBackupWinnersAsync(request.SweepWinnerUid);
+
+			winner.BackupWinners = backups.ToList();
+
+			return winner;
+		}
 	}
 }

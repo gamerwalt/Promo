@@ -4,11 +4,11 @@
 @model PromoteBackupDetails
 @{
     ViewData["Title"] = "Promote Backup Winner";
-    var userLink = linkBuilder.BuildTwitterHandleLink(Model.SweepWinner.UserIdentifier); 
+    var userLink = linkBuilder.BuildTwitterHandleLink(Model.SweepWinner.UserIdentifier);
 }
 <div class="card card-bordered">
     <form asp-controller="SweepWinners"
-          asp-action="FulfillWinner"
+          asp-action="PromoteBackup"
           asp-route-sweepUid=@Model.Sweepstake.SweepUid
           asp-route-prizeUid=@Model.Prize.PrizeUid
           asp-route-sweepWinnerUid=@Model.SweepWinner.SweepWinnerUid
@@ -57,7 +57,13 @@
                     Backup Winners
                 </label>
                 <label class="d-flex align-items-center fs-4 fw-semibold form-label mb-2">
-                    <a href="@userLink" target="_blank">@Model.SweepWinner.UserIdentifier</a>
+                    <ul>
+                    @foreach(var backupWinner in Model.SweepWinner.BackupWinners)
+                    {
+                        var backupWinnerLink = linkBuilder.BuildTwitterHandleLink(backupWinner.UserIdentifier);
+                        <p><a href="@backupWinnerLink" target="_blank">@backupWinner.UserIdentifier</a></p>
+                    }
+                    </ul>
                 </label>
             </div>
             <div class="fv-row mb-8">

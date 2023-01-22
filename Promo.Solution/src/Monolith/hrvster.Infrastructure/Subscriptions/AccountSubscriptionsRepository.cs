@@ -12,6 +12,7 @@ namespace hrvster.Infrastructure.Subscriptions
 	{
 		Task CreateAsync(AccountSubscription model);
 		AccountSubscription GetAccountSubscription(Guid accountUid);
+		Task<AccountSubscription> GetAccountSubscriptionAsync(Guid accountUid);
 		Task<AccountSubscription> GetAccountSubscriptionByEmailAsync(string email);
 		Task<AccountSubscription> GetAsync(Guid subscriptionUid);
 		Task UpdateAccountSubscriptionStatusAsync(Guid subscriptionUid, SubscriptionStatus subscribed);
@@ -62,6 +63,28 @@ namespace hrvster.Infrastructure.Subscriptions
 				conn.Open();
 				using var reader = command.ExecuteReader();
 				while (reader.Read())
+				{
+					account = CreateAccountSubscriptionFrom(reader);
+				}
+			}
+
+			return account;
+		}
+
+		public async Task<AccountSubscription> GetAccountSubscriptionAsync(Guid accountUid)
+		{
+			var account = default(AccountSubscription);
+
+			using (var conn = new MySqlConnection(_database.GetConnectionString()))
+			{
+				var command = conn.CreateCommand();
+				command.CommandText = "account_subscriptions_get_by_account_uid";
+				command.CommandType = CommandType.StoredProcedure;
+				command.AddParameter("accountUid", accountUid);
+
+				await conn.OpenAsync();
+				using var reader = await command.ExecuteReaderAsync();
+				while (await reader.ReadAsync())
 				{
 					account = CreateAccountSubscriptionFrom(reader);
 				}

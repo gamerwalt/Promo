@@ -58,7 +58,7 @@
 			</div>
 		</div>
 		<div class="separator"></div>
-		@if (Model.SweepNotification.DrawAttemptHappened)
+		@if (Model.SweepNotification.DrawAttemptHappened && !Model.SweepNotification.DrawHappened)
 		{
 			<div class="d-flex flex-wrap justify-content-start mb-2">
 				<div class="d-flex flex-wrap">
@@ -555,10 +555,10 @@
 					</div>
 					<div class="tab-pane fade show" id="sweepEntries" role="tabpanel">
 						<div class="table-responsive">
-							<table class="table table-striped">
+							<table id="sweepEntryTable" class="table table-striped border table-rounded gs-7">
 								<thead>
 									<tr>
-										<th class="min-w-250px">Identifier</th>
+										<th class="min-w-100px">Identifier</th>
 										<th>Identifier Type</th>
 										<th>Entry Date</th>
 									</tr>
@@ -686,7 +686,8 @@
 </div>
 
 @section Scripts {
-@{
-    await Html.RenderPartialAsync("_ValidationScriptsPartial");
-}
+	@{
+		await Html.RenderPartialAsync("_ValidationScriptsPartial");
+		await Html.RenderPartialAsync("_ViewSweeps");
+	}
 }

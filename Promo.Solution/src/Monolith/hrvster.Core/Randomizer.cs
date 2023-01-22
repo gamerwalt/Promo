@@ -16,7 +16,9 @@ namespace hrvster.Core
 	{
 		public int GetRandomNumber(int min, int maxInclusive)
 		{
-			if (min >= maxInclusive) throw new ArgumentOutOfRangeException();
+			if (min == maxInclusive) return min;
+
+			if (min > maxInclusive) throw new ArgumentOutOfRangeException();
 
 			return RandomNumberGenerator.GetInt32(min, maxInclusive);
 		}

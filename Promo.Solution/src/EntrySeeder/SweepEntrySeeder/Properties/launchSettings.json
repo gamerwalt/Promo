@@ -1,0 +1,11 @@
+{
+  "profiles": {
+    "SweepEntrySeeder": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "local"
+      },
+      "dotnetRunMessages": true
+    }
+  }
+}

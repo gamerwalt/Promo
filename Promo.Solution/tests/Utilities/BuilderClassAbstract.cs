@@ -20,7 +20,17 @@ namespace TestUtilities
 				TestData.DisplayName)
 			.Build();
 
-		public Campaign BuildNewCampaign(Account account, CampaignType campaignType)
+        public Account BuildNewAccount(Guid accountUid)
+            => new AccountBuilder(
+                TestData.AccountId,
+                accountUid,
+                TestData.EmailAddress,
+                true,
+                TestData.PhoneNumber,
+                TestData.DisplayName)
+            .Build();
+
+        public Campaign BuildNewCampaign(Account account, CampaignType campaignType)
 			=> new CampaignBuilder(
 				TestData.CampaignId,
 				TestData.CampaignUid,

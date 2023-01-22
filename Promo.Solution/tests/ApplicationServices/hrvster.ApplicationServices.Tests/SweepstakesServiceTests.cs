@@ -7,6 +7,7 @@ using Xunit;
 
 namespace hrvster.ApplicationServices.Tests
 {
+    [Collection("Sequential")]
     public class SweepstakesServiceTests : BuilderClassAbstract, IClassFixture<SweepsFeature>
     {
         private readonly SweepsFeature _feature;
@@ -29,7 +30,7 @@ namespace hrvster.ApplicationServices.Tests
         {
             _feature.GivenACleanSlate();
 
-            var account = BuildNewAccount();
+            var account = BuildNewAccount(Guid.NewGuid());
             var campaign = BuildNewCampaign(account, BuildNewCampaignType());
             await _feature.AccountRepository.CreateAsync(account);
             await _feature.CampaignRepository.CreateCampaignAsync(campaign, TestData.WindowsTimezone, false);

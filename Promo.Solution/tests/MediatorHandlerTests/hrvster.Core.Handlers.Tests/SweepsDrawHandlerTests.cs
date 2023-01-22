@@ -22,7 +22,6 @@ namespace hrvster.Core.Handlers.Tests
     public class SweepsDrawHandlerTests : BuilderClassAbstract, IClassFixture<MediatorHandlerFeature>
     {
         private readonly MediatorHandlerFeature _feature;
-        private DrawBackupWinnersForSweepstakesRequest _request;
 
         public SweepsDrawHandlerTests(MediatorHandlerFeature feature)
             => _feature = feature;

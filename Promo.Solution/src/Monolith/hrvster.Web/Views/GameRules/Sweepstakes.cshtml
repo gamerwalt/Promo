@@ -109,9 +109,9 @@
                         {
                             <tr>
                                 <td>
-                                    <a href="@linkBuilder.BuildTwitterLink(rule.ExternalId, rule.RuleUid).Result" target="_blank">
-                                        @linkBuilder.BuildTwitterLink(rule.ExternalId, rule.RuleUid).Result
-                                    </a>
+                                <a href="@linkBuilder.BuildTwitterLink(rule.ExternalId, rule.RuleUid, TwitterUser).Result" target="_blank">
+                                    @linkBuilder.BuildTwitterLink(rule.ExternalId, rule.RuleUid, TwitterUser).Result
+                                </a>
                                 </td>
                                 <td>
                                     <i><strong>@rule.WatchValue</strong></i>

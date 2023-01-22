@@ -39,6 +39,10 @@ namespace TestUtilities
                 services.AddAutoMapper(typeof(EntityMap));
                 services.AddPublishers();
                 services.AddTwitterClient(Configuration);
+                services.AddSubscriptionRepositories();
+                services.AddSubscriptionService();
+                services.AddPaymentServices(Configuration);
+                services.AddHttpContextAccessor();
 
                 services.MockFirebaseAuthManager();
                 services.MockExternalClient();
