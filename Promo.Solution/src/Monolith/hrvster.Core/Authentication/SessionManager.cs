@@ -14,7 +14,7 @@ namespace hrvster.Core.Authentication
 		string GetValue(string keyName);
 		void RemoveKeyValue(string userToken);
 		void SetKeyValue(string keyName, string value);
-		HrvsterUser SetUserInformation();
+		HrvsterUser GetUserInformation();
 		Task UpdateDisplayNameAsync(string displayName);
 	}
 
@@ -50,7 +50,7 @@ namespace hrvster.Core.Authentication
 			_httpContextAccessor.HttpContext.Session.SetString(keyName, value);
 		}
 
-		public HrvsterUser SetUserInformation()
+		public HrvsterUser GetUserInformation()
 		{
 			if (!ContainsKey(SessionConstants.UserUid))
 				return null;

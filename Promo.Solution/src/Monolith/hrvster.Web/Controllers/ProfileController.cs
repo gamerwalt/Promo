@@ -37,7 +37,7 @@ namespace hrvster.Web.Controllers
 		[HttpGet]
 		public async Task<IActionResult> Index()
 		{
-			_hrvsterUser = _sessionManager.SetUserInformation();
+			_hrvsterUser = _sessionManager.GetUserInformation();
 
 			var account = await _mediator.Send(new GetAccountAndProfileRequest(_hrvsterUser.UserUid));
 			var totalsPerAccount = await _mediator.Send(new GetTotalResourcesRequest(_hrvsterUser.UserUid));
@@ -72,7 +72,7 @@ namespace hrvster.Web.Controllers
 
 		private async Task<UpdateAccount> BuildProfileModel()
 		{
-			_hrvsterUser = _sessionManager.SetUserInformation();
+			_hrvsterUser = _sessionManager.GetUserInformation();
 
 			var account = await _mediator.Send(new GetAccountAndProfileRequest(_hrvsterUser.UserUid));
 			var totalsPerAccount = await _mediator.Send(new GetTotalResourcesRequest(_hrvsterUser.UserUid));
@@ -99,7 +99,7 @@ namespace hrvster.Web.Controllers
 		[HttpPost]
 		public async Task<IActionResult> UpdateAccount(UpdateAccount form)
 		{
-			_hrvsterUser = _sessionManager.SetUserInformation();
+			_hrvsterUser = _sessionManager.GetUserInformation();
 
 			if (ModelState.IsValid)
 			{
@@ -124,7 +124,7 @@ namespace hrvster.Web.Controllers
 		[HttpGet]
 		public async Task<IActionResult> UpdateAccountDetails()
 		{
-			_hrvsterUser = _sessionManager.SetUserInformation();
+			_hrvsterUser = _sessionManager.GetUserInformation();
 
 			var account = await _mediator.Send(new GetAccountAndProfileRequest(_hrvsterUser.UserUid));
 			var totalsPerAccount = await _mediator.Send(new GetTotalResourcesRequest(_hrvsterUser.UserUid));
@@ -152,7 +152,7 @@ namespace hrvster.Web.Controllers
 		[HttpPost]
 		public async Task<IActionResult> UpdateAccountDetails(UpdateAccount form)
 		{
-			_hrvsterUser = _sessionManager.SetUserInformation();
+			_hrvsterUser = _sessionManager.GetUserInformation();
 
 			if (ModelState.IsValid)
 			{
@@ -178,7 +178,7 @@ namespace hrvster.Web.Controllers
 		[HttpPost]
 		public async Task<IActionResult> Unlink(ProfileType profileType)
 		{
-			_hrvsterUser = _sessionManager.SetUserInformation();
+			_hrvsterUser = _sessionManager.GetUserInformation();
 
 			await _mediator.Send(new UnlinkProfileRequest(_hrvsterUser.UserUid, profileType));
 

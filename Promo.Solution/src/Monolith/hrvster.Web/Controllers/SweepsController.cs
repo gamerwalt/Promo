@@ -55,7 +55,7 @@ namespace hrvster.Web.Controllers
 
 		public async Task<IActionResult> Index()
 		{
-			_hrvsterUser = _sessionManager.SetUserInformation();
+			_hrvsterUser = _sessionManager.GetUserInformation();
 
 			var sweeps = await _mediator.Send(new GetSweepForAccountUidRequest(_hrvsterUser.UserUid));
 
@@ -65,7 +65,7 @@ namespace hrvster.Web.Controllers
 		[HttpGet]
 		public async Task<IActionResult> CreateNew()
 		{
-			_hrvsterUser = _sessionManager.SetUserInformation();
+			_hrvsterUser = _sessionManager.GetUserInformation();
 
 			var promotions = await _mediator.Send(new GetAllCampaignsForAccount(_hrvsterUser.UserUid));
 			var anyActivePromotions = promotions.Any(c => c.IsActive());
@@ -87,7 +87,7 @@ namespace hrvster.Web.Controllers
 		[HttpPost]
 		public async Task<IActionResult> CreateNew(CreateNewSweep form)
 		{
-			_hrvsterUser = _sessionManager.SetUserInformation();
+			_hrvsterUser = _sessionManager.GetUserInformation();
 
 			var promotions = await _mediator.Send(new GetAllCampaignsForAccount(_hrvsterUser.UserUid));
 
@@ -126,7 +126,7 @@ namespace hrvster.Web.Controllers
 		[HttpGet]
 		public async Task<IActionResult> Create(Guid campaignUid)
 		{
-			_hrvsterUser = _sessionManager.SetUserInformation();
+			_hrvsterUser = _sessionManager.GetUserInformation();
 
 			var campaign = await _mediator.Send(new GetCampaign(campaignUid));
 
@@ -160,7 +160,7 @@ namespace hrvster.Web.Controllers
 		[HttpPost]
 		public async Task<IActionResult> Create([FromQuery] Guid campaignUid, CreateSweep form)
 		{
-			_hrvsterUser = _sessionManager.SetUserInformation();
+			_hrvsterUser = _sessionManager.GetUserInformation();
 
 			var campaign = await _mediator.Send(new GetCampaign(campaignUid));
 
@@ -214,7 +214,7 @@ namespace hrvster.Web.Controllers
 		[HttpGet]
 		public async Task<IActionResult> View(Guid sweepUid)
 		{
-			_hrvsterUser = _sessionManager.SetUserInformation();
+			_hrvsterUser = _sessionManager.GetUserInformation();
 
 			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
 			if (sweep == null) return RedirectToAction("Index");
@@ -279,7 +279,7 @@ namespace hrvster.Web.Controllers
 		[HttpPost]
 		public async Task<IActionResult> View(ViewSweepstake form, Guid sweepUid)
 		{
-			_hrvsterUser = _sessionManager.SetUserInformation();
+			_hrvsterUser = _sessionManager.GetUserInformation();
 
 			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
 			if (sweep == null) return RedirectToAction("Index");
@@ -336,7 +336,7 @@ namespace hrvster.Web.Controllers
 		[Route("/Sweeps/ManualDraw/{sweepUid:Guid}")]
 		public async Task<IActionResult> PerformDrawManually(Guid sweepUid)
 		{
-			_hrvsterUser = _sessionManager.SetUserInformation();
+			_hrvsterUser = _sessionManager.GetUserInformation();
 
 			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
 			if (sweep == null) return RedirectToAction("View", new { sweepUid = sweepUid });
@@ -381,7 +381,7 @@ namespace hrvster.Web.Controllers
 		[Route("/Sweeps/ManualDraw/{sweepUid:Guid}")]
 		public async Task<IActionResult> PerformDrawManually(PerformDrawManually form, Guid sweepUid, string WinnerSelectProcess)
 		{
-			_hrvsterUser = _sessionManager.SetUserInformation();
+			_hrvsterUser = _sessionManager.GetUserInformation();
 
 			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
 			if (sweep == null) return RedirectToAction("View", new { sweepUid = sweepUid });
@@ -439,7 +439,7 @@ namespace hrvster.Web.Controllers
 		[Route("/Sweeps/ToggleDrawAttempted/{sweepUid:Guid}")]
 		public async Task<IActionResult> ToggleDrawAttempted(Guid sweepUid)
 		{
-			_hrvsterUser = _sessionManager.SetUserInformation();
+			_hrvsterUser = _sessionManager.GetUserInformation();
 
 			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
 			if (sweep == null) return RedirectToAction("View", new { sweepUid = sweepUid });

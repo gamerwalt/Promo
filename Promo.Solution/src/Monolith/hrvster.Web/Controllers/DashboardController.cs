@@ -42,7 +42,7 @@ namespace hrvster.Web.Controllers
 		[HttpGet]
 		public async Task<ActionResult> Index()
 		{
-			_hrvsterUser = _sessionManager.SetUserInformation();
+			_hrvsterUser = _sessionManager.GetUserInformation();
 
 			var tasks = new List<Task>();
 			var accountTask = _mediator.Send(new GetAccountRequest(_hrvsterUser.UserUid));
@@ -65,7 +65,7 @@ namespace hrvster.Web.Controllers
 		[HttpGet]
 		public async Task<IActionResult> GetTweets([FromQuery] string campaignUid)
 		{
-			_hrvsterUser = _sessionManager.SetUserInformation();
+			_hrvsterUser = _sessionManager.GetUserInformation();
 
 			_logger.LogInformation("Request to retrieve tweets and entries.");
 
@@ -85,7 +85,7 @@ namespace hrvster.Web.Controllers
 		[HttpGet]
 		public async Task<IActionResult> GetSweepEntries([FromQuery] string campaignUid)
 		{
-			_hrvsterUser = _sessionManager.SetUserInformation();
+			_hrvsterUser = _sessionManager.GetUserInformation();
 
 			_logger.LogInformation("Request to retrieve tweets and entries.");
 

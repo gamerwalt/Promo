@@ -48,7 +48,7 @@ namespace hrvster.Web.Controllers
 		[Route("/CreateSweepPrizes/Create/Sweep/{sweepUid:Guid}")]
 		public async Task<IActionResult> Create(Guid sweepUid)
 		{
-			_hrvsterUser = _sessionManager.SetUserInformation();
+			_hrvsterUser = _sessionManager.GetUserInformation();
 
 			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
 			if (sweep == null)
@@ -101,7 +101,7 @@ namespace hrvster.Web.Controllers
 		[Route("/CreateSweepPrizes/Create/Sweep/{sweepUid:Guid}")]
 		public async Task<IActionResult> Create(Guid sweepUid, CreateSweepPrize form)
 		{
-			_hrvsterUser = _sessionManager.SetUserInformation();
+			_hrvsterUser = _sessionManager.GetUserInformation();
 
 			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
 			if (sweep == null)
@@ -158,7 +158,7 @@ namespace hrvster.Web.Controllers
 		[Route("/CreateSweepPrizes/View/Sweep/{sweepUid:Guid}")]
 		public async Task<IActionResult> View(Guid sweepUid)
 		{
-			_hrvsterUser = _sessionManager.SetUserInformation();
+			_hrvsterUser = _sessionManager.GetUserInformation();
 
 			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
 			if (sweep == null)
@@ -193,7 +193,7 @@ namespace hrvster.Web.Controllers
 		[Route("/CreateSweepPrizes/EditPrize/Sweep/{sweepUid:Guid}/Prize/{prizeUid:Guid}")]
 		public async Task<IActionResult> EditPrize(Guid sweepUid, Guid prizeUid)
 		{
-			_hrvsterUser = _sessionManager.SetUserInformation();
+			_hrvsterUser = _sessionManager.GetUserInformation();
 
 			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
 			if (sweep == null)
@@ -244,7 +244,7 @@ namespace hrvster.Web.Controllers
 		[Route("/CreateSweepPrizes/EditPrize/Sweep/{sweepUid:Guid}/Prize/{prizeUid:Guid}")]
 		public async Task<IActionResult> EditPrize(Guid sweepUid, Guid prizeUid, EditSweepPrize form)
 		{
-			_hrvsterUser = _sessionManager.SetUserInformation();
+			_hrvsterUser = _sessionManager.GetUserInformation();
 
 			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
 			if (sweep == null)
@@ -283,7 +283,7 @@ namespace hrvster.Web.Controllers
 		[Route("/CreateSweepPrizes/DeletePrize/Sweep/{sweepUid:Guid}/Prize/{prizeUid:Guid}")]
 		public async Task<IActionResult> DeletePrize(Guid sweepUid, Guid prizeUid)
 		{
-			_hrvsterUser = _sessionManager.SetUserInformation();
+			_hrvsterUser = _sessionManager.GetUserInformation();
 
 			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
 			if (sweep == null)
@@ -334,7 +334,7 @@ namespace hrvster.Web.Controllers
 		[Route("/CreateSweepPrizes/DeletePrize/Sweep/{sweepUid:Guid}/Prize/{prizeUid:Guid}")]
 		public async Task<IActionResult> DeletePrize(Guid sweepUid, Guid prizeUid, DeleteSweepPrize form)
 		{
-			_hrvsterUser = _sessionManager.SetUserInformation();
+			_hrvsterUser = _sessionManager.GetUserInformation();
 
 			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
 			if (sweep == null)

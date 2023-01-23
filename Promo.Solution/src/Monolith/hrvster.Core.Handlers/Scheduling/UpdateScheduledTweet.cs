@@ -40,7 +40,7 @@ namespace hrvster.Core.Handlers.Scheduling
 
 		protected override async Task Handle(UpdateScheduledTweetRequest request, CancellationToken cancellationToken)
 		{
-			_hrvsterUser = _sessionManager.SetUserInformation();
+			_hrvsterUser = _sessionManager.GetUserInformation();
 
 			try
 			{

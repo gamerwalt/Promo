@@ -46,7 +46,7 @@ namespace hrvster.Web.Controllers
 
 		public async Task<IActionResult> View(Guid ruleUid, Guid sweepUid, string actionName, string controllerName)
 		{
-			_hrvsterUser = _sessionManager.SetUserInformation();
+			_hrvsterUser = _sessionManager.GetUserInformation();
 
 			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
 			if (sweep == null)
@@ -109,7 +109,7 @@ namespace hrvster.Web.Controllers
 			string actionName,
 			string controllerName)
 		{
-			_hrvsterUser = _sessionManager.SetUserInformation();
+			_hrvsterUser = _sessionManager.GetUserInformation();
 
 			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
 			if (sweep == null)
@@ -231,7 +231,7 @@ namespace hrvster.Web.Controllers
 			string controllerName,
 			string actionName)
 		{
-			_hrvsterUser = _sessionManager.SetUserInformation();
+			_hrvsterUser = _sessionManager.GetUserInformation();
 
 			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
 			if (sweep == null)
@@ -317,7 +317,7 @@ namespace hrvster.Web.Controllers
 			string controllerName,
 			string actionName)
 		{
-			_hrvsterUser = _sessionManager.SetUserInformation();
+			_hrvsterUser = _sessionManager.GetUserInformation();
 
 			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
 			if (sweep == null)

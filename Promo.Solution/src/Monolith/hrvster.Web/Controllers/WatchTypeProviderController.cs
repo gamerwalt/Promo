@@ -40,7 +40,7 @@ namespace hrvster.Web.Controllers
 		[HttpGet]
 		public async Task<IActionResult> Select(Guid sweepUid, string actionName, string controllerName)
 		{
-			_hrvsterUser = _sessionManager.SetUserInformation();
+			_hrvsterUser = _sessionManager.GetUserInformation();
 
 			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
 			if (sweep == null)
@@ -78,7 +78,7 @@ namespace hrvster.Web.Controllers
 		[HttpPost]
 		public async Task<IActionResult> Select(Guid sweepUid, SelectWatchTypeProvider form)
 		{
-			_hrvsterUser = _sessionManager.SetUserInformation();
+			_hrvsterUser = _sessionManager.GetUserInformation();
 
 			if (ModelState.IsValid)
 			{

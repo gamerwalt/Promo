@@ -32,7 +32,7 @@ namespace hrvster.Web
 				.AddNToastNotifyToastr(new NToastNotify.ToastrOptions
 				{
 					ProgressBar = true,
-					TimeOut = 10000,
+					TimeOut = 100000,
 					CloseButton = true
 				});
 			services.AddMvc(o =>

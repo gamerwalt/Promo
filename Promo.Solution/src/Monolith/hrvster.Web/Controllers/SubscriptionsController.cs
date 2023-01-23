@@ -59,7 +59,7 @@ namespace hrvster.Web.Controllers
 		{
 			_logger.LogInformation("Posting information for select plan {planUid}", planUid);
 
-			_hrvsterUser = _sessionManager.SetUserInformation();
+			_hrvsterUser = _sessionManager.GetUserInformation();
 
 			_logger.LogInformation("Retrieved user information from session for {email}", _hrvsterUser.EmailAddress);
 

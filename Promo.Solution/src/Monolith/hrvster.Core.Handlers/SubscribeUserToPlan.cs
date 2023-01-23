@@ -30,7 +30,7 @@ namespace hrvster.Core.Handlers
 		public async Task<ServiceOperation<AccountSubscription>> Handle(
 			SubscribeUserToPlanRequest request, CancellationToken cancellationToken)
 		{
-			var hrvsterUser = _sessionManager.SetUserInformation();
+			var hrvsterUser = _sessionManager.GetUserInformation();
 			var startDate = DateTime.Now;
 			var endDate = startDate.AddDays(30);
 

@@ -61,7 +61,7 @@ namespace hrvster.Web.Controllers
 
 		public async Task<IActionResult> View(Guid sweepUid)
 		{
-			_hrvsterUser = _sessionManager.SetUserInformation();
+			_hrvsterUser = _sessionManager.GetUserInformation();
 
 			var sweepRule = await _mediator.Send(new GetSweepstakeAndRulesRequests(sweepUid));
 
@@ -88,7 +88,7 @@ namespace hrvster.Web.Controllers
 			string actionName,
 			string controllerName)
 		{
-			_hrvsterUser = _sessionManager.SetUserInformation();
+			_hrvsterUser = _sessionManager.GetUserInformation();
 
 			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
 			if (sweep == null)
@@ -144,7 +144,7 @@ namespace hrvster.Web.Controllers
 		public async Task<IActionResult> Activate(
 			Guid sweepUid, Guid ruleUid, string actionName, string controllerName, ActivateSweepRule form)
 		{
-			_hrvsterUser = _sessionManager.SetUserInformation();
+			_hrvsterUser = _sessionManager.GetUserInformation();
 
 			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
 			if (sweep == null)
@@ -200,7 +200,7 @@ namespace hrvster.Web.Controllers
 			string actionName,
 			string controllerName)
 		{
-			_hrvsterUser = _sessionManager.SetUserInformation();
+			_hrvsterUser = _sessionManager.GetUserInformation();
 
 			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
 			if (sweep == null)
@@ -255,7 +255,7 @@ namespace hrvster.Web.Controllers
 		[HttpPost]
 		public async Task<IActionResult> Deactivate(Guid sweepUid, Guid ruleUid, string actionName, string controllerName, DeactivateSweepRule form)
 		{
-			_hrvsterUser = _sessionManager.SetUserInformation();
+			_hrvsterUser = _sessionManager.GetUserInformation();
 
 			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
 			if (sweep == null)
@@ -307,7 +307,7 @@ namespace hrvster.Web.Controllers
 		[HttpGet]
 		public async Task<IActionResult> DeleteRule(Guid sweepUid, Guid ruleUid, string actionName, string controllerName)
 		{
-			_hrvsterUser = _sessionManager.SetUserInformation();
+			_hrvsterUser = _sessionManager.GetUserInformation();
 
 			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
 			if (sweep == null)
@@ -362,7 +362,7 @@ namespace hrvster.Web.Controllers
 		[HttpPost]
 		public async Task<IActionResult> DeleteRule(Guid sweepUid, Guid ruleUid, string returnAction, string returnController, DeleteSweepRule form)
 		{
-			_hrvsterUser = _sessionManager.SetUserInformation();
+			_hrvsterUser = _sessionManager.GetUserInformation();
 
 			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
 			if (sweep == null)
@@ -417,7 +417,7 @@ namespace hrvster.Web.Controllers
 		[HttpGet]
 		public async Task<IActionResult> SelectProvider(Guid sweepUid, string actionName, string controllerName)
 		{
-			_hrvsterUser = _sessionManager.SetUserInformation();
+			_hrvsterUser = _sessionManager.GetUserInformation();
 
 			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
 			if (sweep == null)
@@ -459,7 +459,7 @@ namespace hrvster.Web.Controllers
 			string controllerName,
 			SelectWatchTypeProvider form)
 		{
-			_hrvsterUser = _sessionManager.SetUserInformation();
+			_hrvsterUser = _sessionManager.GetUserInformation();
 
 			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
 			if (sweep == null)
@@ -529,7 +529,7 @@ namespace hrvster.Web.Controllers
 
 		public async Task<IActionResult> ValidateTwitterAuth()
 		{
-			_hrvsterUser = _sessionManager.SetUserInformation();
+			_hrvsterUser = _sessionManager.GetUserInformation();
 
 			if (Request.Query["denied"].Count > 0)
 			{
@@ -565,7 +565,7 @@ namespace hrvster.Web.Controllers
 		[HttpGet]
 		public async Task<IActionResult> CreateTweet(Guid sweepUid, string actionName, string controllerName)
 		{
-			_hrvsterUser = _sessionManager.SetUserInformation();
+			_hrvsterUser = _sessionManager.GetUserInformation();
 
 			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
 			if (sweep == null)
@@ -602,7 +602,7 @@ namespace hrvster.Web.Controllers
 		[HttpPost]
 		public async Task<IActionResult> CreateTweet(Guid sweepUid, string actionName, string controllerName, CreateSweepRuleTweet form)
 		{
-			_hrvsterUser = _sessionManager.SetUserInformation();
+			_hrvsterUser = _sessionManager.GetUserInformation();
 
 			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
 			if (sweep == null)

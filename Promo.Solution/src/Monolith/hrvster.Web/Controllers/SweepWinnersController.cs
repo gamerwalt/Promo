@@ -43,7 +43,7 @@ namespace hrvster.Web.Controllers
 			string actionName,
 			string controllerName)
 		{
-			_hrvsterUser = _sessionManager.SetUserInformation();
+			_hrvsterUser = _sessionManager.GetUserInformation();
 
 			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
 			if (sweep == null)
@@ -114,7 +114,7 @@ namespace hrvster.Web.Controllers
 			string actionName,
 			string controllerName)
 		{
-			_hrvsterUser = _sessionManager.SetUserInformation();
+			_hrvsterUser = _sessionManager.GetUserInformation();
 
 			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
 			if (sweep == null)
@@ -194,7 +194,7 @@ namespace hrvster.Web.Controllers
 		public async Task<IActionResult> FulfillWinner(
 			Guid sweepUid, Guid sweepWinnerUid, Guid prizeUid, string actionName, string controllerName)
 		{
-			_hrvsterUser = _sessionManager.SetUserInformation();
+			_hrvsterUser = _sessionManager.GetUserInformation();
 
 			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
 			if (sweep == null)
@@ -265,7 +265,7 @@ namespace hrvster.Web.Controllers
 			string actionName, 
 			string controllerName)
 		{
-			_hrvsterUser = _sessionManager.SetUserInformation();
+			_hrvsterUser = _sessionManager.GetUserInformation();
 
 			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
 			if (sweep == null)

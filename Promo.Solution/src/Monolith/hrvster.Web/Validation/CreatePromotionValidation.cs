@@ -54,7 +54,7 @@ namespace hrvster.Web.Validation
 
 		private bool PromotionDoesNotExist(string promotionName)
 		{
-			_hrvsterUser = _sessionManager.SetUserInformation();
+			_hrvsterUser = _sessionManager.GetUserInformation();
 
 			var result = _campaignsRepository.GetAccountCampaigns(_hrvsterUser.UserUid);
 

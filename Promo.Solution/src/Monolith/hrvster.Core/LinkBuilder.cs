@@ -31,7 +31,7 @@ namespace hrvster.Core
 
 		public async Task<Uri> BuildTwitterLink(string tweetId, Guid ruleUid)
 		{
-			_hrvsterUser = _sessionManager.SetUserInformation();
+			_hrvsterUser = _sessionManager.GetUserInformation();
 
 			if (string.IsNullOrWhiteSpace(_hrvsterUser.TwitterUserName))
 			{

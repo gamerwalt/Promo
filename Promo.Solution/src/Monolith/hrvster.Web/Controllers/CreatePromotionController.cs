@@ -40,7 +40,7 @@ namespace hrvster.Web.Controllers
 		[HttpGet]
 		public async Task<IActionResult> Create()
 		{
-			_hrvsterUser = _sessionManager.SetUserInformation();
+			_hrvsterUser = _sessionManager.GetUserInformation();
 
 			var startDate = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.Now, TimeZoneInfo.Local.Id, _hrvsterUser.WindowsTimeZone);
 
@@ -65,7 +65,7 @@ namespace hrvster.Web.Controllers
 		[HttpPost]
 		public async Task<IActionResult> Create(CreatePromotion form)
 		{
-			_hrvsterUser = _sessionManager.SetUserInformation();
+			_hrvsterUser = _sessionManager.GetUserInformation();
 
 			if (ModelState.IsValid)
 			{
@@ -160,7 +160,7 @@ namespace hrvster.Web.Controllers
 		[Route("/CreatePromotion/View/{promotionUid:Guid}")]
 		public async Task<IActionResult> View(Guid promotionUid, UpdatePromotion form)
 		{
-			_hrvsterUser = _sessionManager.SetUserInformation();
+			_hrvsterUser = _sessionManager.GetUserInformation();
 
 			var campaign = await _mediator.Send(new GetCampaign(promotionUid));
 

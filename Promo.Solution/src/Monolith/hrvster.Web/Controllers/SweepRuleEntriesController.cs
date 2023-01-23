@@ -39,7 +39,7 @@ namespace hrvster.Web.Controllers
 
 		public async Task<IActionResult> View(Guid sweepUid, Guid ruleUid, string actionName, string controllerName)
 		{
-			_hrvsterUser = _sessionManager.SetUserInformation();
+			_hrvsterUser = _sessionManager.GetUserInformation();
 
 			var sweepEntries = await _mediator.Send(new GetSweepRuleEntriesRequest(sweepUid, ruleUid));
 			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));

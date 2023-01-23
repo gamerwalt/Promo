@@ -2,7 +2,7 @@
 @using hrvster.Models
 @inject ISessionManager sessionManager;
 @{
-	var hrvsterUser = sessionManager.SetUserInformation();
+	var hrvsterUser = sessionManager.GetUserInformation();
 }
 <!DOCTYPE html>
 <html lang="en">

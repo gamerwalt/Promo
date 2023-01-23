@@ -41,7 +41,7 @@ namespace hrvster.Web.Controllers
 		[HttpGet]
 		public async Task<ActionResult> Create(Guid sweepUid, string actionName, string controllerName)
 		{
-			_hrvsterUser = _sessionManager.SetUserInformation();
+			_hrvsterUser = _sessionManager.GetUserInformation();
 
 			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
 			if (sweep == null)
@@ -73,7 +73,7 @@ namespace hrvster.Web.Controllers
 		[HttpGet]
 		public async Task<ActionResult> Update(Guid sweepUid, Guid drawRuleUid, string actionName, string controllerName)
 		{
-			_hrvsterUser = _sessionManager.SetUserInformation();
+			_hrvsterUser = _sessionManager.GetUserInformation();
 
 			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
 			if (sweep == null)
@@ -116,7 +116,7 @@ namespace hrvster.Web.Controllers
 		[HttpPost]
 		public async Task<ActionResult> Create(Guid sweepUid, CreateSweepDrawRule model, string actionName, string controllerName)
 		{
-			_hrvsterUser = _sessionManager.SetUserInformation();
+			_hrvsterUser = _sessionManager.GetUserInformation();
 
 			if (ModelState.IsValid)
 			{
@@ -157,7 +157,7 @@ namespace hrvster.Web.Controllers
 		[HttpPost]
 		public async Task<ActionResult> Update(Guid sweepUid, Guid drawRuleUid, UpdateSweepDrawRule form, string actionName, string controllerName)
 		{
-			_hrvsterUser = _sessionManager.SetUserInformation();
+			_hrvsterUser = _sessionManager.GetUserInformation();
 
 			if (ModelState.IsValid)
 			{

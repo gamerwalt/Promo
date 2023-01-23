@@ -49,10 +49,10 @@ namespace hrvster.Core.Handlers.Promotions
 				return Guid.Empty;
 			}
 
-			var campaigns = await _repository.GetAccountCampaignsAsync(campaignUid);
-			var activeCampaigns = campaigns.Where(c => c.ActiveInd && c.IsActive()).ToList();
+			var campaigns = await _repository.GetAccountCampaignsAsync(request.AccountUid);
+			var activeCampaigns = campaigns.Where(c => c.ActiveInd && c.IsActive() || c.WillBeInProgress()).ToList();
 
-			if(accountSubscription.Plan.PromotionsPerMonth != 0) //infinity
+			if(accountSubscription.Plan.PromotionsPerMonth != 0)
 			{
 				if(activeCampaigns.Count >= accountSubscription.Plan.PromotionsPerMonth)
 				{
@@ -61,7 +61,8 @@ namespace hrvster.Core.Handlers.Promotions
 						activeCampaigns.Count,
 						accountSubscription.Plan.PromotionsPerMonth);
 
-					_notificationService.AddErrorToastMessage($"You cannot create more promotions or you have {accountSubscription.Plan.PromotionsPerMonth} or more active promotions and your subscription is capped at {accountSubscription.Plan.PromotionsPerMonth} active promotions per month");
+					_notificationService.AddErrorToastMessage($"You cannot create more promotions.");
+					_notificationService.AddInfoToastMessage($"You can only have {accountSubscription.Plan.PromotionsPerMonth} active promotions per month.");
 
 					return Guid.Empty;
 				}

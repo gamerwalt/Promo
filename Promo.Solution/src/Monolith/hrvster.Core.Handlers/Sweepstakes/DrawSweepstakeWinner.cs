@@ -111,9 +111,9 @@ namespace hrvster.Core.Handlers.Sweepstakes
 							sweep.Name,
 							sweep.SweepUid);
 
-						var randomNumner = _randomizer.GetRandomNumber(min, max) - 1;
+						var backupWinnerIndex = GetRandomNumber(min, max);
 
-						var backupWinnerDrawObject = drawObject[randomNumner];
+						var backupWinnerDrawObject = drawObject[backupWinnerIndex];
 
 						_logger.LogInformation("Backup winner # {number} for winner {winnerNumber} for sweepstake {sweepName} with uid {sweepUid} is {userIdentifier}.",
 						index,
@@ -149,6 +149,14 @@ namespace hrvster.Core.Handlers.Sweepstakes
 				sweep.SweepUid);
 		}
 
+		private int GetRandomNumber(int min, int max)
+		{
+			if (min != max)
+				return _randomizer.GetRandomNumber(min, max) - 1;
+
+			return 0;
+		}
+
 		private List<SweepWinner> DrawWinners(
 			Sweep sweep,
 			List<SweepEntry> entries,
@@ -167,7 +175,8 @@ namespace hrvster.Core.Handlers.Sweepstakes
 					index,
 					sweep.Name,
 					sweep.SweepUid);
-				var winnerIndex = _randomizer.GetRandomNumber(min, max) - 1;
+
+				var winnerIndex = GetRandomNumber(min, max);
 				var winnerDrawObject = drawObject[winnerIndex];
 
 				_logger.LogInformation("Winner # {number} for sweepstake {sweepName} with uid {sweepUid} is {userIdentifier}.",

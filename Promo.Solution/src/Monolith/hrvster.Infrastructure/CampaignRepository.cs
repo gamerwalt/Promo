@@ -10,13 +10,20 @@ namespace hrvster.Infrastructure
 {
 	public interface ICampaignRepository
 	{
+		//Creates
 		Task CreateCampaignAsync(Campaign campaign, string timezone, bool isDayLight);
-		Task<Campaign> GetCampaignByUidAsync(Guid campaignUid, Guid accountUid);
-		Task UpdateCampaignAsync(Guid campaignUid, Campaign campaign, string timezoneId, bool isDaylight);
-		Task<List<Campaign>> GetAccountCampaignsAsync(Guid accountUid);
-		List<Campaign> GetAccountCampaigns(Guid userUid);
-		Task<Campaign> GetCampaignByUidAsync(Guid campaignUid);
+		
+		//Updates
 		Task UpdateCampaignAsync(Guid campaignUid, string campaignName, string description, Guid campaignTypeUid, DateTime startDate, DateTime endDate, string timezoneId, bool isDaylight);
+		Task UpdateCampaignAsync(Guid campaignUid, Campaign campaign, string timezoneId, bool isDaylight);
+
+		//Get Asyncs
+		Task<Campaign> GetCampaignByUidAsync(Guid campaignUid, Guid accountUid);
+		Task<Campaign> GetCampaignByUidAsync(Guid campaignUid);
+		Task<List<Campaign>> GetAccountCampaignsAsync(Guid accountUid);
+
+		//Gets
+		List<Campaign> GetAccountCampaigns(Guid userUid);
 		Campaign GetCampaignByUid(Guid campaignUid, Guid userUid);
 	}
 

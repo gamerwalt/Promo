@@ -53,7 +53,7 @@ namespace hrvster.Web.Controllers
 		[HttpGet]
 		public async Task<IActionResult> Index()
 		{
-			_hrvsterUser = _sessionManager.SetUserInformation();
+			_hrvsterUser = _sessionManager.GetUserInformation();
 
 			var campaigns = await _mediator.Send(new GetAllCampaignsForAccount(_hrvsterUser.UserUid));
 			var promotions = _mapper.Map<IEnumerable<Promotion>>(campaigns.OrderBy(c => c.EndDate));
@@ -64,7 +64,7 @@ namespace hrvster.Web.Controllers
 		[HttpGet]
 		public async Task<IActionResult> View(Guid campaignUid)
 		{
-			_hrvsterUser = _sessionManager.SetUserInformation();
+			_hrvsterUser = _sessionManager.GetUserInformation();
 
 			var campaign = await _mediator.Send(new GetCampaign(campaignUid));
 
@@ -120,7 +120,7 @@ namespace hrvster.Web.Controllers
 		[HttpPost]
 		public async Task<IActionResult> Update([FromQuery] Guid campaignUid, ViewPromotion form)
 		{
-			_hrvsterUser = _sessionManager.SetUserInformation();
+			_hrvsterUser = _sessionManager.GetUserInformation();
 
 			var campaign = await _mediator.Send(new GetCampaign(campaignUid));
 
@@ -185,7 +185,7 @@ namespace hrvster.Web.Controllers
 		[Route("/Promotions/Create")]
 		public async Task<IActionResult> Create()
 		{
-			_hrvsterUser = _sessionManager.SetUserInformation();
+			_hrvsterUser = _sessionManager.GetUserInformation();
 
 			var campaignTypes = await _mediator.Send(new GetCampaignTypesRequest());
 			var startDate = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.Now, TimeZoneInfo.Local.Id, _hrvsterUser.WindowsTimeZone);
@@ -210,7 +210,7 @@ namespace hrvster.Web.Controllers
 		[Route("/Promotions/Create")]
 		public async Task<IActionResult> Create(CreatePromotion model)
 		{
-			_hrvsterUser = _sessionManager.SetUserInformation();
+			_hrvsterUser = _sessionManager.GetUserInformation();
 
 			if (ModelState.IsValid)
 			{

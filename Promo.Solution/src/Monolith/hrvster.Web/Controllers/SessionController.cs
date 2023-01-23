@@ -109,7 +109,7 @@ namespace hrvster.Web.Controllers
 						var isDaylight = TimeZoneInfo.Local.IsDaylightSavingTime(DateTime.Now);
 						_sessionManager.SetKeyValue(SessionConstants.IsDaylight, isDaylight.ToString());
 
-						_hrvsterUser = _sessionManager.SetUserInformation();
+						_hrvsterUser = _sessionManager.GetUserInformation();
 
 						await _mediator.Send(new UpdateLastLoginRequest(link.User.LocalId, _hrvsterUser));
 

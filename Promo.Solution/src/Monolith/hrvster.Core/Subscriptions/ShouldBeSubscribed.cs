@@ -34,7 +34,7 @@ namespace hrvster.Core.Subscriptions
 
 		public void OnAuthorization(AuthorizationFilterContext context)
 		{
-			_hrvsterUser = _sessionManager.SetUserInformation();
+			_hrvsterUser = _sessionManager.GetUserInformation();
 
 			_logger.LogInformation("Attempting to check if user {userUid} is subscribed", _hrvsterUser.UserUid);
 

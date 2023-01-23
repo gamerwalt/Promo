@@ -74,9 +74,14 @@ namespace TestUtilities.Data
         public const string CampaignTypeCode = "AutoEnterSweepsFromTweetReplyHashtag";
 
         public const int CampaignId = 100;
-        public static Guid CampaignUid = Guid.Parse("3e6431d6-ba17-45f4-8f21-fd2d70245845");
+        public static Guid CampaignUid = Guid.Parse("1e6431d6-ba17-45f4-8f21-fd2d70245845");
 		public const string CampaignName = "Test Promotion";
 		public const string CampaignDescription = "Test Promotion";
+
+        public static Guid CampaignUid2 = Guid.Parse("2e6431d6-ba17-45f4-8f21-fd2d70245845");
+        public const int CampaignId2 = 200;
+        public const string CampaignName2 = "Test Promotion 2";
+        public const string CampaignDescription2 = "Test Promotion 2";
 
         public const int RuleId = 1;
         public const int RuleId2 = 2;

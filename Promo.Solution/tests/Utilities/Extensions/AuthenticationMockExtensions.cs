@@ -37,7 +37,7 @@ namespace TestUtilities.Extensions
                 mock.SetupGetValue(SessionConstants.Locale, TestData.Locale);
                 mock.SetupGetValue(SessionConstants.WindowsLocale, TestData.WindowsTimezone);
 
-                mock.Setup(m => m.SetUserInformation())
+                mock.Setup(m => m.GetUserInformation())
                     .Returns(user);
             });
         }

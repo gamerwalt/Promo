@@ -1,19 +1,16 @@
 ﻿using FluentAssertions;
 using hrvster.Core.Handlers.Tests.Common;
 using hrvster.Core.Requests;
-using hrvster.Core.Requests.ApiRequests;
-using hrvster.Models.Subscriptions;
 using hrvster.Web.Mvc.Common.Steps;
 using Moq;
 using NToastNotify;
-using TestUtilities;
 using TestUtilities.Data;
 using Xunit;
 
 namespace hrvster.Core.Handlers.Tests
 {
     [Collection("Sequential")]
-    public class PromotionCreationHandlerTests : BuilderClassAbstract, IClassFixture<MediatorHandlerFeature>
+    public class PromotionCreationHandlerTests : MediatorHandlerTestBase, IClassFixture<MediatorHandlerFeature>
     {
         private readonly MediatorHandlerFeature _feature;
 
@@ -21,28 +18,29 @@ namespace hrvster.Core.Handlers.Tests
             => _feature = feature;
 
         [Fact]
-        public async Task Given_An_Account_Without_A_Subscription_We_Should_Not_Allow_Them_To_Create_A_Promotion()
+        public async Task An_Account_WithoutASubscription_ShouldNotBeAllowed_To_Create_A_Wizard_Promotion()
         {
-            _feature.GivenACleanSlate();
+            _feature.GivenACleanSlate()
+                .MockedToastNotification.Setup(t => t.AddErrorToastMessage(It.IsAny<string>(), It.IsAny<LibraryOptions>()));
 
-            _feature.MockedToastNotification.Setup(t => t.AddErrorToastMessage(It.IsAny<string>(), It.IsAny<LibraryOptions>()));
-            
-            var account = BuildNewAccount();
-            await _feature.AccountRepository.CreateAsync(account);
+            var account = await CreateAccountAsync(_feature);
 
-            account = await _feature.AccountRepository.GetByEmailAddressAsync(account.EmailAddress);
+            await _feature.Mediator.Send(GetCreatePromotionRequest(account, TestData.CampaignUid));
 
-            var newCampaignRequest = new NewCampaignRequest
-            {
-                Name = TestData.CampaignName,
-                Description = TestData.CampaignDescription,
-                CampaignTypeUid = TestData.CampaignTypeUid,
-                StartDate = DateTime.Now.AddDays(1),
-                EndDate = DateTime.Now.AddDays(30)
-            };
+            var campaigns = await _feature.CampaignRepository.GetAccountCampaignsAsync(account.AccountUid);
 
-            var request = new CreateCampaignRequest(newCampaignRequest, account.AccountUid, TestData.WindowsTimezone);
-            await _feature.Mediator.Send(request);
+            campaigns.Count().Should().Be(0);
+        }
+
+        [Fact]
+        public async Task An_Account_WithoutASubscription_ShouldNotBeAllowed_To_Create_A_Promotion()
+        {
+            _feature.GivenACleanSlate()
+                .MockedToastNotification.Setup(t => t.AddErrorToastMessage(It.IsAny<string>(), It.IsAny<LibraryOptions>()));
+
+            var account = await CreateAccountAsync(_feature);
+
+            await _feature.Mediator.Send(GetCreateCampaignRequest1(account));
 
             var campaign = await _feature.CampaignRepository.GetAccountCampaignsAsync(account.AccountUid);
 
@@ -50,35 +48,75 @@ namespace hrvster.Core.Handlers.Tests
         }
 
         [Fact]
-        public async Task If_Plan_Has_0_Max_Promotions_We_Should_Allow_Creation_Of_A_Promotion_If_Account_Is_Subscribed()
+        public async Task If_Plan_Has_1_Max_Promotions_We_ShouldAllow_CreationOf_1_Promotion()
         {
             _feature.GivenACleanSlate();
 
             _feature.MockedToastNotification.Setup(t => t.AddErrorToastMessage(It.IsAny<string>(), It.IsAny<LibraryOptions>()));
 
-            var account = BuildNewAccount();
-            await _feature.AccountRepository.CreateAsync(account);
+            var account = await BuildAccountAndSubscribeToBasicPlan(_feature);
 
-            account = await _feature.AccountRepository.GetByEmailAddressAsync(account.EmailAddress);
-            var plan = await _feature.PlansRepository.GetPlanByUidAsync(TestData.BasicPlanUid, default);
+            await _feature.Mediator.Send(GetCreateCampaignRequest1(account));
 
-            await _feature.SubscriptionService.SubscribeUserToAsync(plan, account.AccountUid);
-
-            var newCampaignRequest = new NewCampaignRequest
-            {
-                Name = TestData.CampaignName,
-                Description = TestData.CampaignDescription,
-                CampaignTypeUid = TestData.CampaignTypeUid,
-                StartDate = DateTime.Now.AddDays(1),
-                EndDate = DateTime.Now.AddDays(30)
-            };
-
-            var request = new CreateCampaignRequest(newCampaignRequest, account.AccountUid, TestData.WindowsTimezone);
-            await _feature.Mediator.Send(request);
+            await _feature.Mediator.Send(GetCreateCampaignRequest2(account));
 
             var campaign = await _feature.CampaignRepository.GetAccountCampaignsAsync(account.AccountUid);
 
             campaign.Count().Should().Be(1);
+        }
+
+        [Fact]
+        public async Task If_Plan_Has_1_Max_Promotions_We_ShouldAllow_CreationOf_1_WizardPromotion()
+        {
+            _feature.GivenACleanSlate();
+
+            _feature.MockedToastNotification.Setup(t => t.AddErrorToastMessage(It.IsAny<string>(), It.IsAny<LibraryOptions>()));
+
+            var account = await BuildAccountAndSubscribeToBasicPlan(_feature);
+
+            await _feature.Mediator.Send(GetCreatePromotionRequest(account, TestData.CampaignUid));
+            await _feature.Mediator.Send(GetCreatePromotionRequest2(account, TestData.CampaignUid2));
+
+            var campaign = await _feature.CampaignRepository.GetAccountCampaignsAsync(account.AccountUid);
+
+            campaign.Count().Should().Be(1);
+            campaign.FirstOrDefault()?.CampaignUid.Should().Be(TestData.CampaignUid);
+        }
+
+        [Fact]
+        public async Task If_Plan_Has_Infinity_Promotions_We_ShouldAllow_Creation_Of_2_Promotions()
+        {
+            _feature.GivenACleanSlate();
+
+            _feature.MockedToastNotification.Setup(t => t.AddErrorToastMessage(It.IsAny<string>(), It.IsAny<LibraryOptions>()));
+
+            var account = await BuildAccountAndSubscribeToStarterPlan(_feature);
+            await _feature.Mediator.Send(
+                new CreateCampaignRequest(GetCampaignRequest(), account.AccountUid, TestData.WindowsTimezone));
+            await _feature.Mediator.Send(new CreateCampaignRequest(GetCampaignRequest2(), account.AccountUid, TestData.WindowsTimezone));
+
+            var campaign = await _feature.CampaignRepository.GetAccountCampaignsAsync(account.AccountUid);
+
+            campaign.Count().Should().Be(2);
+        }
+
+        [Fact]
+        public async Task If_Plan_Has_Infinity_Promotions_We_ShouldAllow_Creation_Of_2_WizardPromotions()
+        {
+            _feature.GivenACleanSlate();
+
+            _feature.MockedToastNotification.Setup(t => t.AddErrorToastMessage(It.IsAny<string>(), It.IsAny<LibraryOptions>()));
+
+            var account = await BuildAccountAndSubscribeToStarterPlan(_feature);
+
+            await _feature.Mediator.Send(GetCreatePromotionRequest(account, TestData.CampaignUid));
+            await _feature.Mediator.Send(GetCreatePromotionRequest2(account, TestData.CampaignUid2));
+
+            var campaign = await _feature.CampaignRepository.GetAccountCampaignsAsync(account.AccountUid);
+
+            campaign.Count().Should().Be(2);
+            campaign[0].CampaignUid.Should().Be(TestData.CampaignUid);
+            campaign[1].CampaignUid.Should().Be(TestData.CampaignUid2);
         }
     }
 }

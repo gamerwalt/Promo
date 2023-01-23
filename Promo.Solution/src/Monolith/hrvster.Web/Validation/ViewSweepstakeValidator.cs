@@ -55,7 +55,7 @@ namespace hrvster.Web.Validation
 
 		private bool ShouldNotExistAlready(ViewSweepstake form, string name)
 		{
-			_hrvsterUser = _sessionManager.SetUserInformation();
+			_hrvsterUser = _sessionManager.GetUserInformation();
 
 			var accountUid = _hrvsterUser.UserUid;
 			var campaignUid = form.UpdateSweepstake.CampaignUid;
@@ -73,7 +73,7 @@ namespace hrvster.Web.Validation
 
 		private bool BeBetweenPromotionDates(ViewSweepstake sweepStake, DateTime inputDate)
 		{
-			_hrvsterUser = _sessionManager.SetUserInformation();
+			_hrvsterUser = _sessionManager.GetUserInformation();
 
 			var campaign = _campaignRepository.GetCampaignByUid(sweepStake.UpdateSweepstake.CampaignUid, _hrvsterUser.UserUid);
 

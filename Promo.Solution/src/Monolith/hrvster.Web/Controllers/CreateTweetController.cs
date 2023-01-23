@@ -58,7 +58,7 @@ namespace hrvster.Web.Controllers
 		[Route("/CreateTweet/SelectProvider/Sweep/{sweepUid:Guid}")]
 		public async Task<IActionResult> SelectProvider(Guid sweepUid)
 		{
-			_hrvsterUser = _sessionManager.SetUserInformation();
+			_hrvsterUser = _sessionManager.GetUserInformation();
 
 			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
 			if (sweep == null)
@@ -99,7 +99,7 @@ namespace hrvster.Web.Controllers
 			Guid sweepUid,
 			SelectWatchTypeProvider form)
 		{
-			_hrvsterUser = _sessionManager.SetUserInformation();
+			_hrvsterUser = _sessionManager.GetUserInformation();
 
 			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
 			if (sweep == null)
@@ -128,7 +128,7 @@ namespace hrvster.Web.Controllers
 		[Route("/CreateTweet/Profile/Sweep/{sweepUid:Guid}/Provider/{providerCode}")]
 		public async Task<IActionResult> CreateProfile(Guid sweepUid, string providerCode)
 		{
-			_hrvsterUser = _sessionManager.SetUserInformation();
+			_hrvsterUser = _sessionManager.GetUserInformation();
 
 			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
 			if (sweep == null)
@@ -183,7 +183,7 @@ namespace hrvster.Web.Controllers
 		[HttpGet]
 		public async Task<IActionResult> ValidateTwitterAuth()
 		{
-			_hrvsterUser = _sessionManager.SetUserInformation();
+			_hrvsterUser = _sessionManager.GetUserInformation();
 
 			if (Request.Query["denied"].Count > 0)
 			{
@@ -208,7 +208,7 @@ namespace hrvster.Web.Controllers
 		[Route("/CreateTweet/Watch/Sweep/{sweepUid:Guid}")]
 		public async Task<IActionResult> Watch(Guid sweepUid)
 		{
-			_hrvsterUser = _sessionManager.SetUserInformation();
+			_hrvsterUser = _sessionManager.GetUserInformation();
 
 			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
 			if (sweep == null)
@@ -252,7 +252,7 @@ namespace hrvster.Web.Controllers
 		[Route("/CreateTweet/Watch/Sweep/{sweepUid:Guid}")]
 		public async Task<IActionResult> Watch(Guid sweepUid, CreateSweepRuleTweet form)
 		{
-			_hrvsterUser = _sessionManager.SetUserInformation();
+			_hrvsterUser = _sessionManager.GetUserInformation();
 
 			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
 			if (sweep == null)

@@ -39,7 +39,7 @@ namespace hrvster.Web.Controllers
 		[Route("/CreateDrawRules/Create/Sweep/{sweepUid:Guid}")]
 		public async Task<IActionResult> Create(Guid sweepUid)
 		{
-			_hrvsterUser = _sessionManager.SetUserInformation();
+			_hrvsterUser = _sessionManager.GetUserInformation();
 
 			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
 			if (sweep == null)
@@ -77,7 +77,7 @@ namespace hrvster.Web.Controllers
 		[Route("/CreateDrawRules/Create/Sweep/{sweepUid:Guid}")]
 		public async Task<IActionResult> Create(Guid sweepUid, CreateSweepDrawRule form)
 		{
-			_hrvsterUser = _sessionManager.SetUserInformation();
+			_hrvsterUser = _sessionManager.GetUserInformation();
 
 			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
 			if (sweep == null)
@@ -138,7 +138,7 @@ namespace hrvster.Web.Controllers
 		[Route("/CreateDrawRules/View/Sweep/{sweepUid:Guid}")]
 		public async Task<IActionResult> View(Guid sweepUid)
 		{
-			_hrvsterUser = _sessionManager.SetUserInformation();
+			_hrvsterUser = _sessionManager.GetUserInformation();
 
 			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
 			if (sweep == null)
@@ -176,7 +176,7 @@ namespace hrvster.Web.Controllers
 		[Route("/CreateDrawRules/View/Sweep/{sweepUid:Guid}")]
 		public async Task<IActionResult> View(Guid sweepUid, UpdateSweepDrawRule form)
 		{
-			_hrvsterUser = _sessionManager.SetUserInformation();
+			_hrvsterUser = _sessionManager.GetUserInformation();
 
 			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
 			if (sweep == null)

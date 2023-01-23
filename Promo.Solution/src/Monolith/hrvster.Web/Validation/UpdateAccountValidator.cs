@@ -52,7 +52,7 @@ namespace hrvster.Web.Validation
 
 		private bool EmailAddressMustNotExist(string emailAddress)
 		{
-			_hrvsterUser = _sessionManager.SetUserInformation();
+			_hrvsterUser = _sessionManager.GetUserInformation();
 
 			if (string.IsNullOrWhiteSpace(emailAddress)) return false;
 
@@ -66,7 +66,7 @@ namespace hrvster.Web.Validation
 
 		private bool PhoneNumberMustNotExist(string phoneNumber)
 		{
-			_hrvsterUser = _sessionManager.SetUserInformation();
+			_hrvsterUser = _sessionManager.GetUserInformation();
 
 			if (string.IsNullOrWhiteSpace(phoneNumber)) return false;
 
@@ -80,7 +80,7 @@ namespace hrvster.Web.Validation
 
 		private bool DisplayNameMustNotExist(string userName)
 		{
-			_hrvsterUser = _sessionManager.SetUserInformation();
+			_hrvsterUser = _sessionManager.GetUserInformation();
 
 			if (string.IsNullOrWhiteSpace(userName)) return false;
 
@@ -94,7 +94,7 @@ namespace hrvster.Web.Validation
 
 		private bool MustNotExist(string displayName)
 		{
-			_hrvsterUser = _sessionManager.SetUserInformation();
+			_hrvsterUser = _sessionManager.GetUserInformation();
 
 			var account = _repository.GetUserByUserName(displayName);
 
