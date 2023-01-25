@@ -15,6 +15,7 @@ namespace hrvster.Infrastructure.Subscriptions
 	{
 		Task<Plan> GetPlanByUidAsync(Guid planUid, CancellationToken cancellationToken);
 		Task<IEnumerable<Plan>> GetPlansAsync();
+		Task UpdateAsync(Plan plan, CancellationToken cancellationToken);
 	}
 
 	public class PlansRepository : IPlansRepository
@@ -66,6 +67,28 @@ namespace hrvster.Infrastructure.Subscriptions
 			}
 
 			return plans;
+		}
+
+		public async Task UpdateAsync(Plan plan, CancellationToken cancellationToken)
+		{
+			var plans = new List<Plan>();
+
+			using var conn = new MySqlConnection(_database.GetConnectionString());
+			var command = conn.CreateCommand();
+			command.CommandText = "plan_update";
+			command.CommandType = CommandType.StoredProcedure;
+			command.AddParameter("planUid", plan.PlanUid)
+				.AddParameter("planName", plan.PlanName)
+				.AddParameter("planDescription", plan.PlanDescription)
+				.AddParameter("promotionsPerMonth", plan.PromotionsPerMonth)
+				.AddParameter("sweepsPerMonth", plan.SweepstakesPerMonth)
+				.AddParameter("sweepsMaximumEntries", plan.SweepstakesMaximumEntries)
+				.AddParameter("sweepHashtagsPerMonth", plan.HashtagsPerMonth)
+				.AddParameter("pricePerMonth", plan.PricePerMonth)
+				.AddParameter("pricePerYear", plan.PricePerYear);
+
+			await conn.OpenAsync(cancellationToken);
+			await command.ExecuteNonQueryAsync(cancellationToken);
 		}
 
 		private Plan CreatePlanFrom(MySqlDataReader reader)

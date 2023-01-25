@@ -2,6 +2,7 @@
 using hrvster.Core.Requests;
 using hrvster.Core.Requests.ApiRequests;
 using hrvster.Core.Requests.WebRequests.Promotions;
+using hrvster.Core.Requests.WebRequests.Sweeps;
 using hrvster.Models;
 using TestUtilities;
 using TestUtilities.Data;
@@ -115,6 +116,57 @@ namespace hrvster.Core.Handlers.Tests
             var campaigns = await _feature.CampaignRepository.GetAccountCampaignsAsync(account.AccountUid);
 
             return campaigns.FirstOrDefault();
+        }
+
+        public static CreateSweepRequest GetCreateSweepRequest2(Models.Account account, Campaign campaign)
+            => new CreateSweepRequest(
+                    $"{TestData.SweepName}2",
+                    DateTime.Now.AddHours(2),
+                    DateTime.Now.AddDays(20),
+                    DateTime.Now.AddDays(21),
+                    campaign.CampaignUid,
+                    account.AccountUid,
+                    TestData.WindowsTimezone,
+                    false);
+
+        public static CreateSweepRequest GetCreateSweepRequest(Models.Account account, Campaign campaign)
+            => new CreateSweepRequest(
+                    TestData.SweepName,
+                    DateTime.Now.AddHours(1),
+                    DateTime.Now.AddDays(30),
+                    DateTime.Now.AddDays(31),
+                    campaign.CampaignUid,
+                    account.AccountUid,
+                    TestData.WindowsTimezone,
+                    false);
+
+        public static NewSweepRequest CreateNewSweepRequest(Models.Account account, Campaign campaign)
+            => new NewSweepRequest
+                {
+                    AccountUid = account.AccountUid,
+                    CampaignUid = campaign.CampaignUid,
+                    Name = TestData.SweepName,
+                    StartDate = DateTime.Now.AddHours(2),
+                    EndDate = DateTime.Now.AddDays(60),
+                    DrawDate = DateTime.Now.AddDays(61)
+                };
+
+        public static NewSweepRequest CreateNewSweepRequest2(Models.Account account, Campaign campaign)
+            => new NewSweepRequest
+            {
+                AccountUid = account.AccountUid,
+                CampaignUid = campaign.CampaignUid,
+                Name = $"{TestData.SweepName}2",
+                StartDate = DateTime.Now.AddHours(4),
+                EndDate = DateTime.Now.AddDays(30),
+                DrawDate = DateTime.Now.AddDays(31)
+            };
+
+        public async Task<Campaign> CreateCampaignAsync(MediatorHandlerFeature _feature, Models.Account account)
+        {
+            var campaignType = BuildNewCampaignType();
+            var campaign = await CreateCampaignAsync(_feature, account, campaignType);
+            return campaign;
         }
     }
 }
