@@ -14,12 +14,16 @@ namespace hrvster.Infrastructure
 {
 	public interface ISweepsRepository
 	{
+		//Create and Updates
 		Task CreateAsync(Sweep sweep, string timezone, bool isDaylight);
+		Task UpdateAsync(Guid sweepUid, Sweep sweep, string timezone, bool isDaylight);
+		Task UpdateSweepAsDrawnAsync(Guid sweepUid);
+
+		//Gets
 		Task<Sweep> GetAsync(Guid sweepUid);
 		Task<IEnumerable<Sweep>> GetAllForCampaignAsync(Guid campaignUid);
-		Task UpdateAsync(Guid sweepUid, Sweep sweep, string timezone, bool isDaylight);
 		Task<IEnumerable<SweepDrawPropertiesAndRule>> GetSweepsRequiringADrawAsync();
-		Task UpdateSweepAsDrawnAsync(Guid sweepUid);
+		
 		Task<IEnumerable<Sweep>> GetAllForAccountAsync(Guid accountUid);
 		IEnumerable<Sweep> GetAllForAccount(Guid accountUid);
 		IEnumerable<Sweep> GetAllForCampaign(Guid campaignUid);

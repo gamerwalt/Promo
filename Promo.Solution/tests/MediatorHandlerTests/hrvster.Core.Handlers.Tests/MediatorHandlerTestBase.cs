@@ -2,6 +2,7 @@
 using hrvster.Core.Requests;
 using hrvster.Core.Requests.ApiRequests;
 using hrvster.Core.Requests.WebRequests.Promotions;
+using hrvster.Models;
 using TestUtilities;
 using TestUtilities.Data;
 
@@ -102,6 +103,18 @@ namespace hrvster.Core.Handlers.Tests
             await _feature.AccountRepository.CreateAsync(account);
 
             return await _feature.AccountRepository.GetByEmailAddressAsync(account.EmailAddress);
+        }
+
+        public async Task<Models.Campaign> CreateCampaignAsync(
+            MediatorHandlerFeature _feature, Models.Account account, Models.CampaignType campaignType)
+        {
+            var campaign = BuildNewCampaign(account, campaignType);
+
+            await _feature.CampaignRepository.CreateCampaignAsync(campaign, TestData.WindowsTimezone, false);
+
+            var campaigns = await _feature.CampaignRepository.GetAccountCampaignsAsync(account.AccountUid);
+
+            return campaigns.FirstOrDefault();
         }
     }
 }
