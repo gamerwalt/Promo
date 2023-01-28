@@ -21,7 +21,7 @@ namespace hrvster.Core.Handlers.Tests
             _feature.GivenACleanSlate();
 
             var account = await CreateAccountAsync(_feature);
-            var campaign = await CreateCampaignAsync(_feature, account);
+            var campaign = await BuildAndCreateCampaignAsync(_feature, account);
 
             await _feature.Mediator.Send(new CreateSweep(
                 CreateNewSweepRequest(account, campaign),
@@ -38,7 +38,7 @@ namespace hrvster.Core.Handlers.Tests
             _feature.GivenACleanSlate();
 
             var account = await CreateAccountAsync(_feature);
-            var campaign = await CreateCampaignAsync(_feature, account);
+            var campaign = await BuildAndCreateCampaignAsync(_feature, account);
 
             await _feature.Mediator.Send(GetCreateSweepRequest(account, campaign));
 
@@ -52,7 +52,7 @@ namespace hrvster.Core.Handlers.Tests
             _feature.GivenACleanSlate();
 
             var account = await BuildAccountAndSubscribeToStarterPlan(_feature);
-            var campaign = await CreateCampaignAsync(_feature, account);
+            var campaign = await BuildAndCreateCampaignAsync(_feature, account);
 
             var plan = await _feature.PlansRepository.GetPlanByUidAsync(TestData.StarterPlanUid, default);
             plan.Should().NotBeNull();
@@ -79,7 +79,7 @@ namespace hrvster.Core.Handlers.Tests
             _feature.GivenACleanSlate();
 
             var account = await BuildAccountAndSubscribeToStarterPlan(_feature);
-            var campaign = await CreateCampaignAsync(_feature, account);
+            var campaign = await BuildAndCreateCampaignAsync(_feature, account);
 
             var plan = await _feature.PlansRepository.GetPlanByUidAsync(TestData.StarterPlanUid, default);
             plan.Should().NotBeNull();

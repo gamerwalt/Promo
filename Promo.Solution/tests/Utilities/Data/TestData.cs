@@ -120,5 +120,18 @@ namespace TestUtilities.Data
         public static Guid BasicPlanUid = Guid.Parse("e39503df-db14-4988-a9ad-adc6e938988e");
         public static Guid StarterPlanUid = Guid.Parse("f88e1f57-c2b9-47d0-95c4-3f8e93e619ed");
         public static Guid AdvancedPlanUid = Guid.Parse("8597b37d-99e4-403a-9b1c-7b75a5e78c50");
+
+        public const int WatchTypeId = 2;
+        public const string Hashtag = "#Hashtag1";
+        public const string TweetId = "8973948734";
+        public const string TweetText = "A sample tweet";
+
+        public const string Hashtag2 = "#Hashtag2";
+        public const string TweetId2 = "2973948734";
+        public const string TweetText2 = "A sample tweet 2";
+
+        public const string Hashtag3 = "#Hashtag3";
+        public const string TweetId3 = "3973948734";
+        public const string TweetText3 = "A sample tweet 3";
     }
 }

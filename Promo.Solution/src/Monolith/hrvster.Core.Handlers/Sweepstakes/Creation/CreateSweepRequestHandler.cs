@@ -59,13 +59,13 @@ namespace hrvster.Core.Handlers.Sweepstakes.Creation
 			{
 				if (activeSweeps.Count >= accountSubscription.Plan.SweepstakesPerMonth)
 				{
-					_logger.LogWarning("Account with uid {accountUid} has a total of {activeCampaignCount} active campaigns and their current max is {maxPromotions}",
+					_logger.LogWarning("Account with uid {accountUid} has a total of {activeSweepsCount} active sweepstakes and their current max is {maxPromotions}",
 						request.Sweep.AccountUid,
 						activeSweeps.Count,
-						accountSubscription.Plan.PromotionsPerMonth);
+						accountSubscription.Plan.SweepstakesPerMonth);
 
-					_notificationService.AddErrorToastMessage($"You cannot create more promotions.");
-					_notificationService.AddInfoToastMessage($"You can only have {accountSubscription.Plan.PromotionsPerMonth} active promotions per month.");
+					_notificationService.AddErrorToastMessage($"You cannot create more sweepstakes.");
+					_notificationService.AddInfoToastMessage($"You can only have {accountSubscription.Plan.PromotionsPerMonth} active sweepstakes per month.");
 
 					return default;
 				}

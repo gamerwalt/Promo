@@ -17,6 +17,7 @@ namespace hrvster.Infrastructure.Scheduling
 		Task<List<ScheduledSweepRuleTweetImage>> GetAllImagesAsync(int scheduledId);
 		Task UpdateStatus(ScheduledSweepRuleTweet scheduledTweet, ScheduledStatus status);
 		Task<ScheduledSweepRuleTweet> GetScheduledTweetAsync(int ruleId);
+		Task<IEnumerable<ScheduledSweepRuleTweet>> GetSweepScheduledTweetAsync(Guid sweepUid);
 	}
 
 	public class ScheduledSweepRuleTweetsRepository : IScheduledSweepRuleTweetsRepository
@@ -140,6 +141,28 @@ namespace hrvster.Infrastructure.Scheduling
 			}
 
 			return scheduledSweepRuleTweet;
+		}
+
+		public async Task<IEnumerable<ScheduledSweepRuleTweet>> GetSweepScheduledTweetAsync(Guid sweepUid)
+		{
+			var scheduledSweepRuleTweets = new List<ScheduledSweepRuleTweet>();
+
+			using (var conn = new MySqlConnection(_database.GetConnectionString()))
+			{
+				var command = conn.CreateCommand();
+				command.CommandText = "scheduled_sweep_rule_tweets_get_by_sweep_uid";
+				command.CommandType = CommandType.StoredProcedure;
+				command.AddParameter(nameof(sweepUid), sweepUid);
+
+				await conn.OpenAsync();
+				using var reader = await command.ExecuteReaderAsync();
+				while (await reader.ReadAsync())
+				{
+					scheduledSweepRuleTweets.Add(CreateRecordFrom(reader));
+				}
+			}
+
+			return scheduledSweepRuleTweets;
 		}
 	}
 }

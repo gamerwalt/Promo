@@ -55,6 +55,9 @@ namespace hrvster.Extensions.Configuration
 				.AddTransient<IIncomingTweetsRepository, IncomingTweetsRepository>()
 				.AddTransient<IUserLimiterRepository, UserLimiterRepository>();
 
+		public static IServiceCollection AddBlackListedSweepsUserRepository(this IServiceCollection services)
+			=> services.AddTransient<IBlacklistedSweepsUsersRepository, BlacklistedSweepsUsersRepository>();
+
 		public static IServiceCollection AddServicesRepositories(this IServiceCollection services)
 			=> services.AddTransient<IServicesRepository, ServicesRepository>();
 

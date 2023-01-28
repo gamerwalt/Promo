@@ -11,16 +11,17 @@ namespace hrvster.Infrastructure
 	public interface ISweepRulesRepository
 	{
 		Task CreateRuleAsync(Models.Rule rule);
-		Task<Models.Rule> GetAsync(Guid ruleUid);
-		Task<IEnumerable<Models.Rule>> GetRules(string watchTypeCode);
 		Task UpdateRuleAsAddedAsync(Guid ruleUid);
-		Task<IEnumerable<Models.Rule>> GetRuleByHashTagAsync(string text);
-		Task<IEnumerable<Models.Rule>> GetSweepRuleAsync(Guid sweepUid);
-		Task<IEnumerable<Models.Rule>> GetSweepRuleAsync();
 		Task UpdateRuleExternalId(Guid ruleUid, string externalId);
 		Task DeleteAsync(Guid ruleUid);
 		Task DeactivateAsync(Guid sweepUid, Guid ruleUid);
 		Task ActivateAsync(Guid sweepUid, Guid ruleUid);
+
+		Task<Models.Rule> GetAsync(Guid ruleUid);
+		Task<IEnumerable<Models.Rule>> GetRules(string watchTypeCode);
+		Task<IEnumerable<Models.Rule>> GetRuleByHashTagAsync(string text);
+		Task<IEnumerable<Models.Rule>> GetSweepRuleAsync(Guid sweepUid);
+		Task<IEnumerable<Models.Rule>> GetSweepRuleAsync();
 		IEnumerable<Models.Rule> GetRuleMatching(string watchValue);
 	}
 

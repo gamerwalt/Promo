@@ -1,6 +1,8 @@
-﻿using hrvster.Core.Clients.Common;
+﻿using hrvster.ApplicationServices.Subscription;
+using hrvster.Core.Clients.Common;
 using hrvster.Core.Requests.Notifications.Publishing;
 using hrvster.Core.Requests.WebRequests.Publishing;
+using hrvster.Infrastructure;
 using hrvster.Infrastructure.Core;
 using hrvster.Infrastructure.Extensions;
 using hrvster.Infrastructure.Scheduling;
@@ -9,6 +11,7 @@ using hrvster.Models.Profiles;
 using hrvster.Models.Scheduling;
 using MediatR;
 using Microsoft.Extensions.Logging;
+using NToastNotify;
 using System;
 using System.Linq;
 using System.Threading;
@@ -21,21 +24,30 @@ namespace hrvster.Core.Handlers.Publishing
 		private readonly ILogger<PublishSweepRuleTweet> _logger;
 		private readonly Func<ExternalClientType, Clients.Publishers.IExternalClient> _publisherResolver;
 		private readonly IMediator _mediator;
+		private readonly ISweepRulesRepository _sweepRulesRepository;
 		private readonly ISweepTweetSchedulerRepository _repository;
 		private readonly IWatchTypesRepository _watchTypesRepository;
+		private readonly IAccountSubscriptionService _accountSubscriptionService;
+		private readonly IToastNotification _notificationService;
 
 		public PublishSweepRuleTweet(
 			ILoggerFactory loggerFactory,
 			Func<ExternalClientType, Clients.Publishers.IExternalClient> publisherResolver,
 			IMediator mediator,
+			ISweepRulesRepository sweepRulesRepository,
 			ISweepTweetSchedulerRepository repository,
-			IWatchTypesRepository watchTypesRepository)
+			IWatchTypesRepository watchTypesRepository,
+			IAccountSubscriptionService accountSubscriptionService,
+			IToastNotification notificationService)
 		{
 			_logger = loggerFactory.CreateLogger<PublishSweepRuleTweet>();
 			_publisherResolver = publisherResolver;
 			_mediator = mediator;
+			_sweepRulesRepository = sweepRulesRepository;
 			_repository = repository;
 			_watchTypesRepository = watchTypesRepository;
+			_accountSubscriptionService = accountSubscriptionService;
+			_notificationService = notificationService;
 		}
 
 		public async Task<bool> Handle(PublishSweepRuleTweetRequest request, CancellationToken cancellationToken)
@@ -44,7 +56,43 @@ namespace hrvster.Core.Handlers.Publishing
 				nameof(PublishSweepRuleTweet),
 				request.AsJson());
 
-			var message = new Message
+			if (!await CanPublishRequestAsync(request))
+			{
+				return false;
+			}
+
+			var message = BuildMessage(request);
+
+			return request.PostNow
+				? await PublishMessageAsync(message, request.MustBeFollowing)
+				: await SaveScheduledTweetAsync(message, request.MustBeFollowing, request.TimeZoneId, request.IsDaylight);
+		}
+
+		private async Task<bool> PublishMessageAsync(Message message, bool following)
+		{
+			var twitterPublisher = _publisherResolver(ExternalClientType.Twitter);
+
+			var tweetId = await twitterPublisher.PublishAsync(message);
+
+			if (string.IsNullOrWhiteSpace(tweetId))
+			{
+				_logger.LogError("Unable to send the tweet {text} for sweep name and uid {name}, {uid} for {profileName} and {profileUid}",
+					message.Text,
+				 	message.SweepName,
+					message.SweepUid,
+					message.Profile.ScreenName,
+					message.Profile.ProfileUid);
+				return false;
+			}
+
+			await _mediator.Publish(new SweepRuleTweetPublished(tweetId, message, following));
+
+			return true;
+		}
+
+		private static Message BuildMessage(PublishSweepRuleTweetRequest request)
+		{
+			return new Message
 			{
 				WatchTypeId = request.WatchTypeId,
 				Hashtag = request.WatchValue,
@@ -56,28 +104,37 @@ namespace hrvster.Core.Handlers.Publishing
 				ScheduledDate = request.ScheduledDate,
 				Media = request.MediaLocation
 			};
+		}
 
-			if (!request.PostNow)
+		private async Task<bool> CanPublishRequestAsync(PublishSweepRuleTweetRequest request)
+		{
+			var accountSubscription = await _accountSubscriptionService.GetAccountSubscriptionAsync(request.Profile.Account.AccountUid);
+
+			if (accountSubscription == null)
 			{
-				return await SaveScheduledTweetAsync(message, request.MustBeFollowing, request.TimeZoneId, request.IsDaylight);
-			}
-
-			var twitterPublisher = _publisherResolver(ExternalClientType.Twitter);
-			var tweetId = await twitterPublisher.PublishAsync(message);
-
-			if (string.IsNullOrWhiteSpace(tweetId))
-			{
-				_logger.LogError("Unable to send the tweet {text} for sweep name and uid {name}, {uid} for {profileName} and {profileUid}",
-					message.Text,
-					message.SweepName,
-					message.SweepUid,
-					message.Profile.ScreenName,
-					message.Profile.ProfileUid);
+				_logger.LogWarning("Account with uid {accountUid} is not subscribed.", request.Profile.Account.AccountUid);
 
 				return false;
 			}
 
-			await _mediator.Publish(new SweepRuleTweetPublished(tweetId, message, request.MustBeFollowing));
+			var rules = await _sweepRulesRepository.GetSweepRuleAsync(request.Sweep.SweepUid);
+			var activeRules = rules.Where(r => r.ActiveInd).ToList();
+
+			if (accountSubscription.Plan.SweepstakesPerMonth != 0)
+			{
+				if (activeRules.Count >= accountSubscription.Plan.HashtagsPerMonth)
+				{
+					_logger.LogWarning("Account with uid {accountUid} has a total of {activeRulesCount} active hashtags and their current max is {maxHashtags}",
+						request.Profile.Account.AccountUid,
+						activeRules.Count,
+						accountSubscription.Plan.HashtagsPerMonth);
+
+					_notificationService.AddErrorToastMessage($"You cannot create more hashtags.");
+					_notificationService.AddInfoToastMessage($"You can only have {accountSubscription.Plan.HashtagsPerMonth} active hashtags per month.");
+
+					return false;
+				}
+			}
 
 			return true;
 		}
@@ -109,7 +166,7 @@ namespace hrvster.Core.Handlers.Publishing
 
 		private async Task SaveScheduledTweetImages(Guid scheduledUid, Message message)
 		{
-			if(message.Media != null)
+			if (message.Media != null)
 			{
 				foreach (var media in message.Media)
 				{

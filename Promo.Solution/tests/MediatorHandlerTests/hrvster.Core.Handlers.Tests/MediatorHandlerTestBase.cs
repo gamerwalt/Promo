@@ -1,9 +1,12 @@
 ﻿using hrvster.Core.Handlers.Tests.Common;
 using hrvster.Core.Requests;
 using hrvster.Core.Requests.ApiRequests;
+using hrvster.Core.Requests.Notifications.Publishing;
 using hrvster.Core.Requests.WebRequests.Promotions;
+using hrvster.Core.Requests.WebRequests.Publishing;
 using hrvster.Core.Requests.WebRequests.Sweeps;
 using hrvster.Models;
+using hrvster.Models.Profiles;
 using TestUtilities;
 using TestUtilities.Data;
 
@@ -162,11 +165,104 @@ namespace hrvster.Core.Handlers.Tests
                 DrawDate = DateTime.Now.AddDays(31)
             };
 
-        public async Task<Campaign> CreateCampaignAsync(MediatorHandlerFeature _feature, Models.Account account)
+        public async Task<Campaign> BuildAndCreateCampaignAsync(MediatorHandlerFeature _feature, Models.Account account)
         {
             var campaignType = BuildNewCampaignType();
             var campaign = await CreateCampaignAsync(_feature, account, campaignType);
             return campaign;
+        }
+
+        public async Task<Sweep> BuildAndCreateSweepAsync(
+            MediatorHandlerFeature _feature, Models.Account account, Campaign campaign)
+            => await _feature.Mediator.Send(
+                new CreateSweep(
+                    CreateNewSweepRequest(account, campaign),
+                    TestData.WindowsTimezone, false));
+
+        public static SweepRuleTweetPublished CreateSweepRuleTweetPublished(Sweep sweep, Profile profile)
+            => new SweepRuleTweetPublished(TestData.TweetId, new Clients.Common.Message
+            {
+                WatchTypeId = TestData.WatchTypeId,
+                Profile = profile,
+                Hashtag = TestData.Hashtag,
+                SweepUid = sweep.SweepUid,
+                SweepName = sweep.Name,
+                Text = TestData.TweetText,
+                IsScheduled = false
+            }, true);
+
+        public static SweepRuleTweetPublished CreateSweepRuleTweetPublished2(Sweep sweep, Profile profile)
+            => new SweepRuleTweetPublished(TestData.TweetId, new Clients.Common.Message
+            {
+                WatchTypeId = TestData.WatchTypeId,
+                Profile = profile,
+                Hashtag = TestData.Hashtag2,
+                SweepUid = sweep.SweepUid,
+                SweepName = $"{sweep.Name}_2",
+                Text = TestData.TweetText2,
+                IsScheduled = false
+            }, true);
+
+        public static SweepRuleTweetPublished CreateSweepRuleTweetPublished3(Sweep sweep, Profile profile)
+            => new SweepRuleTweetPublished(TestData.TweetId, new Clients.Common.Message
+            {
+                WatchTypeId = TestData.WatchTypeId,
+                Profile = profile,
+                Hashtag = TestData.Hashtag3,
+                SweepUid = sweep.SweepUid,
+                SweepName = $"{sweep.Name}_3",
+                Text = TestData.TweetText3,
+                IsScheduled = false
+            }, true);
+
+        public static PublishSweepRuleTweetRequest GetPublishSweepRuleTweetRequest(Profile profile, Sweep sweep, bool postNow = true)
+            => new PublishSweepRuleTweetRequest(
+                sweep,
+                profile,
+                TestData.WatchTypeId,
+                TestData.WatchValue,
+                TestData.TweetText,
+                postNow,
+                DateTime.Now.AddHours(1),
+                true,
+                null,
+                TestData.WindowsTimezone,
+                false);
+
+        public static PublishSweepRuleTweetRequest GetPublishSweepRuleTweetRequest2(Profile profile, Sweep sweep, bool postNow = true)
+            => new PublishSweepRuleTweetRequest(
+                sweep,
+                profile,
+                TestData.WatchTypeId,
+                TestData.WatchValue2,
+                TestData.TweetText2,
+                postNow,
+                DateTime.Now.AddHours(2),
+                true,
+                null,
+                TestData.WindowsTimezone,
+                false);
+        public static PublishSweepRuleTweetRequest GetPublishSweepRuleTweetRequest3(Profile profile, Sweep sweep, bool postNow = true)
+            => new PublishSweepRuleTweetRequest(
+                sweep,
+                profile,
+                TestData.WatchTypeId,
+                TestData.WatchValue3,
+                TestData.TweetText3,
+                postNow,
+                DateTime.Now.AddHours(2),
+                true,
+                null,
+                TestData.WindowsTimezone,
+                false);
+
+        public async Task<Profile> BuildAndCreateProfileAsync(MediatorHandlerFeature feature, Models.Account account)
+        {
+            var profileBuilt = BuildNewTwitterProfile(account);
+
+            await feature.ProfileRespository.UpsertProfileAsync(profileBuilt);
+
+            return await feature.ProfileRespository.GetProfileAsync(account.AccountUid, ProfileType.Twitter);
         }
     }
 }

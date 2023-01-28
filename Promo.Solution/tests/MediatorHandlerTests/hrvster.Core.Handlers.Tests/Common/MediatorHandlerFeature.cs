@@ -3,6 +3,7 @@ using hrvster.ApplicationServices.Sweepstakes;
 using hrvster.Core.Clients.Publishers;
 using hrvster.Infrastructure;
 using hrvster.Infrastructure.Accounts;
+using hrvster.Infrastructure.Scheduling;
 using hrvster.Infrastructure.Subscriptions;
 using hrvster.Models;
 using MediatR;
@@ -34,6 +35,7 @@ namespace hrvster.Core.Handlers.Tests.Common
 		public ISweepsEntriesRepository SweepEntryRepository { get; private set; }
 		public ISweepRulesRepository SweepRulesRepository { get; private set; }
 		public IPlansRepository PlansRepository { get; private set; }
+		public IScheduledSweepRuleTweetsRepository ScheduledSweepRuleTweetsRepository { get; private set; }
 
 		public IDrawService DrawService { get; private set; }
 		public IAccountSubscriptionService AccountSubscriptionService { get; private set; }
@@ -88,6 +90,7 @@ namespace hrvster.Core.Handlers.Tests.Common
 			AccountSubscriptionService = ServiceProvider.GetService<IAccountSubscriptionService>();
             SubscriptionService = ServiceProvider.GetService<ISubscriptionService>();
             PlansRepository = ServiceProvider.GetService<IPlansRepository>();
+			ScheduledSweepRuleTweetsRepository = ServiceProvider.GetService<IScheduledSweepRuleTweetsRepository>();
 
             MockedExternalClient = ServiceProvider.GetService<Mock<IExternalClient>>();
 			MockedTwitterClient = ServiceProvider.GetService<Mock<TwitterClient>>();
