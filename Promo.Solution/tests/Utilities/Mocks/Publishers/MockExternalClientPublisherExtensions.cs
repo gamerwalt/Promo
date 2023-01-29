@@ -38,15 +38,29 @@ namespace TestUtilities.Mocks.Publishers
 
             var mock = new Mock<TwitterClient>(loggerFactory, twitterAccount);
 
-            mock.Setup(x => x.PublishAsync(It.IsAny<Message>()))
-                .ReturnsAsync("896986896");
-            mock.Setup(x => x.PublishResponse(It.IsAny<Message>(), It.IsAny<string>()))
-                .ReturnsAsync("6797634");
+            mock.SetupPublishAsync();
+            mock.SetupPublishResponse();
 
             services.AddSingleton(mock);
             services.AddSingleton(mock.Object);
 
             return services;
+        }
+
+        public static Mock<TwitterClient> SetupPublishAsync(this Mock<TwitterClient> mock)
+        {
+            mock.Setup(x => x.PublishAsync(It.IsAny<Message>()))
+                .ReturnsAsync("896986896");
+
+            return mock;
+        }
+
+        public static Mock<TwitterClient> SetupPublishResponse(this Mock<TwitterClient> mock)
+        {
+            mock.Setup(x => x.PublishResponse(It.IsAny<Message>(), It.IsAny<string>()))
+                .ReturnsAsync("6797634");
+
+            return mock;
         }
     }
 }

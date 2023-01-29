@@ -1,0 +1,4 @@
+1. We need a board
+2. Each board is either a win or not
+3. Irrespective of if the board is a win, if a player selects the wrong numbers on that board, they still loose.
+4. Irrespective of if the board is a loose, no matter what the player selects, they will be wrong 100% of the time

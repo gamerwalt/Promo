@@ -4,6 +4,7 @@ using hrvster.Core.Requests.Notifications.Publishing;
 using hrvster.Infrastructure;
 using hrvster.Infrastructure.Core;
 using hrvster.Models;
+using hrvster.Models.Extensions;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using NToastNotify;
@@ -51,7 +52,7 @@ namespace hrvster.Core.Requests.Notifications.Handlers
 			}
 
 			var rules = await _repository.GetSweepRuleAsync(notification.Message.SweepUid);
-			var activeRules = rules.Where(r => r.ActiveInd).ToList();
+			var activeRules = rules.Where(r => (r.ActiveInd && r.Sweep.IsActive()) || r.Sweep.WillBeInProgress()).ToList();
 
 			if (accountSubscription.Plan.SweepstakesPerMonth != 0)
 			{

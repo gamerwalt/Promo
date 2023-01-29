@@ -52,6 +52,9 @@ namespace TestUtilities
                 services.AddHarvesterService();
                 services.AddHarvesterServiceCommandRepository();
 
+                //games
+                services.AddMatchEngineServices();
+
                 services.MockFirebaseAuthManager();
                 services.MockExternalClient();
                 services.MockToastNotification();

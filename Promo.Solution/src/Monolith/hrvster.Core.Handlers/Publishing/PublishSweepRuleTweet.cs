@@ -7,6 +7,7 @@ using hrvster.Infrastructure.Core;
 using hrvster.Infrastructure.Extensions;
 using hrvster.Infrastructure.Scheduling;
 using hrvster.Models;
+using hrvster.Models.Extensions;
 using hrvster.Models.Profiles;
 using hrvster.Models.Scheduling;
 using MediatR;
@@ -118,7 +119,7 @@ namespace hrvster.Core.Handlers.Publishing
 			}
 
 			var rules = await _sweepRulesRepository.GetSweepRuleAsync(request.Sweep.SweepUid);
-			var activeRules = rules.Where(r => r.ActiveInd).ToList();
+			var activeRules = rules.Where(r => (r.ActiveInd && r.Sweep.IsActive()) || r.Sweep.WillBeInProgress()).ToList();
 
 			if (accountSubscription.Plan.SweepstakesPerMonth != 0)
 			{
