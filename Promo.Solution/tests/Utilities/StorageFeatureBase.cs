@@ -51,6 +51,7 @@ namespace TestUtilities
                 services.AddWatchTypeRepositories();
                 services.AddHarvesterService();
                 services.AddHarvesterServiceCommandRepository();
+                services.AddMatchGameRepositories();
 
                 //games
                 services.AddMatchEngineServices();

@@ -2,6 +2,7 @@
 using hrvster.Infrastructure.Accounts;
 using hrvster.Infrastructure.Core;
 using hrvster.Infrastructure.Harvester;
+using hrvster.Infrastructure.MatchGames;
 using hrvster.Infrastructure.Scheduling;
 using hrvster.Infrastructure.Subscriptions;
 using Microsoft.Extensions.Configuration;
@@ -70,5 +71,8 @@ namespace hrvster.Extensions.Configuration
 
 		public static IServiceCollection AddHarvesterServiceCommandRepository(this IServiceCollection services)
 			=> services.AddTransient<IHarvesterServiceCommandRepository, HarvesterServiceCommandRepository>();
+
+		public static IServiceCollection AddMatchGameRepositories(this IServiceCollection services)
+			=> services.AddTransient<IMatchGamesRepository, MatchGamesRepository>();
 	}
 }

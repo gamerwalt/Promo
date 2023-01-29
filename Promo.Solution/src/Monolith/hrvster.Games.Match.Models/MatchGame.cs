@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace hrvster.Games.Match.Models
+﻿namespace hrvster.Games.Match.Models
 {
 	public class MatchGame
 	{
@@ -17,5 +11,10 @@ namespace hrvster.Games.Match.Models
 		public int TileCountPerBoard { get; set; }
 		public int NumberOfWinnableBoards { get; set; }
 		public int WinProbability { get; set; }
+		public Guid CampaignUid { get; set; }
+		public DateTime StartDate { get; set; }
+		public DateTime StartDateUtc { get; set; }
+		public DateTime EndDate { get; set; }
+		public DateTime EndDateUtc { get; set; }
 	}
 }
