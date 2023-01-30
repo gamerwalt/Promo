@@ -1,20 +1,22 @@
 ﻿using hrvster.Games.Match.Models;
 using hrvster.Infrastructure.Extensions;
-using hrvster.Models;
 using MySqlConnector;
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Tweetinvi.Core.Models.Properties;
 
 namespace hrvster.Infrastructure.MatchGames
 {
 	public interface IMatchGamesRepository
 	{
+		Task CreateAsync(MatchGame matchGame, string timezone, bool isDaylight, CancellationToken cancellationToken);
 		Task<IEnumerable<MatchGame>> GetByAccountAsync(Guid accountUid, CancellationToken cancellationToken);
+		Task<MatchGame> GetByUidAsync(Guid matchGameUid, CancellationToken cancellationToken);
+		Task SetAsGeneratedAsync(MatchGame game, CancellationToken cancellationToken);
+		Task UpdateAsync(MatchGame matchGame, string timezone, bool isDaylight, CancellationToken cancellationToken);
 	}
 
 	public class MatchGamesRepository : IMatchGamesRepository
@@ -24,6 +26,39 @@ namespace hrvster.Infrastructure.MatchGames
 		public MatchGamesRepository(IDatabase database)
 		{
 			_database = database;
+		}
+
+		public async Task CreateAsync(MatchGame matchGame, string timezone, bool isDaylight, CancellationToken cancellationToken)
+		{
+			var startDateUtc = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(matchGame.StartDate, TimeZoneInfo.Local.Id, timezone);
+			var endDateUtc = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(matchGame.EndDate, TimeZoneInfo.Local.Id, timezone);
+
+			if (!isDaylight)
+			{
+				startDateUtc = startDateUtc.AddHours(-2);
+				endDateUtc = endDateUtc.AddHours(-2);
+			}
+
+			using var conn = new MySqlConnection(_database.GetConnectionString());
+			var command = conn.CreateCommand();
+			command.CommandText = "match_game_create";
+			command.CommandType = CommandType.StoredProcedure;
+			command
+				.AddParameter("campaignId", matchGame.CampaignId)
+				.AddParameter("matchGameUid", matchGame.Uid)
+				.AddParameter("matchGameName", matchGame.Name)
+				.AddParameter("matchGameDescription", matchGame.Description)
+				.AddParameter("numberOfBoards", matchGame.NumberOfBoards)
+				.AddParameter("tileCountPerBoard", matchGame.TileCountPerBoard)
+				.AddParameter("numberOfWinnableBoards", matchGame.NumberOfWinnableBoards)
+				.AddParameter("winProbabilityPerBoard", matchGame.WinProbability)
+				.AddParameter("startDate", matchGame.StartDate)
+				.AddParameter("startDateUtc", startDateUtc)
+				.AddParameter("endDate", matchGame.EndDate)
+				.AddParameter("endDateUtc", endDateUtc);
+
+			await conn.OpenAsync(cancellationToken);
+			await command.ExecuteNonQueryAsync(cancellationToken);
 		}
 
 		public async Task<IEnumerable<MatchGame>> GetByAccountAsync(Guid accountUid, CancellationToken cancellationToken)
@@ -48,6 +83,73 @@ namespace hrvster.Infrastructure.MatchGames
 			return matchGames;
 		}
 
+		public async Task<MatchGame> GetByUidAsync(Guid matchGameUid, CancellationToken cancellationToken)
+		{
+			var matchGames = default(MatchGame);
+
+			using (var conn = new MySqlConnection(_database.GetConnectionString()))
+			{
+				var command = conn.CreateCommand();
+				command.CommandText = "match_game_get_by_uid";
+				command.CommandType = CommandType.StoredProcedure;
+				command.AddParameter("matchGameUid", matchGameUid);
+
+				await conn.OpenAsync(cancellationToken);
+				using var reader = await command.ExecuteReaderAsync(cancellationToken);
+				while (await reader.ReadAsync(cancellationToken))
+				{
+					matchGames = CreateFrom(reader);
+				}
+			}
+
+			return matchGames;
+		}
+
+		public async Task SetAsGeneratedAsync(MatchGame matchGame, CancellationToken cancellationToken)
+		{
+			using var conn = new MySqlConnection(_database.GetConnectionString());
+			var command = conn.CreateCommand();
+			command.CommandText = "match_game_set_as_generated";
+			command.CommandType = CommandType.StoredProcedure;
+			command
+				.AddParameter("matchGameUid", matchGame.Uid);
+
+			await conn.OpenAsync(cancellationToken);
+			await command.ExecuteNonQueryAsync(cancellationToken);
+		}
+
+		public async Task UpdateAsync(MatchGame matchGame, string timezone, bool isDaylight, CancellationToken cancellationToken)
+		{
+			var startDateUtc = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(matchGame.StartDate, TimeZoneInfo.Local.Id, timezone);
+			var endDateUtc = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(matchGame.EndDate, TimeZoneInfo.Local.Id, timezone);
+
+			if (!isDaylight)
+			{
+				startDateUtc = startDateUtc.AddHours(-2);
+				endDateUtc = endDateUtc.AddHours(-2);
+			}
+
+			using var conn = new MySqlConnection(_database.GetConnectionString());
+			var command = conn.CreateCommand();
+			command.CommandText = "match_game_update";
+			command.CommandType = CommandType.StoredProcedure;
+			command
+				.AddParameter("matchGameUid", matchGame.Uid)
+				.AddParameter("matchGameName", matchGame.Name)
+				.AddParameter("matchGameDescription", matchGame.Description)
+				.AddParameter("numberOfBoards", matchGame.NumberOfBoards)
+				.AddParameter("tileCountPerBoard", matchGame.TileCountPerBoard)
+				.AddParameter("numberOfWinnableBoards", matchGame.NumberOfWinnableBoards)
+				.AddParameter("winProbabilityPerBoard", matchGame.WinProbability)
+				.AddParameter("startDate", matchGame.StartDate)
+				.AddParameter("startDateUtc", startDateUtc)
+				.AddParameter("endDate", matchGame.EndDate)
+				.AddParameter("endDateUtc", endDateUtc);
+
+			await conn.OpenAsync(cancellationToken);
+			await command.ExecuteNonQueryAsync(cancellationToken);
+		}
+
 		private MatchGame CreateFrom(MySqlDataReader reader)
 		{
 			return new MatchGame
@@ -57,7 +159,7 @@ namespace hrvster.Infrastructure.MatchGames
 				CampaignId = reader.GetInt32("campaign_id"),
 				CampaignUid = reader.GetGuid("campaign_uid"),
 				Name = reader.GetString("match_game_name"),
-				Description= reader.GetString("match_game_description"),
+				Description = reader.GetString("match_game_description"),
 				NumberOfBoards = reader.GetInt32("number_of_boards"),
 				TileCountPerBoard = reader.GetInt32("tile_count_per_board"),
 				NumberOfWinnableBoards = reader.GetInt32("number_of_winnable_boards"),
@@ -65,7 +167,8 @@ namespace hrvster.Infrastructure.MatchGames
 				StartDate = reader.GetDateTime("start_date"),
 				StartDateUtc = reader.GetDateTime("start_date_utc"),
 				EndDate = reader.GetDateTime("end_date"),
-				EndDateUtc = reader.GetDateTime("end_date_utc")
+				EndDateUtc = reader.GetDateTime("end_date_utc"),
+				HasBeenGenerated = reader.GetBoolean("is_generated")
 			};
 		}
 	}

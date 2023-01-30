@@ -4,19 +4,13 @@ using hrvster.Games.Match.Models;
 using hrvster.Infrastructure.Tests.Common;
 using hrvster.Models;
 using hrvster.Web.Mvc.Common.Steps;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using TestUtilities;
 using TestUtilities.Data;
 using Xunit;
 
 namespace hrvster.Infrastructure.Tests
 {
     [Collection("Sequential")]
-    public class MatchGamesRepositoryTests : 
+    public class MatchGamesRepositoryTests :
         RepositoryAbstractModelBuilder, IClassFixture<RepositoryFeature>
     {
         private readonly RepositoryFeature _feature;
@@ -27,7 +21,7 @@ namespace hrvster.Infrastructure.Tests
         {
             _feature = feature;
         }
-            
+
 
         [Fact]
         public async Task Should_Return_0_Match_Games_For_Account()
@@ -40,15 +34,141 @@ namespace hrvster.Infrastructure.Tests
             matchGames.Count().Should().Be(0);
         }
 
-        [Fact]
-        public async Task Should_Be_Able_To_Create_A_Match_Game()
+        [Theory]
+        [InlineData(1)]
+        [InlineData(2)]
+        [InlineData(3)]
+        public async Task Should_Be_Able_To_Create_1_Match_Game_And_Retrieve_It(int numberOfGames)
         {
-            //MatchGameFaker = new Faker<MatchGame>()
-            //    .RuleFor(m => m.Uid, f => Guid.NewGuid())
-            //    .RuleFor(m => m.CampaignId, f => campaign.CampaignId)
-            //    .RuleFor(m => m.Name, f => f.Lorem.Word())
-            //    .RuleFor(m => m.Description, f => f.Lorem.Sentence(2))
-            //    .RuleFor(m => m.)
+            _feature.GivenACleanSlate();
+
+            var account = await BuildAccountAndSubscribeToBasicPlan(_feature);
+            var campaign = await BuildAndCreateCampaignAsync(_feature, account);
+            CreateFakeMatchGame(campaign);
+
+            var matchGames = MatchGameFaker.Generate(numberOfGames);
+
+            foreach(var matchGame in matchGames)
+            {
+                await _feature.MatchGameRepository.CreateAsync(matchGame, TestData.WindowsTimezone, false, default(CancellationToken));
+            }            
+
+            var games = await _feature.MatchGameRepository.GetByAccountAsync(account.AccountUid, default);
+            games.Count().Should().Be(numberOfGames);
+        }
+
+        [Fact]
+        public async Task Should_Be_Able_To_Retrieve_A_Match_Game_By_Uid()
+        {
+            _feature.GivenACleanSlate();
+
+            var account = await BuildAccountAndSubscribeToBasicPlan(_feature);
+            var campaign = await BuildAndCreateCampaignAsync(_feature, account);
+            CreateFakeMatchGame(campaign);
+
+            var matchGame= MatchGameFaker.Generate();
+            await _feature.MatchGameRepository.CreateAsync(matchGame, TestData.WindowsTimezone, false, default);
+
+            var game = await _feature.MatchGameRepository.GetByUidAsync(matchGame.Uid, default);
+            game.Should().NotBeNull();
+            game.Uid.Should().Be(matchGame.Uid);
+        }
+
+        [Fact]
+        public async Task Should_Be_Able_To_Update_The_Match_Game()
+        {
+            _feature.GivenACleanSlate();
+
+            var updatedName = "MatchGameName";
+            var updatedNumberOfBoards = 10;
+
+            var account = await BuildAccountAndSubscribeToBasicPlan(_feature);
+            var campaign = await BuildAndCreateCampaignAsync(_feature, account);
+            CreateFakeMatchGame(campaign);
+
+            var matchGame = MatchGameFaker.Generate();
+            await _feature.MatchGameRepository.CreateAsync(matchGame, TestData.WindowsTimezone, false, default);
+
+            var game = await _feature.MatchGameRepository.GetByUidAsync(matchGame.Uid, default);
+
+            game.Name = updatedName;
+            game.NumberOfBoards = updatedNumberOfBoards;
+
+            await _feature.MatchGameRepository.UpdateAsync(game, TestData.WindowsTimezone, false, default(CancellationToken));
+
+            game = await _feature.MatchGameRepository.GetByUidAsync(game.Uid, default);
+            game.Name.Should().Be(updatedName);
+            game.NumberOfBoards.Should().Be(updatedNumberOfBoards);
+        }
+
+        [Fact]
+        public async Task Should_Be_Able_To_Set_A_Game_As_Generated()
+        {
+            _feature.GivenACleanSlate();
+
+            var account = await BuildAccountAndSubscribeToBasicPlan(_feature);
+            var campaign = await BuildAndCreateCampaignAsync(_feature, account);
+            CreateFakeMatchGame(campaign);
+
+            var matchGame = MatchGameFaker.Generate();
+            await _feature.MatchGameRepository.CreateAsync(matchGame, TestData.WindowsTimezone, false, default);
+
+            var game = await _feature.MatchGameRepository.GetByUidAsync(matchGame.Uid, default);
+
+            await _feature.MatchGameRepository.SetAsGeneratedAsync(game, default(CancellationToken));
+
+            game = await _feature.MatchGameRepository.GetByUidAsync(game.Uid, default);
+            game.HasBeenGenerated.Should().BeTrue();
+        }
+
+        [Fact]
+        public async Task When_MatchGame_Is_Generated_We_Should_Not_Be_Able_To_Update_It()
+        {
+            _feature.GivenACleanSlate();
+
+            var updatedName = "MatchGameName";
+            var updatedNumberOfBoards = 10;
+
+            var account = await BuildAccountAndSubscribeToBasicPlan(_feature);
+            var campaign = await BuildAndCreateCampaignAsync(_feature, account);
+            CreateFakeMatchGame(campaign);
+
+            var matchGame = MatchGameFaker.Generate();
+            await _feature.MatchGameRepository.CreateAsync(matchGame, TestData.WindowsTimezone, false, default);
+
+            var game = await _feature.MatchGameRepository.GetByUidAsync(matchGame.Uid, default);
+            var createdName = game.Name;
+            var createdNumberOfBoards = game.NumberOfBoards;
+
+            await _feature.MatchGameRepository.SetAsGeneratedAsync(game, default(CancellationToken));
+
+            game = await _feature.MatchGameRepository.GetByUidAsync(game.Uid, default);
+            game.Name = updatedName;
+            game.NumberOfBoards = updatedNumberOfBoards;
+
+            await _feature.MatchGameRepository.UpdateAsync(game, TestData.WindowsTimezone, false, default);
+
+            game = await _feature.MatchGameRepository.GetByUidAsync(game.Uid, default);
+            game.Name.Should().Be(createdName);
+            game.NumberOfBoards = createdNumberOfBoards;
+        }
+
+
+
+        private void CreateFakeMatchGame(Campaign campaign)
+        {
+            MatchGameFaker = new Faker<MatchGame>()
+                .RuleFor(m => m.Uid, f => Guid.NewGuid())
+                .RuleFor(m => m.CampaignId, f => campaign.CampaignId)
+                .RuleFor(m => m.CampaignUid, f => campaign.CampaignUid)
+                .RuleFor(m => m.Name, f => f.Lorem.Word())
+                .RuleFor(m => m.Description, f => f.Lorem.Sentence(2))
+                .RuleFor(m => m.NumberOfBoards, f => f.Random.Number(1, 100))
+                .RuleFor(m => m.TileCountPerBoard, f => 9)
+                .RuleFor(m => m.NumberOfWinnableBoards, f => f.Random.Number(1, 100))
+                .RuleFor(m => m.WinProbability, f => f.Random.Number(1, 9))
+                .RuleFor(m => m.StartDate, f => DateTime.Now)
+                .RuleFor(m => m.EndDate, f => DateTime.Now.AddDays(30));
         }
     }
 }
