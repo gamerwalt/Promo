@@ -29,15 +29,30 @@ namespace hrvster.Infrastructure.Tests.Common
 
             await _feature.CampaignRepository.CreateCampaignAsync(campaign, TestData.WindowsTimezone, false);
 
-            var campaigns = await _feature.CampaignRepository.GetAccountCampaignsAsync(account.AccountUid);
+            return await _feature.CampaignRepository.GetCampaignByUidAsync(campaign.CampaignUid, account.AccountUid);
+        }
 
-            return campaigns.FirstOrDefault();
+        public async Task<Models.Campaign> CreateCampaignAsync2(
+            RepositoryFeature _feature, Models.Account account, Models.CampaignType campaignType)
+        {
+            var campaign = BuildNewCampaign2(account, campaignType);
+
+            await _feature.CampaignRepository.CreateCampaignAsync(campaign, TestData.WindowsTimezone, false);
+            
+            return await _feature.CampaignRepository.GetCampaignByUidAsync(campaign.CampaignUid, account.AccountUid);
         }
 
         public async Task<Campaign> BuildAndCreateCampaignAsync(RepositoryFeature _feature, Models.Account account)
         {
             var campaignType = BuildNewCampaignType();
             var campaign = await CreateCampaignAsync(_feature, account, campaignType);
+            return campaign;
+        }
+
+        public async Task<Campaign> BuildAndCreateCampaignAsync2(RepositoryFeature _feature, Models.Account account)
+        {
+            var campaignType = BuildNewCampaignType();
+            var campaign = await CreateCampaignAsync2(_feature, account, campaignType);
             return campaign;
         }
 

@@ -42,7 +42,20 @@ namespace TestUtilities
 				campaignType)
 			.Build();
 
-		public Profile BuildNewTwitterProfile(Account account)
+		public Campaign BuildNewCampaign2(Account account, CampaignType campaignType)
+            => new CampaignBuilder(
+                TestData.CampaignId2,
+                TestData.CampaignUid2,
+                TestData.CampaignName2,
+                TestData.CampaignDescription2,
+                DateTime.Now.AddDays(-30),
+                DateTime.Now.AddDays(20),
+                account,
+                campaignType)
+            .Build();
+
+
+        public Profile BuildNewTwitterProfile(Account account)
 			=> new Profile
 			{
 				Account = account,

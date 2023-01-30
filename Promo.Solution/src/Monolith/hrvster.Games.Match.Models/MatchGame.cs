@@ -12,6 +12,7 @@
 		public int NumberOfWinnableBoards { get; set; }
 		public int WinProbability { get; set; }
 		public bool HasBeenGenerated { get; set; }
+		public bool ReadyToBeGenerated { get; set; }
 		public Guid CampaignUid { get; set; }
 		public DateTime StartDate { get; set; }
 		public DateTime StartDateUtc { get; set; }

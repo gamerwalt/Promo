@@ -14,8 +14,10 @@ namespace hrvster.Infrastructure.MatchGames
 	{
 		Task CreateAsync(MatchGame matchGame, string timezone, bool isDaylight, CancellationToken cancellationToken);
 		Task<IEnumerable<MatchGame>> GetByAccountAsync(Guid accountUid, CancellationToken cancellationToken);
+		Task<IEnumerable<MatchGame>> GetByCampaignAsync(Guid campaignUid, CancellationToken cancellationToken);
 		Task<MatchGame> GetByUidAsync(Guid matchGameUid, CancellationToken cancellationToken);
 		Task SetAsGeneratedAsync(MatchGame game, CancellationToken cancellationToken);
+		Task SetAsReadyToBeGeneratedAsync(MatchGame game, CancellationToken cancellationToken);
 		Task UpdateAsync(MatchGame matchGame, string timezone, bool isDaylight, CancellationToken cancellationToken);
 	}
 
@@ -83,6 +85,28 @@ namespace hrvster.Infrastructure.MatchGames
 			return matchGames;
 		}
 
+		public async Task<IEnumerable<MatchGame>> GetByCampaignAsync(Guid campaignUid, CancellationToken cancellationToken)
+		{
+			var matchGames = new List<MatchGame>();
+
+			using (var conn = new MySqlConnection(_database.GetConnectionString()))
+			{
+				var command = conn.CreateCommand();
+				command.CommandText = "match_games_get_by_campaign_uid";
+				command.CommandType = CommandType.StoredProcedure;
+				command.AddParameter("campaignUid", campaignUid);
+
+				await conn.OpenAsync(cancellationToken);
+				using var reader = await command.ExecuteReaderAsync(cancellationToken);
+				while (await reader.ReadAsync(cancellationToken))
+				{
+					matchGames.Add(CreateFrom(reader));
+				}
+			}
+
+			return matchGames;
+		}
+
 		public async Task<MatchGame> GetByUidAsync(Guid matchGameUid, CancellationToken cancellationToken)
 		{
 			var matchGames = default(MatchGame);
@@ -110,6 +134,19 @@ namespace hrvster.Infrastructure.MatchGames
 			using var conn = new MySqlConnection(_database.GetConnectionString());
 			var command = conn.CreateCommand();
 			command.CommandText = "match_game_set_as_generated";
+			command.CommandType = CommandType.StoredProcedure;
+			command
+				.AddParameter("matchGameUid", matchGame.Uid);
+
+			await conn.OpenAsync(cancellationToken);
+			await command.ExecuteNonQueryAsync(cancellationToken);
+		}
+
+		public async Task SetAsReadyToBeGeneratedAsync(MatchGame matchGame, CancellationToken cancellationToken)
+		{
+			using var conn = new MySqlConnection(_database.GetConnectionString());
+			var command = conn.CreateCommand();
+			command.CommandText = "match_game_set_as_ready_to_be_generated";
 			command.CommandType = CommandType.StoredProcedure;
 			command
 				.AddParameter("matchGameUid", matchGame.Uid);
@@ -168,7 +205,8 @@ namespace hrvster.Infrastructure.MatchGames
 				StartDateUtc = reader.GetDateTime("start_date_utc"),
 				EndDate = reader.GetDateTime("end_date"),
 				EndDateUtc = reader.GetDateTime("end_date_utc"),
-				HasBeenGenerated = reader.GetBoolean("is_generated")
+				HasBeenGenerated = reader.GetBoolean("is_generated"),
+				ReadyToBeGenerated = reader.GetBoolean("ready_to_generate")
 			};
 		}
 	}
