@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using hrvster.Games.Match.Models;
 using hrvster.Models.WebModels;
 using hrvster.Models.WebModels.Sweeps;
 using hrvster.Web.Models;
@@ -53,6 +54,9 @@ namespace hrvster.Web.Mapper
 				.ReverseMap();
 
 			CreateMap<hrvster.Models.SweepBackupWinner, BackupWinner>()
+				.ReverseMap();
+
+			CreateMap<Games.Match.Models.MatchGame, Models.MatchGame>()
 				.ReverseMap();
 		}
 	}

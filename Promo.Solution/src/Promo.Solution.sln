@@ -149,16 +149,18 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SweepEntrySeeder", "EntrySe
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Pick3MatchTests", "Pick3MatchTests", "{80F72DE8-5E7C-4D64-8AEA-C70AE5C528BD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "hrvster.Games.Match.Tests", "..\tests\hrvster.Games.Match.Tests\hrvster.Games.Match.Tests.csproj", "{4A10C13D-4D58-42AA-A682-6196DA08D202}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "hrvster.Games.Match.Tests", "..\tests\hrvster.Games.Match.Tests\hrvster.Games.Match.Tests.csproj", "{4A10C13D-4D58-42AA-A682-6196DA08D202}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Notes", "Notes", "{1F35FD52-89F7-40A3-AABF-3EFA5C8EF8C3}"
 	ProjectSection(SolutionItems) = preProject
 		Pick3Match.txt = Pick3Match.txt
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "hrvster.Games.Match.Models", "Monolith\hrvster.Games.Match.Models\hrvster.Games.Match.Models.csproj", "{312E01AB-5267-43D7-8FAB-5BCC84D01FF9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "hrvster.Games.Match.Models", "Monolith\hrvster.Games.Match.Models\hrvster.Games.Match.Models.csproj", "{312E01AB-5267-43D7-8FAB-5BCC84D01FF9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "hrvster.Games.Match", "Monolith\hrvster.Games.Match\hrvster.Games.Match.csproj", "{C14E4A00-9E65-4453-AAC5-AAE727212AE3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "hrvster.Games.Match", "Monolith\hrvster.Games.Match\hrvster.Games.Match.csproj", "{C14E4A00-9E65-4453-AAC5-AAE727212AE3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "hrvster.Web.Models.Validator.Tests", "..\tests\hrvster.Web.Models.Validator.Tests\hrvster.Web.Models.Validator.Tests.csproj", "{A3F4ACDC-9B07-4411-81DB-C0390E6FC138}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -270,6 +272,10 @@ Global
 		{C14E4A00-9E65-4453-AAC5-AAE727212AE3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C14E4A00-9E65-4453-AAC5-AAE727212AE3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C14E4A00-9E65-4453-AAC5-AAE727212AE3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A3F4ACDC-9B07-4411-81DB-C0390E6FC138}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A3F4ACDC-9B07-4411-81DB-C0390E6FC138}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A3F4ACDC-9B07-4411-81DB-C0390E6FC138}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A3F4ACDC-9B07-4411-81DB-C0390E6FC138}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -324,6 +330,7 @@ Global
 		{1F35FD52-89F7-40A3-AABF-3EFA5C8EF8C3} = {B71190C8-5608-4FFE-8C71-DA20A334CFC6}
 		{312E01AB-5267-43D7-8FAB-5BCC84D01FF9} = {71429F9B-A81B-4A12-98DD-505C0F9FDB34}
 		{C14E4A00-9E65-4453-AAC5-AAE727212AE3} = {71429F9B-A81B-4A12-98DD-505C0F9FDB34}
+		{A3F4ACDC-9B07-4411-81DB-C0390E6FC138} = {FAF1F742-9FB9-4D42-83CA-1ABFDCFFB066}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {94B46B7F-1545-465E-863A-AAD0C58A8C0F}

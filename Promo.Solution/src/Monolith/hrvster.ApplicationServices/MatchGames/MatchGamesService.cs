@@ -11,6 +11,7 @@ namespace hrvster.ApplicationServices.MatchGames
 	public interface IMatchGamesService
 	{
 		Task CreateMatchGameAsync(MatchGame matchGame, string timeZone, bool isDaylight, CancellationToken cancellationToken);
+		Task<IEnumerable<MatchGame>> GetAccountMatchGamesAsync(Guid userUid, CancellationToken cancellationToken);
 		Task<IEnumerable<MatchGame>> GetCampaignMatchGamesAsync(Guid campaignUid, CancellationToken cancellationToken);
 		Task<MatchGame> GetMatchGameAsync(Guid matchGameUid, CancellationToken cancellationToken);
 		Task SetAsReadyToBeProcessedAsync(MatchGame matchGame, CancellationToken cancellationToken);
@@ -37,6 +38,14 @@ namespace hrvster.ApplicationServices.MatchGames
 				throw new ArgumentException("Match game campaign needs to be supplied.");
 
 			await _repository.CreateAsync(matchGame, timeZone, isDaylight, cancellationToken);
+		}
+
+		public async Task<IEnumerable<MatchGame>> GetAccountMatchGamesAsync(Guid userUid, CancellationToken cancellationToken)
+		{
+			if (userUid == Guid.Empty)
+				throw new ArgumentNullException(nameof(userUid));
+
+			return await _repository.GetByAccountAsync(userUid, cancellationToken);
 		}
 
 		public async Task<IEnumerable<MatchGame>> GetCampaignMatchGamesAsync(Guid campaignUid, CancellationToken cancellationToken)

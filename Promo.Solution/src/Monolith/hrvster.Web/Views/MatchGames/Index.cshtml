@@ -1,0 +1,64 @@
+﻿@model IEnumerable<MatchGame>
+@{
+	ViewData["Title"] = "Pick 3 Games";
+}
+<div class="card card-flush">
+	<div class="card-header mt-5">
+		<div class="card-title flex-column">
+			<div class="fs-6 text-gray-400">@Model.Count() Pick 3 Game(s) so far</div>
+		</div>
+		<div class="card-toolbar my-1">
+			<div class="me-6 my-1">
+				<a asp-action="create" class="btn btn-sm btn-primary me-3">Add Pick 3 Game</a>
+			</div>
+		</div>
+	</div>
+	<div class="card-body pt-0">
+		<div class="table-responsive">
+			<table id="kt_profile_overview_table" class="table table-row-bordered table-row-dashed gy-4 align-middle fw-bold">
+				<thead class="fs-7 text-gray-400 text-uppercase">
+					<tr>
+						<th class="min-w-250px">Name</th>
+						<th class="min-w-150px"># of Boards</th>
+						<th class="min-w-150px"># Winnable</th>
+						<th class="min-w-90px">Is Generated</th>
+						<th class="min-w-90px">Played</th>
+						<th class="min-w-90px">Start Date</th>
+						<th class="min-w-90px">End Date</th>
+					</tr>
+				</thead>
+				<tbody class="fs-7">
+					@foreach (var matchGame in @Model)
+					{
+						<tr>
+							<td>
+								<div class="d-flex align-items-center">
+									<div class="me-5 position-relative">
+										<div class="symbol symbol-35px symbol-circle">
+											<div class="symbol-label fs-2 fw-semibold text-success">@matchGame.Name[0]</div>
+										</div>
+									</div>
+									<div class="d-flex flex-column justify-content-center">
+										<a asp-action="View" asp-route-sweepUid=@matchGame.MatchGameUid
+									   class="fs-6 text-gray-800 text-hover-primary">@matchGame.Name</a>
+									</div>
+								</div>
+							</td>
+							<td>@matchGame.NumberOfBoards</td>
+							<td>@matchGame.NumberWinnable</td>
+							<td>
+								if(@matchGame.IsGenerated == 1) 
+									<span>Yes</span>
+								else
+									<span>No</span>
+							</td>
+							<td>000</td>
+							<td>@matchGame.StartDate.ToString("f")</td>
+							<td>@matchGame.EndDate.ToString("f")</td>
+						</tr>
+					}
+				</tbody>
+			</table>
+		</div>
+	</div>
+</div>
