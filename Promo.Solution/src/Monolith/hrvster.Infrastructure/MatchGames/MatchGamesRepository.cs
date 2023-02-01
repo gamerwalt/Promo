@@ -13,6 +13,7 @@ namespace hrvster.Infrastructure.MatchGames
 	public interface IMatchGamesRepository
 	{
 		Task CreateAsync(MatchGame matchGame, string timezone, bool isDaylight, CancellationToken cancellationToken);
+		IEnumerable<MatchGame> GetAllForAccount(Guid accountUid);
 		Task<IEnumerable<MatchGame>> GetByAccountAsync(Guid accountUid, CancellationToken cancellationToken);
 		Task<IEnumerable<MatchGame>> GetByCampaignAsync(Guid campaignUid, CancellationToken cancellationToken);
 		Task<MatchGame> GetByUidAsync(Guid matchGameUid, CancellationToken cancellationToken);
@@ -61,6 +62,28 @@ namespace hrvster.Infrastructure.MatchGames
 
 			await conn.OpenAsync(cancellationToken);
 			await command.ExecuteNonQueryAsync(cancellationToken);
+		}
+
+		public IEnumerable<MatchGame> GetAllForAccount(Guid accountUid)
+		{
+			var matchGames = new List<MatchGame>();
+
+			using (var conn = new MySqlConnection(_database.GetConnectionString()))
+			{
+				var command = conn.CreateCommand();
+				command.CommandText = "match_games_get_by_account_uid";
+				command.CommandType = CommandType.StoredProcedure;
+				command.AddParameter("accountUid", accountUid);
+
+				conn.Open();
+				using var reader = command.ExecuteReader();
+				while (reader.Read())
+				{
+					matchGames.Add(CreateFrom(reader));
+				}
+			}
+
+			return matchGames;
 		}
 
 		public async Task<IEnumerable<MatchGame>> GetByAccountAsync(Guid accountUid, CancellationToken cancellationToken)

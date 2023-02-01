@@ -39,5 +39,8 @@ namespace hrvster.Extensions.Configuration
 
 		public static IServiceCollection AddSweepstakeUtility(this IServiceCollection services)
 			=> services.AddTransient<SweepstakeUtility>();
+
+		public static IServiceCollection AddCampaignService(this IServiceCollection services)
+			=> services.AddTransient<ICampaignService, CampaignService>();
 	}
 }

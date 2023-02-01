@@ -1,17 +1,48 @@
 ﻿using FluentValidation;
+using hrvster.Core.Authentication;
+using hrvster.Infrastructure;
+using hrvster.Infrastructure.MatchGames;
 using hrvster.Web.Models;
 using System;
+using System.Linq;
 
 namespace hrvster.Web.Validation
 {
 	public class CreateMatchGameValidator : AbstractValidator<CreateMatchGame>
 	{
-		public CreateMatchGameValidator() 
+		private readonly ISessionManager _sessionManager;
+		private readonly IMatchGamesRepository _matchGamesRepository;
+		private readonly ICampaignRepository _campaignRepository;
+
+		private hrvster.Models.HrvsterUser _hrvsterUser;
+
+		public CreateMatchGameValidator(
+			ISessionManager sessionManager,
+			IMatchGamesRepository matchGamesRepository,
+			ICampaignRepository campaignRepository)
 		{
+			_sessionManager = sessionManager;
+			_matchGamesRepository = matchGamesRepository;
+			_campaignRepository = campaignRepository;
+
+			RuleFor(f => f.PromotionUid)
+				.NotEmpty()
+				.NotNull()
+				.WithMessage("You need to select a promotion.");
+
+			RuleFor(f => f.PromotionUid)
+				.Must(p => PromotionShouldExist(p))
+				.WithMessage("The promotion does not exist.");
+
 			RuleFor(f => f.Name)
 				.NotNull()
 				.NotEmpty()
 				.WithMessage("We need a match game name.");
+
+			RuleFor(c => c.Name)
+				.Must(name => ShouldNotExistAlready(name))
+				.WithMessage("The match game name already exists.");
+
 			RuleFor(f => f.NumberOfBoards)
 				.NotEmpty()
 				.NotNull()
@@ -45,6 +76,15 @@ namespace hrvster.Web.Validation
 
 		}
 
+		private bool PromotionShouldExist(Guid promotionUid)
+		{
+			_hrvsterUser = _sessionManager.GetUserInformation();
+
+			var promotionsForAccont = _campaignRepository.GetAccountCampaigns(_hrvsterUser.UserUid);
+
+			return promotionsForAccont.Any(p => p.CampaignUid == promotionUid);
+		}
+
 		private bool GreaterThan(CreateMatchGame matchGame, DateTime endDate)
 		{
 			return endDate > matchGame.StartDate;
@@ -54,6 +94,17 @@ namespace hrvster.Web.Validation
 		{
 			return winnableBoards <= matchGame.NumberOfBoards &&
 				winnableBoards > 0;
+		}
+
+		private bool ShouldNotExistAlready(string name)
+		{
+			_hrvsterUser = _sessionManager.GetUserInformation();
+
+			var matachGames = _matchGamesRepository.GetAllForAccount(_hrvsterUser.UserUid);
+
+			var result = matachGames.Any(s => s.Name == name);
+
+			return !result;
 		}
 	}
 }

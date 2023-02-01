@@ -1,8 +1,11 @@
-﻿using hrvster.ApplicationServices.Subscription;
+﻿using hrvster.ApplicationServices.Common;
+using hrvster.ApplicationServices.MatchGames;
+using hrvster.ApplicationServices.Subscription;
 using hrvster.ApplicationServices.Sweepstakes;
 using hrvster.Core.Clients.Publishers;
 using hrvster.Infrastructure;
 using hrvster.Infrastructure.Accounts;
+using hrvster.Infrastructure.MatchGames;
 using hrvster.Infrastructure.Scheduling;
 using hrvster.Infrastructure.Subscriptions;
 using hrvster.Models;
@@ -36,10 +39,14 @@ namespace hrvster.Core.Handlers.Tests.Common
 		public ISweepRulesRepository SweepRulesRepository { get; private set; }
 		public IPlansRepository PlansRepository { get; private set; }
 		public IScheduledSweepRuleTweetsRepository ScheduledSweepRuleTweetsRepository { get; private set; }
+		public IMatchGamesRepository MatchGameRepository { get; private set; }
 
 		public IDrawService DrawService { get; private set; }
 		public IAccountSubscriptionService AccountSubscriptionService { get; private set; }
 		public ISubscriptionService SubscriptionService { get; private set; }
+		public IMatchGamesService MatchGamesService { get; private set; }
+		public ICampaignService CampaignService { get; private set; }
+
         public SweepstakeUtility SweepstakeUtility { get; private set; }
 
         public Mock<IExternalClient> MockedExternalClient { get; private set; }
@@ -91,8 +98,13 @@ namespace hrvster.Core.Handlers.Tests.Common
             SubscriptionService = ServiceProvider.GetService<ISubscriptionService>();
             PlansRepository = ServiceProvider.GetService<IPlansRepository>();
 			ScheduledSweepRuleTweetsRepository = ServiceProvider.GetService<IScheduledSweepRuleTweetsRepository>();
+			MatchGameRepository = ServiceProvider.GetService<IMatchGamesRepository>();
 
-            MockedExternalClient = ServiceProvider.GetService<Mock<IExternalClient>>();
+
+			MatchGamesService = ServiceProvider.GetService<IMatchGamesService>();
+			CampaignService = ServiceProvider.GetService<ICampaignService>();
+
+			MockedExternalClient = ServiceProvider.GetService<Mock<IExternalClient>>();
 			MockedTwitterClient = ServiceProvider.GetService<Mock<TwitterClient>>();
 			MockedToastNotification = ServiceProvider.GetService<Mock<IToastNotification>>();
 

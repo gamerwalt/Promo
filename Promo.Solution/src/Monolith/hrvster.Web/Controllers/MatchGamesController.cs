@@ -2,6 +2,7 @@
 using hrvster.ApplicationServices.MatchGames;
 using hrvster.Core.Authentication;
 using hrvster.Core.Requests;
+using hrvster.Core.Requests.MatchGames;
 using hrvster.Core.Subscriptions;
 using hrvster.Extensions.ModelExtensions;
 using hrvster.Models.WebModels;
@@ -11,6 +12,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.Logging;
 using NToastNotify;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -44,6 +46,7 @@ namespace hrvster.Web.Controllers
 			_notificationService = notificationService;
 			_sessionManager = sessionManager;
 			_mapper = mapper;
+			_mediator = mediator;
 		}
 
 		[HttpGet]
@@ -91,7 +94,9 @@ namespace hrvster.Web.Controllers
 					{
 						Text = $"{a.CampaignName} - {a.StartDate.ToString("d")} to {a.EndDate.ToString("d")}",
 						Value = a.CampaignUid.ToString()
-					})
+					}),
+				StartDate = DateTime.Now,
+				EndDate = DateTime.Now.AddDays(30)
 			};
 
 			return View(createNewMatchGame);
@@ -101,7 +106,38 @@ namespace hrvster.Web.Controllers
 		[Route("/MatchGames/Create")]
 		public async Task<IActionResult> Create(CreateMatchGame form, CancellationToken cancellationToken)
 		{
-			return View();
+			_hrvsterUser = _sessionManager.GetUserInformation();
+
+			if(ModelState.IsValid)
+			{
+				var campaigns = await _mediator.Send(new GetAllCampaignsForAccount(_hrvsterUser.UserUid));
+				if(!campaigns.Any(c => c.CampaignUid == form.PromotionUid))
+				{
+					_notificationService.AddErrorToastMessage("An error occurred trying to add your match game. Please try again.");
+
+					return RedirectToAction("create", form);
+				}
+
+				await _mediator.Send(new CreateMatchGameRequest
+					(
+					_hrvsterUser.UserUid, 
+					form.PromotionUid, 
+					form.Name, 
+					form.Description, 
+					form.NumberOfBoards, 
+					form.WinnableBoards, 
+					form.WinProbability, 
+					form.StartDate, 
+					form.EndDate, 
+					_hrvsterUser.WindowsTimeZone, 
+					_hrvsterUser.IsDaylight));
+
+				return RedirectToAction("Index");
+			}
+
+			_notificationService.AddErrorToastMessage(ModelState.BuildMessageFromErrors());
+
+			return RedirectToAction("create", form);
 		}
 	}
 }

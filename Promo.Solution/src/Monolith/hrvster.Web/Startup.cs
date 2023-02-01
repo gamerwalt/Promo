@@ -78,7 +78,8 @@ namespace hrvster.Web
 				.AddSubscriptionService()
 				.AddPaymentServices(Configuration)
 				.AddMatchGameRepositories()
-				.AddMatchEngineServices();
+				.AddMatchEngineServices()
+				.AddCampaignService();
 		}
 
 

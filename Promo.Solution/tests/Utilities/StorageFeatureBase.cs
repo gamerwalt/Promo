@@ -55,6 +55,7 @@ namespace TestUtilities
 
                 //games
                 services.AddMatchEngineServices();
+                services.AddCampaignService();
 
                 services.MockFirebaseAuthManager();
                 services.MockExternalClient();
