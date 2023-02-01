@@ -27,6 +27,7 @@ namespace hrvster.Web.Validation
 
 			RuleFor(f => f.PromotionUid)
 				.NotEmpty()
+				.WithMessage("You need to select a promotion.")
 				.NotNull()
 				.WithMessage("You need to select a promotion.");
 
@@ -36,6 +37,7 @@ namespace hrvster.Web.Validation
 
 			RuleFor(f => f.Name)
 				.NotNull()
+				.WithMessage("We need a match game name.")
 				.NotEmpty()
 				.WithMessage("We need a match game name.");
 
@@ -45,20 +47,26 @@ namespace hrvster.Web.Validation
 
 			RuleFor(f => f.NumberOfBoards)
 				.NotEmpty()
+				.WithMessage("The number of boards need to be more than 0.")
 				.NotNull()
+				.WithMessage("The number of boards need to be more than 0.")
 				.GreaterThan(0)
 				.WithMessage("The number of boards need to be more than 0.")
 				.LessThan(1000)
 				.WithMessage("The number of boards need to be less than 1000.");
 			RuleFor(f => f.WinnableBoards)
 				.NotEmpty()
+				.WithMessage("The number of winnable boards should be within 1 and the number of boards.")
 				.NotNull()
+				.WithMessage("The number of winnable boards should be within 1 and the number of boards.")
 				.GreaterThan(0)
 				.Must((matchGame, winnableBoards) => BeWithin(matchGame, winnableBoards))
 				.WithMessage("The number of winnable boards should be within 1 and the number of boards.");
 			RuleFor(f => f.WinProbability)
 				.NotEmpty()
+				.WithMessage("The win probability should be greater than 0.")
 				.NotNull()
+				.WithMessage("The win probability should be greater than 0.")
 				.GreaterThan(0)
 				.WithMessage("The win probability should be greater than 0.")
 				.LessThanOrEqualTo(9)

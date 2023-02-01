@@ -95,7 +95,7 @@ namespace hrvster.Web.Controllers
 						Text = $"{a.CampaignName} - {a.StartDate.ToString("d")} to {a.EndDate.ToString("d")}",
 						Value = a.CampaignUid.ToString()
 					}),
-				StartDate = DateTime.Now,
+				StartDate = DateTime.Now.AddDays(1),
 				EndDate = DateTime.Now.AddDays(30)
 			};
 
