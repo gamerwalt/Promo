@@ -59,6 +59,8 @@ namespace hrvster.Web.Mapper
 			CreateMap<Games.Match.Models.MatchGame, Models.MatchGame>()
 				.ForMember(dest => dest.NumberWinnable, opt => opt.MapFrom(src => src.NumberOfWinnableBoards))
 				.ForMember(dest => dest.MatchGameUid, opt => opt.MapFrom(src => src.Uid))
+				.ForMember(dest => dest.IsGenerated, opt => opt.MapFrom(src => src.HasBeenGenerated))
+				.ForMember(dest => dest.ReadyToGenerate, opt => opt.MapFrom(src => src.ReadyToBeGenerated))
 				.ReverseMap();
 		}
 	}

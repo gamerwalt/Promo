@@ -1,12 +1,14 @@
 ﻿using hrvster.Core.Handlers.Tests.Common;
 using hrvster.Core.Requests;
 using hrvster.Core.Requests.ApiRequests;
+using hrvster.Core.Requests.MatchGames;
 using hrvster.Core.Requests.Notifications.Publishing;
 using hrvster.Core.Requests.WebRequests.Promotions;
 using hrvster.Core.Requests.WebRequests.Publishing;
 using hrvster.Core.Requests.WebRequests.Sweeps;
 using hrvster.Models;
 using hrvster.Models.Profiles;
+using hrvster.Web.Models;
 using TestUtilities;
 using TestUtilities.Data;
 
@@ -20,7 +22,23 @@ namespace hrvster.Core.Handlers.Tests
             DateTime endDate)
             => new CreateCampaignRequest(GetCampaignRequest2(startDate, endDate), account.AccountUid, TestData.WindowsTimezone);
 
-        public static CreateCampaignRequest GetCreateCampaignRequest2(
+		public static CreateMatchGameRequest CreateACreateMatchGameRequest(Guid matchGameUid, Models.Account account, CreateMatchGame model)
+			=> new CreateMatchGameRequest(
+                matchGameUid,
+				account.AccountUid,
+				model.PromotionUid,
+				model.Name,
+				model.Description,
+				model.NumberOfBoards,
+				model.WinnableBoards,
+				model.WinProbability,
+				model.StartDate,
+				model.EndDate,
+				TestData.WindowsTimezone,
+				false
+				);
+
+		public static CreateCampaignRequest GetCreateCampaignRequest2(
             Models.Account account)
             => new CreateCampaignRequest(GetCampaignRequest2(), account.AccountUid, TestData.WindowsTimezone);
 
@@ -175,7 +193,7 @@ namespace hrvster.Core.Handlers.Tests
         public async Task<Sweep> BuildAndCreateSweepAsync(
             MediatorHandlerFeature _feature, Models.Account account, Campaign campaign)
             => await _feature.Mediator.Send(
-                new CreateSweep(
+                new Requests.CreateSweep(
                     CreateNewSweepRequest(account, campaign),
                     TestData.WindowsTimezone, false));
 

@@ -5,6 +5,7 @@ using hrvster.Core.Requests;
 using hrvster.Core.Requests.MatchGames;
 using hrvster.Core.Subscriptions;
 using hrvster.Extensions.ModelExtensions;
+using hrvster.Models;
 using hrvster.Models.WebModels;
 using hrvster.Web.Models;
 using MediatR;
@@ -68,7 +69,7 @@ namespace hrvster.Web.Controllers
 
 			var campaigns = await _mediator.Send(new GetAllCampaignsForAccount(_hrvsterUser.UserUid));
 
-			if(campaigns.Count == 0)
+			if (campaigns.Count == 0)
 			{
 				_notificationService.AddInfoToastMessage("You need a promotion before you continue.");
 
@@ -86,18 +87,7 @@ namespace hrvster.Web.Controllers
 				return RedirectToAction("Index");
 			}
 
-			var createNewMatchGame = new CreateMatchGame()
-			{
-				Promotions = campaigns
-					.Where(p => p.IsActive() || p.WillBeInProgress())
-					.Select(a => new SelectListItem()
-					{
-						Text = $"{a.CampaignName} - {a.StartDate.ToString("d")} to {a.EndDate.ToString("d")}",
-						Value = a.CampaignUid.ToString()
-					}),
-				StartDate = DateTime.Now.AddDays(1),
-				EndDate = DateTime.Now.AddDays(30)
-			};
+			var createNewMatchGame = BuildCreateGameModel(campaigns);
 
 			return View(createNewMatchGame);
 		}
@@ -108,36 +98,158 @@ namespace hrvster.Web.Controllers
 		{
 			_hrvsterUser = _sessionManager.GetUserInformation();
 
-			if(ModelState.IsValid)
+			var campaigns = await _mediator.Send(new GetAllCampaignsForAccount(_hrvsterUser.UserUid));
+
+			if (ModelState.IsValid)
 			{
-				var campaigns = await _mediator.Send(new GetAllCampaignsForAccount(_hrvsterUser.UserUid));
-				if(!campaigns.Any(c => c.CampaignUid == form.PromotionUid))
+				var matchGameUid = Guid.NewGuid();
+				if (campaigns.Count == 0)
+				{
+					_notificationService.AddInfoToastMessage("You need a promotion before you continue.");
+
+					return RedirectToAction("Index", "Promotions");
+				}
+
+				if (!campaigns.Any(c => c.CampaignUid == form.PromotionUid))
 				{
 					_notificationService.AddErrorToastMessage("An error occurred trying to add your match game. Please try again.");
 
 					return RedirectToAction("create", form);
 				}
 
-				await _mediator.Send(new CreateMatchGameRequest
+				var anyActivePromotions = campaigns.Any(c => c.IsActive());
+				var anyWillBeInProgress = campaigns.Any(c => c.WillBeInProgress());
+
+				if (!anyActivePromotions && !anyWillBeInProgress)
+				{
+					_notificationService.AddErrorToastMessage(
+						"None of your promotions are active. We need 1 active promotion to continue.");
+
+					return RedirectToAction("Index");
+				}
+
+				if (await _mediator.Send(new CreateMatchGameRequest
 					(
-					_hrvsterUser.UserUid, 
-					form.PromotionUid, 
-					form.Name, 
-					form.Description, 
-					form.NumberOfBoards, 
-					form.WinnableBoards, 
-					form.WinProbability, 
-					form.StartDate, 
-					form.EndDate, 
-					_hrvsterUser.WindowsTimeZone, 
-					_hrvsterUser.IsDaylight));
+						matchGameUid,
+						_hrvsterUser.UserUid, 
+						form.PromotionUid, 
+						form.Name, 
+						form.Description, 
+						form.NumberOfBoards, 
+						form.WinnableBoards, 
+						form.WinProbability, 
+						form.StartDate, 
+						form.EndDate, 
+						_hrvsterUser.WindowsTimeZone, 
+						_hrvsterUser.IsDaylight)
+					))
+					return RedirectToAction("Index");
+
+				form.Promotions = campaigns
+								.Where(p => p.IsActive() || p.WillBeInProgress())
+								.Select(a => new SelectListItem()
+								{
+									Text = $"{a.CampaignName} - {a.StartDate.ToString("d")} to {a.EndDate.ToString("d")}",
+									Value = a.CampaignUid.ToString()
+								});
+
+				return View("create", form);
+			}
+
+			form.Promotions = campaigns
+				.Where(p => p.IsActive() || p.WillBeInProgress())
+				.Select(a => new SelectListItem()
+				{
+					Text = $"{a.CampaignName} - {a.StartDate.ToString("d")} to {a.EndDate.ToString("d")}",
+					Value = a.CampaignUid.ToString()
+				});
+
+			_notificationService.AddErrorToastMessage(ModelState.BuildMessageFromErrors());
+
+			return View("create", form);
+		}
+
+		[HttpGet]
+		[Route("/MatchGames/{matchGameUid:Guid}/View")]
+		public async Task<IActionResult> View(Guid matchGameUid, CancellationToken cancellationToken)
+		{
+			_hrvsterUser = _sessionManager.GetUserInformation();
+
+			var matchGameTask = _mediator.Send(new GetMatchGameRequest(matchGameUid));
+			var campaignsTask = _mediator.Send(new GetAllCampaignsForAccount(_hrvsterUser.UserUid));
+
+			var tasks = new List<Task>();
+			tasks.Add(matchGameTask);
+			tasks.Add(campaignsTask);
+
+			await Task.WhenAll(tasks);
+
+			var matchGame = matchGameTask.Result;
+			var campaigns = campaignsTask.Result;
+
+			if (matchGame == null)
+			{
+				_notificationService.AddWarningToastMessage("Unable to locate the Match Game.");
 
 				return RedirectToAction("Index");
 			}
 
-			_notificationService.AddErrorToastMessage(ModelState.BuildMessageFromErrors());
+			if (campaigns.Count == 0)
+			{
+				_notificationService.AddInfoToastMessage("You need a promotion before you continue.");
 
-			return RedirectToAction("create", form);
+				return RedirectToAction("Index", "Promotions");
+			}
+
+			var anyActivePromotions = campaigns.Any(c => c.IsActive());
+			var anyWillBeInProgress = campaigns.Any(c => c.WillBeInProgress());
+
+			if (!anyActivePromotions && !anyWillBeInProgress)
+			{
+				_notificationService.AddErrorToastMessage(
+					"None of your promotions are active. We need 1 active promotion to continue.");
+
+				return RedirectToAction("Index");
+			}
+
+			var model = BuildMatchGameDetails(matchGame, campaigns);
+
+			return View(model);
 		}
+
+		private static MatchGameDetails BuildMatchGameDetails(Games.Match.Models.MatchGame matchGame, List<Campaign> campaigns)
+			=> new MatchGameDetails
+				{
+					Promotions = campaigns
+									.Where(p => p.IsActive() || p.WillBeInProgress())
+									.Select(a => new SelectListItem()
+									{
+										Text = $"{a.CampaignName} - {a.StartDate.ToString("d")} to {a.EndDate.ToString("d")}",
+										Value = a.CampaignUid.ToString()
+									}),
+					PromotionUid = matchGame.CampaignUid,
+					MatchGameUid = matchGame.Uid,
+					Name = matchGame.Name,
+					Description = matchGame.Description,
+					NumberOfBoards = matchGame.NumberOfBoards,
+					WinnableBoards = matchGame.NumberOfWinnableBoards,
+					WinProbability = matchGame.WinProbability,
+					StartDate = matchGame.StartDate,
+					EndDate = matchGame.EndDate,
+				};
+
+		private static CreateMatchGame BuildCreateGameModel(List<Campaign> campaigns)
+			=> new CreateMatchGame()
+				{
+					Promotions = campaigns
+									.Where(p => p.IsActive() || p.WillBeInProgress())
+									.Select(a => new SelectListItem()
+									{
+										Text = $"{a.CampaignName} - {a.StartDate.ToString("d")} to {a.EndDate.ToString("d")}",
+										Value = a.CampaignUid.ToString()
+									}),
+					StartDate = DateTime.Now.AddDays(1),
+					EndDate = DateTime.Now.AddDays(30)
+				};
 	}
 }

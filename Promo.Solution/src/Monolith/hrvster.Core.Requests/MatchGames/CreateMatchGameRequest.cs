@@ -3,8 +3,9 @@ using System;
 
 namespace hrvster.Core.Requests.MatchGames
 {
-	public class CreateMatchGameRequest : IRequest
+	public class CreateMatchGameRequest : IRequest<bool>
 	{
+		private Guid _matchGammeUid;
 		private Guid _accountUid;
 		private Guid _promotionUid;
 		private string _name;
@@ -17,8 +18,9 @@ namespace hrvster.Core.Requests.MatchGames
 		private string _timeZone;
 		private bool _isDaylight;
 
-		public CreateMatchGameRequest(Guid accountUid, Guid promotionUid, string name, string description, int numberOfBoards, int winnableBoards, int winProbability, DateTime startDate, DateTime endDate, string timeZone, bool isDaylight)
+		public CreateMatchGameRequest(Guid matchGameUid, Guid accountUid, Guid promotionUid, string name, string description, int numberOfBoards, int winnableBoards, int winProbability, DateTime startDate, DateTime endDate, string timeZone, bool isDaylight)
 		{
+			_matchGammeUid = matchGameUid;
 			_accountUid = accountUid;
 			_promotionUid = promotionUid;
 			_name = name;
@@ -32,6 +34,7 @@ namespace hrvster.Core.Requests.MatchGames
 			_isDaylight = isDaylight;
 		}
 
+		public Guid MatchGameUid { get { return _matchGammeUid; } }
 		public Guid AccountUid { get { return _accountUid; } }
 		public Guid PromotionUid { get { return _promotionUid; } }
 		public string Name { get { return _name;} }

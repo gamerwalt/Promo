@@ -5,12 +5,13 @@ using MediatR;
 using Microsoft.Extensions.Logging;
 using NToastNotify;
 using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace hrvster.Core.Handlers.MatchGame
 {
-	public class CreateMatchGame : AsyncRequestHandler<CreateMatchGameRequest>
+	public class CreateMatchGame : IRequestHandler<CreateMatchGameRequest, bool>
 	{
 		private readonly ILogger<CreateMatchGame> _logger;
 		private readonly IMatchGamesService _service;
@@ -29,9 +30,14 @@ namespace hrvster.Core.Handlers.MatchGame
 			_notificationService = notificationService;
 		}
 
-		protected async override Task Handle(CreateMatchGameRequest request, CancellationToken cancellationToken)
+		public async Task<bool> Handle(CreateMatchGameRequest request, CancellationToken cancellationToken)
 		{
-			var matchGameUid = Guid.NewGuid();
+			if (! await ValidateCreateMatchGameRequestName(request, cancellationToken))
+			{
+				_notificationService.AddErrorToastMessage("The match game name you supplied already exists.");
+
+				return false;
+			}
 
 			var campaign = await _campaignService.GetCampaignAsync(request.PromotionUid, cancellationToken);
 
@@ -44,7 +50,7 @@ namespace hrvster.Core.Handlers.MatchGame
 				NumberOfBoards = request.NumberOfBoards,
 				NumberOfWinnableBoards = request.WinnableBoards,
 				TileCountPerBoard = 9,
-				Uid = matchGameUid,
+				Uid = request.MatchGameUid,
 				WinProbability = request.WinProbability,
 				StartDate = request.StartDate,
 				EndDate = request.EndDate
@@ -57,6 +63,16 @@ namespace hrvster.Core.Handlers.MatchGame
 			await _service.CreateMatchGameAsync(matchGame, request.TimeZone, request.IsDayLight, cancellationToken);
 
 			_notificationService.AddSuccessToastMessage("Match game created successfully.");
+
+			return true;
+		}
+
+		private async Task<bool> ValidateCreateMatchGameRequestName(
+			CreateMatchGameRequest request, CancellationToken cancellationToken)
+		{
+			var matchGames = await _service.GetCampaignMatchGamesAsync(request.PromotionUid, cancellationToken);
+
+			return !matchGames.Any(c => c.Name == request.Name);
 		}
 	}
 }
