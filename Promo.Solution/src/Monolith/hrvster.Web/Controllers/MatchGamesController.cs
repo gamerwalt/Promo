@@ -6,12 +6,10 @@ using hrvster.Core.Requests.MatchGames;
 using hrvster.Core.Subscriptions;
 using hrvster.Extensions.ModelExtensions;
 using hrvster.Models;
-using hrvster.Models.WebModels;
 using hrvster.Web.Models;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.Extensions.Logging;
 using NToastNotify;
 using System;
 using System.Collections.Generic;
@@ -25,24 +23,21 @@ namespace hrvster.Web.Controllers
 	[ShouldBeSubscribed]
 	public class MatchGamesController : Controller
 	{
-		private readonly ILogger<MatchGamesController> _logger;
 		private readonly IMatchGamesService _matchGamesService;
 		private readonly IToastNotification _notificationService;
 		private readonly ISessionManager _sessionManager;
 		private readonly IMapper _mapper;
 		private readonly IMediator _mediator;
 
-		private hrvster.Models.HrvsterUser _hrvsterUser;
+		private HrvsterUser _hrvsterUser;
 
 		public MatchGamesController(
-			ILoggerFactory loggerFactory,
 			IMatchGamesService matchGamesService,
 			IToastNotification notificationService,
 			ISessionManager sessionManager,
 			IMapper mapper,
 			IMediator mediator)
 		{
-			_logger = loggerFactory.CreateLogger<MatchGamesController>();
 			_matchGamesService = matchGamesService;
 			_notificationService = notificationService;
 			_sessionManager = sessionManager;
@@ -131,16 +126,16 @@ namespace hrvster.Web.Controllers
 				if (await _mediator.Send(new CreateMatchGameRequest
 					(
 						matchGameUid,
-						_hrvsterUser.UserUid, 
-						form.PromotionUid, 
-						form.Name, 
-						form.Description, 
-						form.NumberOfBoards, 
-						form.WinnableBoards, 
-						form.WinProbability, 
-						form.StartDate, 
-						form.EndDate, 
-						_hrvsterUser.WindowsTimeZone, 
+						_hrvsterUser.UserUid,
+						form.PromotionUid,
+						form.Name,
+						form.Description,
+						form.NumberOfBoards,
+						form.WinnableBoards,
+						form.WinProbability,
+						form.StartDate,
+						form.EndDate,
+						_hrvsterUser.WindowsTimeZone,
 						_hrvsterUser.IsDaylight)
 					))
 					return RedirectToAction("Index");
@@ -219,37 +214,37 @@ namespace hrvster.Web.Controllers
 
 		private static MatchGameDetails BuildMatchGameDetails(Games.Match.Models.MatchGame matchGame, List<Campaign> campaigns)
 			=> new MatchGameDetails
-				{
-					Promotions = campaigns
+			{
+				Promotions = campaigns
 									.Where(p => p.IsActive() || p.WillBeInProgress())
 									.Select(a => new SelectListItem()
 									{
 										Text = $"{a.CampaignName} - {a.StartDate.ToString("d")} to {a.EndDate.ToString("d")}",
 										Value = a.CampaignUid.ToString()
 									}),
-					PromotionUid = matchGame.CampaignUid,
-					MatchGameUid = matchGame.Uid,
-					Name = matchGame.Name,
-					Description = matchGame.Description,
-					NumberOfBoards = matchGame.NumberOfBoards,
-					WinnableBoards = matchGame.NumberOfWinnableBoards,
-					WinProbability = matchGame.WinProbability,
-					StartDate = matchGame.StartDate,
-					EndDate = matchGame.EndDate,
-				};
+				PromotionUid = matchGame.CampaignUid,
+				MatchGameUid = matchGame.Uid,
+				Name = matchGame.Name,
+				Description = matchGame.Description,
+				NumberOfBoards = matchGame.NumberOfBoards,
+				WinnableBoards = matchGame.NumberOfWinnableBoards,
+				WinProbability = matchGame.WinProbability,
+				StartDate = matchGame.StartDate,
+				EndDate = matchGame.EndDate,
+			};
 
 		private static CreateMatchGame BuildCreateGameModel(List<Campaign> campaigns)
 			=> new CreateMatchGame()
-				{
-					Promotions = campaigns
+			{
+				Promotions = campaigns
 									.Where(p => p.IsActive() || p.WillBeInProgress())
 									.Select(a => new SelectListItem()
 									{
 										Text = $"{a.CampaignName} - {a.StartDate.ToString("d")} to {a.EndDate.ToString("d")}",
 										Value = a.CampaignUid.ToString()
 									}),
-					StartDate = DateTime.Now.AddDays(1),
-					EndDate = DateTime.Now.AddDays(30)
-				};
+				StartDate = DateTime.Now.AddDays(1),
+				EndDate = DateTime.Now.AddDays(30)
+			};
 	}
 }
