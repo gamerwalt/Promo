@@ -61,7 +61,7 @@ namespace hrvster.ApplicationServices.MatchGames
 			if (matchGameUid == Guid.Empty)
 				throw new ArgumentNullException(nameof(matchGameUid));
 
-			return await _repository.GetByUidAsync(matchGameUid, cancellationToken);
+			return await _repository.GetAsync(matchGameUid, cancellationToken);
 		}
 
 		public async Task SetAsReadyToBeProcessedAsync(MatchGame matchGame, CancellationToken cancellationToken)

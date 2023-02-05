@@ -1,10 +1,12 @@
 ﻿using hrvster.Models;
 using TestUtilities;
 using TestUtilities.Data;
+using Xunit;
 
 namespace hrvster.ApplicationServices.Tests.Common
 {
-    public abstract class MatchGameTestsAbstractBase : BuilderClassAbstract
+	[Collection("Sequential")]
+	public abstract class MatchGameTestsAbstractBase : BuilderClassAbstract
     {
         public async Task<Account> BuildAccountAndSubscribeToBasicPlan(
             MatchGameFeature _feature)
@@ -39,6 +41,7 @@ namespace hrvster.ApplicationServices.Tests.Common
         public async Task<Account> CreateAccountAsync(MatchGameFeature _feature)
         {
             var account = BuildNewAccount();
+            account.PhoneNumber = account.PhoneNumber.Substring(0, 12);
             await _feature.AccountsRepository.CreateAsync(account);
 
             return await _feature.AccountsRepository.GetByEmailAddressAsync(account.EmailAddress);

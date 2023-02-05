@@ -20,9 +20,14 @@ namespace hrvster.ApplicationServices.Tests.Common
         public IAccountsRepository AccountsRepository { get; private set; }
         public ICampaignRepository CampaignRepository { get; private set; }
         public IPlansRepository PlansRepository { get; private set; }
+        public IMatchImagesRepository MatchImageRepository { get; private set; }
+        public IMatchPrizesRepository MatchPrizesRepository { get; private set; }
+        public IMatchBoardsRepository MatchBoardsRepository { get; private set; }
 
-        public IMatchGamesService MatchGamesService { get; private set; }
-        public ISubscriptionService SubscriptionService { get; private set; }
+
+		public IMatchGamesService MatchGamesService { get; private set; }
+        public IMatchGameReadinessService MatchGameReadinessService { get; private set; }
+		public ISubscriptionService SubscriptionService { get; private set; }
 
         public MatchGameFeature()
         {
@@ -57,10 +62,13 @@ namespace hrvster.ApplicationServices.Tests.Common
             AccountsRepository = ServiceProvider.GetService<IAccountsRepository>();
             CampaignRepository = ServiceProvider.GetService<ICampaignRepository>();
             PlansRepository = ServiceProvider.GetService<IPlansRepository>();
+            MatchImageRepository = ServiceProvider.GetService<IMatchImagesRepository>();
+            MatchPrizesRepository = ServiceProvider.GetService<IMatchPrizesRepository>();
+            MatchBoardsRepository = ServiceProvider.GetService<IMatchBoardsRepository>();
 
             MatchGamesService = ServiceProvider.GetService<IMatchGamesService>();
+            MatchGameReadinessService = ServiceProvider.GetService<IMatchGameReadinessService>();
             SubscriptionService = ServiceProvider.GetService<ISubscriptionService>();
-
 
             var hrvsterUser = ServiceProvider.GetService<HrvsterUser>();
             hrvsterUser.EmailAddress = TestData.EmailAddress;

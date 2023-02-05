@@ -1,9 +1,12 @@
-﻿namespace hrvster.Games.Match.Models
+﻿using hrvster.Models;
+
+namespace hrvster.Games.Match.Models
 {
 	public class MatchImage
 	{
 		public int Id { get; set; }
 		public Guid Uid { get; set; }
+		public MatchGame MatchGame { get; set; }
 		public string LocationUrl { get; set; }
 	}
 }

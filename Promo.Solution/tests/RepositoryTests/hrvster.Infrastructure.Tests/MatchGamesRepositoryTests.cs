@@ -10,8 +10,7 @@ using Xunit;
 namespace hrvster.Infrastructure.Tests
 {
     [Collection("Sequential")]
-    public class MatchGamesRepositoryTests :
-        RepositoryAbstractModelBuilder, IClassFixture<RepositoryFeature>
+    public class MatchGamesRepositoryTests : RepositoryAbstractModelBuilder, IClassFixture<RepositoryFeature>
     {
         private readonly RepositoryFeature _feature;
         private Faker<MatchGame> MatchGameFaker;
@@ -69,7 +68,7 @@ namespace hrvster.Infrastructure.Tests
             var matchGame= MatchGameFaker.Generate();
             await _feature.MatchGameRepository.CreateAsync(matchGame, TestData.WindowsTimezone, false, default);
 
-            var game = await _feature.MatchGameRepository.GetByUidAsync(matchGame.Uid, default);
+            var game = await _feature.MatchGameRepository.GetAsync(matchGame.Uid, default);
             game.Should().NotBeNull();
             game.Uid.Should().Be(matchGame.Uid);
         }
@@ -89,14 +88,14 @@ namespace hrvster.Infrastructure.Tests
             var matchGame = MatchGameFaker.Generate();
             await _feature.MatchGameRepository.CreateAsync(matchGame, TestData.WindowsTimezone, false, default);
 
-            var game = await _feature.MatchGameRepository.GetByUidAsync(matchGame.Uid, default);
+            var game = await _feature.MatchGameRepository.GetAsync(matchGame.Uid, default);
 
             game.Name = updatedName;
             game.NumberOfBoards = updatedNumberOfBoards;
 
             await _feature.MatchGameRepository.UpdateAsync(game, TestData.WindowsTimezone, false, default(CancellationToken));
 
-            game = await _feature.MatchGameRepository.GetByUidAsync(game.Uid, default);
+            game = await _feature.MatchGameRepository.GetAsync(game.Uid, default);
             game.Name.Should().Be(updatedName);
             game.NumberOfBoards.Should().Be(updatedNumberOfBoards);
         }
@@ -113,11 +112,11 @@ namespace hrvster.Infrastructure.Tests
             var matchGame = MatchGameFaker.Generate();
             await _feature.MatchGameRepository.CreateAsync(matchGame, TestData.WindowsTimezone, false, default);
 
-            var game = await _feature.MatchGameRepository.GetByUidAsync(matchGame.Uid, default);
+            var game = await _feature.MatchGameRepository.GetAsync(matchGame.Uid, default);
 
             await _feature.MatchGameRepository.SetAsGeneratedAsync(game, default);
 
-            game = await _feature.MatchGameRepository.GetByUidAsync(game.Uid, default);
+            game = await _feature.MatchGameRepository.GetAsync(game.Uid, default);
             game.HasBeenGenerated.Should().BeTrue();
         }
 
@@ -136,19 +135,19 @@ namespace hrvster.Infrastructure.Tests
             var matchGame = MatchGameFaker.Generate();
             await _feature.MatchGameRepository.CreateAsync(matchGame, TestData.WindowsTimezone, false, default);
 
-            var game = await _feature.MatchGameRepository.GetByUidAsync(matchGame.Uid, default);
+            var game = await _feature.MatchGameRepository.GetAsync(matchGame.Uid, default);
             var createdName = game.Name;
             var createdNumberOfBoards = game.NumberOfBoards;
 
             await _feature.MatchGameRepository.SetAsGeneratedAsync(game, default(CancellationToken));
 
-            game = await _feature.MatchGameRepository.GetByUidAsync(game.Uid, default);
+            game = await _feature.MatchGameRepository.GetAsync(game.Uid, default);
             game.Name = updatedName;
             game.NumberOfBoards = updatedNumberOfBoards;
 
             await _feature.MatchGameRepository.UpdateAsync(game, TestData.WindowsTimezone, false, default);
 
-            game = await _feature.MatchGameRepository.GetByUidAsync(game.Uid, default);
+            game = await _feature.MatchGameRepository.GetAsync(game.Uid, default);
             game.Name.Should().Be(createdName);
             game.NumberOfBoards = createdNumberOfBoards;
         }
@@ -193,11 +192,11 @@ namespace hrvster.Infrastructure.Tests
             var matchGame = MatchGameFaker.Generate();
             await _feature.MatchGameRepository.CreateAsync(matchGame, TestData.WindowsTimezone, false, default);
 
-            var game = await _feature.MatchGameRepository.GetByUidAsync(matchGame.Uid, default);
+            var game = await _feature.MatchGameRepository.GetAsync(matchGame.Uid, default);
 
             await _feature.MatchGameRepository.SetAsReadyToBeGeneratedAsync(game, default);
 
-            var updatedGame = await _feature.MatchGameRepository.GetByUidAsync(matchGame.Uid, default);
+            var updatedGame = await _feature.MatchGameRepository.GetAsync(matchGame.Uid, default);
 
             updatedGame.ReadyToBeGenerated.Should().BeTrue();
         }
@@ -214,12 +213,12 @@ namespace hrvster.Infrastructure.Tests
             var matchGame = MatchGameFaker.Generate();
             await _feature.MatchGameRepository.CreateAsync(matchGame, TestData.WindowsTimezone, false, default);
 
-            var game = await _feature.MatchGameRepository.GetByUidAsync(matchGame.Uid, default);
+            var game = await _feature.MatchGameRepository.GetAsync(matchGame.Uid, default);
 
             await _feature.MatchGameRepository.SetAsGeneratedAsync(game, default);
             await _feature.MatchGameRepository.SetAsReadyToBeGeneratedAsync(game, default);
 
-            game = await _feature.MatchGameRepository.GetByUidAsync(game.Uid, default);
+            game = await _feature.MatchGameRepository.GetAsync(game.Uid, default);
 
             game.HasBeenGenerated.Should().BeTrue();
             game.ReadyToBeGenerated.Should().BeFalse();

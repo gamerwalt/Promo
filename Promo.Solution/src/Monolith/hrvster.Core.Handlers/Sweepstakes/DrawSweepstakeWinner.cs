@@ -22,17 +22,20 @@ namespace hrvster.Core.Handlers.Sweepstakes
 		private readonly IMediator _mediator;
 		private readonly IRandomizer _randomizer;
 		private readonly ISweepWinnersRepository _sweepWinnersRepository;
+		private readonly ISweepsRepository _sweepsRepository;
 
 		public DrawSweepstakeWinner(
 			ILoggerFactory loggerFactory,
 			IMediator mediator,
 			IRandomizer randomizer,
-			ISweepWinnersRepository sweepWinnersRepository)
+			ISweepWinnersRepository sweepWinnersRepository,
+			ISweepsRepository sweepsRepository)
 		{
 			_logger = loggerFactory.CreateLogger<DrawSweepstakeWinner>();
 			_mediator = mediator;
 			_randomizer = randomizer;
 			_sweepWinnersRepository = sweepWinnersRepository;
+			_sweepsRepository = sweepsRepository;
 		}
 
 		protected async override Task Handle(DrawSweepstakesWinnerRequest request, CancellationToken cancellationToken)
@@ -111,9 +114,26 @@ namespace hrvster.Core.Handlers.Sweepstakes
 							sweep.Name,
 							sweep.SweepUid);
 
-						var backupWinnerIndex = GetRandomNumber(min, max);
+						var backupWinnerIndex = 0;
+						var backupWinnerDrawObject = default(SweepstakeDrawObject);
 
-						var backupWinnerDrawObject = drawObject[backupWinnerIndex];
+						if (drawObject.Count() < 0 || drawObject.Count() == 0)
+						{
+							_logger.LogWarning("There are no more entries to draw backup winners from for sweepstake {sweepName} with uid {sweepUid}",
+								sweep.Name,
+								sweep.SweepUid);
+							_logger.LogWarning("Backup Draw object count {drawObjectCount}. Entry Count {entryCount}",
+								drawObject.Count(),
+								entries.Count());
+
+							break;
+						}
+						else
+						{
+							backupWinnerIndex = GetRandomNumber(min, max);
+
+							backupWinnerDrawObject = drawObject[backupWinnerIndex];
+						}
 
 						_logger.LogInformation("Backup winner # {number} for winner {winnerNumber} for sweepstake {sweepName} with uid {sweepUid} is {userIdentifier}.",
 						index,
@@ -176,8 +196,25 @@ namespace hrvster.Core.Handlers.Sweepstakes
 					sweep.Name,
 					sweep.SweepUid);
 
-				var winnerIndex = GetRandomNumber(min, max);
-				var winnerDrawObject = drawObject[winnerIndex];
+				var winnerIndex = 0;
+				var winnerDrawObject = default(SweepstakeDrawObject);
+
+				if (drawObject.Count() < 0 || drawObject.Count() == 0)
+				{
+					_logger.LogWarning("There are no more entries to draw winners from for sweepstake {sweepName} with uid {sweepUid}",
+						sweep.Name,
+						sweep.SweepUid);
+					_logger.LogWarning("Winners Draw object count {drawObjectCount}. Entry Count {entryCount}",
+						drawObject.Count(),
+						entries.Count());
+
+					break;
+				}
+				else
+				{
+					winnerIndex = GetRandomNumber(min, max);
+					winnerDrawObject = drawObject[winnerIndex];
+				}
 
 				_logger.LogInformation("Winner # {number} for sweepstake {sweepName} with uid {sweepUid} is {userIdentifier}.",
 					index,
@@ -212,14 +249,14 @@ namespace hrvster.Core.Handlers.Sweepstakes
 		{
 			drawObject.Remove(winnerDrawObject);
 
-			return max;
+			return drawObject.Count;
 		}
 
 		private int RemoveBackupWInnerFromDrawObject(List<SweepstakeDrawObject> drawObject, int max, SweepstakeDrawObject backupWinnerDrawObject)
 		{
 			drawObject.Remove(backupWinnerDrawObject);
 
-			return max;
+			return drawObject.Count;
 		}
 
 		private SweepBackupWinner GetBackupWinner(Sweep sweep, List<SweepEntry> entries, int index, SweepstakeDrawObject backupWinnerDrawObject)
@@ -292,6 +329,9 @@ namespace hrvster.Core.Handlers.Sweepstakes
 				_logger.LogInformation($"Rule: Total winners count {winnerAndBackupCount} is more than the distinct number of users {distinctUserCount} who entered the sweepstakes.");
 				_logger.LogInformation($"Cannot continue. Please perform this draw manually or update the Winner count and back up winner count for Sweep: {sweep.Name}.");
 
+				if (sweep.Account == null)
+					sweep.Account = await GetSweepAccountAsync(sweep);
+
 				var account = await _mediator.Send(new GetAccountRequest(sweep.Account.AccountUid));
 
 				await _mediator.Send(new SweepsDistinctUsersLessThanWinnerCountMailRequest(account.EmailAddress, sweep.Name));
@@ -302,6 +342,13 @@ namespace hrvster.Core.Handlers.Sweepstakes
 			}
 
 			return true;
+		}
+
+		private async Task<Models.Account> GetSweepAccountAsync(Sweep sweep)
+		{
+			var retrievedSweep = await _sweepsRepository.GetAsync(sweep.SweepUid);
+
+			return retrievedSweep.Account;
 		}
 
 		private static IEnumerable<SweepEntryUser> GetDistinctEntries(List<SweepEntry> entries)

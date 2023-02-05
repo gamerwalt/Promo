@@ -1,4 +1,5 @@
-﻿using FluentAssertions;
+﻿using Bogus;
+using FluentAssertions;
 using hrvster.Core.Clients.Common;
 using hrvster.Core.Handlers.Tests.Common;
 using hrvster.Core.Requests.ServiceRequests;
@@ -31,6 +32,9 @@ namespace hrvster.Core.Handlers.Tests
         {
             _feature.GivenACleanSlate();
 
+            var winnerCount = new Faker().Random.Number(1, 5);
+            var backupCount = new Faker().Random.Number(1, 3);
+
             var account = BuildNewAccount();
             var campaign = BuildNewCampaign(account, BuildNewCampaignType());
             var profile = BuildNewTwitterProfile(account);
@@ -55,7 +59,7 @@ namespace hrvster.Core.Handlers.Tests
             var sweepEntryRule = BuildNewSweepEntryRule(TestData.EntryRuleUid, sweep, campaign, 3);
             await _feature.SweepEntryRulesRepository.CreateAsync(sweepEntryRule);
 
-            var drawRule = BuildSweepDrawRule(TestData.SweepDrawRuleUid, sweep, 2, 3);
+            var drawRule = BuildSweepDrawRule(TestData.SweepDrawRuleUid, sweep, winnerCount, backupCount);
             await _feature.SweepDrawRuleRepository.CreateAsync(drawRule);
 
             var rule = BuildRule(TestData.RuleUid, campaign, sweep, "#Testinghashtag");
@@ -64,7 +68,7 @@ namespace hrvster.Core.Handlers.Tests
             rule = rules.FirstOrDefault();
 
             //Seed entries
-            var sweepEntries = SeedEntriesFor(sweep, rule);
+            var sweepEntries = SeedEntriesFor(sweep, rule, winnerCount * backupCount);
             foreach(var entry in sweepEntries)
             {
                 await _feature.SweepEntryRepository.CreateAsync(entry);
@@ -117,7 +121,7 @@ namespace hrvster.Core.Handlers.Tests
             rule = rules.FirstOrDefault();
 
             //Seed entries
-            var sweepEntries = SeedEntriesFor(sweep, rule);
+            var sweepEntries = SeedEntriesFor(sweep, rule, 2 * 3);
             foreach (var entry in sweepEntries)
             {
                 await _feature.SweepEntryRepository.CreateAsync(entry);
@@ -125,7 +129,7 @@ namespace hrvster.Core.Handlers.Tests
 
             await _feature.DrawService.ProcessDrawsAsync(default);
 
-            _feature.EmailsTableShouldContainFieldEqualTo(MailTableFields.EmailAddress, TestData.EmailAddress);
+            _feature.EmailsTableShouldContainFieldEqualTo(MailTableFields.EmailAddress, account.EmailAddress);
             _feature.SweepNotificationTableShouldContainFieldEqualTo(SweepNotificationTableFields.SweepId, sweep.SweepId.ToString());
             _feature.SweepNotificationTableShouldContainFieldEqualTo(SweepNotificationTableFields.DrawAttempted, 1.ToString());
             _feature.SweepNotificationTableShouldContainFieldEqualTo(SweepNotificationTableFields.DrawHappened, 1.ToString());

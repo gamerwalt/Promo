@@ -17,6 +17,7 @@ namespace hrvster.Core
 		public int GetRandomNumber(int min, int maxInclusive)
 		{
 			if (min == maxInclusive) return min;
+			if (min > maxInclusive) return 0;
 
 			if (min > maxInclusive) throw new ArgumentOutOfRangeException();
 

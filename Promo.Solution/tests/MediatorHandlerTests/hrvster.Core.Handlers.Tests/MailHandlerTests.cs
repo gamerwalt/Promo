@@ -50,8 +50,8 @@ namespace hrvster.Core.Handlers.Tests
 
 			await _feature.Mediator.Send(request);
 
-			_feature.EmailsTableShouldContainFieldEqualTo(MailTableFields.EmailAddress, TestData.EmailAddress);
-			_feature.EmailsTableShouldContain(MailTableFields.Parameters, TestData.SweepName);
+			_feature.EmailsTableShouldContainFieldEqualTo(MailTableFields.EmailAddress, account.EmailAddress);
+			_feature.EmailsTableShouldContain(MailTableFields.Parameters, sweep.Name);
 			_feature.EmailsTableShouldContain(MailTableFields.Parameters, hourValue.ToString());
 		}
 
@@ -74,8 +74,8 @@ namespace hrvster.Core.Handlers.Tests
 
 			await _feature.Mediator.Send(request);
 
-			_feature.EmailsTableShouldContainFieldEqualTo(MailTableFields.EmailAddress, TestData.EmailAddress);
-			_feature.EmailsTableShouldContain(MailTableFields.Parameters, TestData.SweepName);
+			_feature.EmailsTableShouldContainFieldEqualTo(MailTableFields.EmailAddress, account.EmailAddress);
+			_feature.EmailsTableShouldContain(MailTableFields.Parameters, sweep.Name);
 			_feature.EmailsTableShouldContain(MailTableFields.Parameters, sweep.StartDate.ToString("f"));
 		}
 	}

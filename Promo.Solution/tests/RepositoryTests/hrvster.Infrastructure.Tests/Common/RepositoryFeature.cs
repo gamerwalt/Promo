@@ -16,10 +16,12 @@ namespace hrvster.Infrastructure.Tests.Common
 		public ICampaignRepository CampaignRepository { get; private set; }
 		public IPlansRepository PlansRepository { get; private set; }
 		public IMatchGamesRepository MatchGameRepository { get; private set; }
+		public IMatchPrizesRepository MatchPrizesRepository { get; private set; }
+		public IMatchImagesRepository MatchImageRepository { get; private set; }
+		public IMatchBoardsRepository MatchBoardsRepository { get; private set; }
+		public IMatchTilesRepository MatchTilesRepository { get; private set; }
 
-
-
-        public ISubscriptionService SubscriptionService { get; private set; }
+		public ISubscriptionService SubscriptionService { get; private set; }
 
 
         public RepositoryFeature()
@@ -57,8 +59,12 @@ namespace hrvster.Infrastructure.Tests.Common
 			PlansRepository = ServiceProvider.GetService<IPlansRepository>();
 			AccountsRepository = ServiceProvider.GetService<IAccountsRepository>();
 			MatchGameRepository = ServiceProvider.GetService<IMatchGamesRepository>();
+			MatchPrizesRepository = ServiceProvider.GetService<IMatchPrizesRepository>();
+			MatchImageRepository = ServiceProvider.GetService<IMatchImagesRepository>();
+			MatchBoardsRepository = ServiceProvider.GetService<IMatchBoardsRepository>();
+			MatchTilesRepository = ServiceProvider.GetService<IMatchTilesRepository>();
 
-            SubscriptionService = ServiceProvider.GetService<ISubscriptionService>();
+			SubscriptionService = ServiceProvider.GetService<ISubscriptionService>();
 		}
 
 		protected virtual void ApplyAdditionalServiceConfiguration(

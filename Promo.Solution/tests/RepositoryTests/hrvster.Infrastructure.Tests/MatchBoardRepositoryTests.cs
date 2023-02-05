@@ -1,0 +1,131 @@
+﻿using Bogus;
+using FluentAssertions;
+using hrvster.Games.Match.Models;
+using hrvster.Infrastructure.Tests.Common;
+using hrvster.Models;
+using hrvster.Web.Mvc.Common.Steps;
+using TestUtilities.Data;
+using Xunit;
+
+namespace hrvster.Infrastructure.Tests
+{
+	[Collection("Sequential")]
+	public class MatchBoardRepositoryTests : RepositoryAbstractModelBuilder, IClassFixture<RepositoryFeature>
+	{
+		private readonly RepositoryFeature _feature;
+		private Faker<MatchGame> MatchGameFaker;
+		private Faker<MatchPrize> MatchPrizeFaker;
+		private Faker<MatchImage> MatchImageFaker;
+		private Faker<MatchBoard> MatchBoardFaker;
+
+		public MatchBoardRepositoryTests(RepositoryFeature feature)
+		{
+			_feature = feature;
+		}
+
+		[Fact]
+		public async Task Should_Return_0_Boards()
+		{
+			_feature.GivenACleanSlate();
+			var matchGame = await CreateAccountCampaignAndMatchGameAsync();
+
+			var boards = await _feature.MatchBoardsRepository.GetForMatchGameAsync(matchGame.Uid, default);
+
+			boards.Count().Should().Be(0);
+		}
+
+		[Theory]
+		[InlineData(1)]
+		public async Task Should_Return_1_Board_If_We_Add_1_Board(int numBoards)
+		{
+			_feature.GivenACleanSlate();
+			var matchGame = await CreateAccountCampaignAndMatchGameAsync();
+			CreateFakerMatchImage(matchGame);
+			var matchImage = MatchImageFaker.Generate();
+
+			await _feature.MatchImageRepository.CreateAsync(matchImage, default);
+			CreateFakeMatchPrize(matchGame, matchImage);
+			var matchPrize = MatchPrizeFaker.Generate();
+
+			await _feature.MatchPrizesRepository.CreateAsync(matchPrize, default);
+
+			CreateFakerMatchBoard(matchGame, matchPrize);
+			var boards = MatchBoardFaker.Generate(numBoards);
+
+			foreach (var board in boards)
+			{
+				await _feature.MatchBoardsRepository.CreateAsync(board, default);
+			}
+
+			var matchBoards = await _feature.MatchBoardsRepository.GetForMatchGameAsync(matchGame.Uid, default);
+			matchBoards.Count().Should().Be(numBoards);
+		}
+
+
+		private async Task<MatchImage> CreateMatchImageAsync(MatchGame matchGame)
+		{
+			CreateFakerMatchImage(matchGame);
+			var matchImage = MatchImageFaker.Generate();
+			await _feature.MatchImageRepository.CreateAsync(matchImage, default);
+			matchImage = await _feature.MatchImageRepository.GetAsync(matchImage.Uid, default);
+			return matchImage;
+		}
+
+		private async Task<MatchGame> CreateAccountCampaignAndMatchGameAsync()
+		{
+			var account = await BuildAccountAndSubscribeToBasicPlan(_feature);
+			var campaign = await BuildAndCreateCampaignAsync(_feature, account);
+			CreateFakeMatchGame(campaign);
+
+			var matchGame = MatchGameFaker.Generate();
+			await _feature.MatchGameRepository.CreateAsync(matchGame, TestData.WindowsTimezone, false, default);
+			matchGame = await _feature.MatchGameRepository.GetAsync(matchGame.Uid, default);
+			return matchGame;
+		}
+
+		private void CreateFakerMatchImage(MatchGame matchGame)
+		{
+			MatchImageFaker = new Faker<MatchImage>()
+				.RuleFor(m => m.Uid, f => Guid.NewGuid())
+				.RuleFor(m => m.MatchGame, f => matchGame)
+				.RuleFor(m => m.LocationUrl, f => f.Internet.Url());
+		}
+
+		private void CreateFakeMatchPrize(MatchGame matchGame, MatchImage matchImage)
+		{
+			MatchPrizeFaker = new Faker<MatchPrize>()
+				.RuleFor(m => m.MatchGame, f => matchGame)
+				.RuleFor(m => m.Uid, f => Guid.NewGuid())
+				.RuleFor(m => m.Name, f => f.Lorem.Word())
+				.RuleFor(m => m.Description, f => f.Lorem.Sentence())
+				.RuleFor(m => m.Value, f => f.Random.Int())
+				.RuleFor(m => m.Image, f => matchImage);
+		}
+
+		private void CreateFakerMatchBoard(MatchGame matchGame, MatchPrize matchPrize)
+		{
+			var faker = new Faker();
+			var winnable = faker.Random.Bool();
+
+			MatchBoardFaker = new Faker<MatchBoard>()
+				.RuleFor(m => m.MatchGame, f => matchGame)
+				.RuleFor(m => m.Prize, f => winnable ? matchPrize : new MatchPrize { Uid = Guid.NewGuid() })
+				.RuleFor(m => m.Uid, f => Guid.NewGuid())
+				.RuleFor(m => m.IsWinnable, f => winnable);
+		}
+
+		private void CreateFakeMatchGame(Campaign campaign)
+			=> MatchGameFaker = new Faker<MatchGame>()
+				.RuleFor(m => m.Uid, f => Guid.NewGuid())
+				.RuleFor(m => m.CampaignId, f => campaign.CampaignId)
+				.RuleFor(m => m.CampaignUid, f => campaign.CampaignUid)
+				.RuleFor(m => m.Name, f => f.Lorem.Word())
+				.RuleFor(m => m.Description, f => f.Lorem.Sentence(2))
+				.RuleFor(m => m.NumberOfBoards, f => f.Random.Number(1, 100))
+				.RuleFor(m => m.TileCountPerBoard, f => 9)
+				.RuleFor(m => m.NumberOfWinnableBoards, f => f.Random.Number(1, 100))
+				.RuleFor(m => m.WinProbability, f => f.Random.Number(1, 9))
+				.RuleFor(m => m.StartDate, f => DateTime.Now)
+				.RuleFor(m => m.EndDate, f => DateTime.Now.AddDays(30));
+	}
+}

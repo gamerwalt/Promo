@@ -16,7 +16,7 @@ namespace hrvster.Infrastructure.MatchGames
 		IEnumerable<MatchGame> GetAllForAccount(Guid accountUid);
 		Task<IEnumerable<MatchGame>> GetByAccountAsync(Guid accountUid, CancellationToken cancellationToken);
 		Task<IEnumerable<MatchGame>> GetByCampaignAsync(Guid campaignUid, CancellationToken cancellationToken);
-		Task<MatchGame> GetByUidAsync(Guid matchGameUid, CancellationToken cancellationToken);
+		Task<MatchGame> GetAsync(Guid matchGameUid, CancellationToken cancellationToken);
 		Task SetAsGeneratedAsync(MatchGame game, CancellationToken cancellationToken);
 		Task SetAsReadyToBeGeneratedAsync(MatchGame game, CancellationToken cancellationToken);
 		Task UpdateAsync(MatchGame matchGame, string timezone, bool isDaylight, CancellationToken cancellationToken);
@@ -130,7 +130,7 @@ namespace hrvster.Infrastructure.MatchGames
 			return matchGames;
 		}
 
-		public async Task<MatchGame> GetByUidAsync(Guid matchGameUid, CancellationToken cancellationToken)
+		public async Task<MatchGame> GetAsync(Guid matchGameUid, CancellationToken cancellationToken)
 		{
 			var matchGames = default(MatchGame);
 

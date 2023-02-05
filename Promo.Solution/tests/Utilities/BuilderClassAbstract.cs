@@ -10,15 +10,25 @@ namespace TestUtilities
 {
 	public abstract class BuilderClassAbstract
 	{
+		Faker<Account> AccountFaker;
+		public BuilderClassAbstract()
+		{
+			AccountFaker = new Faker<Account>()
+				.RuleFor(a => a.AccountUid, f => TestData.AccountUid)
+				.RuleFor(a => a.EmailAddress, f => f.Internet.Email())
+				.RuleFor(a => a.EmailVerified, f => true)
+				.RuleFor(a => a.PhoneNumber, f => f.Person.Phone)
+				.RuleFor(a => a.DisplayName, f => f.Internet.UserName());
+
+		}
+
 		public Account BuildNewAccount()
-			=> new AccountBuilder(
-				TestData.AccountId,
-				TestData.AccountUid,
-				TestData.EmailAddress,
-				true,
-				TestData.PhoneNumber,
-				TestData.DisplayName)
-			.Build();
+		{
+			var account = AccountFaker.Generate();
+			account.PhoneNumber = account.PhoneNumber.Substring(0, 12);
+
+			return account;
+		}
 
         public Account BuildNewAccount(Guid accountUid)
             => new AccountBuilder(
@@ -159,7 +169,7 @@ namespace TestUtilities
 			=> new SweepBackupWinnerBuilder(sweepWinnerId, sweepWinnerUid, sweep, userIdentifier)
 				.Build();
 
-        public IEnumerable<SweepEntry> SeedEntriesFor(Sweep sweep, Rule rule)
+        public IEnumerable<SweepEntry> SeedEntriesFor(Sweep sweep, Rule rule, int total)
         {
 			var testSweepEntry = new Faker<SweepEntry>()
 				.RuleFor(s => s.Sweep, sweep)
@@ -169,7 +179,7 @@ namespace TestUtilities
 				.RuleFor(s => s.UserIdentifierType, f => UserIdentifierType.TwitterHandle)
 				.RuleFor(s => s.AcceptedTerms, f => true);
 
-			return testSweepEntry.Generate(30);
+			return testSweepEntry.Generate(new Faker().Random.Number(total * 2, total * 3));
         }
     }
 }
