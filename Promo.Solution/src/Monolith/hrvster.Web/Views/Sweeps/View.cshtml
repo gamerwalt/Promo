@@ -162,42 +162,87 @@
 							<div class="card">
 								<div class="card-body">
 									<div class="fv-row mb-8">
-										<label class="required d-flex align-items-center fs-6 fw-semibold form-label mb-2">
-											Sweepstake Name
-										</label>
-										<input type="text"
+										@if(!Model.SweepNotification.DrawHappened || Model.SweepEntries.Count() <= 0)
+										{
+											<label class="required d-flex align-items-center fs-6 fw-semibold form-label mb-2">
+												Sweepstake Name
+											</label>
+											<input type="text"
 											   class="form-control form-control-solid"
 											   placeholder="@Model.UpdateSweepstake.Name"
 											   value="@Model.UpdateSweepstake.Name"
-											   asp-for="@Model.UpdateSweepstake.Name" maxlength="90"/>
-										<span asp-validation-for="@Model.UpdateSweepstake.Name"></span>
+											   asp-for="@Model.UpdateSweepstake.Name" maxlength="90" />
+											<span asp-validation-for="@Model.UpdateSweepstake.Name"></span>
+										}
+										else
+										{
+											<label class="d-flex align-items-center fs-6 fw-semibold form-label mb-2">
+												Sweepstake Name:
+											</label>
+											<label class="d-flex align-items-center fs-3 fw-semibold form-label mb-2">@Model.Sweepstake.Name</label>
+										}
+
 									</div>
 									<div class="fv-row mb-6 w-lg-250px">
-										<label class="required d-flex align-items-center fs-6 fw-semibold form-label mb-2">
-											Start Date
-										</label>
-										<input class="form-control form-control-solid"
+										
+										@if (!Model.SweepNotification.DrawHappened || Model.SweepEntries.Count() <= 0)
+										{
+											<label class="required d-flex align-items-center fs-6 fw-semibold form-label mb-2">
+												Start Date
+											</label>
+											<input class="form-control form-control-solid"
 											   asp-for="@Model.UpdateSweepstake.StartDate" />
-										<span asp-validation-for="@Model.UpdateSweepstake.StartDate"></span>
+											<span asp-validation-for="@Model.UpdateSweepstake.StartDate"></span>
+										}
+										else
+										{
+											<label class="d-flex align-items-center fs-6 fw-semibold form-label mb-2">
+												Start Date
+											</label>
+											<label class="d-flex align-items-center fs-3 fw-semibold form-label mb-2">@Model.Sweepstake.StartDate.ToString("f")</label>
+										}
+
 									</div>
 									<div class="fv-row mb-6 w-lg-250px">
-										<label class="required d-flex align-items-center fs-6 fw-semibold form-label mb-2">
-											End Date
-										</label>
-										<input class="form-control form-control-solid"
+										
+										@if (!Model.SweepNotification.DrawHappened || Model.SweepEntries.Count() <= 0)
+										{
+											<label class="required d-flex align-items-center fs-6 fw-semibold form-label mb-2">
+												End Date
+											</label>
+											<input class="form-control form-control-solid"
 											   asp-for="@Model.UpdateSweepstake.EndDate" />
-										<span asp-validation-for="@Model.UpdateSweepstake.EndDate"></span>
+											<span asp-validation-for="@Model.UpdateSweepstake.EndDate"></span>
+										}
+										else
+										{
+											<label class="d-flex align-items-center fs-6 fw-semibold form-label mb-2">
+												End Date:
+											</label>
+											<label class="d-flex align-items-center fs-3 fw-semibold form-label mb-2">@Model.Sweepstake.EndDate.ToString("f")</label>
+										}
+
 									</div>
 									<div class="fv-row mb-6 w-lg-250px">
-										<label class="required d-flex align-items-center fs-6 fw-semibold form-label mb-2">
-											Draw Date
-										</label>
-										<input class="form-control form-control-solid"
-											   asp-for="@Model.UpdateSweepstake.DrawDate"/>
-										<span asp-validation-for="@Model.UpdateSweepstake.DrawDate"></span>
+										@if (!Model.SweepNotification.DrawHappened || Model.SweepEntries.Count() <= 0)
+										{
+											<label class="required d-flex align-items-center fs-6 fw-semibold form-label mb-2">
+												Draw Date
+											</label>
+											<input class="form-control form-control-solid"
+											   asp-for="@Model.UpdateSweepstake.DrawDate" />
+											<span asp-validation-for="@Model.UpdateSweepstake.DrawDate"></span>
+										}
+										else
+										{
+											<label class="d-flex align-items-center fs-6 fw-semibold form-label mb-2">
+												Draw Date
+											</label>
+											<label class="d-flex align-items-center fs-3 fw-semibold form-label mb-2">@Model.Sweepstake.DrawDate.GetValueOrDefault().ToString("f")</label>
+										}
 									</div>
 								</div>
-								@if (!Model.SweepNotification.DrawHappened || Model.SweepEntries.Count() < 0)
+								@if (!Model.SweepNotification.DrawHappened || Model.SweepEntries.Count() <= 0)
 								{
 									<div class="card-footer">
 										<button type="submit" class="btn btn-lg btn-primary">Update</button>
@@ -306,7 +351,7 @@
 														}
 														@if (rule.ExternalId != "0")
 														{
-															@if (!Model.SweepNotification.DrawHappened || Model.SweepEntries.Count() < 0)
+															@if (!Model.SweepNotification.DrawHappened || Model.SweepEntries.Count() <= 0)
 															{
 																<div class="menu-item px-3">
 																	<a asp-action="DeleteRule"
@@ -323,7 +368,7 @@
 														}
 														else
 														{
-															@if (!Model.SweepNotification.DrawHappened || Model.SweepEntries.Count() < 0)
+															@if (!Model.SweepNotification.DrawHappened || Model.SweepEntries.Count() <= 0)
 															{
 																<div class="menu-item px-3">
 																	<a asp-action="DeleteScheduledRule"
@@ -340,7 +385,7 @@
 														}
 														@if (rule.ActiveInd)
 														{
-															@if (!Model.SweepNotification.DrawHappened || Model.SweepEntries.Count() < 0)
+															@if (!Model.SweepNotification.DrawHappened || Model.SweepEntries.Count() <= 0)
 															{
 																<div class="menu-item px-3">
 																	<a asp-action="Deactivate"
@@ -357,7 +402,7 @@
 														}
 														else
 														{
-															@if (!Model.SweepNotification.DrawHappened || Model.SweepEntries.Count() < 0)
+															@if (!Model.SweepNotification.DrawHappened || Model.SweepEntries.Count() <= 0)
 															{
 																<div class="menu-item px-3">
 																	<a asp-action="Activate"
@@ -381,7 +426,7 @@
 							</table>
 						</div>
 						<div class="separator mb-4"></div>
-						@if (!Model.SweepNotification.DrawHappened || Model.SweepEntries.Count() < 0)
+						@if (!Model.SweepNotification.DrawHappened || Model.SweepEntries.Count() <= 0)
 						{
 							<a class="btn btn-primary mb-4"
 								asp-controller="SweepRules"
@@ -522,7 +567,7 @@
 											<td>@prize.PrizeDescription</td>
 											<td>@prize.PrizeValue</td>
 											<td>
-												@if (!Model.SweepNotification.DrawHappened || Model.SweepEntries.Count() < 0)
+												@if (!Model.SweepNotification.DrawHappened || Model.SweepEntries.Count() <= 0)
 												{
 													<div class="me-0">
 														<button class="btn btn-sm btn-bg-light btn-active-color-primary"
