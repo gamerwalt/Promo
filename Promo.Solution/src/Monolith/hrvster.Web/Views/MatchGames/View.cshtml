@@ -9,11 +9,11 @@
 				<div class="d-flex justify-content-between align-items-start flex-wrap mb-2">
 					<div class="d-flex flex-column">
 						<div class="d-flex align-items-center mb-1">
-							@if (@Model.IsActive())
+							@if (@Model.MatchGame.IsActive())
 							{
 								<span class="badge badge-light-success me-auto">Is Active</span>
 							}
-							else if (@Model.WillBeInProgress())
+							else if (@Model.MatchGame.WillBeInProgress())
 							{
 								<span class="badge badge-light-info me-auto">Future Progress</span>
 							}
@@ -29,31 +29,31 @@
 						<div class="border border-gray-300 border-dashed rounded min-w-125px py-3 px-4 me-6 mb-3">
 							<div class="fw-semibold fs-6 text-gray-400">Start Date</div>
 							<div class="d-flex align-items-center">
-								<div class="fs-4 fw-bold">@Model.StartDate.ToString("f")</div>
+								<div class="fs-4 fw-bold">@Model.MatchGame.StartDate.ToString("f")</div>
 							</div>
 						</div>
 						<div class="border border-gray-300 border-dashed rounded min-w-125px py-3 px-4 me-6 mb-3">
 							<div class="fw-semibold fs-6 text-gray-400">End Date</div>
 							<div class="d-flex align-items-center">
-								<div class="fs-4 fw-bold">@Model.EndDate.ToString("f")</div>
+								<div class="fs-4 fw-bold">@Model.MatchGame.EndDate.ToString("f")</div>
 							</div>
 						</div>
 						<div class="border border-gray-300 border-dashed rounded min-w-125px py-3 px-4 me-6 mb-3">
 							<div class="fw-semibold fs-6 text-gray-400"># of Boards</div>
 							<div class="d-flex align-items-center">
-								<div class="fs-4 fw-bold">@Model.NumberOfBoards</div>
+								<div class="fs-4 fw-bold">@Model.MatchGame.NumberOfBoards</div>
 							</div>
 						</div>
 						<div class="border border-gray-300 border-dashed rounded min-w-125px py-3 px-4 me-6 mb-3">
 							<div class="fw-semibold fs-6 text-gray-400"># Winnable</div>
 							<div class="d-flex align-items-center">
-								<div class="fs-4 fw-bold">@Model.WinnableBoards</div>
+								<div class="fs-4 fw-bold">@Model.MatchGame.WinnableBoards</div>
 							</div>
 						</div>
 						<div class="border border-gray-300 border-dashed rounded min-w-125px py-3 px-4 me-6 mb-3">
 							<div class="fw-semibold fs-6 text-gray-400">Win Probability</div>
 							<div class="d-flex align-items-center">
-								<div class="fs-4 fw-bold">@Model.WinProbability</div>
+								<div class="fs-4 fw-bold">@Model.MatchGame.WinProbability</div>
 							</div>
 						</div>
 					</div>
@@ -62,99 +62,163 @@
 		</div>
 	</div>
 </div>
-<div class="card card-bordered">
-	<form asp-controller="MatchGames" asp-action="Create" class="form-horizontal form-material mx-2">
-		<div class="card-body">
-			<div class="d-flex flex-column flex-lg-row">
-				<div class="flex-lg-row-fluid me-lg-15 order-2 order-lg-1 mb-10 mb-lg-0">
-					<div class="card">
-						<div class="card-body">
-							<div class="fv-row mb-8 w-lg-500px">
-							<label class="required d-flex align-items-center fs-6 fw-semibold form-label mb-2">
-								Promotion
-							</label>
-							<select asp-for="PromotionUid" asp-items=@Model.Promotions class="form-select form-control-lg">
-								<option value="@Guid.Empty">Please select promotion</option>
-							</select>
-							<span asp-validation-for="PromotionUid"></span>
-						</div>
-						<div class="fv-row mb-8">
-							<label class="required d-flex align-items-center fs-6 fw-semibold form-label mb-2">
-								Name
-							</label>
-							<input type="text" asp-for="Name" id="Name" class="form-control" placeholder="Name" maxlength="90" />
-								<span asp-validation-for="Name"></span>
-						</div>
-						<div class="fv-row mb-8">
-							<label class="required d-flex align-items-center fs-6 fw-semibold form-label mb-2">
-								Description
-							</label>
-								<textarea rows="6" cols="5" asp-for="Description" id="Description" class="form-control" placeholder="Name" maxlength="90"></textarea>
-							<span asp-validation-for="Description"></span>
-						</div>
-						</div>
-					</div>
-				</div>
-			</div>
-			<div class="d-flex flex-column flex-lg-row">
-				<div class="flex-column flex-lg-row-auto w-100 w-lg-250px w-xxl-325px mb-8 mb-lg-0 me-lg-9 me-5">
-					<div class="card">
-						<div class="card-body">
-							<div class="fv-row mb-8">
-							<label class="required d-flex align-items-center fs-6 fw-semibold form-label mb-2">
-								Number of Boards
-							</label>
-							<input type="number" asp-for="NumberOfBoards" id="NumberOfBoards"
-									class="form-control" placeholder="1" />
-							<span asp-validation-for="NumberOfBoards"></span>
-						</div>
-						<div class="fv-row mb-8">
-							<label class="required d-flex align-items-center fs-6 fw-semibold form-label mb-2">
-								Winnable Boards
-							</label>
-							<input type="number" asp-for="WinnableBoards" id="WinnableBoards"
-								class="form-control" placeholder="1" />
-								<span asp-validation-for="WinnableBoards"></span>
-						</div>
-						<div class="fv-row mb-8">
-							<label class="required d-flex align-items-center fs-6 fw-semibold form-label mb-2">
-								Win Probability
-							</label>
-								<input type="number" asp-for="WinProbability" id="WinProbability"
-								class="form-control" placeholder="1" />
-							<span asp-validation-for="WinProbability"></span>
-						</div>
-						</div>
-					</div>
-				</div>
-				<div class="flex-column flex-lg-row-auto w-100 w-lg-250px w-xxl-325px mb-8 mb-lg-0 me-lg-9 me-5">
-					<div class="card">
+<div class="separator"></div>
+<div class="card">
+	<div class="card-header card-header-tabs">
+		<div class="card-toolbar">
+			<ul class="nav nav-stretch nav-line-tabs nav-line-tabs-2x border-transparent fs-5 fw-bold">
+				<li class="nav-item">
+					<a class="nav-link text-active-primary py-5 me-6 active"
+					   data-bs-toggle="tab"
+					   href="#editDetails">
+						Edit Details
+					</a>
+				</li>
+				<li class="nav-item">
+					<a class="nav-link text-active-primary py-5 me-6"
+					   data-bs-toggle="tab"
+					   href="#images">
+						Images
+					</a>
+				</li>
+				<li class="nav-item">
+					<a class="nav-link text-active-primary py-5 me-6"
+					   data-bs-toggle="tab"
+					   href="#prizes">
+						Prizes
+					</a>
+				</li>
+				<li class="nav-item">
+					<a class="nav-link text-active-primary py-5 me-6"
+					   data-bs-toggle="tab"
+					   href="#rules">
+						Rules/Hashtags/Tweets
+					</a>
+				</li>
+				<li class="nav-item">
+					<a class="nav-link text-active-primary py-5 me-6"
+					   data-bs-toggle="tab"
+					   href="#winners">
+						Plays and Winners
+					</a>
+				</li>
+			</ul>
+		</div>
+	</div>
+	<div class="card-body">
+		<div class="tab-content" id="promotionsTabContent">
+			<div class="tab-pane fade active show" id="editDetails" role="tabpanel">
+				<form asp-controller="MatchGames" asp-action="Create" class="form-horizontal form-material mx-2">
 					<div class="card-body">
-						<div class="fv-row mb-8 w-lg-300px">
-							<label class="required d-flex align-items-center fs-6 fw-semibold form-label mb-2">
-								Start Date
-							</label>
-							<input asp-for="StartDate" class="form-control" />
-							<span asp-validation-for="StartDate"></span>
+						<div class="d-flex flex-column flex-lg-row">
+							<div class="flex-lg-row-fluid me-lg-15 order-2 order-lg-1 mb-10 mb-lg-0">
+								<div class="card">
+									<div class="card-body">
+										<div class="fv-row mb-8 w-lg-500px">
+											<label class="required d-flex align-items-center fs-6 fw-semibold form-label mb-2">
+												Promotion
+											</label>
+											<select asp-for="MatchGame.PromotionUid" asp-items="@Model.MatchGame.Promotions" class="form-select form-control-lg">
+												<option value="@Guid.Empty">Please select promotion</option>
+											</select>
+											<span asp-validation-for="MatchGame.PromotionUid"></span>
+										</div>
+										<div class="fv-row mb-8">
+											<label class="required d-flex align-items-center fs-6 fw-semibold form-label mb-2">
+												Name
+											</label>
+											<input type="text" asp-for="MatchGame.Name" class="form-control" placeholder="Name" maxlength="90" />
+											<span asp-validation-for="MatchGame.Name"></span>
+										</div>
+										<div class="fv-row mb-8">
+											<label class="required d-flex align-items-center fs-6 fw-semibold form-label mb-2">
+												Description
+											</label>
+											<textarea rows="6" cols="5" asp-for="MatchGame.Description" class="form-control" placeholder="Name" maxlength="90"></textarea>
+											<span asp-validation-for="MatchGame.Description"></span>
+										</div>
+									</div>
+								</div>
+							</div>
 						</div>
-						<div class="fv-row mb-8 w-lg-300px">
-							<label class="required d-flex align-items-center fs-6 fw-semibold form-label mb-2">
-								End Date
-							</label>
-							<input asp-for="EndDate" class="form-control" />
-							<span asp-validation-for="EndDate"></span>
+						<div class="d-flex flex-column flex-lg-row">
+							<div class="flex-column flex-lg-row-auto w-100 w-lg-250px w-xxl-325px mb-8 mb-lg-0 me-lg-9 me-5">
+								<div class="card">
+									<div class="card-body">
+										<div class="fv-row mb-8">
+											<label class="required d-flex align-items-center fs-6 fw-semibold form-label mb-2">
+												Number of Boards
+											</label>
+											<input type="number" asp-for="MatchGame.NumberOfBoards" class="form-control" placeholder="1" />
+											<span asp-validation-for="MatchGame.NumberOfBoards"></span>
+										</div>
+										<div class="fv-row mb-8">
+											<label class="required d-flex align-items-center fs-6 fw-semibold form-label mb-2">
+												Winnable Boards
+											</label>
+											<input type="number" asp-for="MatchGame.WinnableBoards" class="form-control" placeholder="1" />
+											<span asp-validation-for="MatchGame.WinnableBoards"></span>
+										</div>
+										<div class="fv-row mb-8">
+											<label class="required d-flex align-items-center fs-6 fw-semibold form-label mb-2">
+												Win Probability
+											</label>
+											<input type="number" asp-for="MatchGame.WinProbability" class="form-control" placeholder="1" />
+											<span asp-validation-for="MatchGame.WinProbability"></span>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="flex-column flex-lg-row-auto w-100 w-lg-250px w-xxl-325px mb-8 mb-lg-0 me-lg-9 me-5">
+								<div class="card">
+									<div class="card-body">
+										<div class="fv-row mb-8 w-lg-300px">
+											<label class="required d-flex align-items-center fs-6 fw-semibold form-label mb-2">
+												Start Date
+											</label>
+											<input asp-for="MatchGame.StartDate" class="form-control" />
+											<span asp-validation-for="MatchGame.StartDate"></span>
+										</div>
+										<div class="fv-row mb-8 w-lg-300px">
+											<label class="required d-flex align-items-center fs-6 fw-semibold form-label mb-2">
+												End Date
+											</label>
+											<input asp-for="MatchGame.EndDate" class="form-control" />
+											<span asp-validation-for="MatchGame.EndDate"></span>
+										</div>
+									</div>
+								</div>
+							</div>
 						</div>
 					</div>
-				</div>
+					<div class="card-footer">
+						<div class="card-toolbar">
+							<button type="submit" class="btn btn-md btn-light btn-primary">
+								Update
+							</button>
+						</div>
+					</div>
+				</form>
+			</div>
+			<div class="tab-pane fade active show" id="images" role="tabpanel">
+				<a class="btn btn-primary mb-4"
+				   asp-controller="MatchImages"
+				   asp-action="Create"
+				   asp-route-matchGameUid="@Model.MatchGame.MatchGameUid"
+				   asp-route-actionName=@ViewContext.RouteData.Values["action"]
+				   asp-route-controllerName=@ViewContext.RouteData.Values["controller"]>
+					Create New Image
+				</a>
+				<div class="separator mb-4"></div>
+				<div class="d-flex flex-row">
+					@foreach (var image in Model.MatchImages)
+					{
+						<div class="d-flex flex-column-auto h-150px border border-gray-800 mr-4">
+							<img class="mx-auto" width="128px" height="128px" src="@image.LocationUrl" alt="MatchGameImage" />
+						</div>
+					}
 				</div>
 			</div>
 		</div>
-		<div class="card-footer">
-			<div class="card-toolbar">
-				<button type="submit" class="btn btn-md btn-light btn-primary">
-					Update
-				</button>
-			</div>
-		</div>
-	</form>
+	</div>
 </div>

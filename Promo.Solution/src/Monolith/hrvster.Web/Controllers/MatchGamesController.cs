@@ -24,6 +24,7 @@ namespace hrvster.Web.Controllers
 	public class MatchGamesController : Controller
 	{
 		private readonly IMatchGamesService _matchGamesService;
+		private readonly IMatchImageService _matchImageService;
 		private readonly IToastNotification _notificationService;
 		private readonly ISessionManager _sessionManager;
 		private readonly IMapper _mapper;
@@ -33,12 +34,14 @@ namespace hrvster.Web.Controllers
 
 		public MatchGamesController(
 			IMatchGamesService matchGamesService,
+			IMatchImageService matchImageService,
 			IToastNotification notificationService,
 			ISessionManager sessionManager,
 			IMapper mapper,
 			IMediator mediator)
 		{
 			_matchGamesService = matchGamesService;
+			_matchImageService = matchImageService;
 			_notificationService = notificationService;
 			_sessionManager = sessionManager;
 			_mapper = mapper;
@@ -170,17 +173,20 @@ namespace hrvster.Web.Controllers
 		{
 			_hrvsterUser = _sessionManager.GetUserInformation();
 
-			var matchGameTask = _mediator.Send(new GetMatchGameRequest(matchGameUid));
+			var matchGameTask = _matchGamesService.GetMatchGameAsync(matchGameUid, cancellationToken);
 			var campaignsTask = _mediator.Send(new GetAllCampaignsForAccount(_hrvsterUser.UserUid));
+			var imagesTask = _matchImageService.GetForMatchGameAsync(matchGameUid, cancellationToken);
 
 			var tasks = new List<Task>();
 			tasks.Add(matchGameTask);
 			tasks.Add(campaignsTask);
+			tasks.Add(imagesTask);
 
 			await Task.WhenAll(tasks);
 
 			var matchGame = matchGameTask.Result;
 			var campaigns = campaignsTask.Result;
+			var images = imagesTask.Result;
 
 			if (matchGame == null)
 			{
@@ -207,31 +213,38 @@ namespace hrvster.Web.Controllers
 				return RedirectToAction("Index");
 			}
 
-			var model = BuildMatchGameDetails(matchGame, campaigns);
+			var model = BuildMatchGameDetails(matchGame, images, campaigns);
 
 			return View(model);
 		}
 
-		private static MatchGameDetails BuildMatchGameDetails(Games.Match.Models.MatchGame matchGame, List<Campaign> campaigns)
-			=> new MatchGameDetails
-			{
-				Promotions = campaigns
-									.Where(p => p.IsActive() || p.WillBeInProgress())
-									.Select(a => new SelectListItem()
-									{
-										Text = $"{a.CampaignName} - {a.StartDate.ToString("d")} to {a.EndDate.ToString("d")}",
-										Value = a.CampaignUid.ToString()
-									}),
-				PromotionUid = matchGame.CampaignUid,
-				MatchGameUid = matchGame.Uid,
-				Name = matchGame.Name,
-				Description = matchGame.Description,
-				NumberOfBoards = matchGame.NumberOfBoards,
-				WinnableBoards = matchGame.NumberOfWinnableBoards,
-				WinProbability = matchGame.WinProbability,
-				StartDate = matchGame.StartDate,
-				EndDate = matchGame.EndDate,
-			};
+		private MatchGameDetails BuildMatchGameDetails(
+			Games.Match.Models.MatchGame matchGame,
+			IEnumerable<Games.Match.Models.MatchImage> images,
+			List<Campaign> campaigns)
+				=> new MatchGameDetails
+				{
+					MatchGame = new UpdateMatchGame
+					{
+						Promotions = campaigns
+							.Where(p => p.IsActive() || p.WillBeInProgress())
+							.Select(a => new SelectListItem()
+							{
+								Text = $"{a.CampaignName} - {a.StartDate.ToString("d")} to {a.EndDate.ToString("d")}",
+								Value = a.CampaignUid.ToString()
+							}),
+						PromotionUid = matchGame.CampaignUid,
+						MatchGameUid = matchGame.Uid,
+						Name = matchGame.Name,
+						Description = matchGame.Description,
+						NumberOfBoards = matchGame.NumberOfBoards,
+						WinnableBoards = matchGame.NumberOfWinnableBoards,
+						WinProbability = matchGame.WinProbability,
+						StartDate = matchGame.StartDate,
+						EndDate = matchGame.EndDate
+					},
+					MatchImages = _mapper.Map<List<MatchImage>>(images)
+				};
 
 		private static CreateMatchGame BuildCreateGameModel(List<Campaign> campaigns)
 			=> new CreateMatchGame()

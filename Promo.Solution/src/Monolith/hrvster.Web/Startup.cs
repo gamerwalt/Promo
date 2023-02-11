@@ -2,11 +2,13 @@ using FluentValidation;
 using FluentValidation.AspNetCore;
 using hrvster.Extensions.Configuration;
 using hrvster.Extensions.OptionsConfiguration;
+using hrvster.Models.Options;
 using hrvster.Web.Mapper;
 using hrvster.Web.Validation;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Azure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -32,7 +34,7 @@ namespace hrvster.Web
 				.AddNToastNotifyToastr(new NToastNotify.ToastrOptions
 				{
 					ProgressBar = true,
-					TimeOut = 900000,
+					TimeOut = 10000,
 					CloseButton = true,
 				});
 			services.AddMvc(o =>

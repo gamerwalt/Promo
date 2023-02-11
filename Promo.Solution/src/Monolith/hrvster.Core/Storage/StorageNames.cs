@@ -7,5 +7,6 @@ namespace hrvster.Core.Storage
 	public class StorageNames
 	{
 		public static string TweetUploads = "tweetuploads";
+		public static string MatchGameUploads = "matchgameuploads";
 	}
 }

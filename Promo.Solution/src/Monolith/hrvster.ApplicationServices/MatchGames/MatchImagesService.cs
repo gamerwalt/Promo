@@ -1,10 +1,11 @@
-﻿using hrvster.Games.Match.Models;
+﻿using hrvster.Core.Requests.WebRequests.Files;
+using hrvster.Games.Match.Models;
 using hrvster.Infrastructure.MatchGames;
+using MediatR;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -12,23 +13,75 @@ namespace hrvster.ApplicationServices.MatchGames
 {
 	public interface IMatchImageService
 	{
-		Task<IEnumerable<MatchImage>> GetByMatchGameUid(Guid matchGameUid, CancellationToken cancellationToken);
+		Task<bool> CreateImagesAsync(MatchGame matchGame, ICollection<IFormFile> images, CancellationToken cancellationToken);
+		Task<IEnumerable<MatchImage>> GetForMatchGameAsync(Guid matchGameUid, CancellationToken cancellationToken);
 	}
 
 	public class MatchImagesService : IMatchImageService
 	{
 		private readonly ILogger<MatchImagesService> _logger;
 		private readonly IMatchImagesRepository _repository;
+		private readonly IMediator _mediator;
 
 		public MatchImagesService(
 			ILoggerFactory loggerFactory,
-			IMatchImagesRepository repository)
-		{ 
+			IMatchImagesRepository repository,
+			IMediator mediator)
+		{
 			_logger = loggerFactory.CreateLogger<MatchImagesService>();
 			_repository = repository;
+			_mediator = mediator;
 		}
 
-		public async Task<IEnumerable<MatchImage>> GetByMatchGameUid(Guid matchGameUid, CancellationToken cancellationToken)
+		public async Task<bool> CreateImagesAsync(
+			MatchGame matchGame,
+			ICollection<IFormFile> images,
+			CancellationToken cancellationToken)
+		{
+			try
+			{
+				var locations = await _mediator.Send(new UploadMatchImagesRequest(matchGame, images));
+
+				var tasks = new List<Task>();
+
+				foreach (var location in locations)
+				{
+					var matchImage = CreateMatchImage(matchGame, location);
+
+					tasks.Add(_repository.CreateAsync(matchImage, cancellationToken));
+
+					_logger.LogInformation("Saving the image {location} into the database for {gameName}",
+						location,
+						matchGame.Name);
+				}
+
+				await Task.WhenAll(tasks);
+
+				_logger.LogInformation("Successfully saved all the messages for {gameName}", matchGame.Name);
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError("An error occurred while trying to create images at {actionName} with error {errorMessage}",
+					nameof(CreateImagesAsync),
+					ex.Message);
+
+				_logger.LogError(ex.StackTrace);
+
+				return false;
+			}
+
+			return true;
+		}
+
+		private MatchImage CreateMatchImage(MatchGame matchGame, string location)
+			=> new MatchImage
+			{
+				Uid = Guid.NewGuid(),
+				LocationUrl = location,
+				MatchGame = matchGame
+			};
+
+		public async Task<IEnumerable<MatchImage>> GetForMatchGameAsync(Guid matchGameUid, CancellationToken cancellationToken)
 			=> await _repository.GetForMatchGamesAsync(matchGameUid, cancellationToken);
 	}
 }

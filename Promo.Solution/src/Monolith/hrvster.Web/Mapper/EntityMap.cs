@@ -62,6 +62,13 @@ namespace hrvster.Web.Mapper
 				.ForMember(dest => dest.IsGenerated, opt => opt.MapFrom(src => src.HasBeenGenerated))
 				.ForMember(dest => dest.ReadyToGenerate, opt => opt.MapFrom(src => src.ReadyToBeGenerated))
 				.ReverseMap();
+
+			CreateMap<Games.Match.Models.MatchImage, Models.MatchImage>()
+				.ForMember(dest => dest.MatchGameName, opt => opt.MapFrom(src => src.MatchGame.Name))
+				.ForMember(dest => dest.CampaignUid, opt => opt.MapFrom(src => src.MatchGame.CampaignUid))
+				.ForMember(dest => dest.LocationUrl, opt => opt.MapFrom(src => src.LocationUrl))
+				.ForMember(dest => dest.Uid, opt => opt.MapFrom(src => src.Uid))
+				.ReverseMap();
 		}
 	}
 }
