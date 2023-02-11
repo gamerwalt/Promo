@@ -163,7 +163,7 @@ namespace hrvster.Infrastructure.Subscriptions
 				.AddParameter("startDate", startDate)
 				.AddParameter("startDateUtc", startDateUtc)
 				.AddParameter("endDate", endDate)
-				.AddParameter("startDateUtc", startDateUtc);
+				.AddParameter("endDateUtc", endDateUtc);
 
 			await conn.OpenAsync();
 			await command.ExecuteNonQueryAsync();

@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using hrvster.Infrastructure.Subscriptions;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using TestUtilities;
 
@@ -11,7 +12,8 @@ namespace hrvster.Infrastructure.Tests.Common
 		public ISweepNotificationRepository SweepNotificationRepository { get; private set; }
 		public IAccountsRepository AccountsRepository { get; private set; }
 		public ICampaignRepository CampaignRepository { get; private set; }
-		
+		public IPlansRepository PlansRepository { get; private set; }
+		public IAccountSubscriptionsRepository AccountSubscriptionsRepository { get; private set; }
 
 		public RepositoryFeature()
 		{
@@ -45,6 +47,8 @@ namespace hrvster.Infrastructure.Tests.Common
 			AccountsRepository = ServiceProvider.GetService<IAccountsRepository>();
 			CampaignRepository = ServiceProvider.GetService<ICampaignRepository>();
 			SweepNotificationRepository = ServiceProvider.GetService<ISweepNotificationRepository>();
+			PlansRepository = ServiceProvider.GetService<IPlansRepository>();
+			AccountSubscriptionsRepository = ServiceProvider.GetService<IAccountSubscriptionsRepository>();
 		}
 
 		protected virtual void ApplyAdditionalServiceConfiguration(
