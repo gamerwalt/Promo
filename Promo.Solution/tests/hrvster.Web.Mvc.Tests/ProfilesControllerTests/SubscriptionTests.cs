@@ -54,6 +54,10 @@ namespace ControllerTests
 					{
 						mock.MockIsSubscribed();
 					});
+					services.MockAccountSubscriptionService(mock =>
+					{
+						mock.SetupGetAccountSubscription();
+					});
 				})
 				.WhenILoadThePromotionsPage()
 				.ThenTheResponseShouldMatch<Feature, string>(HttpStatusCode.OK, view =>
@@ -94,6 +98,10 @@ namespace ControllerTests
 					services.MockSubscription(mock =>
 					{
 						mock.MockIsSubscribed();
+					});
+					services.MockAccountSubscriptionService(mock =>
+					{
+						mock.SetupGetAccountSubscription();
 					});
 				})
 				.WhenILoadTheSweepsPage()

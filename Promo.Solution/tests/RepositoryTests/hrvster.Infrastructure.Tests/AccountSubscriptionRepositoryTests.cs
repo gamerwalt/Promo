@@ -7,6 +7,7 @@ using Xunit;
 
 namespace hrvster.Infrastructure.Tests
 {
+	[Collection("Sequential")]
 	public class AccountSubscriptionRepositoryTests : BuilderClassAbstract, IClassFixture<RepositoryFeature>
 	{
 		private readonly RepositoryFeature _feature;

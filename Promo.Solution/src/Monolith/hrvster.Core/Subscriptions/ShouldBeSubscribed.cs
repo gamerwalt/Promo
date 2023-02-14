@@ -1,6 +1,7 @@
 ﻿using hrvster.ApplicationServices.Subscription;
 using hrvster.Core.Authentication;
 using hrvster.Models;
+using hrvster.Models.Subscriptions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Logging;
@@ -20,16 +21,19 @@ namespace hrvster.Core.Subscriptions
 
 		private readonly ILogger<ShouldBeSubscribedFilter> _logger;
 		private readonly ISubscriptionService _subscriptionManager;
+		private readonly IAccountSubscriptionService _accountSubscriptionService;
 		private readonly ISessionManager _sessionManager;
 
 		public ShouldBeSubscribedFilter(
 			ILoggerFactory loggerFactory,
 			ISubscriptionService subscriptionManager,
+			IAccountSubscriptionService accountSubscriptionService,
 			ISessionManager sessionManager)
 		{
-			_sessionManager = sessionManager;
 			_logger = loggerFactory.CreateLogger<ShouldBeSubscribedFilter>();
+			_sessionManager = sessionManager;
 			_subscriptionManager = subscriptionManager;
+			_accountSubscriptionService = accountSubscriptionService;
 		}
 
 		public void OnAuthorization(AuthorizationFilterContext context)
@@ -54,16 +58,51 @@ namespace hrvster.Core.Subscriptions
 		private void IsAccountSubscribed(AuthorizationFilterContext context)
 		{
 			var subscriptionStatus = _subscriptionManager.IsAccountSubscribed(_hrvsterUser.UserUid);
+			var accountSubscription = _accountSubscriptionService.GetAccountSubscription(_hrvsterUser.UserUid);
+
+			if (accountSubscription == null)
+			{
+				context.Result = new RedirectToActionResult(
+					"Index",
+					"Subscriptions",
+					new { subscriptionStatus = SubscriptionStatus.UnSubscribed.ToString() });
+
+				return;
+			}
 
 			switch (subscriptionStatus)
 			{
 				case SubscriptionStatus.UnSubscribed:
-					context.Result = new RedirectToActionResult(
-						"Index",
-						"Subscriptions",
-						new { subscriptionStatus = SubscriptionStatus.UnSubscribed.ToString() });
+					if(IsSubscriptionEndDate(accountSubscription))
+					{
+						context.Result = new RedirectToActionResult(
+							"Index",
+							"Subscriptions",
+							new { subscriptionStatus = SubscriptionStatus.UnSubscribed.ToString() });
+					}
+					
+					break;
+				case SubscriptionStatus.Subscribed:
+					if(IsSubscriptionEndDate(accountSubscription))
+					{
+						context.Result = new RedirectToActionResult(
+							"Index",
+							"Subscriptions",
+							new { SubscriptionStatus = SubscriptionStatus.EndOfSubscription.ToString() } );
+					}
+
 					break;
 			}
+		}
+
+		private bool IsSubscriptionEndDate(AccountSubscription accountSubscription)
+		{
+			if(accountSubscription != null)
+			{
+				return accountSubscription.EndDateUtc < DateTime.UtcNow;
+			}
+
+			return false;
 		}
 	}
 }

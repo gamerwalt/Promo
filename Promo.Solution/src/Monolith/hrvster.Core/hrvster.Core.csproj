@@ -17,8 +17,4 @@
     <ProjectReference Include="..\hrvster.Infrastructure\hrvster.Infrastructure.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Payments\" />
-  </ItemGroup>
-
 </Project>

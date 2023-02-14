@@ -21,13 +21,13 @@ namespace hrvster.Extensions.Configuration
 				.AddFlutterWaveConfigurations(configuration)
 				.AddFlutterwavePlans()
 				.AddFlutterwaveEventRepository()
-				.AddTransient<Func<PaymentClientEnum, IPaymentAdaptor>>(sp => serviceTypeName =>
+				.AddTransient<Func<PaymentClient, IPaymentAdaptor>>(sp => serviceTypeName =>
 				{
 					switch (serviceTypeName)
 					{
-						case PaymentClientEnum.Flutterwave:
+						case PaymentClient.Flutterwave:
 							return sp.GetService<FlutterwavePaymentService>();
-						case PaymentClientEnum.Paystack:
+						case PaymentClient.Paystack:
 							return sp.GetService<PaystackPaymentService>();
 						default:
 							return sp.GetService<FlutterwavePaymentService>();
@@ -35,7 +35,7 @@ namespace hrvster.Extensions.Configuration
 				});
 
 		public static IServiceCollection AddFlutterWaveConfigurations(
-			this IServiceCollection services, 
+			this IServiceCollection services,
 			IConfiguration configuration)
 			=> services
 				.Configure<FlutterwaveConfigurations>(configuration)

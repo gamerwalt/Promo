@@ -8,6 +8,7 @@ namespace hrvster.ApplicationServices.Subscription
 {
 	public interface IAccountSubscriptionService
 	{
+		AccountSubscription GetAccountSubscription(Guid accountUid);
 		Task<AccountSubscription> GetAccountSubscriptionAsync(Guid accountUid);
 	}
 
@@ -21,6 +22,9 @@ namespace hrvster.ApplicationServices.Subscription
 			_logger = loggerFactory.CreateLogger<AccountSubscriptionService>();
 			_repository = repository;
 		}
+
+		public AccountSubscription GetAccountSubscription(Guid accountUid)
+			=> _repository.GetAccountSubscription(accountUid);
 
 		public async Task<AccountSubscription> GetAccountSubscriptionAsync(Guid accountUid)
 			=> await _repository.GetAccountSubscriptionAsync(accountUid);

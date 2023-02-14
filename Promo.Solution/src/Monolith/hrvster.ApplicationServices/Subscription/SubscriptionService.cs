@@ -1,4 +1,5 @@
-﻿using hrvster.Core.Requests;
+﻿using hrvster.ApplicationServices.Payments;
+using hrvster.Core.Requests;
 using hrvster.Core.Requests.Notifications;
 using hrvster.Infrastructure.Subscriptions;
 using hrvster.Models;
@@ -9,6 +10,7 @@ using hrvster.Models.Subscriptions.Flutterwave;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace hrvster.ApplicationServices.Subscription
@@ -19,6 +21,7 @@ namespace hrvster.ApplicationServices.Subscription
 		Task ProcessFlutterwaveTransactionAsync(Guid flutterwaveEventUid, FlutterwaveCardTransaction cardTransaction);
 		Task SaveFlutterwaveEventAsync(string flutterwaveEventString);
 		Task<ServiceOperation<AccountSubscription>> SubscribeUserToAsync(Plan plan, Guid accountUid);
+		Task UnsubscribeAsync(Guid accountUid, PaymentClient paymentClient, CancellationToken cancellationToken);
 	}
 
 	public class SubscriptionService : ISubscriptionService
@@ -27,17 +30,23 @@ namespace hrvster.ApplicationServices.Subscription
 		private readonly IAccountSubscriptionsRepository _repository;
 		private readonly IFlutterwaveEventRepository _flutterwaveEventRepository;
 		private readonly IMediator _mediator;
+		private readonly Func<PaymentClient, IPaymentAdaptor> _paymentResolver;
+		private readonly IFlutterwaveAccountSubscriptionRepository _flutterwaveAccountSubscriptionRepository;
 
 		public SubscriptionService(
 			ILoggerFactory loggerFactory,
 			IAccountSubscriptionsRepository repository,
 			IFlutterwaveEventRepository flutterwaveEventRepository,
-			IMediator mediator)
+			IMediator mediator,
+			Func<PaymentClient, IPaymentAdaptor> paymentResolver,
+			IFlutterwaveAccountSubscriptionRepository flutterwaveAccountSubscriptionRepository)
 		{
 			_logger = loggerFactory.CreateLogger<SubscriptionService>();
 			_repository = repository;
 			_flutterwaveEventRepository = flutterwaveEventRepository;
 			_mediator = mediator;
+			_paymentResolver = paymentResolver;
+			_flutterwaveAccountSubscriptionRepository = flutterwaveAccountSubscriptionRepository;
 		}
 
 		public SubscriptionStatus IsAccountSubscribed(Guid accountUid)
@@ -116,6 +125,23 @@ namespace hrvster.ApplicationServices.Subscription
 			};
 
 			await _flutterwaveEventRepository.CreateAsync(flutterwaveEvent);
+		}
+
+		public async Task UnsubscribeAsync(Guid accountUid, PaymentClient paymentClient, CancellationToken cancellationToken)
+		{
+			var accountSubscription = await _repository.GetAccountSubscriptionAsync(accountUid);
+
+			var client = _paymentResolver(paymentClient);
+
+			var clientAccountSubscription = default(ClientAccountSubscription);
+
+			switch(paymentClient)
+			{
+				case PaymentClient.Flutterwave:
+					clientAccountSubscription = await _flutterwaveAccountSubscriptionRepository
+						.GetAccountSubscriptionAsync(accountSubscription.SubscriptionUid, cancellationToken);
+					break;
+			}
 		}
 	}
 }

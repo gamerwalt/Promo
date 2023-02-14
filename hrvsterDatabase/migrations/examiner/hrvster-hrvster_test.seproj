@@ -1,0 +1,62 @@
+<Project version="21">
+  <Sources>
+    <Source id="1">
+      <EngineType>MySql</EngineType>
+      <StorageType>LiveDb</StorageType>
+      <ServerName>localhost</ServerName>
+      <Port>3306</Port>
+      <Database>hrvster</Database>
+      <Login>hrvster_user</Login>
+    </Source>
+    <Source id="2">
+      <EngineType>MySql</EngineType>
+      <StorageType>LiveDb</StorageType>
+      <ServerName>localhost</ServerName>
+      <Port>3306</Port>
+      <Database>hrvster_test</Database>
+      <Login>hrvster_user</Login>
+    </Source>
+  </Sources>
+  <DataTypesMappings>
+    <DataTypesMapping name="Default" default="True" />
+  </DataTypesMappings>
+  <ObjectFilter mode="All" />
+  <ProjectOptions>
+    <IgnoreIndices>false</IgnoreIndices>
+    <IgnoreIndexDetails>false</IgnoreIndexDetails>
+    <IgnorePrimaryKeys>false</IgnorePrimaryKeys>
+    <IgnoreUniqueConstraints>false</IgnoreUniqueConstraints>
+    <IgnoreForeignKeys>false</IgnoreForeignKeys>
+    <IgnoreFKAction>false</IgnoreFKAction>
+    <IgnoreChecks>false</IgnoreChecks>
+    <IgnoreConnectionConstraints>false</IgnoreConnectionConstraints>
+    <IgnoreFullText>false</IgnoreFullText>
+    <IgnoreWithNocheck>false</IgnoreWithNocheck>
+    <IgnoreNotForReplication>false</IgnoreNotForReplication>
+    <IgnoreFileGroup>false</IgnoreFileGroup>
+    <IgnoreIdentity>false</IgnoreIdentity>
+    <IgnoreComments>true</IgnoreComments>
+    <IgnoreCaseSensitivity>true</IgnoreCaseSensitivity>
+    <IgnoreSpaces>true</IgnoreSpaces>
+    <IgnoreSemicolons>true</IgnoreSemicolons>
+    <IgnoreOwners>true</IgnoreOwners>
+    <IncludeSchemaInScript>false</IncludeSchemaInScript>
+    <IgnoreTriggers>false</IgnoreTriggers>
+    <IgnoreCollations>false</IgnoreCollations>
+    <IgnoreExtProperties>false</IgnoreExtProperties>
+    <IgnorePermissions>false</IgnorePermissions>
+    <IgnoreIndexNames>true</IgnoreIndexNames>
+    <IgnoreNullable>false</IgnoreNullable>
+    <IgnoreColumnsTypes>false</IgnoreColumnsTypes>
+    <IgnoreDefaults>false</IgnoreDefaults>
+    <IgnoreAnsiNulls>false</IgnoreAnsiNulls>
+    <IgnoreQuotedID>false</IgnoreQuotedID>
+    <IgnorePhysicalProperties>false</IgnorePhysicalProperties>
+    <DecryptTextObjects>false</DecryptTextObjects>
+    <IgnoreDefiner>false</IgnoreDefiner>
+    <SaveOrderOption>true</SaveOrderOption>
+    <UserTypesToBase>false</UserTypesToBase>
+    <CaseSense>false</CaseSense>
+    <IgnoreCaseObjectNames>true</IgnoreCaseObjectNames>
+  </ProjectOptions>
+</Project>

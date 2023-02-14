@@ -15,13 +15,13 @@ namespace hrvster.ApplicationServices.Payments
 	{
 		private readonly ILogger<PaymentService> _logger;
 		private readonly IPaymentServiceRepository _repository;
-		private readonly Func<PaymentClientEnum, IPaymentAdaptor> _paymentAdaptorResolver;
+		private readonly Func<PaymentClient, IPaymentAdaptor> _paymentAdaptorResolver;
 		private readonly IPaymentAdaptor _paymentAdaptor;
 
 		public PaymentService(
 			ILoggerFactory loggerFactory,
 			IPaymentServiceRepository repository,
-			Func<PaymentClientEnum, IPaymentAdaptor> paymentAdaptorResolver)
+			Func<PaymentClient, IPaymentAdaptor> paymentAdaptorResolver)
 		{
 			_logger = loggerFactory.CreateLogger<PaymentService>();
 			_repository = repository;
@@ -31,7 +31,7 @@ namespace hrvster.ApplicationServices.Payments
 			var paymentServiceModel = paymentServiceModels.FirstOrDefault(p => p.EnabledIndicator);
 			if (paymentServiceModel != null)
 			{
-				_paymentAdaptor = _paymentAdaptorResolver(Enum.Parse<PaymentClientEnum>(paymentServiceModel.PaymentServiceName));
+				_paymentAdaptor = _paymentAdaptorResolver(Enum.Parse<PaymentClient>(paymentServiceModel.PaymentServiceName));
 			}
 		}
 	}
