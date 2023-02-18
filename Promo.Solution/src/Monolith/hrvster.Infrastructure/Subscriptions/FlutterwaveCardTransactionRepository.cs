@@ -14,7 +14,7 @@ namespace hrvster.Infrastructure.Subscriptions
 {
 	public interface IFlutterwaveCardTransactionRepository
 	{
-		Task CreateAsync(Guid cardTransactionUid, long id, string txRef, string flwRef, string orderRef, CancellationToken cancellationToken);
+		Task CreateAsync(Guid cardTransactionUid, long id, string txRef, string flwRef, string orderRef, long amount, long chargedAmount, string status, string currency, long paymentPlan, long paymentPage, CancellationToken cancellationToken);
 		Task<FlutterwaveCardTransaction> GetAsync(long id, string txRef, string flwRef, string orderRef, CancellationToken cancellationToken);
 	}
 
@@ -32,6 +32,12 @@ namespace hrvster.Infrastructure.Subscriptions
 			string txRef, 
 			string flwRef, 
 			string orderRef, 
+			long amount, 
+			long chargedAmount, 
+			string status, 
+			string currency, 
+			long paymentPlan, 
+			long paymentPage, 
 			CancellationToken cancellationToken)
 		{
 			using var conn = new MySqlConnection(_database.GetConnectionString());
@@ -43,7 +49,13 @@ namespace hrvster.Infrastructure.Subscriptions
 				.AddParameter("id", id)
 				.AddParameter("transactionReference", txRef)
 				.AddParameter("flowReference", flwRef)
-				.AddParameter("orderReference", orderRef);
+				.AddParameter("orderReference", orderRef)
+				.AddParameter("amount", amount)
+				.AddParameter("chargedAmount", chargedAmount)
+				.AddParameter("transactionStatus", status)
+				.AddParameter("currency", currency)
+				.AddParameter("paymentPlan", paymentPlan)
+				.AddParameter("paymentPage", paymentPage);
 
 			await conn.OpenAsync();
 			await command.ExecuteNonQueryAsync();

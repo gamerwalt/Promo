@@ -51,7 +51,19 @@ namespace hrvster.ApplicationServices.Payments
 			}
 
 			var cardTransactionUid = Guid.NewGuid();
-			await _cardTransactionRepository.CreateAsync(cardTransactionUid, cardTransaction.Id, cardTransaction.TxRef, cardTransaction.FlwRef, cardTransaction.OrderRef, cancellationToken);
+			await _cardTransactionRepository.CreateAsync(
+				cardTransactionUid, 
+				cardTransaction.Id, 
+				cardTransaction.TxRef, 
+				cardTransaction.FlwRef, 
+				cardTransaction.OrderRef, 
+				cardTransaction.Amount,
+				cardTransaction.ChargedAmount,
+				cardTransaction.Status,
+				cardTransaction.Currency,
+				cardTransaction.PaymentPlan,
+				cardTransaction.PaymentPage,
+				cancellationToken);
 
 			_logger.LogInformation("Continuing to process the flutterwave event with uid {flutterwaveEventUid}.", flutterwaveEventUid);
 

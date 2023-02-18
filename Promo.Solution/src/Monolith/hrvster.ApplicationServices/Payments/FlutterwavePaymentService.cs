@@ -24,7 +24,7 @@ namespace hrvster.ApplicationServices.Payments
 			_client = _httpClientFactory.CreateClient(HttpClients.Flutterwave);
 		}
 
-		public async Task<string> GetUserSubscriptionAsync(string emailAddress, CancellationToken cancellationToken)
+		public virtual async Task<string> GetUserSubscriptionAsync(string emailAddress, CancellationToken cancellationToken)
 		{
 			var uri = $"{FlutterwaveUrls.Subscriptions}?{FlutterwaveParameters.Email}={emailAddress}&{FlutterwaveParameters.Status}=active";
 
@@ -38,7 +38,7 @@ namespace hrvster.ApplicationServices.Payments
 			return string.Empty;
 		}
 
-		public async Task UnsubscribeUserAsync(long id, CancellationToken cancellationToken)
+		public virtual async Task UnsubscribeUserAsync(long id, CancellationToken cancellationToken)
 		{
 			var uri = $"{FlutterwaveUrls.Subscriptions}/{id}/cancel";
 
