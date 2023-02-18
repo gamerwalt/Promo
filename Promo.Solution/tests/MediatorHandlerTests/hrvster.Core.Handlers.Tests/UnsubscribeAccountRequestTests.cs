@@ -27,6 +27,7 @@ namespace hrvster.Core.Handlers.Tests
 			var accountSubscription = await _feature.AccountSubscriptionService.GetAccountSubscriptionAsync(account.AccountUid);
 
 			accountSubscription.Should().NotBeNull();
+			//Verify the end date
 		}
 	}
 }

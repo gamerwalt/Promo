@@ -76,7 +76,9 @@ namespace hrvster.Web
 				.AddFirebaseAuthManager()
 				.AddSessionManager()
 				.AddSubscriptionService()
-				.AddPaymentServices(Configuration);
+				.AddPaymentServices(Configuration)
+				.AddHttpClient()
+				.AddFlutterwaveHttpClient();
 		}
 
 

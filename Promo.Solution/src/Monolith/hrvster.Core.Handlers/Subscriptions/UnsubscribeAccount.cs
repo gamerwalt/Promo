@@ -3,7 +3,6 @@ using hrvster.Core.Requests.WebRequests.Subscriptions;
 using hrvster.Models;
 using MediatR;
 using Microsoft.Extensions.Logging;
-using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -23,14 +22,9 @@ namespace hrvster.Core.Handlers.Subscriptions
 		}
 
 		protected override async Task Handle(UnsubscribeAccountRequest request, CancellationToken cancellationToken)
-		{
-			//1. Call the flutterwave client to unsubscribe the user
-			//2. Once that comes back, we unsubscribe the user, but leave the end date alone
-
-			await _subscriptionService.UnsubscribeAsync(
-				request.AccountUid, 
-				PaymentClient.Flutterwave, 
+			=> await _subscriptionService.UnsubscribeAsync(
+				request.AccountUid,
+				PaymentClient.Flutterwave,
 				cancellationToken);
-		}
 	}
 }

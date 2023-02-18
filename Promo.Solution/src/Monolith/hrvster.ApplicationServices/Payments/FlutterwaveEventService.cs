@@ -1,5 +1,6 @@
 ﻿using hrvster.Infrastructure.Subscriptions;
 using hrvster.Models;
+using hrvster.Models.Subscriptions;
 using hrvster.Models.Subscriptions.Flutterwave;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
@@ -23,15 +24,18 @@ namespace hrvster.ApplicationServices.Payments
 		private readonly ILogger<FlutterwaveEventService> _logger;
 		private readonly IFlutterwaveEventRepository _flutterwaveEventRepository;
 		private readonly IFlutterwaveCardTransactionService _cardService;
+		private readonly IFlutterwaveAccountSubscriptionRepository _flutterwaveAccountSubscriptionRepository;
 
 		public FlutterwaveEventService(
 			ILoggerFactory loggerFactory,
 			IFlutterwaveEventRepository flutterwaveEventRepository,
-			IFlutterwaveCardTransactionService cardService)
+			IFlutterwaveCardTransactionService cardService,
+			IFlutterwaveAccountSubscriptionRepository flutterwaveAccountSubscriptionRepository)
 		{
 			_logger = loggerFactory.CreateLogger<FlutterwaveEventService>();
 			_flutterwaveEventRepository = flutterwaveEventRepository;
 			_cardService = cardService;
+			_flutterwaveAccountSubscriptionRepository = flutterwaveAccountSubscriptionRepository;
 		}
 
 		public async Task ProcessFlutterwaveEventsAsync(CancellationToken cancellationToken)
@@ -71,6 +75,9 @@ namespace hrvster.ApplicationServices.Payments
 					}
 					else
 					{
+						//Save customer details here as well as external Ids that can be used later for unsubscriptions
+						//await _flutterwaveAccountSubscriptionRepository.CreateAsync(GetClientAccountSubscriptionFrom(flutterwaveCardTransaction), cancellationToken);
+
 						if (await _cardService.ProcessAsync(eventUid, flutterwaveCardTransaction, cancellationToken))
 							await _flutterwaveEventRepository.UpdateEventStatusAsync(
 								eventUid, FlutterwaveEventStatus.Success, cancellationToken);

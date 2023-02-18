@@ -174,6 +174,11 @@ namespace hrvster.Web.Controllers
 
 			await _mediator.Send(new UnsubscribeAccountRequest(_hrvsterUser.UserUid));
 
+			_notificationService.AddSuccessToastMessage("Request to unsubscribe plan completed. We're sorry to see you go.");
+
+			//await _mediator.Publish(new AccountUnsubscribed(_hrvsterUser.UserUid));
+			//Send email with this accountUnsubscribe
+
 			return RedirectToAction("Index", "Dashboard");
 		}
 

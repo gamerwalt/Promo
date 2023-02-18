@@ -1,6 +1,7 @@
 ﻿using hrvster.ApplicationServices.Payments;
 using hrvster.Core.Requests;
 using hrvster.Core.Requests.Notifications;
+using hrvster.Infrastructure;
 using hrvster.Infrastructure.Subscriptions;
 using hrvster.Models;
 using hrvster.Models.Core;
@@ -9,7 +10,9 @@ using hrvster.Models.Subscriptions;
 using hrvster.Models.Subscriptions.Flutterwave;
 using MediatR;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -32,6 +35,7 @@ namespace hrvster.ApplicationServices.Subscription
 		private readonly IMediator _mediator;
 		private readonly Func<PaymentClient, IPaymentAdaptor> _paymentResolver;
 		private readonly IFlutterwaveAccountSubscriptionRepository _flutterwaveAccountSubscriptionRepository;
+		private readonly IAccountsRepository _accountsRepository;
 
 		public SubscriptionService(
 			ILoggerFactory loggerFactory,
@@ -39,7 +43,8 @@ namespace hrvster.ApplicationServices.Subscription
 			IFlutterwaveEventRepository flutterwaveEventRepository,
 			IMediator mediator,
 			Func<PaymentClient, IPaymentAdaptor> paymentResolver,
-			IFlutterwaveAccountSubscriptionRepository flutterwaveAccountSubscriptionRepository)
+			IFlutterwaveAccountSubscriptionRepository flutterwaveAccountSubscriptionRepository,
+			IAccountsRepository accountsRepository)
 		{
 			_logger = loggerFactory.CreateLogger<SubscriptionService>();
 			_repository = repository;
@@ -47,6 +52,7 @@ namespace hrvster.ApplicationServices.Subscription
 			_mediator = mediator;
 			_paymentResolver = paymentResolver;
 			_flutterwaveAccountSubscriptionRepository = flutterwaveAccountSubscriptionRepository;
+			_accountsRepository = accountsRepository;
 		}
 
 		public SubscriptionStatus IsAccountSubscribed(Guid accountUid)
@@ -60,7 +66,7 @@ namespace hrvster.ApplicationServices.Subscription
 
 			_logger.LogInformation("Account {accountUid} is subscribed with {subscription}", accountUid, accountSubscription.ToJsonString());
 
-			return SubscriptionStatus.Subscribed;
+			return accountSubscription.SubscriptionStatus;
 		}
 
 		public async Task ProcessFlutterwaveTransactionAsync(Guid flutterwaveEventUid, FlutterwaveCardTransaction cardTransaction)
@@ -129,19 +135,73 @@ namespace hrvster.ApplicationServices.Subscription
 
 		public async Task UnsubscribeAsync(Guid accountUid, PaymentClient paymentClient, CancellationToken cancellationToken)
 		{
+			//1. Call the flutterwave client to unsubscribe the user
+			//2. Once that comes back, we unsubscribe the user, but leave the end date alone
+
 			var accountSubscription = await _repository.GetAccountSubscriptionAsync(accountUid);
+
+			if(accountSubscription== null)
+			{
+				_logger.LogError("Unable to locate the account subscription for account with Uid {accountUid}", accountUid);
+				_logger.LogError("Unable to unsubscribe the account with Uid {accountUid}", accountUid);
+
+				return;
+			}
+
+			var account = await _accountsRepository.GetAsync(accountUid);
+
+			if(account == null)
+			{
+				_logger.LogError("Unable to locate the account for account with Uid {accountUid}", accountUid);
+				_logger.LogError("Unable to unsubscribe the account with Uid {accountUid}", accountUid);
+
+				return;
+			}
 
 			var client = _paymentResolver(paymentClient);
 
-			var clientAccountSubscription = default(ClientAccountSubscription);
+			var subscription = string.Empty;
 
 			switch(paymentClient)
 			{
 				case PaymentClient.Flutterwave:
-					clientAccountSubscription = await _flutterwaveAccountSubscriptionRepository
-						.GetAccountSubscriptionAsync(accountSubscription.SubscriptionUid, cancellationToken);
+					_logger.LogInformation("Retrieving user subscription from Flutterwave for account with EmailAddress {emailAddress}",
+						account.EmailAddress);
+
+					subscription = await client.GetUserSubscriptionAsync(account.EmailAddress, cancellationToken);
+
+					if(string.IsNullOrWhiteSpace(subscription))
+					{
+						_logger.LogError("Unable to locate the subscription for account with Uid {accountUid} from Flutterwave", accountUid);
+						_logger.LogError("Unable to unsubscribe the account with Uid {accountUid}", accountUid);
+
+						return;
+					}
+
+					_logger.LogInformation("Retrieved subscription for account with uid {accountUid} from Flutterwave.", account.AccountUid);
+
+					var flutterwaveSubscription = JsonConvert.DeserializeObject<FlutterwaveSubscriptionBase>(subscription);
+
+					if(flutterwaveSubscription.Subscriptions.Count == 0)
+					{
+						_logger.LogError("Unable to locate the subscription for account with Uid {accountUid} from Flutterwave", accountUid);
+						_logger.LogError("Unable to unsubscribe the account with Uid {accountUid}", accountUid);
+
+						return;
+					}
+
+					_logger.LogInformation("Unsubscribing account from Flutterwave with account uid {accountUid}", account.AccountUid);
+
+					await client.UnsubscribeUserAsync(flutterwaveSubscription.Subscriptions.FirstOrDefault().Id, cancellationToken);
+
+					_logger.LogInformation("Finished unsubscribing account with uid {accountUid} from Flutterwave", account.AccountUid);
+
+					await _repository.UpdateAccountSubscriptionStatusAsync(accountSubscription.SubscriptionUid, SubscriptionStatus.UnSubscribed);
+
 					break;
 			}
+
+			
 		}
 	}
 }
