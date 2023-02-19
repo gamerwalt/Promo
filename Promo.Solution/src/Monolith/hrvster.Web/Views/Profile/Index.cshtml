@@ -265,13 +265,15 @@
 											}
 										</div>
 										<div class="separator separator-dashed my-3"></div>
-										<form asp-action="Unsubscribe"
-										  asp-controller="Profile"
-										  id="formUnsubscribe">
-											<button type="submit" class="btn btn-sm btn-danger fs-8 fw-bold">
-												Unsubscribe/Cancel
-											</button>
-										</form>
+										@if(Model.AccountSubscription.SubscriptionStatus == SubscriptionStatus.Subscribed ||
+											Model.AccountSubscription.SubscriptionStatus == SubscriptionStatus.PendingPayment)
+										{
+											<form asp-action="Unsubscribe" asp-controller="Profile" id="formUnsubscribe">
+												<button type="submit" class="btn btn-sm btn-danger fs-8 fw-bold">
+													Unsubscribe/Cancel
+												</button>
+											</form>
+										}
 									</div>
 								}
 								
