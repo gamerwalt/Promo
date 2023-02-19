@@ -167,6 +167,12 @@ namespace hrvster.Web.Controllers
 			return RedirectToAction("Index");
 		}
 
+		[HttpGet]
+		public async Task<IActionResult> Unsubscribe(string empty)
+		{
+			return RedirectToAction("Index");
+		}
+
 		[HttpPost]
 		public async Task<IActionResult> Unsubscribe()
 		{
