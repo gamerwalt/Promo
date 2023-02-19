@@ -81,7 +81,10 @@ namespace hrvster.Web
 				.AddPaymentServices(Configuration)
 				.AddMatchGameRepositories()
 				.AddMatchEngineServices()
-				.AddCampaignService();
+				.AddCampaignService()
+				.AddPaymentServices(Configuration)
+				.AddHttpClient()
+				.AddFlutterwaveHttpClient();
 		}
 
 

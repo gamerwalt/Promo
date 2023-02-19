@@ -27,6 +27,14 @@
 							{
 								<span class="badge badge-light-danger me-auto">InActive</span>
 							}
+							@if(Model.SweepNotification.DrawAttemptHappened)
+							{
+								<span class="badge badge-light-info me-auto"> -> Draw Attempted!</span>
+							}
+							@if (Model.SweepNotification.DrawHappened)
+							{
+								<span class="badge badge-light-success me-auto"> -> Completed!</span>
+							}
 						</div>
 						<div class="d-flex flex-wrap fw-semibold mb-4 fs-5 text-gray-400">
 							@Model.Sweepstake.RulesUrl
@@ -154,44 +162,92 @@
 							<div class="card">
 								<div class="card-body">
 									<div class="fv-row mb-8">
-										<label class="required d-flex align-items-center fs-6 fw-semibold form-label mb-2">
-											Sweepstake Name
-										</label>
-										<input type="text"
+										@if(!Model.SweepNotification.DrawHappened || Model.SweepEntries.Count() <= 0)
+										{
+											<label class="required d-flex align-items-center fs-6 fw-semibold form-label mb-2">
+												Sweepstake Name
+											</label>
+											<input type="text"
 											   class="form-control form-control-solid"
 											   placeholder="@Model.UpdateSweepstake.Name"
 											   value="@Model.UpdateSweepstake.Name"
-											   asp-for="@Model.UpdateSweepstake.Name" maxlength="90"/>
-										<span asp-validation-for="@Model.UpdateSweepstake.Name"></span>
+											   asp-for="@Model.UpdateSweepstake.Name" maxlength="90" />
+											<span asp-validation-for="@Model.UpdateSweepstake.Name"></span>
+										}
+										else
+										{
+											<label class="d-flex align-items-center fs-6 fw-semibold form-label mb-2">
+												Sweepstake Name:
+											</label>
+											<label class="d-flex align-items-center fs-3 fw-semibold form-label mb-2">@Model.Sweepstake.Name</label>
+										}
+
 									</div>
 									<div class="fv-row mb-6 w-lg-250px">
-										<label class="required d-flex align-items-center fs-6 fw-semibold form-label mb-2">
-											Start Date
-										</label>
-										<input class="form-control form-control-solid"
+										
+										@if (!Model.SweepNotification.DrawHappened || Model.SweepEntries.Count() <= 0)
+										{
+											<label class="required d-flex align-items-center fs-6 fw-semibold form-label mb-2">
+												Start Date
+											</label>
+											<input class="form-control form-control-solid"
 											   asp-for="@Model.UpdateSweepstake.StartDate" />
-										<span asp-validation-for="@Model.UpdateSweepstake.StartDate"></span>
+											<span asp-validation-for="@Model.UpdateSweepstake.StartDate"></span>
+										}
+										else
+										{
+											<label class="d-flex align-items-center fs-6 fw-semibold form-label mb-2">
+												Start Date
+											</label>
+											<label class="d-flex align-items-center fs-3 fw-semibold form-label mb-2">@Model.Sweepstake.StartDate.ToString("f")</label>
+										}
+
 									</div>
 									<div class="fv-row mb-6 w-lg-250px">
-										<label class="required d-flex align-items-center fs-6 fw-semibold form-label mb-2">
-											End Date
-										</label>
-										<input class="form-control form-control-solid"
+										
+										@if (!Model.SweepNotification.DrawHappened || Model.SweepEntries.Count() <= 0)
+										{
+											<label class="required d-flex align-items-center fs-6 fw-semibold form-label mb-2">
+												End Date
+											</label>
+											<input class="form-control form-control-solid"
 											   asp-for="@Model.UpdateSweepstake.EndDate" />
-										<span asp-validation-for="@Model.UpdateSweepstake.EndDate"></span>
+											<span asp-validation-for="@Model.UpdateSweepstake.EndDate"></span>
+										}
+										else
+										{
+											<label class="d-flex align-items-center fs-6 fw-semibold form-label mb-2">
+												End Date:
+											</label>
+											<label class="d-flex align-items-center fs-3 fw-semibold form-label mb-2">@Model.Sweepstake.EndDate.ToString("f")</label>
+										}
+
 									</div>
 									<div class="fv-row mb-6 w-lg-250px">
-										<label class="required d-flex align-items-center fs-6 fw-semibold form-label mb-2">
-											Draw Date
-										</label>
-										<input class="form-control form-control-solid"
-											   asp-for="@Model.UpdateSweepstake.DrawDate"/>
-										<span asp-validation-for="@Model.UpdateSweepstake.DrawDate"></span>
+										@if (!Model.SweepNotification.DrawHappened || Model.SweepEntries.Count() <= 0)
+										{
+											<label class="required d-flex align-items-center fs-6 fw-semibold form-label mb-2">
+												Draw Date
+											</label>
+											<input class="form-control form-control-solid"
+											   asp-for="@Model.UpdateSweepstake.DrawDate" />
+											<span asp-validation-for="@Model.UpdateSweepstake.DrawDate"></span>
+										}
+										else
+										{
+											<label class="d-flex align-items-center fs-6 fw-semibold form-label mb-2">
+												Draw Date
+											</label>
+											<label class="d-flex align-items-center fs-3 fw-semibold form-label mb-2">@Model.Sweepstake.DrawDate.GetValueOrDefault().ToString("f")</label>
+										}
 									</div>
 								</div>
-								<div class="card-footer">
-									<button type="submit" class="btn btn-lg btn-primary">Update</button>
-								</div>
+								@if (!Model.SweepNotification.DrawHappened || Model.SweepEntries.Count() <= 0)
+								{
+									<div class="card-footer">
+										<button type="submit" class="btn btn-lg btn-primary">Update</button>
+									</div>
+								}
 							</div>
 						</form>
 					</div>
@@ -267,13 +323,13 @@
 														{
 															<div class="menu-item px-3">
 																<a asp-action="View"
-														   asp-controller="ScheduledTweets"
-														   asp-route-sweepUid="@Model.Sweepstake.SweepUid"
-														   asp-route-ruleUid="@rule.RuleUid"
-														   asp-route-actionName=@ViewContext.RouteData.Values["action"]
-														   asp-route-controllerName=@ViewContext.RouteData.Values["controller"]
-														   target="_blank"
-														   class="menu-link flex-stack px-3">
+																   asp-controller="ScheduledTweets"
+																   asp-route-sweepUid="@Model.Sweepstake.SweepUid"
+																   asp-route-ruleUid="@rule.RuleUid"
+																   asp-route-actionName=@ViewContext.RouteData.Values["action"]
+																   asp-route-controllerName=@ViewContext.RouteData.Values["controller"]
+																   target="_blank"
+																   class="menu-link flex-stack px-3">
 																	View
 																</a>
 															</div>
@@ -282,72 +338,84 @@
 														{
 															<div class="menu-item px-3">
 																<a asp-action="View"
-														   asp-controller="SweepRuleEntries"
-														   asp-route-sweepUid="@Model.Sweepstake.SweepUid"
-														   asp-route-ruleUid="@rule.RuleUid"
-														   asp-route-actionName=@ViewContext.RouteData.Values["action"]
-														   asp-route-controllerName=@ViewContext.RouteData.Values["controller"]
-														   target="_blank"
-														   class="menu-link flex-stack px-3">
+																   asp-controller="SweepRuleEntries"
+																   asp-route-sweepUid="@Model.Sweepstake.SweepUid"
+																   asp-route-ruleUid="@rule.RuleUid"
+																   asp-route-actionName=@ViewContext.RouteData.Values["action"]
+																   asp-route-controllerName=@ViewContext.RouteData.Values["controller"]
+																   target="_blank"
+																   class="menu-link flex-stack px-3">
 																	View Entries
 																</a>
 															</div>
 														}
 														@if (rule.ExternalId != "0")
 														{
-															<div class="menu-item px-3">
-																<a asp-action="DeleteRule"
-														   asp-controller="SweepRules"
-														   asp-route-sweepUid="@Model.Sweepstake.SweepUid"
-														   asp-route-ruleUid="@rule.RuleUid"
-														   asp-route-actionName=@ViewContext.RouteData.Values["action"]
-														   asp-route-controllerName=@ViewContext.RouteData.Values["controller"]
-														   class="menu-link flex-stack px-3">
-																	Delete
-																</a>
-															</div>
+															@if (!Model.SweepNotification.DrawHappened || Model.SweepEntries.Count() <= 0)
+															{
+																<div class="menu-item px-3">
+																	<a asp-action="DeleteRule"
+																	   asp-controller="SweepRules"
+																	   asp-route-sweepUid="@Model.Sweepstake.SweepUid"
+																	   asp-route-ruleUid="@rule.RuleUid"
+																	   asp-route-actionName=@ViewContext.RouteData.Values["action"]
+																	   asp-route-controllerName=@ViewContext.RouteData.Values["controller"]
+																	   class="menu-link flex-stack px-3">
+																		Delete
+																	</a>
+																</div>
+															}
 														}
 														else
 														{
-															<div class="menu-item px-3">
-																<a asp-action="DeleteScheduledRule"
-														   asp-controller="ScheduledTweets"
-														   asp-route-sweepUid="@Model.Sweepstake.SweepUid"
-														   asp-route-ruleUid="@rule.RuleUid"
-														   asp-route-actionName=@ViewContext.RouteData.Values["action"]
-														   asp-route-controllerName=@ViewContext.RouteData.Values["controller"]
-														   class="menu-link flex-stack px-3">
-																	Delete Scheduled
-																</a>
-															</div>
+															@if (!Model.SweepNotification.DrawHappened || Model.SweepEntries.Count() <= 0)
+															{
+																<div class="menu-item px-3">
+																	<a asp-action="DeleteScheduledRule"
+																   asp-controller="ScheduledTweets"
+																   asp-route-sweepUid="@Model.Sweepstake.SweepUid"
+																   asp-route-ruleUid="@rule.RuleUid"
+																   asp-route-actionName=@ViewContext.RouteData.Values["action"]
+																   asp-route-controllerName=@ViewContext.RouteData.Values["controller"]
+																   class="menu-link flex-stack px-3">
+																		Delete Scheduled
+																	</a>
+																</div>
+															}
 														}
 														@if (rule.ActiveInd)
 														{
-															<div class="menu-item px-3">
-																<a asp-action="Deactivate"
-														   asp-controller="SweepRules"
-														   asp-route-sweepUid="@Model.Sweepstake.SweepUid"
-														   asp-route-ruleUid="@rule.RuleUid"
-														   asp-route-actionName=@ViewContext.RouteData.Values["action"]
-														   asp-route-controllerName=@ViewContext.RouteData.Values["controller"]
-														   class="menu-link flex-stack px-3">
-																	Deactivate
-																</a>
-															</div>
+															@if (!Model.SweepNotification.DrawHappened || Model.SweepEntries.Count() <= 0)
+															{
+																<div class="menu-item px-3">
+																	<a asp-action="Deactivate"
+																   asp-controller="SweepRules"
+																   asp-route-sweepUid="@Model.Sweepstake.SweepUid"
+																   asp-route-ruleUid="@rule.RuleUid"
+																   asp-route-actionName=@ViewContext.RouteData.Values["action"]
+																   asp-route-controllerName=@ViewContext.RouteData.Values["controller"]
+																   class="menu-link flex-stack px-3">
+																		Deactivate
+																	</a>
+																</div>
+															}
 														}
 														else
 														{
-															<div class="menu-item px-3">
-																<a asp-action="Activate"
-														   asp-controller="SweepRules"
-														   asp-route-sweepUid="@Model.Sweepstake.SweepUid"
-														   asp-route-ruleUid="@rule.RuleUid"
-														   asp-route-actionName=@ViewContext.RouteData.Values["action"]
-														   asp-route-controllerName=@ViewContext.RouteData.Values["controller"]
-														   class="menu-link flex-stack px-3">
-																	Activate
-																</a>
-															</div>
+															@if (!Model.SweepNotification.DrawHappened || Model.SweepEntries.Count() <= 0)
+															{
+																<div class="menu-item px-3">
+																	<a asp-action="Activate"
+																   asp-controller="SweepRules"
+																   asp-route-sweepUid="@Model.Sweepstake.SweepUid"
+																   asp-route-ruleUid="@rule.RuleUid"
+																   asp-route-actionName=@ViewContext.RouteData.Values["action"]
+																   asp-route-controllerName=@ViewContext.RouteData.Values["controller"]
+																   class="menu-link flex-stack px-3">
+																		Activate
+																	</a>
+																</div>
+															}
 														}
 													</div>
 												</div>
@@ -358,16 +426,18 @@
 							</table>
 						</div>
 						<div class="separator mb-4"></div>
-						<a class="btn btn-primary mb-4"
-							asp-controller="SweepRules"
-							asp-action="SelectProvider"
-							asp-route-sweepUid="@Model.Sweepstake.SweepUid"
-							asp-route-actionName=@ViewContext.RouteData.Values["action"]
-							asp-route-controllerName=@ViewContext.RouteData.Values["controller"]
-						>
-                            Create New Watch
-                        </a>
-						<div class="separator"></div>
+						@if (!Model.SweepNotification.DrawHappened || Model.SweepEntries.Count() <= 0)
+						{
+							<a class="btn btn-primary mb-4"
+								asp-controller="SweepRules"
+								asp-action="SelectProvider"
+								asp-route-sweepUid="@Model.Sweepstake.SweepUid"
+								asp-route-actionName=@ViewContext.RouteData.Values["action"]
+								asp-route-controllerName=@ViewContext.RouteData.Values["controller"]>
+								Create New Watch
+							</a>
+							<div class="separator"></div>
+						}
 						<div class="row p-0 mb-5 px-9">
 							<div class="col">
 								<div class="border border-dashed border-gray-300 text-center min-w-125px rounded pt-4 pb-2 my-3">
@@ -497,41 +567,44 @@
 											<td>@prize.PrizeDescription</td>
 											<td>@prize.PrizeValue</td>
 											<td>
-												<div class="me-0">
-													<button class="btn btn-sm btn-bg-light btn-active-color-primary"
+												@if (!Model.SweepNotification.DrawHappened || Model.SweepEntries.Count() <= 0)
+												{
+													<div class="me-0">
+														<button class="btn btn-sm btn-bg-light btn-active-color-primary"
 														data-kt-menu-trigger="click" data-kt-menu-placement="bottom-end">
-														Actions
-													</button>
-													<div class="menu menu-sub menu-sub-dropdown menu-column menu-rounded menu-gray-800 menu-state-bg-light-primary fw-semibold w-200px py-3" data-kt-menu="true">
-														<div class="menu-item px-3">
-															<div class="menu-content text-muted pb-2 px-3 fs-7 text-uppercase">
-																Prize Actions
+															Actions
+														</button>
+														<div class="menu menu-sub menu-sub-dropdown menu-column menu-rounded menu-gray-800 menu-state-bg-light-primary fw-semibold w-200px py-3" data-kt-menu="true">
+															<div class="menu-item px-3">
+																<div class="menu-content text-muted pb-2 px-3 fs-7 text-uppercase">
+																	Prize Actions
+																</div>
 															</div>
-														</div>
-														<div class="menu-item px-3">
-															<a asp-action="EditPrize"
+															<div class="menu-item px-3">
+																<a asp-action="EditPrize"
 																asp-controller="SweepPrizes"
 																asp-route-sweepUid="@Model.Sweepstake.SweepUid"
 																asp-route-prizeUid="@prize.PrizeUid"
 																asp-route-actionName="View"
 																asp-route-controllerName="Sweeps"
 																class="menu-link flex-stack px-3">
-																Update
-															</a>
-														</div>
-														<div class="menu-item px-3">
-															<a asp-action="DeletePrize"
+																	Update
+																</a>
+															</div>
+															<div class="menu-item px-3">
+																<a asp-action="DeletePrize"
 															   asp-controller="SweepPrizes"
 															   asp-route-sweepUid="@Model.Sweepstake.SweepUid"
 															   asp-route-prizeUid="@prize.PrizeUid"
 															   asp-route-actionName="View"
 																asp-route-controllerName="Sweeps"
 															   class="menu-link flex-stack px-3">
-																Delete
-															</a>
+																	Delete
+																</a>
+															</div>
 														</div>
 													</div>
-												</div>
+												}
 											</td>
 										</tr>
 									}

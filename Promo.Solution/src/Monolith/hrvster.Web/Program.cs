@@ -18,6 +18,13 @@ namespace hrvster.Web
 				.AddJsonFile($"appsettings.{env}.json")
 				.Build();
 
+			Log.Logger = new LoggerConfiguration()
+				.ReadFrom.Configuration(configuration)
+				.WriteTo.Loggly()
+				.CreateLogger();
+
+			Log.Information("Main - Starting Web Host for hrvster.WEB");
+
 			CreateHostBuilder(args).Build().Run();
 		}
 

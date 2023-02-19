@@ -21,7 +21,7 @@
 		Failed
 	}
 
-	public enum PaymentClientEnum
+	public enum PaymentClient
 	{
 		Flutterwave,
 		Paystack,
@@ -98,7 +98,8 @@
 	{
 		Subscribed,
 		UnSubscribed,
-		PendingPayment
+		PendingPayment,
+		EndOfSubscription
 	}
 
 	public enum ActivityType

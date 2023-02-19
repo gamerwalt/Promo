@@ -1,5 +1,6 @@
 ﻿using hrvster.Models;
 using hrvster.Models.Profiles;
+using hrvster.Models.Subscriptions;
 using System.Collections.Generic;
 
 namespace hrvster.Web.Models
@@ -12,6 +13,8 @@ namespace hrvster.Web.Models
 		public AccountDetails AccountDetails { get; set; }
 		public string EmailAddress { get; set; }
 		public string PhoneNumber { get; set; }
+		public Plan Plan { get; set; }
+		public AccountSubscription AccountSubscription { get;  set; }
 	}
 
 	public class AccountDetails

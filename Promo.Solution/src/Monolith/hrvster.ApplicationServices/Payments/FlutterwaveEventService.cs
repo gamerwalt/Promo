@@ -1,5 +1,7 @@
-﻿using hrvster.Infrastructure.Subscriptions;
+﻿using hrvster.Infrastructure;
+using hrvster.Infrastructure.Subscriptions;
 using hrvster.Models;
+using hrvster.Models.Subscriptions;
 using hrvster.Models.Subscriptions.Flutterwave;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
@@ -23,15 +25,24 @@ namespace hrvster.ApplicationServices.Payments
 		private readonly ILogger<FlutterwaveEventService> _logger;
 		private readonly IFlutterwaveEventRepository _flutterwaveEventRepository;
 		private readonly IFlutterwaveCardTransactionService _cardService;
+		private readonly IFlutterwaveAccountSubscriptionRepository _flutterwaveAccountSubscriptionRepository;
+		private readonly IAccountsRepository _accountsRepository;
+		private readonly IAccountSubscriptionsRepository _accountSubscriptionsRepository;
 
 		public FlutterwaveEventService(
 			ILoggerFactory loggerFactory,
 			IFlutterwaveEventRepository flutterwaveEventRepository,
-			IFlutterwaveCardTransactionService cardService)
+			IFlutterwaveCardTransactionService cardService,
+			IFlutterwaveAccountSubscriptionRepository flutterwaveAccountSubscriptionRepository,
+			IAccountsRepository accountsRepository,
+			IAccountSubscriptionsRepository accountSubscriptionsRepository)
 		{
 			_logger = loggerFactory.CreateLogger<FlutterwaveEventService>();
 			_flutterwaveEventRepository = flutterwaveEventRepository;
 			_cardService = cardService;
+			_flutterwaveAccountSubscriptionRepository = flutterwaveAccountSubscriptionRepository;
+			_accountsRepository = accountsRepository;
+			_accountSubscriptionsRepository = accountSubscriptionsRepository;
 		}
 
 		public async Task ProcessFlutterwaveEventsAsync(CancellationToken cancellationToken)
@@ -53,7 +64,6 @@ namespace hrvster.ApplicationServices.Payments
 
 				try
 				{
-
 					_logger.LogInformation("Trying to deserialize the event {event} for Event Uid {uid}",
 						flutterwaveEvent.Payload,
 						eventUid);
@@ -67,10 +77,16 @@ namespace hrvster.ApplicationServices.Payments
 
 					if (flutterwaveCardTransaction == null)
 					{
+						_logger.LogWarning("Received an event from Flutterwave and we don't have an object to deserialize it to. Event: {eventContent}", flutterwaveEvent.Payload);
+
 						//retry another deserialization
 					}
 					else
 					{
+						var clientSubscription = await GetClientAccountSubscriptionFrom(flutterwaveCardTransaction);
+
+						await _flutterwaveAccountSubscriptionRepository.CreateAsync(clientSubscription, cancellationToken);
+
 						if (await _cardService.ProcessAsync(eventUid, flutterwaveCardTransaction, cancellationToken))
 							await _flutterwaveEventRepository.UpdateEventStatusAsync(
 								eventUid, FlutterwaveEventStatus.Success, cancellationToken);
@@ -86,8 +102,6 @@ namespace hrvster.ApplicationServices.Payments
 					await _flutterwaveEventRepository.UpdateEventStatusAsync(
 						eventUid, FlutterwaveEventStatus.Failed, cancellationToken);
 				}
-
-				
 			}
 
 			if(exceptions.Count > 0)
@@ -98,6 +112,20 @@ namespace hrvster.ApplicationServices.Payments
 					_logger.LogWarning(exception.Message);
 				}
 			}
+		}
+
+		private async Task<ClientAccountSubscription> GetClientAccountSubscriptionFrom(FlutterwaveCardTransaction flutterwaveCardTransaction)
+		{
+			var account = await _accountsRepository.GetByEmailAddressAsync(flutterwaveCardTransaction.Customer.Email);
+			var accountSubscription = await _accountSubscriptionsRepository.GetAccountSubscriptionAsync(account.AccountUid);
+
+			return new ClientAccountSubscription
+			{
+				Uid = Guid.NewGuid(),
+				ExternalAccountId = flutterwaveCardTransaction.Customer?.Id.ToString(),
+				ExternalSubscriptionId = flutterwaveCardTransaction.Id.ToString(),
+				SubscriptionUid = accountSubscription.SubscriptionUid
+			};
 		}
 	}
 }

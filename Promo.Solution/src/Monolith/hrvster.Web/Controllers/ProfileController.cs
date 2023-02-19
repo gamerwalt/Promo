@@ -1,5 +1,7 @@
-﻿using hrvster.Core.Authentication;
+﻿using hrvster.ApplicationServices.Subscription;
+using hrvster.Core.Authentication;
 using hrvster.Core.Requests.WebRequests.Accounts;
+using hrvster.Core.Requests.WebRequests.Subscriptions;
 using hrvster.Extensions.ModelExtensions;
 using hrvster.Models;
 using hrvster.Web.Models;
@@ -19,6 +21,7 @@ namespace hrvster.Web.Controllers
 		private readonly IMediator _mediator;
 		private readonly IToastNotification _notificationService;
 		private readonly ISessionManager _sessionManager;
+		private readonly IAccountSubscriptionService _accountSubscriptionService;
 
 		private HrvsterUser _hrvsterUser;
 
@@ -26,12 +29,14 @@ namespace hrvster.Web.Controllers
 			ILoggerFactory loggerFactory,
 			IMediator mediator,
 			IToastNotification notificationService,
-			ISessionManager sessionManager)
+			ISessionManager sessionManager,
+			IAccountSubscriptionService accountSubscriptionService)
 		{
 			_logger = loggerFactory.CreateLogger<ProfileController>();
 			_mediator = mediator;
 			_notificationService = notificationService;
 			_sessionManager = sessionManager;
+			_accountSubscriptionService = accountSubscriptionService;
 		}
 
 		[HttpGet]
@@ -41,6 +46,7 @@ namespace hrvster.Web.Controllers
 
 			var account = await _mediator.Send(new GetAccountAndProfileRequest(_hrvsterUser.UserUid));
 			var totalsPerAccount = await _mediator.Send(new GetTotalResourcesRequest(_hrvsterUser.UserUid));
+			var accountSubscription = await _accountSubscriptionService.GetAccountSubscriptionAsync(_hrvsterUser.UserUid);
 
 			var model = new UpdateAccount
 			{
@@ -56,7 +62,9 @@ namespace hrvster.Web.Controllers
 				FirstName = account.FirstName,
 				LastName = account.LastName,
 				EmailAddress = account.EmailAddress,
-				PhoneNumber = account.PhoneNumber
+				PhoneNumber = account.PhoneNumber,
+				Plan = accountSubscription == null ? null : accountSubscription.Plan,
+				AccountSubscription = accountSubscription
 			};
 
 			return View(model);
@@ -68,32 +76,6 @@ namespace hrvster.Web.Controllers
 			var model = await BuildProfileModel();
 
 			return View(model);
-		}
-
-		private async Task<UpdateAccount> BuildProfileModel()
-		{
-			_hrvsterUser = _sessionManager.GetUserInformation();
-
-			var account = await _mediator.Send(new GetAccountAndProfileRequest(_hrvsterUser.UserUid));
-			var totalsPerAccount = await _mediator.Send(new GetTotalResourcesRequest(_hrvsterUser.UserUid));
-
-			var model = new UpdateAccount
-			{
-				AccountDetails = new AccountDetails
-				{
-					Account = account,
-					Profiles = account.Profiles,
-					TotalSweepEntries = totalsPerAccount.TotalSweepEntries,
-					TotalPromotions = totalsPerAccount.TotalCampaigns,
-					TotalSweepstakes = totalsPerAccount.TotalSweeps
-				},
-				DisplayName = account.DisplayName,
-				FirstName = account.FirstName,
-				LastName = account.LastName,
-				EmailAddress = account.EmailAddress,
-				PhoneNumber = account.PhoneNumber
-			};
-			return model;
 		}
 
 		[HttpPost]
@@ -183,6 +165,47 @@ namespace hrvster.Web.Controllers
 			await _mediator.Send(new UnlinkProfileRequest(_hrvsterUser.UserUid, profileType));
 
 			return RedirectToAction("Index");
+		}
+
+		[HttpPost]
+		public async Task<IActionResult> Unsubscribe()
+		{
+			_hrvsterUser = _sessionManager.GetUserInformation();
+
+			await _mediator.Send(new UnsubscribeAccountRequest(_hrvsterUser.UserUid));
+
+			_notificationService.AddSuccessToastMessage("Request to unsubscribe plan completed. We're sorry to see you go.");
+
+			//await _mediator.Publish(new AccountUnsubscribed(_hrvsterUser.UserUid));
+			//Send email with this accountUnsubscribe
+
+			return RedirectToAction("Index", "Dashboard");
+		}
+
+		private async Task<UpdateAccount> BuildProfileModel()
+		{
+			_hrvsterUser = _sessionManager.GetUserInformation();
+
+			var account = await _mediator.Send(new GetAccountAndProfileRequest(_hrvsterUser.UserUid));
+			var totalsPerAccount = await _mediator.Send(new GetTotalResourcesRequest(_hrvsterUser.UserUid));
+
+			var model = new UpdateAccount
+			{
+				AccountDetails = new AccountDetails
+				{
+					Account = account,
+					Profiles = account.Profiles,
+					TotalSweepEntries = totalsPerAccount.TotalSweepEntries,
+					TotalPromotions = totalsPerAccount.TotalCampaigns,
+					TotalSweepstakes = totalsPerAccount.TotalSweeps
+				},
+				DisplayName = account.DisplayName,
+				FirstName = account.FirstName,
+				LastName = account.LastName,
+				EmailAddress = account.EmailAddress,
+				PhoneNumber = account.PhoneNumber
+			};
+			return model;
 		}
 	}
 }

@@ -1,4 +1,5 @@
-﻿using hrvster.ApplicationServices.Common;
+﻿using hrvster.ApplicationServices.Payments;
+using hrvster.ApplicationServices.Common;
 using hrvster.ApplicationServices.MatchGames;
 using hrvster.ApplicationServices.Subscription;
 using hrvster.ApplicationServices.Sweepstakes;
@@ -17,6 +18,7 @@ using Moq;
 using NToastNotify;
 using TestUtilities;
 using TestUtilities.Data;
+using TestUtilities.Mocks.Clients;
 using TestUtilities.Mocks.Publishers;
 
 namespace hrvster.Core.Handlers.Tests.Common
@@ -50,8 +52,11 @@ namespace hrvster.Core.Handlers.Tests.Common
         public SweepstakeUtility SweepstakeUtility { get; private set; }
 
         public Mock<IExternalClient> MockedExternalClient { get; private set; }
+		public Mock<IPaymentAdaptor> MockedPaymentAdaptor { get; private set; }
 		public Mock<TwitterClient> MockedTwitterClient { get; private set; }
+		public Mock<FlutterwavePaymentService> MockedFlutterwavePaymentService { get; private set; }
 		public Mock<IToastNotification> MockedToastNotification { get; private set; }
+
         public MediatorHandlerFeature()
 		{
 			Initialize();
@@ -104,8 +109,12 @@ namespace hrvster.Core.Handlers.Tests.Common
 			MatchGamesService = ServiceProvider.GetService<IMatchGamesService>();
 			CampaignService = ServiceProvider.GetService<ICampaignService>();
 
+            MockedExternalClient = ServiceProvider.GetService<Mock<IExternalClient>>();
+			MockedPaymentAdaptor = ServiceProvider.GetService<Mock<IPaymentAdaptor>>();
 			MockedExternalClient = ServiceProvider.GetService<Mock<IExternalClient>>();
 			MockedTwitterClient = ServiceProvider.GetService<Mock<TwitterClient>>();
+			MockedFlutterwavePaymentService = ServiceProvider.GetService<Mock<FlutterwavePaymentService>>();
+
 			MockedToastNotification = ServiceProvider.GetService<Mock<IToastNotification>>();
 
             SetupHrvsterUser();
@@ -129,12 +138,18 @@ namespace hrvster.Core.Handlers.Tests.Common
 			{
                 var loggerFactory = ServiceProvider.GetRequiredService<ILoggerFactory>();
                 var twitterAccount = ServiceProvider.GetRequiredService<TwitterAccount>();
+				var httpClientFactory = ServiceProvider.GetRequiredService<IHttpClientFactory>();
 
                 services.MockTwitterClient(loggerFactory, twitterAccount);
+				services.MockFlutterwaveHttpClient(loggerFactory, httpClientFactory);
 
 				var m = new Mock<Func<ExternalClientType, IExternalClient>>();
 				m.Setup(c => c.Invoke(It.IsAny<ExternalClientType>()))
 					.Returns(ServiceProvider.GetRequiredService<TwitterClient>());
+
+				var x = new Mock<Func<PaymentClient, IPaymentAdaptor>>();
+				x.Setup(c => c.Invoke(It.IsAny<PaymentClient>()))
+					.Returns(ServiceProvider.GetRequiredService<FlutterwavePaymentService>());				
 			}
 
             AdditionalServices?.Invoke(services);

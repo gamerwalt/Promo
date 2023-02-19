@@ -1,5 +1,6 @@
 ﻿using hrvster.ApplicationServices.Harvesters.Twitter;
 using hrvster.Core.Authentication;
+using hrvster.Models;
 using hrvster.Models.Options;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -46,6 +47,23 @@ namespace hrvster.Extensions.Configuration
 			var credential = string.Format("{0}:{1}", serviceUsername, servicePassword);
 
 			return Convert.ToBase64String(encoding.GetBytes(credential));
+		}
+
+		public static IServiceCollection AddFlutterwaveHttpClient(this IServiceCollection services)
+		{
+			var sp = services.BuildServiceProvider();
+			var flutterwaveConfig = sp.GetRequiredService<FlutterwaveConfigurations>();
+
+			services.AddHttpClient(HttpClients.Flutterwave, options =>
+			{
+				options.BaseAddress = new Uri(flutterwaveConfig.BaseUri);
+				options.DefaultRequestHeaders.Clear();
+				options.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
+					"Bearer",
+					flutterwaveConfig.SecretKey);
+			});
+
+			return services;
 		}
 	}
 }

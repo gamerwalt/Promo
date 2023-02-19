@@ -91,6 +91,13 @@
 					Profiles
 				</a>
 			</li>
+			<li class="nav-item">
+				<a class="nav-link text-active-primary py-5 me-6"
+				   data-bs-toggle="tab"
+				   href="#subscriptions">
+					Subscriptions
+				</a>
+			</li>
 		</ul>
 	</div>
 </div>
@@ -225,6 +232,113 @@
 						}
 					</div>
 					<!--end::Body-->
+				</div>
+			</div>
+			<div class="tab-pane fade show" id="subscriptions" role="tabpanel">
+				<div class="row g-6 g-xl-9">
+					<div class="col-md-6 col-xl-8 border border-1 border-active-primary">
+						<div class="card">
+							<div class="card-body">
+								@if(Model.Plan != null)
+								{
+									<div class="d-flex flex-stack fs-4 py-3">
+										<div class="fw-bold">@Model.Plan.PlanName</div>
+									</div>
+									<div class="separator separator-dashed my-3"></div>
+									<div class="pb-5 fs-6">
+										<div class="text-gray-600">@Model.Plan.PlanDescription</div>
+										<div class="fw-bold mt-5">Start Date</div>
+										<div class="text-gray-600">@Model.AccountSubscription.StartDate</div>
+										<div class="fw-bold mt-5">End Date</div>
+										<div class="text-gray-600">@Model.AccountSubscription.EndDate</div>
+										<div class="fw-bold mt-5">Subscription Status</div>
+										<div class="text-gray-600">@Model.AccountSubscription.SubscriptionStatus</div>
+										<div class="fw-bold mt-5">Discounted</div>
+										<div class="text-gray-600">
+											@if(Model.AccountSubscription.IsDiscounted == false)
+											{
+												<span>No</span>
+											}
+											else
+											{
+												<span>Yes</span>
+											}
+										</div>
+										<div class="separator separator-dashed my-3"></div>
+										@if(Model.AccountSubscription.SubscriptionStatus == SubscriptionStatus.Subscribed ||
+											Model.AccountSubscription.SubscriptionStatus == SubscriptionStatus.PendingPayment)
+										{
+											<form asp-action="Unsubscribe" asp-controller="Profile" id="formUnsubscribe">
+												<button type="submit" class="btn btn-sm btn-danger fs-8 fw-bold">
+													Unsubscribe/Cancel
+												</button>
+											</form>
+										}
+									</div>
+								}
+								
+							</div>
+						</div>
+					</div>
+					<div class="col-md-6 col-xl-4 border border-1 border-active-primary">
+						<div class="card">
+							<div class="card-body">
+								@if(Model.Plan != null)
+								{
+									<div class="d-flex flex-stack fs-4 py-3">
+										<div class="fw-bold">Ngn @Model.Plan.PricePerMonth</div>
+									</div>
+									<div class="separator separator-dashed my-3"></div>
+									<div class="pb-5 fs-6">
+										<div class="fw-bold mt-5">Promotions Per Month</div>
+										<div class="text-gray-600">
+											@if (Model.Plan.PromotionsPerMonth == 0)
+											{
+												<span>Infinity</span>
+											}
+											else
+											{
+												<span>@Model.Plan.PromotionsPerMonth</span>
+											}
+										</div>
+										<div class="fw-bold mt-5">Sweepstakes Per Month</div>
+										<div class="text-gray-600">
+											@if(Model.Plan.SweepstakesPerMonth == 0)
+											{
+												<span>Infinity</span>
+											}
+											else
+											{
+												<span>@Model.Plan.SweepstakesPerMonth</span>
+											}
+										</div>
+										<div class="fw-bold mt-5">Sweepstakes Maximum Entries</div>
+										<div class="text-gray-600">
+											@if (Model.Plan.SweepstakesMaximumEntries == 0)
+											{
+												<span>Infinity</span>
+											}
+											else
+											{
+												<span>@Model.Plan.SweepstakesMaximumEntries</span>
+											}
+										</div>
+										<div class="fw-bold mt-5">Sweepstakes Hashtags per month</div>
+										<div class="text-gray-600">
+											@if (Model.Plan.HashtagsPerMonth == 0)
+											{
+												<span>Infinity</span>
+											}
+											else
+											{
+												<span>@Model.Plan.HashtagsPerMonth</span>
+											}
+										</div>
+									</div>
+								}
+							</div>
+						</div>
+					</div>
 				</div>
 			</div>
 		</div>

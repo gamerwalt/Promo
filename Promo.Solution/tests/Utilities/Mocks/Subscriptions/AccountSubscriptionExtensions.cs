@@ -29,17 +29,26 @@ namespace TestUtilities.Mocks.Subscriptions
         public static Mock<IAccountSubscriptionService> SetupGetAccountSubscription(
             this Mock<IAccountSubscriptionService> mock)
         {
-            mock.Setup(x => x.GetAccountSubscriptionAsync(It.IsAny<Guid>()))
-                .ReturnsAsync(new AccountSubscription
+            var accountSubscription = new AccountSubscription
+            {
+                Plan = new Plan
                 {
-                    Plan = new Plan
-                    {
-                        PlanUid = TestData.BasicPlanUid,
-                        PromotionsPerMonth = 1
-                    },
-                    Account = new Account(),
-                    SubscriptionStatus = SubscriptionStatus.Subscribed
-                });
+                    PlanUid = TestData.BasicPlanUid,
+                    PromotionsPerMonth = 1
+                },
+                Account = new Account(),
+                SubscriptionStatus = SubscriptionStatus.Subscribed,
+                StartDate = DateTime.Now,
+                StartDateUtc = DateTime.UtcNow,
+                EndDate = DateTime.Now.AddDays(30),
+                EndDateUtc = DateTime.UtcNow.AddDays(30)
+            };
+
+			mock.Setup(x => x.GetAccountSubscriptionAsync(It.IsAny<Guid>()))
+                .ReturnsAsync(accountSubscription);
+
+            mock.Setup(x => x.GetAccountSubscription(It.IsAny<Guid>()))
+                .Returns(accountSubscription);
 
             return mock;
         }

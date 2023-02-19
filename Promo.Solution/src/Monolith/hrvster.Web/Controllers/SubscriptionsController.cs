@@ -2,14 +2,11 @@
 using hrvster.Core.Authentication;
 using hrvster.Core.Requests.WebRequests.Subscriptions;
 using hrvster.Models;
-using hrvster.Models.Core;
 using hrvster.Models.Extensions;
-using hrvster.Models.Subscriptions;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using NToastNotify;
-using NToastNotify.Helpers;
 using System;
 using System.Threading.Tasks;
 
@@ -27,7 +24,7 @@ namespace hrvster.Web.Controllers
 		private HrvsterUser _hrvsterUser;
 
 		public SubscriptionsController(
-			ILoggerFactory loggerFactory, 
+			ILoggerFactory loggerFactory,
 			IMediator mediator,
 			ISubscriptionService subscriptionService,
 			IToastNotification notificationService,
@@ -40,22 +37,30 @@ namespace hrvster.Web.Controllers
 			_sessionManager = sessionManager;
 		}
 
-		public async Task<ActionResult> Index(string subscriptionStatus)
+		public async Task<IActionResult> Index(string subscriptionStatus)
 		{
 			return RedirectToAction(subscriptionStatus);
 		}
 
 		[Route("/Subscriptions/Unsubscribed")]
-		public async Task<ActionResult> UnSubscribed()
+		public async Task<IActionResult> UnSubscribed()
 		{
 			var plans = await _mediator.Send(new GetPlansRequest());
 
 			return View(plans);
 		}
 
+		[Route("/Subscriptions/EndOfSubscription")]
+		public async Task<IActionResult> EndOfSubscription()
+		{
+			_notificationService.AddInfoToastMessage("You have reached the end of your subscription. You will need to subscribe again to continue.");
+
+			return RedirectToAction("UnSubscribed");
+		}
+
 		[HttpPost]
 		[Route("/SelectPlan/{planUid:Guid}")]
-		public async Task<ActionResult> SelectPlanForUser(Guid planUid)
+		public async Task<IActionResult> SelectPlanForUser(Guid planUid)
 		{
 			_logger.LogInformation("Posting information for select plan {planUid}", planUid);
 
@@ -105,11 +110,11 @@ namespace hrvster.Web.Controllers
 
 		[HttpGet]
 		[Route("/subscriptions/flutterwave/completed/plan/{planName}")]
-		public async Task<ActionResult> Completed([FromRoute] string planName, [FromQuery] string status, [FromQuery] string txRef)
+		public async Task<IActionResult> Completed([FromRoute] string planName, [FromQuery] string status, [FromQuery] string txRef)
 		{
 			_logger.LogInformation("A redirect happened and now with the plan name {planName}", planName);
 
-			if(_sessionManager.ContainsKey(SessionConstants.UserUid) && 
+			if (_sessionManager.ContainsKey(SessionConstants.UserUid) &&
 				_sessionManager.ContainsKey(SessionConstants.UserToken))
 			{
 				var userUid = _sessionManager.ContainsKey(SessionConstants.UserUid);
@@ -127,7 +132,7 @@ namespace hrvster.Web.Controllers
 
 		[HttpPost]
 		[Route("/subscriptions/flutterwave/completed")]
-		public async Task<ActionResult> CompletedPost(string status, string txRef)
+		public async Task<IActionResult> CompletedPost(string status, string txRef)
 		{
 			_logger.LogInformation("Information received on the get route Flutterwave. Status {status} and Transaction Reference {txRef}",
 				status,

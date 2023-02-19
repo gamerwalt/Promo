@@ -54,13 +54,17 @@ namespace SweepEntrySeeder.Requests
 
 					var entries = entryRules.Generate(_settings.TotalEntries);
 
+					var tasks = new List<Task>();
+
 					foreach (var entry in entries)
 					{
-						var tasks = new List<Task>();
-
 						tasks.Add(_sweepsEntriesRepository.CreateAsync(entry));
 
-						await Task.WhenAll(tasks);
+						if(tasks.Count == 50)
+						{
+							await Task.WhenAll(tasks);
+							tasks = new List<Task>();
+						}
 					}
 				}
 			}
