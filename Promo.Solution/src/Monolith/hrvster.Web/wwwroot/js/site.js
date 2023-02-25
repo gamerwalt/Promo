@@ -32,5 +32,5 @@ $(document).ready(function () {
     $("#sweepEntryTable").DataTable({
         destroy: true,
         searching: true,
-        });
+    });
 });

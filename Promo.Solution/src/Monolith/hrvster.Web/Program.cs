@@ -20,7 +20,9 @@ namespace hrvster.Web
 
 			Log.Logger = new LoggerConfiguration()
 				.ReadFrom.Configuration(configuration)
+				.Enrich.FromLogContext()
 				.WriteTo.Loggly()
+				.MinimumLevel.Debug()
 				.CreateLogger();
 
 			Log.Information("Main - Starting Web Host for hrvster.WEB");

@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Threading;
 using System.Threading.Tasks;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace hrvster.Infrastructure.MatchGames
 {
@@ -14,6 +15,7 @@ namespace hrvster.Infrastructure.MatchGames
 		Task CreateAsync(MatchImage image, CancellationToken cancellationToken);
 		Task<MatchImage> GetAsync(Guid uid, CancellationToken cancellationToken);
 		Task<IEnumerable<MatchImage>> GetForMatchGamesAsync(Guid matchGameUid, CancellationToken cancellationToken);
+		Task UpdateAsync(Guid matchImageUid, MatchImage matchImage, CancellationToken cancellationToken);
 	}
 
 	public class MatchImagesRepository : IMatchImagesRepository
@@ -31,8 +33,7 @@ namespace hrvster.Infrastructure.MatchGames
 			var command = conn.CreateCommand();
 			command.CommandText = "match_image_create";
 			command.CommandType = CommandType.StoredProcedure;
-			command
-				.AddParameter("imageUid", image.Uid)
+			command.AddParameter("imageUid", image.Uid)
 				.AddParameter("matchGameUid", image.MatchGame.Uid)
 				.AddParameter("locationUrl", image.LocationUrl);
 
@@ -82,6 +83,19 @@ namespace hrvster.Infrastructure.MatchGames
 			}
 
 			return matchImages;
+		}
+
+		public async Task UpdateAsync(Guid matchImageUid, MatchImage matchImage, CancellationToken cancellationToken)
+		{
+			using var conn = new MySqlConnection(_database.GetConnectionString());
+			var command = conn.CreateCommand();
+			command.CommandText = "match_image_update";
+			command.CommandType = CommandType.StoredProcedure;
+			command.AddParameter("imageUid", matchImageUid)
+				.AddParameter("locationUrl", matchImage.LocationUrl);
+
+			await conn.OpenAsync(cancellationToken);
+			await command.ExecuteNonQueryAsync(cancellationToken);
 		}
 
 		private MatchImage CreateFrom(MySqlDataReader reader)

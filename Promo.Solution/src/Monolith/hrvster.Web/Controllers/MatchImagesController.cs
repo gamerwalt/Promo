@@ -4,15 +4,19 @@ using hrvster.ApplicationServices.MatchGames;
 using hrvster.Core.Authentication;
 using hrvster.Core.Subscriptions;
 using hrvster.Extensions.ModelExtensions;
+using hrvster.Games.Match.Models;
 using hrvster.Models;
 using hrvster.Web.Models;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using NToastNotify;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using MatchImage = hrvster.Web.Models.MatchImage;
 
 namespace hrvster.Web.Controllers
 {
@@ -27,10 +31,12 @@ namespace hrvster.Web.Controllers
 		private readonly IMatchImageService _matchImagesService;
 		private readonly IMapper _mapper;
 		private readonly IToastNotification _notificationService;
+		private readonly ILogger _logger;
 
 		private HrvsterUser _hrvsterUser;
 
 		public MatchImagesController(
+			ILoggerFactory loggerFactory,
 			ISessionManager sessionManager,
 			IMatchGamesService matchGamesService,
 			IMatchImageService matchImageService,
@@ -39,6 +45,7 @@ namespace hrvster.Web.Controllers
 			IMapper mapper,
 			IToastNotification notificationService)
 		{
+			_logger = loggerFactory.CreateLogger<MatchImagesController>();
 			_sessionManager = sessionManager;
 			_matchGamesService = matchGamesService;
 			_matchImageService = matchImageService;
@@ -81,7 +88,7 @@ namespace hrvster.Web.Controllers
 			{
 				MatchImages = _mapper.Map<IEnumerable<MatchImage>>(matchImages),
 				Campaign = campaign,
-				MatchGame = _mapper.Map<MatchGame>(matchGame)
+				MatchGame = _mapper.Map<Models.MatchGame>(matchGame)
 			};
 			
 			return View(model);
@@ -120,7 +127,7 @@ namespace hrvster.Web.Controllers
 
 			var model = new CreateImage
 			{
-				MatchGame = _mapper.Map<MatchGame>(matchGame),
+				MatchGame = _mapper.Map<Models.MatchGame>(matchGame),
 				Campaign = campaign
 			};
 
@@ -176,6 +183,84 @@ namespace hrvster.Web.Controllers
 			_notificationService.AddErrorToastMessage(ModelState.BuildMessageFromErrors());
 
 			return RedirectToAction("Create", new { matchGameUid });
+		}
+
+		[HttpGet]
+		[Route("/MatchImages/game/{matchGameUid:Guid}/image/{matchImageUid:Guid}/update")]
+		public async Task<IActionResult> Update(
+			Guid matchGameUid, 
+			Guid matchImageUid, 
+			string actionName, 
+			string controllerName, 
+			CancellationToken cancellationToken)
+		{
+			_hrvsterUser = _sessionManager.GetUserInformation();
+
+			var matchGame = await _matchGamesService.GetMatchGameAsync(matchGameUid, cancellationToken);
+			if (matchGame == null)
+			{
+				_notificationService.AddErrorToastMessage("Unable to find Match Game.");
+
+				return RedirectToAction(actionName ?? "View", controllerName ?? "MatchGames", new { matchGameUid });
+			}
+
+			var matchImage = await _matchImageService.GetImageAsync(matchImageUid, cancellationToken);
+			if(matchImage == null || matchImage?.Uid == Guid.Empty)
+			{
+				_notificationService.AddErrorToastMessage("Unable to locate image.");
+
+				return RedirectToAction(actionName ?? "View", controllerName ?? "MatchGames", new { matchGameUid });
+			}
+
+			var model = new UpdateMatchImage
+			{
+				MatchImage = _mapper.Map<Models.MatchImage>(matchImage),
+				MatchGame = _mapper.Map<Models.MatchGame>(matchGame)
+			};
+
+			return View(model);
+		}
+
+		[HttpPost]
+		[Route("/MatchImages/game/{matchGameUid:Guid}/image/{matchImageUid:Guid}/update")]
+		public async Task<IActionResult> Update(
+			Guid matchGameUid,
+			Guid matchImageUid,
+			string actionName,
+			string controllerName,
+			UpdateMatchImage form,
+			CancellationToken cancellationToken)
+		{
+			_hrvsterUser = _sessionManager.GetUserInformation();
+
+			var matchGame = await _matchGamesService.GetMatchGameAsync(matchGameUid, cancellationToken);
+			if (matchGame == null)
+			{
+				_notificationService.AddErrorToastMessage("Unable to find Match Game.");
+
+				return RedirectToAction(actionName ?? "View", controllerName ?? "MatchGames", new { matchGameUid });
+			}
+
+			var matchImage = await _matchImageService.GetImageAsync(matchImageUid, cancellationToken);
+			if (matchImage == null || matchImage?.Uid == Guid.Empty)
+			{
+				_notificationService.AddErrorToastMessage("Unable to locate image.");
+
+				return RedirectToAction(actionName ?? "View", controllerName ?? "MatchGames", new { matchGameUid });
+			}
+
+			if(ModelState.IsValid)
+			{
+				await _matchImageService.UpdateImageAsync(matchImageUid, matchGame, form.Image, cancellationToken);
+
+				_notificationService.AddSuccessToastMessage("Image updated successfully.");
+
+				return RedirectToAction(actionName ?? "View", controllerName ?? "MatchGames", new { matchGameUid });
+			}
+
+			_notificationService.AddErrorToastMessage(ModelState.BuildMessageFromErrors());
+
+			return RedirectToAction(actionName ?? "View", controllerName ?? "MatchGames", new { matchGameUid });
 		}
 	}
 }

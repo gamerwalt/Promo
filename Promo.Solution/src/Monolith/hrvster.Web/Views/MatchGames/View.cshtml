@@ -200,7 +200,7 @@
 					</div>
 				</form>
 			</div>
-			<div class="tab-pane fade active show" id="images" role="tabpanel">
+			<div class="tab-pane fade active" id="images" role="tabpanel">
 				<a class="btn btn-primary mb-4"
 				   asp-controller="MatchImages"
 				   asp-action="Create"
@@ -210,13 +210,45 @@
 					Create New Image
 				</a>
 				<div class="separator mb-4"></div>
-				<div class="d-flex flex-row">
-					@foreach (var image in Model.MatchImages)
-					{
-						<div class="d-flex flex-column-auto h-150px border border-gray-800 mr-4">
-							<img class="mx-auto" width="128px" height="128px" src="@image.LocationUrl" alt="MatchGameImage" />
-						</div>
-					}
+				<div class="table-responsive">
+					<table class="table table-striped">
+						<thead>
+							<tr class="fw-semibold fs-6 text-gray-800 border-bottom-2 border-gray-200">
+								<th>Image</th>
+								<th>Actions</th>
+							</tr>
+						</thead>
+						<tbody>
+							@foreach (var image in Model.MatchImages)
+							{
+								<tr>
+									<td>
+										<img class="mx-auto" width="64px" height="64px" src="@image.LocationUrl" alt="MatchGameImage" />
+									</td>
+									<td>
+										<a class="btn btn-primary btn-sm mb-4"
+											asp-controller="MatchImages"
+											asp-action="Update"
+											asp-route-matchGameUid="@Model.MatchGame.MatchGameUid"
+											asp-route-matchImageUid="@image.Uid"
+											asp-route-actionName=@ViewContext.RouteData.Values["action"]
+											asp-route-controllerName=@ViewContext.RouteData.Values["controller"]>
+											Update Image
+										</a>
+										<a class="btn btn-danger btn-sm mb-4"
+											asp-controller="MatchImages"
+											asp-action="Delete"
+											asp-route-matchGameUid="@Model.MatchGame.MatchGameUid"
+											asp-route-matchImageUid="@image.Uid"
+											asp-route-actionName=@ViewContext.RouteData.Values["action"]
+											asp-route-controllerName=@ViewContext.RouteData.Values["controller"]>
+											Delete Image
+										</a>
+									</td>
+								</tr>
+							}
+						</tbody>
+					</table>
 				</div>
 			</div>
 		</div>
