@@ -13,6 +13,7 @@ namespace hrvster.Infrastructure.MatchGames
 	public interface IMatchImagesRepository
 	{
 		Task CreateAsync(MatchImage image, CancellationToken cancellationToken);
+		Task DeleteAsync(Guid uid, CancellationToken cancellationToken);
 		Task<MatchImage> GetAsync(Guid uid, CancellationToken cancellationToken);
 		Task<IEnumerable<MatchImage>> GetForMatchGamesAsync(Guid matchGameUid, CancellationToken cancellationToken);
 		Task UpdateAsync(Guid matchImageUid, MatchImage matchImage, CancellationToken cancellationToken);
@@ -35,7 +36,20 @@ namespace hrvster.Infrastructure.MatchGames
 			command.CommandType = CommandType.StoredProcedure;
 			command.AddParameter("imageUid", image.Uid)
 				.AddParameter("matchGameUid", image.MatchGame.Uid)
+				.AddParameter("imageName", image.Name)
 				.AddParameter("locationUrl", image.LocationUrl);
+
+			await conn.OpenAsync(cancellationToken);
+			await command.ExecuteNonQueryAsync(cancellationToken);
+		}
+
+		public async Task DeleteAsync(Guid uid, CancellationToken cancellationToken)
+		{
+			using var conn = new MySqlConnection(_database.GetConnectionString());
+			var command = conn.CreateCommand();
+			command.CommandText = "match_image_delete";
+			command.CommandType = CommandType.StoredProcedure;
+			command.AddParameter("imageUid", uid);
 
 			await conn.OpenAsync(cancellationToken);
 			await command.ExecuteNonQueryAsync(cancellationToken);
@@ -105,6 +119,7 @@ namespace hrvster.Infrastructure.MatchGames
 				Id = reader.GetInt32("image_id"),
 				Uid = reader.GetGuid("image_uid"),
 				LocationUrl = reader.GetString("location_url"),
+				Name = reader.GetString("image_name"),
 				MatchGame = new MatchGame
 				{
 					Uid = reader.GetGuid("match_game_uid"),

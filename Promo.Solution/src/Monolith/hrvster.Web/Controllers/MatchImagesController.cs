@@ -262,5 +262,83 @@ namespace hrvster.Web.Controllers
 
 			return RedirectToAction(actionName ?? "View", controllerName ?? "MatchGames", new { matchGameUid });
 		}
+
+		[HttpGet]
+		[Route("/MatchImages/game/{matchGameUid:Guid}/image/{matchImageUid:Guid}/delete")]
+		public async Task<IActionResult> Delete(
+			Guid matchGameUid,
+			Guid matchImageUid,
+			string actionName,
+			string controllerName,
+			CancellationToken cancellationToken)
+		{
+			_hrvsterUser = _sessionManager.GetUserInformation();
+
+			var matchGame = await _matchGamesService.GetMatchGameAsync(matchGameUid, cancellationToken);
+			if (matchGame == null)
+			{
+				_notificationService.AddErrorToastMessage("Unable to find Match Game.");
+
+				return RedirectToAction(actionName ?? "View", controllerName ?? "MatchGames", new { matchGameUid });
+			}
+
+			var matchImage = await _matchImageService.GetImageAsync(matchImageUid, cancellationToken);
+			if (matchImage == null || matchImage?.Uid == Guid.Empty)
+			{
+				_notificationService.AddErrorToastMessage("Unable to locate image.");
+
+				return RedirectToAction(actionName ?? "View", controllerName ?? "MatchGames", new { matchGameUid });
+			}
+
+			var model = new DeleteMatchImage
+			{
+				MatchImage = _mapper.Map<Models.MatchImage>(matchImage),
+				MatchGame = _mapper.Map<Models.MatchGame>(matchGame)
+			};
+
+			return View(model);
+		}
+
+		[HttpPost]
+		[Route("/MatchImages/game/{matchGameUid:Guid}/image/{matchImageUid:Guid}/delete")]
+		public async Task<IActionResult> Delete(
+			Guid matchGameUid,
+			Guid matchImageUid,
+			string actionName,
+			string controllerName,
+			DeleteMatchImage form,
+			CancellationToken cancellationToken)
+		{
+			_hrvsterUser = _sessionManager.GetUserInformation();
+
+			var matchGame = await _matchGamesService.GetMatchGameAsync(matchGameUid, cancellationToken);
+			if (matchGame == null)
+			{
+				_notificationService.AddErrorToastMessage("Unable to find Match Game.");
+
+				return RedirectToAction("View", "MatchGames", new { matchGameUid });
+			}
+
+			var matchImage = await _matchImageService.GetImageAsync(matchImageUid, cancellationToken);
+			if (matchImage == null || matchImage?.Uid == Guid.Empty)
+			{
+				_notificationService.AddErrorToastMessage("Unable to locate image.");
+
+				return RedirectToAction("View", "MatchGames", new { matchGameUid });
+			}
+
+			if (ModelState.IsValid)
+			{
+				await _matchImageService.DeleteImageAsync(matchImage, matchGame, cancellationToken);
+
+				_notificationService.AddSuccessToastMessage("Image updated successfully.");
+
+				return RedirectToAction("View", "MatchGames", new { matchGameUid });
+			}
+
+			_notificationService.AddErrorToastMessage(ModelState.BuildMessageFromErrors());
+
+			return RedirectToAction("View", "MatchGames", new { matchGameUid });
+		}
 	}
 }

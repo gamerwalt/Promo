@@ -1,6 +1,7 @@
 ﻿using hrvster.Core.Requests.WebRequests.Files;
 using hrvster.Games.Match.Models;
 using hrvster.Infrastructure.MatchGames;
+using hrvster.Models;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
@@ -15,6 +16,7 @@ namespace hrvster.ApplicationServices.MatchGames
 	public interface IMatchImageService
 	{
 		Task<bool> CreateImagesAsync(MatchGame matchGame, ICollection<IFormFile> images, CancellationToken cancellationToken);
+		Task DeleteImageAsync(MatchImage matchImage, MatchGame matchGame, CancellationToken cancellationToken);
 		Task<IEnumerable<MatchImage>> GetForMatchGameAsync(Guid matchGameUid, CancellationToken cancellationToken);
 		Task<MatchImage> GetImageAsync(Guid imageUid, CancellationToken cancellationToken);
 		Task UpdateImageAsync(Guid matchImageUid, MatchGame matchGame, IFormFile image, CancellationToken cancellationToken);
@@ -43,18 +45,18 @@ namespace hrvster.ApplicationServices.MatchGames
 		{
 			try
 			{
-				var locations = await _mediator.Send(new UploadMatchImagesRequest(matchGame, images));
+				var uploadedImages = await _mediator.Send(new UploadMatchImagesRequest(matchGame, images));
 
 				var tasks = new List<Task>();
 
-				foreach (var location in locations)
+				foreach (var uploadedImage in uploadedImages)
 				{
-					var matchImage = CreateMatchImage(matchGame, location);
+					var matchImage = CreateMatchImage(matchGame, uploadedImage);
 
 					tasks.Add(_repository.CreateAsync(matchImage, cancellationToken));
 
 					_logger.LogInformation("Saving the image {location} into the database for {gameName}",
-						location,
+						uploadedImage.LocationUrl,
 						matchGame.Name);
 				}
 
@@ -84,13 +86,13 @@ namespace hrvster.ApplicationServices.MatchGames
 					image.Name,
 					matchImageUid);
 
-				var locations = await _mediator.Send(new UploadMatchImagesRequest(matchGame, new[] { image }));
+				var uploadedImage = await _mediator.Send(new UploadMatchImagesRequest(matchGame, new[] { image }));
 
 				_logger.LogInformation("Saved the image {imageName} at {location}",
 					image.Name,
-					locations.FirstOrDefault());
+					uploadedImage.FirstOrDefault());
 
-				var matchImage = CreateMatchImage(matchGame, locations.FirstOrDefault());
+				var matchImage = CreateMatchImage(matchGame, uploadedImage.FirstOrDefault());
 
 				await _repository.UpdateAsync(matchImageUid, matchImage, cancellationToken);
 
@@ -106,11 +108,12 @@ namespace hrvster.ApplicationServices.MatchGames
 			}
 		}
 
-		private MatchImage CreateMatchImage(MatchGame matchGame, string location)
+		private MatchImage CreateMatchImage(MatchGame matchGame, UploadedImage uploadedImage)
 			=> new MatchImage
 			{
 				Uid = Guid.NewGuid(),
-				LocationUrl = location,
+				LocationUrl = uploadedImage.LocationUrl,
+				Name = uploadedImage.Name,
 				MatchGame = matchGame
 			};
 
@@ -119,5 +122,17 @@ namespace hrvster.ApplicationServices.MatchGames
 
 		public async Task<MatchImage> GetImageAsync(Guid imageUid, CancellationToken cancellationToken)
 			=> await _repository.GetAsync(imageUid, cancellationToken);
+
+		public async Task DeleteImageAsync(MatchImage matchImage, MatchGame matchGame, CancellationToken cancellationToken)
+		{
+			_logger.LogInformation("Retrieving the image with uid {matchImageUid} with the location {locationUrl}",
+				matchImage.Uid,
+				matchImage.LocationUrl);
+
+			await _mediator.Send(new DeleteMatchImageRequest(matchImage, matchGame));
+
+			await _repository.DeleteAsync(matchImage.Uid, cancellationToken);
+		}
 	}
 }
+ 

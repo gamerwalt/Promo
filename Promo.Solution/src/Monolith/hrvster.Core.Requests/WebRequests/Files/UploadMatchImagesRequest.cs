@@ -1,11 +1,12 @@
 ﻿using hrvster.Games.Match.Models;
+using hrvster.Models;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using System.Collections.Generic;
 
 namespace hrvster.Core.Requests.WebRequests.Files
 {
-	public class UploadMatchImagesRequest : IRequest<IEnumerable<string>>
+	public class UploadMatchImagesRequest : IRequest<IEnumerable<UploadedImage>>
 	{
 		private MatchGame matchGame;
 		private ICollection<IFormFile> images;

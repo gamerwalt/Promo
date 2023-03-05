@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace hrvster.Core.Handlers.Files
 {
-	public class UploadMatchImages : IRequestHandler<UploadMatchImagesRequest, IEnumerable<string>>
+	public class UploadMatchImages : IRequestHandler<UploadMatchImagesRequest, IEnumerable<UploadedImage>>
 	{
 		private readonly ILogger<UploadMatchImages> _logger;
 		private readonly ISessionManager _sessionManager;
@@ -28,21 +28,15 @@ namespace hrvster.Core.Handlers.Files
 			_sessionManager = sessionManager;
 		}
 
-		public async Task<IEnumerable<string>> Handle(UploadMatchImagesRequest request, CancellationToken cancellationToken)
+		public async Task<IEnumerable<UploadedImage>> Handle(UploadMatchImagesRequest request, CancellationToken cancellationToken)
 		{
+			var uploadedImages = new List<UploadedImage>();
+
 			_logger.LogInformation("Uploading match image for the match game {gameName}", request.MatchGame.Name);
 
 			_hrvsterUser = _sessionManager.GetUserInformation();
 
-			var listOfPaths = new List<string>();
 			var googleStorageFileName = string.Empty;
-
-			var firebaseStorage = new FirebaseStorage(StorageNames.MatchGameUploads, new FirebaseStorageOptions
-			{
-				AuthTokenAsyncFactory = () => Task.FromResult(_hrvsterUser.Token),
-				ThrowOnCancel = true
-			})
-			.Child(request.MatchGame.Uid.ToString());
 
 			foreach (var image in request.Images)
 			{
@@ -60,12 +54,18 @@ namespace hrvster.Core.Handlers.Files
 					await image.CopyToAsync(stream);
 				}
 
+				var firebaseStorage = new FirebaseStorage(StorageNames.MatchGameUploads, new FirebaseStorageOptions
+				{
+					AuthTokenAsyncFactory = () => Task.FromResult(_hrvsterUser.Token),
+					ThrowOnCancel = true
+				}).Child(request.MatchGame.Uid.ToString());
+
 				using (var ms = new FileStream(filePath, FileMode.Open))
 				{
 					googleStorageFileName = await firebaseStorage.Child(image.FileName).PutAsync(ms);
 				}
 
-				listOfPaths.Add(googleStorageFileName);
+				uploadedImages.Add(new UploadedImage {  LocationUrl = googleStorageFileName, Name = image.FileName });
 
 				_logger.LogInformation("Finished saving the image {imageName} for game {gameName} at {storageFileName}",
 					image.Name,
@@ -73,7 +73,7 @@ namespace hrvster.Core.Handlers.Files
 					googleStorageFileName);
 			}
 
-			return listOfPaths;
+			return uploadedImages;
 		}
 
 		private string GetFilePath(Guid matchGameUid)

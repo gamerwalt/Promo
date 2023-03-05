@@ -1,0 +1,26 @@
+﻿@model DeleteMatchImage
+@{
+	ViewData["Title"] = $"Delete Image for {Model.MatchGame.Name}";
+}
+<div class="card card-bordered">
+	<form asp-controller="MatchImages" 
+		asp-action="Delete" 
+		asp-route-matchGameUid="@Model.MatchGame.MatchGameUid" 
+		asp-route-matchImageUid="@Model.MatchImage.Uid"
+		asp-route-actionName=@ViewContext.RouteData.Values["action"]
+		asp-route-controllerName=@ViewContext.RouteData.Values["controller"]
+		enctype="multipart/form-data" class="form-horizontal form-material mx-2">
+		<div class="card-body">
+			<div class="flex-lg-row">
+				<img class="mx-auto" width="124px" height="124px" src="@Model.MatchImage.LocationUrl" alt="MatchGameImage" />
+			</div>
+		</div>
+		<div class="card-footer">
+			<div class="card-toolbar">
+				<button type="submit" class="btn btn-md btn-light btn-primary">
+					Delete Image
+				</button>
+			</div>
+		</div>
+	</form>
+</div>

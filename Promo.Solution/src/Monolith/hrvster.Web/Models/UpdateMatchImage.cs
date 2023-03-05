@@ -8,4 +8,10 @@ namespace hrvster.Web.Models
 		public MatchGame MatchGame { get; set; }
 		public IFormFile Image { get; set; }
 	}
+
+	public class DeleteMatchImage
+	{
+		public MatchImage MatchImage { get; set; }
+		public MatchGame MatchGame { get; set; }
+	}
 }
