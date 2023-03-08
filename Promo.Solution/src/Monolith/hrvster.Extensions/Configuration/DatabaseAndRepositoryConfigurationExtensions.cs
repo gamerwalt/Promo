@@ -75,6 +75,7 @@ namespace hrvster.Extensions.Configuration
 
 		public static IServiceCollection AddMatchGameRepositories(this IServiceCollection services)
 			=> services.AddTransient<IMatchGamesRepository, MatchGamesRepository>()
+				.AddTransient<IMatchGameRulesRepository, MatchGameRulesRepository>()
 				.AddTransient<IMatchImagesRepository, MatchImagesRepository>()
 				.AddTransient<IMatchPrizesRepository, MatchPrizesRepository>()
 				.AddTransient<IMatchBoardsRepository, MatchBoardsRepository>()

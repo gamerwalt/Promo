@@ -176,6 +176,7 @@ namespace hrvster.Web.Controllers
 			var matchGameTask = _matchGamesService.GetMatchGameAsync(matchGameUid, cancellationToken);
 			var campaignsTask = _mediator.Send(new GetAllCampaignsForAccount(_hrvsterUser.UserUid));
 			var imagesTask = _matchImageService.GetForMatchGameAsync(matchGameUid, cancellationToken);
+			//var matchRulesTask = _matchRulesService
 
 			var tasks = new List<Task>();
 			tasks.Add(matchGameTask);

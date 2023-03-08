@@ -17,6 +17,7 @@ namespace hrvster.Infrastructure.Tests.Common
 		public IPlansRepository PlansRepository { get; private set; }
 		public IAccountSubscriptionsRepository AccountSubscriptionsRepository { get; private set; }
 		public IMatchGamesRepository MatchGameRepository { get; private set; }
+		public IMatchGameRulesRepository MatchGameRulesRepository { get; private set; }
 		public IMatchPrizesRepository MatchPrizesRepository { get; private set; }
 		public IMatchImagesRepository MatchImageRepository { get; private set; }
 		public IMatchBoardsRepository MatchBoardsRepository { get; private set; }
@@ -62,6 +63,7 @@ namespace hrvster.Infrastructure.Tests.Common
 			PlansRepository = ServiceProvider.GetService<IPlansRepository>();
 			AccountsRepository = ServiceProvider.GetService<IAccountsRepository>();
 			MatchGameRepository = ServiceProvider.GetService<IMatchGamesRepository>();
+			MatchGameRulesRepository = ServiceProvider.GetService<IMatchGameRulesRepository>();
 			MatchPrizesRepository = ServiceProvider.GetService<IMatchPrizesRepository>();
 			MatchImageRepository = ServiceProvider.GetService<IMatchImagesRepository>();
 			MatchBoardsRepository = ServiceProvider.GetService<IMatchBoardsRepository>();

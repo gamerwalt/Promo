@@ -84,15 +84,15 @@
 				<li class="nav-item">
 					<a class="nav-link text-active-primary py-5 me-6"
 					   data-bs-toggle="tab"
-					   href="#prizes">
-						Prizes
+					   href="#rules">
+						Rules/Hashtags/Tweets
 					</a>
 				</li>
 				<li class="nav-item">
 					<a class="nav-link text-active-primary py-5 me-6"
 					   data-bs-toggle="tab"
-					   href="#rules">
-						Rules/Hashtags/Tweets
+					   href="#prizes">
+						Prizes
 					</a>
 				</li>
 				<li class="nav-item">
@@ -200,7 +200,7 @@
 					</div>
 				</form>
 			</div>
-			<div class="tab-pane fade active" id="images" role="tabpanel">
+			<div class="tab-pane fade" id="images" role="tabpanel">
 				<a class="btn btn-primary mb-4"
 				   asp-controller="MatchImages"
 				   asp-action="Create"
@@ -247,6 +247,25 @@
 									</td>
 								</tr>
 							}
+						</tbody>
+					</table>
+				</div>
+			</div>
+			<div class="tab-pane fade" id="rules" role="tabpanel">
+				<div class="table-responsive">
+					<table class="table table-striped">
+						<thead>
+							<tr class="fw-semibold fs-6 text-gray-800 border-bottom-2 border-gray-200">
+								<th>Watch Value</th>
+								<th>Tweet</th>
+								<th>Active</th>
+								<th>Must Be Following?</th>
+								<th>Notify Winners?</th>
+								<th>Actions</th>
+							</tr>
+						</thead>
+						<tbody>
+							
 						</tbody>
 					</table>
 				</div>
