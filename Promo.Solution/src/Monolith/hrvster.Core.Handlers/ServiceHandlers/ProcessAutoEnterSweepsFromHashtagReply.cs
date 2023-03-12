@@ -1,4 +1,5 @@
-﻿using hrvster.Core.Requests.ServiceRequests;
+﻿using hrvster.ApplicationServices.Sweepstakes;
+using hrvster.Core.Requests.ServiceRequests;
 using hrvster.Core.Requests.ServiceRequests.Notifications;
 using hrvster.Infrastructure;
 using hrvster.Infrastructure.Accounts;
@@ -6,6 +7,7 @@ using hrvster.Infrastructure.Harvester;
 using hrvster.Models;
 using hrvster.Models.Profiles;
 using MediatR;
+using MediatR.Pipeline;
 using Microsoft.Extensions.Logging;
 using Org.BouncyCastle.Asn1.X509.Qualified;
 using System;
@@ -24,6 +26,10 @@ namespace hrvster.Core.Handlers.ServiceHandlers
 		private readonly TwitterAccount _twitterAccount;
 		private readonly IMediator _mediator;
 		private readonly IIncomingTweetsRepository _incomingTweetsRepository;
+		private readonly ISweepstakesService _sweepstakeService;
+		private readonly ISweepNotificationRepository _sweepNotificationRepository;
+		private readonly IMailRepository _mailRepository;
+		private readonly IAccountsRepository _accountsRepository;
 
 		private TwitterClient _twitterClient;
 
@@ -33,7 +39,11 @@ namespace hrvster.Core.Handlers.ServiceHandlers
 			IProfilesRepository profilesRepository,
 			TwitterAccount twitterAccount,
 			IMediator mediator,
-			IIncomingTweetsRepository incomingTweetsRepository)
+			IIncomingTweetsRepository incomingTweetsRepository,
+			ISweepstakesService sweepstakesService,
+			ISweepNotificationRepository sweepNotificationRepository,
+			IMailRepository mailRepository,
+			IAccountsRepository accountsRepository)
 		{
 			_logger = loggerFactory.CreateLogger<ProcessAutoEnterSweepsFromHashtagReply>();
 			_sweepsEntriesRepository = sweepsEntriesRepository;
@@ -41,6 +51,10 @@ namespace hrvster.Core.Handlers.ServiceHandlers
 			_twitterAccount = twitterAccount;
 			_mediator = mediator;
 			_incomingTweetsRepository = incomingTweetsRepository;
+			_sweepstakeService = sweepstakesService;
+			_sweepNotificationRepository = sweepNotificationRepository;
+			_mailRepository = mailRepository;
+			_accountsRepository = accountsRepository;
 		}
 
 		protected override async Task Handle(ProcessAutoEnterSweepsFromHashtagReplyRequest request, CancellationToken cancellationToken)
@@ -49,25 +63,68 @@ namespace hrvster.Core.Handlers.ServiceHandlers
 
 			if (CanEnterSweepstakes(request))
 			{
-				_logger.LogInformation("User can enter sweeps with tweet uid {tweetGuid}",
+				if(!await _sweepstakeService.IsMaxedOut(request.Rule.Sweep, cancellationToken))
+				{
+					_logger.LogInformation("User can enter sweeps with tweet uid {tweetGuid}",
 					request.IncomingTweet.IncomingTweetUid);
 
-				if (await IsFollowing(profile, request))
-				{
-					await EnterSweepstakesAsync(request);
+					if (await IsFollowing(profile, request))
+					{
+						await EnterSweepstakesAsync(request);
+					}
+					else
+					{
+						_logger.LogInformation("The user {screenName} is not following Profile {accountScreenName}",
+							request.Tweet.CreatedBy.ScreenName,
+							profile.ScreenName);
+
+						await _mediator.Send(new NotifyUserOfNotFollowingProfileRequest(
+							request.Tweet,
+							profile,
+							request.IncomingTweet));
+					}
 				}
 				else
 				{
-					_logger.LogInformation("The user {screenName} is not following Profile {accountScreenName}",
-						request.Tweet.CreatedBy.ScreenName,
-						profile.ScreenName);
+					_logger.LogWarning("Sweepstake {sweepName} with uid {sweepUid} is already maxed out.",
+						request.Rule.Sweep.Name,
+						request.Rule.Sweep.SweepUid);
 
-					await _mediator.Send(new NotifyUserOfNotFollowingProfileRequest(
-						request.Tweet, 
-						profile, 
-						request.IncomingTweet));
+					var sweepNotification = await _sweepNotificationRepository.GetSweepNotificationAsync(request.Rule.Sweep.SweepId, cancellationToken);
+
+					var account = await _accountsRepository.GetAsync(request.Rule.Sweep.Account.AccountUid);
+
+					//notify main account user with this information.
+					//if we have notified before, then don't notify
+					if (sweepNotification == null || !sweepNotification.MaxEntries)
+					{
+						await _mailRepository.CreateAsync(CreateMaxEntryEmail(request.Rule.Sweep, account));
+
+						await _sweepNotificationRepository.ToggleMaxEntriesAsync(
+							request.Rule.Sweep.SweepId, 
+							cancellationToken);
+					}
 				}
 			}
+		}
+
+		private Models.Email CreateMaxEntryEmail(Sweep sweep, Models.Account account)
+		{
+			return new Models.Email
+			{
+				Template = EmailTemplate.SweepstakeMaxEntries,
+				EmailAddress = account.EmailAddress,
+				EmailUid = Guid.NewGuid(),
+				Status = EmailStatus.New,
+				Parameters = new System.Collections.Generic.Dictionary<string, string>
+				{
+					{EmailParameters.SweepstakeName, sweep.Name},
+					{EmailParameters.StartDate, sweep.StartDate.ToString("f")},
+					{EmailParameters.EndDate, sweep.EndDate.ToString("f")},
+					{EmailParameters.Email, account.EmailAddress },
+					{EmailParameters.EmailAddress, account.EmailAddress },
+				}
+			};
 		}
 
 		private async Task<bool> IsFollowing(Profile profile, ProcessAutoEnterSweepsFromHashtagReplyRequest request)

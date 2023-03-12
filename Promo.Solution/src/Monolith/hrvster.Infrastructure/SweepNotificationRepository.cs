@@ -17,6 +17,7 @@ namespace hrvster.Infrastructure
 		Task<SweepNotification> GetSweepNotificationAsync(int sweepId, CancellationToken cancellationToken);
 		Task ToggleDrawAttemptedAsync(int sweepId, CancellationToken cancellationToken);
 		Task ToggleDrawHappenedAsync(int sweepId, CancellationToken cancellationToken);
+		Task ToggleMaxEntriesAsync(int sweepId, CancellationToken cancellationToken);
 		Task ToggleNotEnoughUniqueEntrantsAsync(int sweepId, CancellationToken cancellationToken);
 		Task ToggleSweepsGoingLiveAsync(int sweepId, CancellationToken cancellationToken);
 		Task ToggleSweepsLiveAsync(int sweepId, CancellationToken cancellationToken);
@@ -65,7 +66,8 @@ namespace hrvster.Infrastructure
 				SweepsLive = reader.GetBoolean("sweeps_live"),
 				DrawAttemptHappened = reader.GetBoolean("draw_attempted"),
 				DrawHappened = reader.GetBoolean("draw_happened"),
-				NotEnoughUniqueEntrants = reader.GetBoolean("not_enough_unique_entrants")
+				NotEnoughUniqueEntrants = reader.GetBoolean("not_enough_unique_entrants"),
+				MaxEntries = reader.GetBoolean("max_entries")
 			};
 		}
 
@@ -122,6 +124,18 @@ namespace hrvster.Infrastructure
 			using var conn = new MySqlConnection(_database.GetConnectionString());
 			var command = conn.CreateCommand();
 			command.CommandText = "sweep_notification_sweep_live_upsert";
+			command.CommandType = CommandType.StoredProcedure;
+			command.AddParameter("sweepId", sweepId);
+
+			await conn.OpenAsync();
+			await command.ExecuteNonQueryAsync();
+		}
+
+		public async Task ToggleMaxEntriesAsync(int sweepId, CancellationToken cancellationToken)
+		{
+			using var conn = new MySqlConnection(_database.GetConnectionString());
+			var command = conn.CreateCommand();
+			command.CommandText = "sweep_notification_max_entries_upsert";
 			command.CommandType = CommandType.StoredProcedure;
 			command.AddParameter("sweepId", sweepId);
 

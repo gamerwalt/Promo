@@ -91,7 +91,8 @@ namespace TestUtilities
 				"DELETE FROM sweep_entry WHERE sweep_entry_id > 0;" +
 				"DELETE FROM sweep_draw_rules WHERE sweep_draw_rule_id > 0;" +
 				"DELETE FROM account_subscriptions WHERE subscription_id > 0;" +
-				"DELETE FROM scheduled_sweep_rule_tweets WHERE scheduled_id > 0;";
+				"DELETE FROM scheduled_sweep_rule_tweets WHERE scheduled_id > 0;" +
+				"DELETE FROM sweep_entry WHERE sweep_entry_id > 0;";
 			command.CommandType = CommandType.Text;
 			conn.Open();
 			command.ExecuteNonQuery();

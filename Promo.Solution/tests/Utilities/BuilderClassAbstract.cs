@@ -3,6 +3,7 @@ using hrvster.Models;
 using hrvster.Models.Profiles;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using TestUtilities.Builders.Resources;
 using TestUtilities.Data;
 
@@ -158,5 +159,5 @@ namespace TestUtilities
 
 			return testSweepEntry.Generate(30);
         }
-    }
+	}
 }

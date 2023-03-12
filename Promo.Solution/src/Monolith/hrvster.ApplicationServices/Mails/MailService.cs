@@ -54,6 +54,10 @@ namespace hrvster.ApplicationServices.Mails
 							await SendDrawCompletedEmailAsync(email);
 							break;
 
+						case EmailTemplate.SweepstakeMaxEntries:
+							await SendSweepstakeMaxEntriesAsync(email);
+							break;
+
 						case EmailTemplate.SweepLive:
 							if (await SendSweepsLiveAsync(new SweepLiveRequest
 							{
@@ -211,6 +215,37 @@ namespace hrvster.ApplicationServices.Mails
 			}
 
 			_logger.LogInformation($"{nameof(ProcessAnyUnsentEmails)} processing completed.");
+		}
+
+		private async Task SendSweepstakeMaxEntriesAsync(Email email)
+		{
+			var request = new SweepstakeMaxEntriesRequest
+			{
+				EmailTemplate = EmailTemplate.SweepstakeMaxEntries,
+				EmailAddress = email.EmailAddress,
+				SweepstakeName = email.Parameters[EmailParameters.SweepstakeName],
+				StartDate = email.Parameters[EmailParameters.StartDate],
+				EndDate = email.Parameters[EmailParameters.EndDate]
+			};
+
+			var mailText = GetMailText(request.EmailTemplate);
+			var type = request.GetType();
+
+			foreach (var f in type.GetProperties(BindingFlags.Instance | BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public))
+			{
+				mailText = mailText.Replace($"[{f.Name}]", f.GetValue(request).ToString());
+			}
+
+			await SendEmailAsync(
+				new MailRequest
+				{
+					ToEmailAddress = request.EmailAddress,
+					Body = mailText,
+					Subject = $"{request.SweepstakeName}'s  has reached the max entries."
+				}
+			);
+
+			await _mailRepository.UpdateAsSentAsync(email);
 		}
 
 		private async Task SendDrawCompletedEmailAsync(Email email)

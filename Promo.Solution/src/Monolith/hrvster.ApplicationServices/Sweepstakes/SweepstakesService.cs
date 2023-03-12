@@ -1,5 +1,7 @@
-﻿using hrvster.Core.Requests.ServiceRequests;
+﻿using hrvster.ApplicationServices.Subscription;
+using hrvster.Core.Requests.ServiceRequests;
 using hrvster.Core.Requests.Sweepstakes;
+using hrvster.Infrastructure;
 using hrvster.Models;
 using hrvster.Models.Extensions;
 using hrvster.Models.Sweepstakes;
@@ -19,6 +21,7 @@ namespace hrvster.ApplicationServices.Sweepstakes
 		Task<SweepProperty> GetSweepDrawPropertiesAndRules(Guid sweepUid, CancellationToken cancellationToken);
 		Task<IEnumerable<Sweep>> GetSweepsGoingLiveInHourAsync(int hour, CancellationToken cancellationToken);
 		Task<SweepNotification> GetSweepsNotificationAsync(Sweep sweep, CancellationToken cancellationToken);
+		Task<bool> IsMaxedOut(Sweep sweep, CancellationToken cancellationToken);
 		Task UpdateSweepNotificationAsync(Sweep sweep, SweepNotificationType notificationType, CancellationToken cancellationToken);
 	}
 
@@ -26,11 +29,22 @@ namespace hrvster.ApplicationServices.Sweepstakes
 	{
 		private readonly ILogger<SweepstakesService> _logger;
 		private readonly IMediator _mediator;
+		private readonly ISweepsRepository _sweepRepository;
+		private readonly IAccountSubscriptionService _accountSubscriptionService;
+		private readonly ISweepsEntriesRepository _sweepsEntriesRepository;
 
-		public SweepstakesService(ILoggerFactory loggerFactory, IMediator mediator)
+		public SweepstakesService(
+			ILoggerFactory loggerFactory, 
+			IMediator mediator,
+			ISweepsRepository sweepsRepository,
+			IAccountSubscriptionService accountSubscriptionService,
+			ISweepsEntriesRepository sweepsEntriesRepository)
 		{
 			_logger = loggerFactory.CreateLogger<SweepstakesService>();
 			_mediator = mediator;
+			_sweepRepository = sweepsRepository;
+			_accountSubscriptionService = accountSubscriptionService;
+			_sweepsEntriesRepository = sweepsEntriesRepository;
 		}
 
 		public async Task<IEnumerable<Sweep>> GetLiveSweepsAsync(CancellationToken cancellationToken)
@@ -79,6 +93,42 @@ namespace hrvster.ApplicationServices.Sweepstakes
 				sweep.Name);
 
 			return await _mediator.Send(new GetSweepNotificationRequest(sweep));
+		}
+
+		public async Task<bool> IsMaxedOut(Sweep sweep, CancellationToken cancellationToken)
+		{
+			if (cancellationToken.IsCancellationRequested) return false;
+
+			if(sweep.Account == null)
+			{
+				sweep = await _sweepRepository.GetAsync(sweep.SweepUid);
+			}
+
+			if(sweep.Account == null)
+			{
+				_logger.LogWarning("Could not find out if the Sweepstake with name {sweepName} and uid {sweepUid} is not maxed out. Because we could not retrieve the account.",
+					sweep.Name,
+					sweep.SweepUid);
+
+				return true;
+			}
+
+			var accountSubscription = await _accountSubscriptionService
+				.GetAccountSubscriptionAsync(sweep.Account.AccountUid);
+
+			if (accountSubscription == null)
+			{
+				_logger.LogWarning("Could not find out if the Sweepstake with name {sweepName} and uid {sweepUid} is not maxed out. Because we could not retrieve the account subscription.",
+					sweep.Name,
+					sweep.SweepUid);
+
+				return true;
+			}
+
+			//get total entries
+			var totalEntries = await _sweepsEntriesRepository.GetSweepEntriesAsync(sweep.SweepUid);
+
+			return totalEntries.Count() >= accountSubscription.Plan.SweepstakesMaximumEntries;
 		}
 
 		public async Task UpdateSweepNotificationAsync(

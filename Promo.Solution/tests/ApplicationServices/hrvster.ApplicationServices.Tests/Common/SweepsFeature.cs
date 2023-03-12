@@ -1,5 +1,7 @@
-﻿using hrvster.ApplicationServices.Sweepstakes;
+﻿using hrvster.ApplicationServices.Subscription;
+using hrvster.ApplicationServices.Sweepstakes;
 using hrvster.Infrastructure;
+using hrvster.Infrastructure.Subscriptions;
 using hrvster.Models;
 using MediatR;
 using Microsoft.Extensions.Configuration;
@@ -14,9 +16,16 @@ namespace hrvster.ApplicationServices.Tests.Common
 		public IMediator Mediator { get; private set; }
 		public IConfiguration Configuration { get; private set; }
 		public ISweepsRepository SweepsRepository { get; private set; }
+		public ISweepsEntriesRepository SweepEntryRepository { get; private set; }
+		public ISweepRulesRepository SweepRulesRepository { get; private set; }
+
 		public ISweepstakesService SweepstakesService { get; private set; }
 		public IAccountsRepository AccountRepository { get; private set; }
 		public ICampaignRepository CampaignRepository { get; private set; }
+		public IPlansRepository PlansRepository { get; private set; }
+
+		public IAccountSubscriptionService AccountSubscriptionService { get; private set; }
+		public ISubscriptionService SubscriptionService { get; private set; }
 
 		public SweepsFeature()
 		{
@@ -48,10 +57,16 @@ namespace hrvster.ApplicationServices.Tests.Common
 		{
 			Mediator = ServiceProvider.GetService<IMediator>();
 			SweepsRepository = ServiceProvider.GetService<ISweepsRepository>();
+			SweepEntryRepository = ServiceProvider.GetService<ISweepsEntriesRepository>();
+			SweepRulesRepository = ServiceProvider.GetService<ISweepRulesRepository>();
+
 			AccountRepository = ServiceProvider.GetService<IAccountsRepository>();
 			CampaignRepository = ServiceProvider.GetService<ICampaignRepository>();
+			PlansRepository = ServiceProvider.GetService<IPlansRepository>();
 
 			SweepstakesService = ServiceProvider.GetService<ISweepstakesService>();
+			AccountSubscriptionService = ServiceProvider.GetService<IAccountSubscriptionService>();
+			SubscriptionService = ServiceProvider.GetService<ISubscriptionService>();
 
 
 			var hrvsterUser = ServiceProvider.GetService<HrvsterUser>();
