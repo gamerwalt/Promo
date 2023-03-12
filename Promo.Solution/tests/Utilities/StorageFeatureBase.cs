@@ -99,8 +99,9 @@ namespace TestUtilities
                 "DELETE FROM match_boards WHERE board_id > 0;" +
                 "DELETE FROM match_tiles WHERE tile_id > 0;" +
                 "DELETE FROM match_images WHERE image_id > 0;" +
-                "DELETE FROM match_prizes WHERE prize_id > 0;";
-            command.CommandType = CommandType.Text;
+                "DELETE FROM match_prizes WHERE prize_id > 0;" +
+				"DELETE FROM sweep_entry WHERE sweep_entry_id > 0;";
+			command.CommandType = CommandType.Text;
             conn.Open();
             command.ExecuteNonQuery();
 

@@ -238,6 +238,24 @@ namespace hrvster.Infrastructure.Tests
 			sweepNotification.NotEnoughUniqueEntrants.Should().Be(true);
 		}
 
+		[Fact]
+		public async Task If_We_Toggle_Max_Entries_It_Toggles_It_From_True_To_False_And_Vice_Versa()
+		{
+			_feature.GivenACleanSlate();
+
+			var sweep1 = await SetupSweepAsync();
+
+			await _feature.SweepNotificationRepository.ToggleMaxEntriesAsync(sweep1.SweepId, default);
+			var sweepNotification = await _feature.SweepNotificationRepository.GetSweepNotificationAsync(sweep1.SweepId, default);
+
+			sweepNotification.MaxEntries.Should().BeTrue();
+
+			await _feature.SweepNotificationRepository.ToggleMaxEntriesAsync(sweep1.SweepId, default);
+			sweepNotification = await _feature.SweepNotificationRepository.GetSweepNotificationAsync(sweep1.SweepId, default);
+
+			sweepNotification.MaxEntries.Should().BeFalse();
+		}
+
 		private async Task<Sweep> SetupSweepAsync()
 		{
 			Account account = await CreateNewAccountAsync();

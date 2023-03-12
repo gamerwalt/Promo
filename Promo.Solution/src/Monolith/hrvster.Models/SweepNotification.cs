@@ -12,5 +12,6 @@ namespace hrvster.Models
 		public bool SweepsLive { get; set; }
 		public bool DrawHappened { get; set; }
 		public bool DrawAttemptHappened { get; set; }
+		public bool MaxEntries { get; set; }
 	}
 }

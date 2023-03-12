@@ -47,7 +47,8 @@
 		SweepsGoingLiveSoon,
 		SweepsGoingLiveSoonMissingProperty,
 		SweepLive,
-		DrawCompleted
+		DrawCompleted,
+		SweepstakeMaxEntries
 	}
 
 	public enum CampaignTypeCode
@@ -144,5 +145,12 @@
 		Aborted,
 		Success,
 		Failed
+	}
+
+	public enum SubscriptionPlans
+	{
+		Basic,
+		Starter,
+		Advanced
 	}
 }

@@ -54,6 +54,9 @@
     <None Update="Templates\SweepLive.html">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="Templates\SweepstakeMaxEntries.html">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="Templates\SweepsGoingLiveSoonMissingProperty.html">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
