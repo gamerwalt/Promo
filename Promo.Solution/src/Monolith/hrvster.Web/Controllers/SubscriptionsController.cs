@@ -1,4 +1,5 @@
-﻿using hrvster.ApplicationServices.Subscription;
+﻿using hrvster.ApplicationServices.Accounts;
+using hrvster.ApplicationServices.Subscription;
 using hrvster.Core.Authentication;
 using hrvster.Core.Requests.WebRequests.Subscriptions;
 using hrvster.Models;
@@ -20,6 +21,7 @@ namespace hrvster.Web.Controllers
 		private readonly ISubscriptionService _subscriptionService;
 		private readonly IToastNotification _notificationService;
 		private readonly ISessionManager _sessionManager;
+		private readonly IAccountsService _accountsService;
 
 		private HrvsterUser _hrvsterUser;
 
@@ -28,13 +30,15 @@ namespace hrvster.Web.Controllers
 			IMediator mediator,
 			ISubscriptionService subscriptionService,
 			IToastNotification notificationService,
-			ISessionManager sessionManager)
+			ISessionManager sessionManager,
+			IAccountsService accountsService)
 		{
 			_logger = loggerFactory.CreateLogger<SubscriptionsController>();
 			_mediator = mediator;
 			_subscriptionService = subscriptionService;
 			_notificationService = notificationService;
 			_sessionManager = sessionManager;
+			_accountsService = accountsService;
 		}
 
 		public async Task<IActionResult> Index(string subscriptionStatus)
@@ -105,7 +109,9 @@ namespace hrvster.Web.Controllers
 				_hrvsterUser.EmailAddress,
 				plan.FlutterwavePlan.ExternalMonthlyPaymentLink);
 
-			return Redirect(plan.FlutterwavePlan.ExternalMonthlyPaymentLink.ToString());
+			var account = await _accountsService.GetAccountByUidAsync(_hrvsterUser.UserUid);
+
+			return Redirect($"{plan.FlutterwavePlan.ExternalMonthlyPaymentLink}?email={_hrvsterUser.EmailAddress}&firstname={account.FirstName}&lastname={account.LastName}");
 		}
 
 		[HttpGet]

@@ -11,6 +11,8 @@ namespace hrvster.Infrastructure.Subscriptions
 	public interface IAccountSubscriptionsRepository
 	{
 		Task CreateAsync(AccountSubscription model);
+		Task CreateHistoryAsync(AccountSubscription accountSubscription);
+		Task DeleteSubscriptionAsync(AccountSubscription accountSubscription);
 		AccountSubscription GetAccountSubscription(Guid accountUid);
 		Task<AccountSubscription> GetAccountSubscriptionAsync(Guid accountUid);
 		Task<AccountSubscription> GetAccountSubscriptionByEmailAsync(string email);
@@ -44,6 +46,41 @@ namespace hrvster.Infrastructure.Subscriptions
 				.AddParameter("endDateUtc", model.EndDateUtc)
 				.AddParameter("isDiscounted", model.IsDiscounted)
 				.AddParameter("discountedBy", model.DiscountedBy);
+
+			await conn.OpenAsync();
+			await command.ExecuteNonQueryAsync();
+		}
+
+		public async Task CreateHistoryAsync(AccountSubscription model)
+		{
+			using var conn = new MySqlConnection(_database.GetConnectionString());
+			var command = conn.CreateCommand();
+			command.CommandText = "account_subscription_create_history";
+			command.CommandType = CommandType.StoredProcedure;
+			command
+				.AddParameter("subscriptionUid", model.SubscriptionUid)
+				.AddParameter("accountUid", model.Account.AccountUid)
+				.AddParameter("planId", model.Plan.PlanId)
+				.AddParameter("subscriptionStatus", model.SubscriptionStatus.ToString())
+				.AddParameter("startDate", model.StartDate)
+				.AddParameter("startDateUtc", model.StartDateUtc)
+				.AddParameter("endDate", model.EndDate)
+				.AddParameter("endDateUtc", model.EndDateUtc)
+				.AddParameter("isDiscounted", model.IsDiscounted)
+				.AddParameter("discountedBy", model.DiscountedBy);
+
+			await conn.OpenAsync();
+			await command.ExecuteNonQueryAsync();
+		}
+
+		public async Task DeleteSubscriptionAsync(AccountSubscription model)
+		{
+			using var conn = new MySqlConnection(_database.GetConnectionString());
+			var command = conn.CreateCommand();
+			command.CommandText = "account_subscription_delete";
+			command.CommandType = CommandType.StoredProcedure;
+			command
+				.AddParameter("subscriptionUid", model.SubscriptionUid);
 
 			await conn.OpenAsync();
 			await command.ExecuteNonQueryAsync();

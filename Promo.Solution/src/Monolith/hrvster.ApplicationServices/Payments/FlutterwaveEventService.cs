@@ -87,7 +87,12 @@ namespace hrvster.ApplicationServices.Payments
 
 						await _flutterwaveAccountSubscriptionRepository.CreateAsync(clientSubscription, cancellationToken);
 
-						if (await _cardService.ProcessAsync(eventUid, flutterwaveCardTransaction, cancellationToken))
+						var cardTransactionProcessed = await _cardService.ProcessAsync(
+							eventUid, 
+							flutterwaveCardTransaction, 
+							cancellationToken);
+
+						if (cardTransactionProcessed)
 							await _flutterwaveEventRepository.UpdateEventStatusAsync(
 								eventUid, FlutterwaveEventStatus.Success, cancellationToken);
 						else
