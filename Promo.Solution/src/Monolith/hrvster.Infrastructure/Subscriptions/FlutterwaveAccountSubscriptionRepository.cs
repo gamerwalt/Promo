@@ -26,7 +26,7 @@ namespace hrvster.Infrastructure.Subscriptions
 		{
 			using var conn = new MySqlConnection(_database.GetConnectionString());
 			var command = conn.CreateCommand();
-			command.CommandText = "account_subscription_create";
+			command.CommandText = "flutterwave_account_subscription_create";
 			command.CommandType = CommandType.StoredProcedure;
 			command
 				.AddParameter("Uid", model.Uid)

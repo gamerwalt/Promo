@@ -51,6 +51,18 @@ namespace hrvster.Core.Handlers
 				request.UserUId,
 				request.Plan.PlanName);
 
+			//Todo: check if we have one already, if we do, add to history, then update with most recent information
+
+			var accountSubscription = await _repository.GetAccountSubscriptionAsync(request.UserUId);
+
+			if(accountSubscription != null)
+			{
+				//add to history
+				await _repository.CreateHistoryAsync(accountSubscription);
+				//update current
+				await _repository.DeleteSubscriptionAsync(accountSubscription);
+			}
+			
 			await _repository.CreateAsync(new AccountSubscription
 			{
 				Account = new Models.Account
@@ -66,6 +78,7 @@ namespace hrvster.Core.Handlers
 				SubscriptionStatus = Models.SubscriptionStatus.PendingPayment,
 				SubscriptionUid = subscriptionUid
 			});
+						
 
 			_logger.LogInformation("Account subscription created for account with uid {accountUid}",
 				request.UserUId);
