@@ -168,14 +168,13 @@ namespace hrvster.Web.Controllers
 		}
 
 		[HttpGet]
-		[Route("/MatchGames/{matchGameUid:Guid}/View")]
-		public async Task<IActionResult> View(Guid matchGameUid, CancellationToken cancellationToken)
+		public async Task<IActionResult> View(Guid Uid, CancellationToken cancellationToken)
 		{
 			_hrvsterUser = _sessionManager.GetUserInformation();
 
-			var matchGameTask = _matchGamesService.GetMatchGameAsync(matchGameUid, cancellationToken);
+			var matchGameTask = _matchGamesService.GetMatchGameAsync(Uid, cancellationToken);
 			var campaignsTask = _mediator.Send(new GetAllCampaignsForAccount(_hrvsterUser.UserUid));
-			var imagesTask = _matchImageService.GetForMatchGameAsync(matchGameUid, cancellationToken);
+			var imagesTask = _matchImageService.GetForMatchGameAsync(Uid, cancellationToken);
 			//var matchRulesTask = _matchRulesService
 
 			var tasks = new List<Task>();

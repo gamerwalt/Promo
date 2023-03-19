@@ -201,7 +201,7 @@ namespace hrvster.Web.Controllers
 			{
 				_notificationService.AddErrorToastMessage("Unable to find Match Game.");
 
-				return RedirectToAction(actionName ?? "View", controllerName ?? "MatchGames", new { matchGameUid });
+				return RedirectToAction(actionName ?? "View", controllerName ?? "MatchGames", new { Uid = matchGameUid });
 			}
 
 			var matchImage = await _matchImageService.GetImageAsync(matchImageUid, cancellationToken);
@@ -209,7 +209,7 @@ namespace hrvster.Web.Controllers
 			{
 				_notificationService.AddErrorToastMessage("Unable to locate image.");
 
-				return RedirectToAction(actionName ?? "View", controllerName ?? "MatchGames", new { matchGameUid });
+				return RedirectToAction(actionName ?? "View", controllerName ?? "MatchGames", new { Uid = matchGameUid });
 			}
 
 			var model = new UpdateMatchImage
@@ -238,7 +238,7 @@ namespace hrvster.Web.Controllers
 			{
 				_notificationService.AddErrorToastMessage("Unable to find Match Game.");
 
-				return RedirectToAction(actionName ?? "View", controllerName ?? "MatchGames", new { matchGameUid });
+				return RedirectToAction(actionName ?? "View", controllerName ?? "MatchGames", new { Uid = matchGameUid });
 			}
 
 			var matchImage = await _matchImageService.GetImageAsync(matchImageUid, cancellationToken);
@@ -246,7 +246,7 @@ namespace hrvster.Web.Controllers
 			{
 				_notificationService.AddErrorToastMessage("Unable to locate image.");
 
-				return RedirectToAction(actionName ?? "View", controllerName ?? "MatchGames", new { matchGameUid });
+				return RedirectToAction(actionName ?? "View", controllerName ?? "MatchGames", new { Uid = matchGameUid });
 			}
 
 			if(ModelState.IsValid)
@@ -255,12 +255,12 @@ namespace hrvster.Web.Controllers
 
 				_notificationService.AddSuccessToastMessage("Image updated successfully.");
 
-				return RedirectToAction(actionName ?? "View", controllerName ?? "MatchGames", new { matchGameUid });
+				return RedirectToAction(actionName ?? "View", controllerName ?? "MatchGames", new { Uid = matchGameUid });
 			}
 
 			_notificationService.AddErrorToastMessage(ModelState.BuildMessageFromErrors());
 
-			return RedirectToAction(actionName ?? "View", controllerName ?? "MatchGames", new { matchGameUid });
+			return RedirectToAction(actionName ?? "View", controllerName ?? "MatchGames", new { Uid = matchGameUid });
 		}
 
 		[HttpGet]
@@ -279,7 +279,7 @@ namespace hrvster.Web.Controllers
 			{
 				_notificationService.AddErrorToastMessage("Unable to find Match Game.");
 
-				return RedirectToAction(actionName ?? "View", controllerName ?? "MatchGames", new { matchGameUid });
+				return RedirectToAction(actionName ?? "View", controllerName ?? "MatchGames", new { Uid = matchGameUid });
 			}
 
 			var matchImage = await _matchImageService.GetImageAsync(matchImageUid, cancellationToken);
@@ -287,7 +287,7 @@ namespace hrvster.Web.Controllers
 			{
 				_notificationService.AddErrorToastMessage("Unable to locate image.");
 
-				return RedirectToAction(actionName ?? "View", controllerName ?? "MatchGames", new { matchGameUid });
+				return RedirectToAction(actionName ?? "View", controllerName ?? "MatchGames", new { Uid = matchGameUid });
 			}
 
 			var model = new DeleteMatchImage
@@ -316,7 +316,7 @@ namespace hrvster.Web.Controllers
 			{
 				_notificationService.AddErrorToastMessage("Unable to find Match Game.");
 
-				return RedirectToAction("View", "MatchGames", new { matchGameUid });
+				return RedirectToAction("View", "MatchGames", new { Uid = matchGameUid });
 			}
 
 			var matchImage = await _matchImageService.GetImageAsync(matchImageUid, cancellationToken);
@@ -324,7 +324,7 @@ namespace hrvster.Web.Controllers
 			{
 				_notificationService.AddErrorToastMessage("Unable to locate image.");
 
-				return RedirectToAction("View", "MatchGames", new { matchGameUid });
+				return RedirectToAction("View", "MatchGames", new { Uid = matchGameUid });
 			}
 
 			if (ModelState.IsValid)
@@ -333,12 +333,12 @@ namespace hrvster.Web.Controllers
 
 				_notificationService.AddSuccessToastMessage("Image updated successfully.");
 
-				return RedirectToAction("View", "MatchGames", new { matchGameUid });
+				return RedirectToAction("View", "MatchGames", new { Uid = matchGameUid });
 			}
 
 			_notificationService.AddErrorToastMessage(ModelState.BuildMessageFromErrors());
 
-			return RedirectToAction("View", "MatchGames", new { matchGameUid });
+			return RedirectToAction("View", "MatchGames", new { Uid = matchGameUid });
 		}
 	}
 }

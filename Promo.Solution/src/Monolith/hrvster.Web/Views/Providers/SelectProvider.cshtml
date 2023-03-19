@@ -34,7 +34,11 @@
                 <button type="submit" class="btn btn-md btn-light btn-primary me-3">
                     Create
                 </button>
-                <a class="btn btn-light btn-default" href="javascript:history.go(-1)">Back</a>
+                <a 
+                    asp-action="@Model.ReturnAction"
+                    asp-controller="@Model.ReturnController"
+                    asp-route-Uid="@Model.Uid"
+                    class="btn btn-light btn-default">Back</a>
             </div>
         </div>
     </form>
