@@ -1,0 +1,41 @@
+﻿@model SelectWatchTypeProvider
+@{
+    ViewData["Title"] = "Select Provider To Watch";
+}
+<div class="card card-bordered">
+    <form 
+        asp-controller="Providers" 
+        asp-action="SelectProvider" 
+        asp-route-Uid=@Model.Uid
+        asp-route-actionName=@Model.ReturnAction
+        asp-route-controllerName=@Model.ReturnController
+        class="form-horizontal form-material mx-2">
+        <div class="card-header">
+            <h3 class="card-title">Select a provider to create a new watch type rule</h3>
+        </div>
+        <div class="card-body">
+            <div class="d-flex flex-column flex-lg-row">
+                <div class="flex-lg-row-fluid me-lg-15 order-2 order-lg-1 mb-10 mb-lg-0">
+                    <div class="fv-row mb-6">
+                        <label class="required d-flex align-items-center fs-6 fw-semibold form-label mb-2">
+                            Select a Social Media Provider
+                        </label>
+                        <select asp-for="ProviderCode"
+                                asp-items=@Model.Providers class="form-select form-control-lg">
+                            <option value="0">Please select one</option>
+                        </select>
+                        <span asp-validation-for="ProviderCode"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card-footer">
+            <div class="card-toolbar">
+                <button type="submit" class="btn btn-md btn-light btn-primary me-3">
+                    Create
+                </button>
+                <a class="btn btn-light btn-default" href="javascript:history.go(-1)">Back</a>
+            </div>
+        </div>
+    </form>
+</div>

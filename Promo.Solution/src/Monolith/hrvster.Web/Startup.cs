@@ -86,7 +86,8 @@ namespace hrvster.Web
 				.AddCampaignService()
 				.AddPaymentServices(Configuration)
 				.AddHttpClient()
-				.AddFlutterwaveHttpClient();
+				.AddFlutterwaveHttpClient()
+				.AddProvidersService();
 		}
 
 

@@ -17,5 +17,7 @@
 		public const string WizardSweepUid = "_WizardSweepUid";
 
 		public const string Subscribed = "_Subscribed";
+
+		public const string Uid = "_Uid";
 	}
 }
