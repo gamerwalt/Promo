@@ -2,7 +2,7 @@
 
 namespace hrvster.Games.Match.Models
 {
-	public class MatchGameRule
+	public class MatchGameRule : Rule
 	{
 		public int Id { get; set; }
 		public Guid Uid { get; set; }
@@ -13,6 +13,5 @@ namespace hrvster.Games.Match.Models
 		public bool NotifyWinners { get; set; }
 		public bool ScheduledIndicator { get; set; }
 		public bool ActiveIndicator { get; set; }
-		public long ExternalId { get; set; }
 	}
 }

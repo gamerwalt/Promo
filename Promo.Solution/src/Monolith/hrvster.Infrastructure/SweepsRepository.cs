@@ -194,7 +194,7 @@ namespace hrvster.Infrastructure
 				{
 					WatchValue = reader.GetStringValue("sweep_rule_watch_value"),
 					ActiveInd = reader.GetBoolean("sweep_rule_active_indidcator"),
-					ExternalId = reader.GetLongValue("external_id"),
+					ExternalId = reader.GetStringValue("external_id"),
 					MustBeFollowing = reader.GetBoolean("must_be_following"),
 					NotifyWinners = reader.GetBoolean("notify_winners")
 				},

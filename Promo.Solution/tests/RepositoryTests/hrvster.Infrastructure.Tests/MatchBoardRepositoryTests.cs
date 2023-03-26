@@ -87,6 +87,7 @@ namespace hrvster.Infrastructure.Tests
 		{
 			MatchImageFaker = new Faker<MatchImage>()
 				.RuleFor(m => m.Uid, f => Guid.NewGuid())
+				.RuleFor(m => m.Name, f => f.Random.Word())
 				.RuleFor(m => m.MatchGame, f => matchGame)
 				.RuleFor(m => m.LocationUrl, f => f.Internet.Url());
 		}

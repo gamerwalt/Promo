@@ -14,4 +14,13 @@ namespace hrvster.Models.Extensions
 			return DateTime.UtcNow <= sweep.StartDateUtc;
 		}
 	}
+
+	public static class GameExtensions
+	{
+		public static bool IsActive(this Game game)
+			=> DateTime.UtcNow >= game.StartDateUtc && DateTime.UtcNow <= game.EndDateUtc;
+
+		public static bool WillBeInProgress(this Game game)
+			=> DateTime.UtcNow <= game.StartDateUtc;
+	}
 }

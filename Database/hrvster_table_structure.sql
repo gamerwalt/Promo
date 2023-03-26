@@ -370,6 +370,7 @@ CREATE TABLE `match_boards` (
   `board_id` int unsigned NOT NULL AUTO_INCREMENT,
   `board_uid` varchar(50) NOT NULL,
   `match_game_id` int unsigned NOT NULL,
+  `prize_id` int unsigned NOT NULL,
   `is_winnable` tinyint NOT NULL DEFAULT '0',
   `created_date` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_date` datetime DEFAULT NULL,
@@ -378,6 +379,36 @@ CREATE TABLE `match_boards` (
   UNIQUE KEY `board_uid_UNIQUE` (`board_uid`),
   KEY `match_game_board_idx` (`match_game_id`),
   CONSTRAINT `match_game_board` FOREIGN KEY (`match_game_id`) REFERENCES `match_games` (`match_game_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `match_game_rules`
+--
+
+DROP TABLE IF EXISTS `match_game_rules`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `match_game_rules` (
+  `rule_id` int unsigned NOT NULL AUTO_INCREMENT,
+  `rule_uid` varchar(50) NOT NULL,
+  `match_game_id` int unsigned NOT NULL,
+  `watch_type_id` int unsigned NOT NULL,
+  `watch_value` varchar(500) NOT NULL,
+  `must_be_following` tinyint NOT NULL,
+  `notify_winners` tinyint DEFAULT NULL,
+  `scheduled_ind` tinyint NOT NULL,
+  `active_ind` tinyint NOT NULL,
+  `external_id` varchar(100) DEFAULT NULL,
+  `created_date` datetime NOT NULL,
+  `updated_date` datetime DEFAULT NULL,
+  PRIMARY KEY (`rule_id`),
+  UNIQUE KEY `rule_id_UNIQUE` (`rule_id`),
+  UNIQUE KEY `rule_uid_UNIQUE` (`rule_uid`),
+  KEY `fk_match_game_rules_game_idx` (`match_game_id`),
+  KEY `fk_watch_type_idx` (`watch_type_id`),
+  CONSTRAINT `fk_match_game_rules_game` FOREIGN KEY (`match_game_id`) REFERENCES `match_games` (`match_game_id`),
+  CONSTRAINT `fk_watch_type` FOREIGN KEY (`watch_type_id`) REFERENCES `watch_types` (`watch_type_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -425,6 +456,7 @@ CREATE TABLE `match_images` (
   `image_id` int unsigned NOT NULL AUTO_INCREMENT,
   `image_uid` varchar(50) NOT NULL,
   `match_game_id` int unsigned NOT NULL,
+  `image_name` varchar(1000) NOT NULL,
   `location_url` varchar(500) NOT NULL,
   `created_date` datetime DEFAULT CURRENT_TIMESTAMP,
   `updated_date` datetime DEFAULT NULL,
@@ -433,7 +465,7 @@ CREATE TABLE `match_images` (
   UNIQUE KEY `image_uid_UNIQUE` (`image_uid`),
   KEY `match_game_image_idx` (`match_game_id`),
   CONSTRAINT `match_game_image` FOREIGN KEY (`match_game_id`) REFERENCES `match_games` (`match_game_id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -622,7 +654,7 @@ CREATE TABLE `scheduled_sweep_rule_tweet_images` (
   UNIQUE KEY `scheduled_images_id_UNIQUE` (`scheduled_image_id`),
   KEY `fk_scheduled_sweep_rule_idx` (`scheduled_id`),
   CONSTRAINT `fk_scheduled_sweep_rule` FOREIGN KEY (`scheduled_id`) REFERENCES `scheduled_sweep_rule_tweets` (`scheduled_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=45 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=46 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -648,7 +680,7 @@ CREATE TABLE `scheduled_sweep_rule_tweets` (
   UNIQUE KEY `scheduled_uid_UNIQUE` (`scheduled_uid`),
   KEY `scheduled_sweep_rule_tweets_ibfk_1` (`rule_id`),
   CONSTRAINT `scheduled_sweep_rule_tweets_ibfk_1` FOREIGN KEY (`rule_id`) REFERENCES `sweep_rules` (`rule_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=30 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=31 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -702,7 +734,7 @@ CREATE TABLE `sweep` (
   KEY `fk_campaign_sweeps_idx` (`campaign_id`),
   CONSTRAINT `fk_account_sweeps` FOREIGN KEY (`account_id`) REFERENCES `accounts` (`account_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `fk_campaign_sweeps` FOREIGN KEY (`campaign_id`) REFERENCES `campaigns` (`campaign_id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=60 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=61 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -786,8 +818,9 @@ CREATE TABLE `sweep_notifications` (
   `not_enough_unique_entrants` tinyint NOT NULL DEFAULT '0',
   `sweeps_going_live` tinyint NOT NULL DEFAULT '0',
   `sweeps_live` tinyint NOT NULL DEFAULT '0',
-  `draw_attempted` tinyint DEFAULT '0',
+  `draw_attempted` tinyint NOT NULL DEFAULT '0',
   `draw_happened` tinyint NOT NULL DEFAULT '0',
+  `max_entries` tinyint NOT NULL DEFAULT '0',
   `created_date` datetime DEFAULT NULL,
   `updated_date` datetime DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`sweep_notification_id`,`sweep_id`),
@@ -841,7 +874,7 @@ CREATE TABLE `sweep_rules` (
   `notify_winners` tinyint DEFAULT '1',
   `scheduled_ind` bit(1) NOT NULL DEFAULT b'0',
   `active_ind` bit(1) NOT NULL DEFAULT b'0',
-  `external_id` bigint DEFAULT NULL,
+  `external_id` varchar(50) DEFAULT NULL,
   `added_for_tracking` bit(1) DEFAULT b'0',
   `date_added_for_tracking` datetime DEFAULT NULL,
   `created_date` datetime NOT NULL,
@@ -854,7 +887,7 @@ CREATE TABLE `sweep_rules` (
   KEY `sweep_id_rules_idx` (`sweep_id`),
   CONSTRAINT `sweep_id_rules` FOREIGN KEY (`sweep_id`) REFERENCES `sweep` (`sweep_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `watch_types_rules` FOREIGN KEY (`watch_type_id`) REFERENCES `watch_types` (`watch_type_id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=102 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=104 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -978,7 +1011,7 @@ CREATE TABLE `user_activities` (
   `created_date_utc` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`activity_id`,`activity_uid`),
   UNIQUE KEY `activity_id_UNIQUE` (`activity_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=174 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=239 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1043,4 +1076,4 @@ CREATE TABLE `watch_types` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2023-02-18 12:24:22
+-- Dump completed on 2023-03-25 16:32:07

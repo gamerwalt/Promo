@@ -11,7 +11,7 @@ namespace TestUtilities.Builders.Resources
         public Sweep Sweep { get; set; }
         public WatchTypeCode WatchTypeCode { get; set; }
         public string WatchValue { get; set; }
-        public long ExternalId { get; set; }
+        public string ExternalId { get; set; }
         public bool ActiveInd { get; set; }
         public bool MustBeFollowing { get; set; }
         public bool NotifyWinners { get; set; }
@@ -22,7 +22,7 @@ namespace TestUtilities.Builders.Resources
             Campaign = campaign;
             Sweep = sweep;
             WatchValue = watchValue;
-            ExternalId = new Randomizer().Long();
+            ExternalId = new Randomizer().Long().ToString();
             WatchTypeCode = WatchTypeCode.Hashtag;
             ActiveInd = true;
             MustBeFollowing = true;

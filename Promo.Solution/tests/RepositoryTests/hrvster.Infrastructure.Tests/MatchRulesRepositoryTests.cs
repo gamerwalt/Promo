@@ -42,8 +42,9 @@ namespace hrvster.Infrastructure.Tests
 
 			matchGame = await _feature.MatchGameRepository.GetAsync(matchGame.Uid, default);
 
-			var matchGameRuleFaker = new Faker<MatchGameRule>();
-			var matchGameRule = matchGameRuleFaker.Generate();
+            MatchGameRuleFaker = new Faker<MatchGameRule>();
+			CreateFakeMatchGameRule(matchGame, WatchTypeCode.Hashtag);
+            var matchGameRule = MatchGameRuleFaker.Generate();
 
 			await _feature.MatchGameRulesRepository.CreateAsync(matchGameRule, default);
 
@@ -74,7 +75,7 @@ namespace hrvster.Infrastructure.Tests
 				.RuleFor(m => m.NotifyWinners, f => f.Random.Bool())
 				.RuleFor(m => m.ScheduledIndicator, f => f.Random.Bool())
 				.RuleFor(m => m.ActiveIndicator, f => f.Random.Bool())
-				.RuleFor(m => m.ExternalId, f => f.Random.Long());
+				.RuleFor(m => m.ExternalId, f => f.Random.Long().ToString());
 
 		private void CreateFakeMatchGame(Campaign campaign)
 			=> MatchGameFaker = new Faker<MatchGame>()

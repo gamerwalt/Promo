@@ -14,6 +14,7 @@ namespace hrvster.ApplicationServices.MatchGames
 		Task<IEnumerable<MatchGame>> GetAccountMatchGamesAsync(Guid userUid, CancellationToken cancellationToken);
 		Task<IEnumerable<MatchGame>> GetCampaignMatchGamesAsync(Guid campaignUid, CancellationToken cancellationToken);
 		Task<MatchGame> GetMatchGameAsync(Guid matchGameUid, CancellationToken cancellationToken);
+		IEnumerable<MatchGameRule> GetRulesMatching(string watchValue);
 		Task SetAsReadyToBeProcessedAsync(MatchGame matchGame, CancellationToken cancellationToken);
 		Task SetMatchGameAsProcessedAsync(MatchGame matchGame, CancellationToken cancellationToken);
 		Task UpdateMatchGameAsync(MatchGame matchGame, string timeZone, bool isDaylight, CancellationToken cancellationToken);
@@ -23,11 +24,16 @@ namespace hrvster.ApplicationServices.MatchGames
 	{
 		private readonly ILogger<MatchGamesService> _logger;
 		private readonly IMatchGamesRepository _repository;
+		private readonly IMatchRulesService _matchRulesService;
 
-		public MatchGamesService(ILoggerFactory loggerFactory, IMatchGamesRepository repository)
+		public MatchGamesService(
+			ILoggerFactory loggerFactory,
+			IMatchGamesRepository repository,
+			IMatchRulesService matchRulesService)
 		{
 			_logger = loggerFactory.CreateLogger<MatchGamesService>();
 			_repository = repository;
+			_matchRulesService = matchRulesService;
 		}
 
 		public async Task CreateMatchGameAsync(
@@ -63,6 +69,9 @@ namespace hrvster.ApplicationServices.MatchGames
 
 			return await _repository.GetAsync(matchGameUid, cancellationToken);
 		}
+
+		public IEnumerable<MatchGameRule> GetRulesMatching(string watchValue)
+			=> _matchRulesService.GetRulesMatching(watchValue);
 
 		public async Task SetAsReadyToBeProcessedAsync(MatchGame matchGame, CancellationToken cancellationToken)
 		{

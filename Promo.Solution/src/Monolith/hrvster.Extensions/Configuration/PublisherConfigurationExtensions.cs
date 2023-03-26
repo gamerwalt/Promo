@@ -1,4 +1,5 @@
-﻿using hrvster.Core.Clients.Publishers;
+﻿using hrvster.ApplicationServices.Publishing;
+using hrvster.Core.Clients.Publishers;
 using hrvster.Models;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -24,6 +25,7 @@ namespace hrvster.Extensions.Configuration
 						default:
 							return sp.GetService<TwitterClient>();
 					}
-				});
+				})
+				.AddTransient<IPublishService, PublishService>();
 	}
 }

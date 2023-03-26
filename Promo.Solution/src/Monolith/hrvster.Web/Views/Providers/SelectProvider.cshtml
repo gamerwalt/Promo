@@ -7,6 +7,7 @@
         asp-controller="Providers" 
         asp-action="SelectProvider" 
         asp-route-Uid=@Model.Uid
+        asp-route-gameType="@Model.GameType"
         asp-route-actionName=@Model.ReturnAction
         asp-route-controllerName=@Model.ReturnController
         class="form-horizontal form-material mx-2">
@@ -38,6 +39,7 @@
                     asp-action="@Model.ReturnAction"
                     asp-controller="@Model.ReturnController"
                     asp-route-Uid="@Model.Uid"
+                    asp-fragment="rules"
                     class="btn btn-light btn-default">Back</a>
             </div>
         </div>

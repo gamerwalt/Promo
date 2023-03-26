@@ -7,6 +7,7 @@ using hrvster.Core.Requests.WebRequests.Core;
 using hrvster.Core.Requests.WebRequests.Files;
 using hrvster.Core.Requests.WebRequests.Publishing;
 using hrvster.Core.Requests.WebRequests.Sweeps;
+using hrvster.Core.Subscriptions;
 using hrvster.Extensions.ModelExtensions;
 using hrvster.Models;
 using hrvster.Models.Options;
@@ -26,6 +27,7 @@ using System.Threading.Tasks;
 namespace hrvster.Web.Controllers
 {
 	[FirebaseAuthorize]
+	[ShouldBeSubscribed]
 	public class SweepRulesController : Controller
 	{
 		private readonly ILogger<SweepRulesController> _logger;

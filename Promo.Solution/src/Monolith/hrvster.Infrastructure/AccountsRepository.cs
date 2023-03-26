@@ -29,6 +29,7 @@ namespace hrvster.Infrastructure
 		Task UpdateAsync(Guid accountUid, string firstName, string lastName, string displayName);
 		Task UpdateAsync(Guid accountUid, string emailAddress, string phoneNumber);
 		Task UpdateLastLoginAsync(Guid accountUid, HrvsterUser hrvsterUser);
+		Task<IEnumerable<Models.Rule>> GetRulesAsync(Guid accountUid);
 	}
 
 	public class AccountsRepository : IAccountsRepository
@@ -387,5 +388,41 @@ namespace hrvster.Infrastructure
 			await conn.OpenAsync();
 			await command.ExecuteNonQueryAsync();
 		}
+
+		public async Task<IEnumerable<Models.Rule>> GetRulesAsync(Guid accountUid)
+		{
+			var rules = new List<Models.Rule>();
+
+			using var conn = new MySqlConnection(_database.GetConnectionString());
+			var command = conn.CreateCommand();
+			command.CommandText = "account_get_all_rules";
+			command.CommandType = CommandType.StoredProcedure;
+			command.AddParameter("accountUid", accountUid);
+
+			await conn.OpenAsync();
+			using var reader = await command.ExecuteReaderAsync();
+			while (await reader.ReadAsync())
+			{
+				rules.Add(CreateRuleFrom(reader));
+			}
+
+			return rules;
+		}
+
+		private Models.Rule CreateRuleFrom(MySqlDataReader reader)
+			=> new Models.Rule
+				{
+					RuleId = reader.GetInt32("rule_id"),
+					RuleUid = reader.GetGuid("rule_uid"),
+					Game = new Game
+					{
+						Id = reader.GetInt32("game_id"),
+						Uid = reader.GetGuid("game_uid"),
+						StartDate = reader.GetDateTime("start_date"),
+						EndDate = reader.GetDateTime("end_date"),
+						StartDateUtc = reader.GetDateTime("start_date_utc"),
+						EndDateUtc = reader.GetDateTime("end_date_utc")
+					}
+				};
 	}
 }

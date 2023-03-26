@@ -15,6 +15,7 @@ namespace hrvster.Infrastructure.MatchGames
 	{
 		Task CreateAsync(MatchGameRule matchGameRule, CancellationToken cancellationToken);
 		Task<IEnumerable<MatchGameRule>> GetAllRulesAsync(Guid gameUid, CancellationToken cancellationToken);
+		IEnumerable<MatchGameRule> GetRulesMatching(string watchValue);
 	}
 
 	public class MatchGameRulesRepository : IMatchGameRulesRepository
@@ -30,7 +31,7 @@ namespace hrvster.Infrastructure.MatchGames
 		{
 			using var conn = new MySqlConnection(_database.GetConnectionString());
 			var command = conn.CreateCommand();
-			command.CommandText = "match_game_create";
+			command.CommandText = "match_game_rule_create";
 			command.CommandType = CommandType.StoredProcedure;
 			command
 				.AddParameter("ruleUid", matchGameRule.Uid)
@@ -68,6 +69,28 @@ namespace hrvster.Infrastructure.MatchGames
 			return rules;
 		}
 
+		public IEnumerable<MatchGameRule> GetRulesMatching(string watchValue)
+		{
+			var rules = new List<MatchGameRule>();
+
+			using (var conn = new MySqlConnection(_database.GetConnectionString()))
+			{
+				var command = conn.CreateCommand();
+				command.CommandText = "match_games_get_rules_matching";
+				command.CommandType = CommandType.StoredProcedure;
+				command.AddParameter("watchValue", watchValue);
+
+				conn.Open();
+				using var reader = command.ExecuteReader();
+				while (reader.Read())
+				{
+					rules.Add(CreateFrom(reader));
+				}
+			}
+
+			return rules;
+		}
+
 		private MatchGameRule CreateFrom(MySqlDataReader reader)
 		{
 			return new MatchGameRule
@@ -81,12 +104,12 @@ namespace hrvster.Infrastructure.MatchGames
 				},
 				WatchType = new Models.WatchType
 				{
-					WatchTypeCode = reader.GetString("watch_type_code"),
-					WatchTypeName = reader.GetString("watch_type_name")
+					WatchTypeCode = reader.GetStringValue("watch_type_code"),
+					WatchTypeName = reader.GetStringValue("watch_type_name")
 				},
-				WatchValue = reader.GetString("watch_value"),
+				WatchValue = reader.GetStringValue("watch_value"),
 				ActiveIndicator = reader.GetBoolean("active_ind"),
-				ExternalId = reader.GetInt64("external_id"),
+				ExternalId = reader.GetStringValue("external_id"),
 				MustBeFollowing = reader.GetBoolean("must_be_following"),
 				NotifyWinners = reader.GetBoolean("notify_winners"),
 				ScheduledIndicator = reader.GetBoolean("scheduled_ind")

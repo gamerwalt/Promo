@@ -52,6 +52,7 @@ namespace hrvster.Extensions.Configuration
 		public static IServiceCollection AddHarvesterAndReportingRepositories(this IServiceCollection services)
 			=> services.AddTransient<IReportingRepository, ReportingRepository>()
 				.AddTransient<IBlacklistedSweepsUsersRepository, BlacklistedSweepsUsersRepository>()
+				.AddTransient<IBlacklistedUserRepository, BlacklistedUserRepository>()
 				.AddTransient<IHarvesterRepository, HarvesterRepository>()
 				.AddTransient<IIncomingTweetsRepository, IncomingTweetsRepository>()
 				.AddTransient<IUserLimiterRepository, UserLimiterRepository>();

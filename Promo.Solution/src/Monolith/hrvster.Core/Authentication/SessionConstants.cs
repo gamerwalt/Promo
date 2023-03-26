@@ -19,5 +19,7 @@
 		public const string Subscribed = "_Subscribed";
 
 		public const string Uid = "_Uid";
+
+		public const string GameType = "_GameType";
 	}
 }

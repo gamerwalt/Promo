@@ -219,7 +219,7 @@ namespace hrvster.Core.Handlers.Publishing
 				},
 				WatchTypeCode = (WatchTypeCode)Enum.Parse(typeof(WatchTypeCode), watchTypeCodeSelected),
 				WatchValue = message.Hashtag,
-				ExternalId = 0,
+				ExternalId = string.Empty,
 				ActiveInd = true,
 				MustBeFollowing = mustBeFollowing,
 				ScheduledInd = true

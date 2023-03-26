@@ -200,7 +200,7 @@ namespace hrvster.Core.Handlers.Tests
         public static SweepRuleTweetPublished CreateSweepRuleTweetPublished(Sweep sweep, Profile profile)
             => new SweepRuleTweetPublished(TestData.TweetId, new Clients.Common.Message
             {
-                WatchTypeId = TestData.WatchTypeId,
+                WatchTypeId = TestData.WatchTypeHashtagId,
                 Profile = profile,
                 Hashtag = TestData.Hashtag,
                 SweepUid = sweep.SweepUid,
@@ -212,7 +212,7 @@ namespace hrvster.Core.Handlers.Tests
         public static SweepRuleTweetPublished CreateSweepRuleTweetPublished2(Sweep sweep, Profile profile)
             => new SweepRuleTweetPublished(TestData.TweetId, new Clients.Common.Message
             {
-                WatchTypeId = TestData.WatchTypeId,
+                WatchTypeId = TestData.WatchTypeHashtagId,
                 Profile = profile,
                 Hashtag = TestData.Hashtag2,
                 SweepUid = sweep.SweepUid,
@@ -224,7 +224,7 @@ namespace hrvster.Core.Handlers.Tests
         public static SweepRuleTweetPublished CreateSweepRuleTweetPublished3(Sweep sweep, Profile profile)
             => new SweepRuleTweetPublished(TestData.TweetId, new Clients.Common.Message
             {
-                WatchTypeId = TestData.WatchTypeId,
+                WatchTypeId = TestData.WatchTypeHashtagId,
                 Profile = profile,
                 Hashtag = TestData.Hashtag3,
                 SweepUid = sweep.SweepUid,
@@ -237,7 +237,7 @@ namespace hrvster.Core.Handlers.Tests
             => new PublishSweepRuleTweetRequest(
                 sweep,
                 profile,
-                TestData.WatchTypeId,
+                TestData.WatchTypeHashtagId,
                 TestData.WatchValue,
                 TestData.TweetText,
                 postNow,
@@ -251,7 +251,7 @@ namespace hrvster.Core.Handlers.Tests
             => new PublishSweepRuleTweetRequest(
                 sweep,
                 profile,
-                TestData.WatchTypeId,
+                TestData.WatchTypeHashtagId,
                 TestData.WatchValue2,
                 TestData.TweetText2,
                 postNow,
@@ -264,7 +264,7 @@ namespace hrvster.Core.Handlers.Tests
             => new PublishSweepRuleTweetRequest(
                 sweep,
                 profile,
-                TestData.WatchTypeId,
+                TestData.WatchTypeHashtagId,
                 TestData.WatchValue3,
                 TestData.TweetText3,
                 postNow,

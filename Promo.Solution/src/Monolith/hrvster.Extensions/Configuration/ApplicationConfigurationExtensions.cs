@@ -1,4 +1,5 @@
-﻿using hrvster.ApplicationServices.Accounts;
+﻿using hrvster.ApplicationServices;
+using hrvster.ApplicationServices.Accounts;
 using hrvster.ApplicationServices.Common;
 using hrvster.ApplicationServices.Harvesters.Twitter;
 using hrvster.ApplicationServices.Mails;
@@ -19,6 +20,7 @@ namespace hrvster.Extensions.Configuration
 				.AddTransient<IDrawService, DrawService>()
 				.AddTransient<IMailService, MailService>()
 				.AddTransient<IAccountVerificationService, AccountVerificationService>()
+				.AddGameService()
 				.AddUserRateLimiterService();
 
 		public static IServiceCollection AddRandomizer(this IServiceCollection services)
@@ -42,5 +44,8 @@ namespace hrvster.Extensions.Configuration
 
 		public static IServiceCollection AddCampaignService(this IServiceCollection services)
 			=> services.AddTransient<ICampaignService, CampaignService>();
+
+		public static IServiceCollection AddGameService(this IServiceCollection services)
+			=> services.AddTransient<IGameService, GameService>();
 	}
 }

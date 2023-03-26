@@ -1,6 +1,8 @@
-﻿namespace hrvster.Games.Match.Models
+﻿using hrvster.Models;
+
+namespace hrvster.Games.Match.Models
 {
-	public class MatchGame
+	public class MatchGame : Game
 	{
 		public int Id { get; set; }
 		public Guid Uid { get; set; }

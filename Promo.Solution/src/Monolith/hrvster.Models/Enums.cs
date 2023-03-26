@@ -153,4 +153,10 @@
 		Starter,
 		Advanced
 	}
+
+	public enum GameTypesEnum
+	{
+		Sweeps,
+		MatchGames
+	}
 }

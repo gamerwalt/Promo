@@ -225,7 +225,7 @@ namespace hrvster.Infrastructure
 				RuleUid = reader.GetGuid("rule_uid"),
 				WatchValue = reader.GetStringValue("watch_value"),
 				WatchTypeCode = (WatchTypeCode)Enum.Parse(typeof(WatchTypeCode), reader.GetStringValue("watch_type_code")),
-				ExternalId = reader.GetLongValue("external_id"),
+				ExternalId = reader.GetStringValue("external_id"),
 				ActiveInd = reader.GetBoolean("active_ind"),
 				MustBeFollowing = reader.GetBoolean("must_be_following"),
 				NotifyWinners = reader.GetBoolean("notify_winners"),

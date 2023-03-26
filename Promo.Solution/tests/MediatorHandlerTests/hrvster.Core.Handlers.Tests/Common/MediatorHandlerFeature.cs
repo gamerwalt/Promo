@@ -111,7 +111,6 @@ namespace hrvster.Core.Handlers.Tests.Common
 
             MockedExternalClient = ServiceProvider.GetService<Mock<IExternalClient>>();
 			MockedPaymentAdaptor = ServiceProvider.GetService<Mock<IPaymentAdaptor>>();
-			MockedExternalClient = ServiceProvider.GetService<Mock<IExternalClient>>();
 			MockedTwitterClient = ServiceProvider.GetService<Mock<TwitterClient>>();
 			MockedFlutterwavePaymentService = ServiceProvider.GetService<Mock<FlutterwavePaymentService>>();
 

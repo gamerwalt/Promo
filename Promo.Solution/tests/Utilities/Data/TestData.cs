@@ -121,7 +121,7 @@ namespace TestUtilities.Data
         public static Guid StarterPlanUid = Guid.Parse("f88e1f57-c2b9-47d0-95c4-3f8e93e619ed");
         public static Guid AdvancedPlanUid = Guid.Parse("8597b37d-99e4-403a-9b1c-7b75a5e78c50");
 
-        public const int WatchTypeId = 2;
+        public const int WatchTypeHashtagId = 2;
         public const string Hashtag = "#Hashtag1";
         public const string TweetId = "8973948734";
         public const string TweetText = "A sample tweet";

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace hrvster.Models
 {
-    public class Sweep
+    public class Sweep : Game
     {
 		public Sweep()
 		{

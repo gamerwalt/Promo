@@ -18,9 +18,11 @@ namespace hrvster.ApplicationServices.Sweepstakes
 	public interface ISweepstakesService
 	{
 		Task<IEnumerable<Sweep>> GetLiveSweepsAsync(CancellationToken cancellationToken);
+		IEnumerable<Rule> GetRulesMatching(string watchValue);
 		Task<SweepProperty> GetSweepDrawPropertiesAndRules(Guid sweepUid, CancellationToken cancellationToken);
 		Task<IEnumerable<Sweep>> GetSweepsGoingLiveInHourAsync(int hour, CancellationToken cancellationToken);
 		Task<SweepNotification> GetSweepsNotificationAsync(Sweep sweep, CancellationToken cancellationToken);
+		Task<Sweep> GetSweepstakeAsync(Guid uid, CancellationToken cancellationToken);
 		Task<bool> IsMaxedOut(Sweep sweep, CancellationToken cancellationToken);
 		Task UpdateSweepNotificationAsync(Sweep sweep, SweepNotificationType notificationType, CancellationToken cancellationToken);
 	}
@@ -32,19 +34,22 @@ namespace hrvster.ApplicationServices.Sweepstakes
 		private readonly ISweepsRepository _sweepRepository;
 		private readonly IAccountSubscriptionService _accountSubscriptionService;
 		private readonly ISweepsEntriesRepository _sweepsEntriesRepository;
+		private readonly ISweepRulesRepository _sweepRulesRepository;
 
 		public SweepstakesService(
 			ILoggerFactory loggerFactory, 
 			IMediator mediator,
 			ISweepsRepository sweepsRepository,
 			IAccountSubscriptionService accountSubscriptionService,
-			ISweepsEntriesRepository sweepsEntriesRepository)
+			ISweepsEntriesRepository sweepsEntriesRepository,
+			ISweepRulesRepository sweepRulesRepository)
 		{
 			_logger = loggerFactory.CreateLogger<SweepstakesService>();
 			_mediator = mediator;
 			_sweepRepository = sweepsRepository;
 			_accountSubscriptionService = accountSubscriptionService;
 			_sweepsEntriesRepository = sweepsEntriesRepository;
+			_sweepRulesRepository = sweepRulesRepository;
 		}
 
 		public async Task<IEnumerable<Sweep>> GetLiveSweepsAsync(CancellationToken cancellationToken)
@@ -58,6 +63,9 @@ namespace hrvster.ApplicationServices.Sweepstakes
 
 			return sweepsLive;
 		}
+
+		public IEnumerable<Rule> GetRulesMatching(string watchValue)
+			=> _sweepRulesRepository.GetRuleMatching(watchValue);
 
 		public async Task<SweepProperty> GetSweepDrawPropertiesAndRules(Guid sweepUid, CancellationToken cancellationToken)
 		{
@@ -93,6 +101,13 @@ namespace hrvster.ApplicationServices.Sweepstakes
 				sweep.Name);
 
 			return await _mediator.Send(new GetSweepNotificationRequest(sweep));
+		}
+
+		public async Task<Sweep> GetSweepstakeAsync(Guid uid, CancellationToken cancellationToken)
+		{
+			if (cancellationToken.IsCancellationRequested) return default(Sweep);
+
+			return await _sweepRepository.GetAsync(uid);
 		}
 
 		public async Task<bool> IsMaxedOut(Sweep sweep, CancellationToken cancellationToken)

@@ -306,6 +306,89 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `account_subscription_create_history` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`hrvster_user`@`%` PROCEDURE `account_subscription_create_history`(
+	IN subscriptionUid VARCHAR(50),
+    IN accountUid VARCHAR(50),
+    IN planId INT,
+    IN subscriptionStatus VARCHAR(100),
+    IN startDate DATETIME,
+    IN startDateUtc DATETIME,
+    IN endDate DATETIME,
+    IN endDateUtc DATETIME,
+    IN isDiscounted TINYINT,
+    IN discountedBy DECIMAL)
+BEGIN
+	DECLARE accountId INT DEFAULT 0;
+
+    SELECT account_id INTO @accountId FROM accounts WHERE account_uid = accountUid;
+    IF(@accountId = 0) THEN
+		SIGNAL SQLSTATE '45000'
+			SET MESSAGE_TEXT = 'Account not found';
+    END IF;
+    
+    INSERT INTO account_subscriptions_history
+    (
+		subscription_history_uid,
+        subscription_status,
+        account_id,
+        plan_id,
+        start_date,
+        start_date_utc,
+        end_date,
+        end_date_utc,
+        is_discounted,
+        discounted_by,
+        created_date
+    )
+    VALUES
+    (
+		subscriptionUid,
+        subscriptionStatus,
+        @accountId,
+        planId,
+        startDate,
+        startDateUtc,
+        endDate,
+        endDateUtc,
+        isDiscounted,
+        discountedBy,
+        CURRENT_TIMESTAMP()
+    );
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `account_subscription_delete` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`hrvster_user`@`%` PROCEDURE `account_subscription_delete`(IN subscriptionUid VARCHAR(50))
+BEGIN
+	DELETE FROM account_subscriptions WHERE subscription_uid = subscriptionUid;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 /*!50003 DROP PROCEDURE IF EXISTS `account_subscription_get_by_email` */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -1050,13 +1133,41 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `flutterwave_account_subscription_get` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`hrvster_user`@`%` PROCEDURE `flutterwave_account_subscription_get`(IN subscriptionUid VARCHAR(50))
+BEGIN
+	SELECT
+		ASB.subscription_id,
+        ASB.subscription_uid,
+        FAS.id,
+        FAS.uid,
+        FAS.external_account_id,
+        FAS.external_subscription_id
+    FROM flutterwave_account_subscriptions as FAS
+    INNER JOIN account_subscriptions as ASB ON FAS.subscription_id = ASB.subscription_id
+    WHERE ASB.subscription_uid = subscriptionUid;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 /*!50003 DROP PROCEDURE IF EXISTS `flutterwave_card_transactions_create` */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8mb3 */ ;
-/*!50003 SET character_set_results = utf8mb3 */ ;
-/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
@@ -1065,7 +1176,13 @@ CREATE DEFINER=`hrvster_user`@`%` PROCEDURE `flutterwave_card_transactions_creat
     IN id BIGINT,
     IN transactionReference VARCHAR(100),
     IN flowReference VARCHAR(100),
-    IN orderReference VARCHAR(100))
+    IN orderReference VARCHAR(100),
+    IN amount BIGINT,
+    IN chargedAmount BIGINT,
+    IN transactionStatus VARCHAR(100),
+    IN currency VARCHAR(10),
+    IN paymentPlan BIGINT,
+    IN paymentPage BIGINT)
 BEGIN
 	INSERT INTO flutterwave_card_transactions
     (
@@ -1074,6 +1191,12 @@ BEGIN
         transaction_reference,
         flow_reference,
         order_reference,
+        amount,
+        charged_amount,
+        transaction_status,
+        currency,
+        payment_plan,
+        payment_page,
         created_date
     )
     VALUES
@@ -1083,6 +1206,12 @@ BEGIN
         transactionReference,
         flowReference,
         orderReference,
+        amount,
+        chargedAmount,
+        transactionStatus,
+        currency,
+        paymentPlan,
+        paymentPage,
         CURRENT_TIMESTAMP()
     );
 END ;;
@@ -1633,6 +1762,106 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `match_game_rules_get_by_match_game_uid` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`hrvster_user`@`%` PROCEDURE `match_game_rules_get_by_match_game_uid`(IN matchGameUid VARCHAR(50))
+BEGIN
+	SELECT
+		MGR.rule_id,
+        MGR.rule_uid,
+        MG.match_game_id,
+        MG.match_game_uid,
+        WT.watch_type_code,
+        WT.watch_type_name,
+        MGR.watch_value,
+        MGR.active_ind,
+        MGR.external_id,
+        MGR.must_be_following,
+        MGR.notify_winners,
+        MGR.scheduled_ind
+    FROM match_game_rules as MGR
+    INNER JOIN match_games as MG ON MGR.match_game_id = MG.match_game_id
+    INNER JOIN watch_types as WT ON WT.watch_type_id = MGR.watch_type_id
+    WHERE MG.match_game_uid = matchGameUid;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `match_game_rule_create` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`hrvster_user`@`%` PROCEDURE `match_game_rule_create`(
+	IN ruleUid VARCHAR(50),
+	IN matchGameUid VARCHAR(50),
+    IN watchTypeCode VARCHAR(50), 
+    IN externalId VARCHAR(100), 
+    IN watchValue VARCHAR(500), 
+    IN activeInd BIT,
+    IN mustBeFollowing BIT,
+    IN scheduledInd BIT
+)
+BEGIN
+	DECLARE watchTypeId INT DEFAULT 0;
+    DECLARE matchGameId INT DEFAULT 0;
+	
+    SELECT @watchTypeId := watch_type_id FROM watch_types WHERE watch_type_code = watchTypeCode;
+    SELECT @matchGameId := match_game_id FROM match_games WHERE match_game_uid = matchGameUid;
+
+    IF(@watchTypeId = 0) THEN 
+		SIGNAL SQLSTATE '45000'
+			SET MESSAGE_TEXT = 'Watch type not found';
+	END IF;
+    
+    IF(@matchGameId = 0) THEN
+		SIGNAL SQLSTATE '45000'
+			SET MESSAGE_TEXT = 'Sweep not found.';
+    END IF;
+    
+    INSERT INTO match_game_rules
+    (
+		rule_uid,
+        match_game_id,
+        watch_type_id,
+        watch_value,
+        active_ind,
+        scheduled_ind,
+        external_id,
+        must_be_following,
+        created_date
+    )
+    SELECT
+		ruleUid,
+        @matchGameId,
+        @watchTypeId,
+        watchValue,
+        activeInd,
+        scheduledInd,
+        externalId,
+        mustBeFollowing,
+        CURRENT_TIMESTAMP();
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 /*!50003 DROP PROCEDURE IF EXISTS `match_game_set_as_generated` */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -1739,6 +1968,7 @@ BEGIN
 		MG.match_game_uid,
         MG.match_game_id,
         MI.image_id,
+        MI.image_name,
         MI.image_uid,
         MI.location_url
     FROM match_images as MI
@@ -1760,7 +1990,7 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-CREATE DEFINER=`hrvster_user`@`%` PROCEDURE `match_image_create`(IN imageUid VARCHAR(50), IN matchGameUid VARCHAR(50), IN locationUrl VARCHAR(4000))
+CREATE DEFINER=`hrvster_user`@`%` PROCEDURE `match_image_create`(IN imageUid VARCHAR(50), IN matchGameUid VARCHAR(50), IN locationUrl VARCHAR(4000), IN imageName VARCHAR(5000))
 BEGIN
 	DECLARE matchGameId INT DEFAULT 0;
     SELECT match_game_id INTO @matchGameId FROM match_games WHERE match_game_uid = matchGameUid;
@@ -1774,6 +2004,7 @@ BEGIN
 		image_uid,
         match_game_id,
         location_url,
+        image_name,
         created_date
     )
     VALUES
@@ -1781,6 +2012,7 @@ BEGIN
 		imageUid,
         @matchGameId,
         locationUrl,
+        imageName,
         CURRENT_TIMESTAMP()
     );
 END ;;
@@ -1805,6 +2037,7 @@ BEGIN
 		MG.match_game_uid,
         MG.match_game_id,
         MI.image_id,
+        MI.image_name,
         MI.image_uid,
         MI.location_url
     FROM match_images as MI
@@ -1840,7 +2073,7 @@ BEGIN
         MI.image_uid
     FROM match_prizes AS MP
     INNER JOIN match_games as MG ON MG.match_game_id = MP.match_game_id
-    INNER JOIN match_images as MI ON MI.image_id = MP.match_image_id
+    INNER JOIN match_images as MI ON MI.image_id = MP.image_id
     WHERE MG.match_game_uid = matchGameUid;
 END ;;
 DELIMITER ;
@@ -1886,7 +2119,7 @@ BEGIN
     (
 		prize_uid,
         match_game_id,
-        match_image_id,
+        image_id,
         prize_name,
         prize_description,
         prize_value,
@@ -3837,6 +4070,39 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sweep_notification_max_entries_upsert` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`hrvster_user`@`%` PROCEDURE `sweep_notification_max_entries_upsert`(IN sweepId INT)
+BEGIN
+	INSERT INTO sweep_notifications
+	(
+		sweep_id,
+		max_entries,
+		created_date
+	)
+	VALUES
+	(
+		sweepId,
+		1,
+		CURRENT_TIMESTAMP()
+	)
+    ON DUPLICATE KEY UPDATE
+	  max_entries = !max_entries,
+      updated_date = CURRENT_TIMESTAMP();
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 /*!50003 DROP PROCEDURE IF EXISTS `sweep_notification_not_enough_unique_entrants_upsert` */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -5299,4 +5565,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2023-02-09 17:44:06
+-- Dump completed on 2023-03-25 16:21:04

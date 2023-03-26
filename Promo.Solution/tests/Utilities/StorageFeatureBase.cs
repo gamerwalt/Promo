@@ -51,7 +51,10 @@ namespace TestUtilities
 					.AddMatchGameRepositories()
 					.AddMatchEngineServices()
 					.AddCampaignService()
-					.AddHttpClient();
+					.AddGameService()
+					.AddAccountsService()
+					.AddHarvesterAndReportingRepositories()
+                    .AddHttpClient();
 
 				services.MockFirebaseAuthManager()
 					.MockExternalClient()
@@ -100,6 +103,7 @@ namespace TestUtilities
                 "DELETE FROM match_tiles WHERE tile_id > 0;" +
                 "DELETE FROM match_images WHERE image_id > 0;" +
                 "DELETE FROM match_prizes WHERE prize_id > 0;" +
+				"DELETE FROM match_game_rules WHERE rule_id > 0;" +
 				"DELETE FROM sweep_entry WHERE sweep_entry_id > 0;";
 			command.CommandType = CommandType.Text;
             conn.Open();
@@ -107,7 +111,13 @@ namespace TestUtilities
 
 			using var harvesterConn = new MySqlConnection(harvesterConnectionString);
 			var harvesterCommand = harvesterConn.CreateCommand();
-			harvesterCommand.CommandText = "DELETE FROM harvested WHERE harvested_id > 0;";
+			harvesterCommand.CommandText = "DELETE FROM harvested WHERE harvested_id > 0;" +
+                "DELETE FROM blacklisted_users WHERE id > 0;" +
+				"DELETE FROM blacklisted_sweeps_users WHERE id > 0;" +
+				"DELETE FROM incoming_tweets WHERE incoming_tweet_id > 0;" +
+				"DELETE FROM tweets WHERE tweet_id > 0;" +
+				"DELETE FROM user_limiter WHERE user_limiter_id > 0;" +
+				"DELETE FROM users WHERE user_id > 0;";
 			harvesterCommand.CommandType = CommandType.Text;
 			harvesterConn.Open();
 			harvesterCommand.ExecuteNonQuery();

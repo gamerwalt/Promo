@@ -14,5 +14,6 @@ namespace hrvster.Web.Models
 		public Guid Uid { get; set; }
 		public string ReturnController { get; set; }
 		public string ReturnAction { get; set; }
+		public string GameType { get; internal set; }
 	}
 }
