@@ -1,4 +1,8 @@
-﻿@using hrvster.Models;
+﻿@using hrvster.Core;
+@using hrvster.Models;
+
+@inject LinkBuilder linkBuilder
+
 @model MatchGameDetails
 @{
 	ViewData["Title"] = $"View Match Game";
@@ -266,7 +270,51 @@
 							</tr>
 						</thead>
 						<tbody>
-							
+							@foreach(var rule in Model.MatchRules)
+							{
+								<tr>
+									<td>@rule.WatchValue</td>
+									<td>
+										@if (@rule.ExternalId == "0")
+										{
+											<a 
+												asp-action="View" 
+												asp-controller="ScheduledTweets"
+												asp-route-ruleUid="@rule.RuleUid"
+												asp-route-gameUid="@Model.MatchGame.MatchGameUid" target="_blank">
+												Scheduled
+											</a>
+										}
+										else
+										{
+											<a href="@linkBuilder.BuildTwitterLink(rule.ExternalId, rule.RuleUid).Result" target="_blank">@rule.ExternalId</a>
+										}
+									</td>
+									<td>
+										@if (@rule.IsActive)
+										{
+											<span>True</span>
+										}
+										else
+										{
+											<span>False</span>
+										}
+									</td>
+									<td>
+										@if (@rule.MustBeFollowing)
+										{
+											<span>True</span>
+										}
+										else
+										{
+											<span>False</span>
+										}
+									</td>
+									<td>
+										<span>@rule.NotifyWinners</span>
+									</td>
+								</tr>
+							}
 						</tbody>
 					</table>
 				</div>

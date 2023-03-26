@@ -13,5 +13,6 @@ namespace hrvster.Games.Match.Models
 		public bool NotifyWinners { get; set; }
 		public bool ScheduledIndicator { get; set; }
 		public bool ActiveIndicator { get; set; }
+		public string ExternalId { get; set; }
 	}
 }

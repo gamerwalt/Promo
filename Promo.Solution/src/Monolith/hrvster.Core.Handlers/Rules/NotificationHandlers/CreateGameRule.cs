@@ -115,7 +115,8 @@ namespace hrvster.Core.Handlers.Rules.NotificationHandlers
 				ExternalId = notification.ExternalId,
 				ActiveIndicator = true,
 				MustBeFollowing = notification.MustBeFollowing,
-				ScheduledInd = false				
+				ScheduledInd = false,
+				NotifyWinners = true
 			}, default);
 		}
 

@@ -236,7 +236,7 @@ namespace hrvster.Web.Controllers
 					form.Media2, 
 					form.Media3, 
 					form.Media4,
-					form.MustBeFollowing);
+					true);
 
 				_notificationService.AddSuccessToastMessage("Tweet published successfully.");
 

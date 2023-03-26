@@ -6,5 +6,6 @@ namespace hrvster.Web.Models
 	{
 		public UpdateMatchGame MatchGame { get; set; }
 		public List<MatchImage> MatchImages { get; set; }
+		public List<MatchRule> MatchRules { get; set; }
 	}
 }
