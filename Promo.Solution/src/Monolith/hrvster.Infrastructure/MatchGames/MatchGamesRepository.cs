@@ -20,6 +20,7 @@ namespace hrvster.Infrastructure.MatchGames
 		Task SetAsGeneratedAsync(MatchGame game, CancellationToken cancellationToken);
 		Task SetAsReadyToBeGeneratedAsync(MatchGame game, CancellationToken cancellationToken);
 		Task UpdateAsync(MatchGame matchGame, string timezone, bool isDaylight, CancellationToken cancellationToken);
+		MatchGame Get(Guid matchGameUid, CancellationToken cancellationToken);
 	}
 
 	public class MatchGamesRepository : IMatchGamesRepository
@@ -132,7 +133,7 @@ namespace hrvster.Infrastructure.MatchGames
 
 		public async Task<MatchGame> GetAsync(Guid matchGameUid, CancellationToken cancellationToken)
 		{
-			var matchGames = default(MatchGame);
+			var matchGame = default(MatchGame);
 
 			using (var conn = new MySqlConnection(_database.GetConnectionString()))
 			{
@@ -145,11 +146,11 @@ namespace hrvster.Infrastructure.MatchGames
 				using var reader = await command.ExecuteReaderAsync(cancellationToken);
 				while (await reader.ReadAsync(cancellationToken))
 				{
-					matchGames = CreateFrom(reader);
+					matchGame = CreateFrom(reader);
 				}
 			}
 
-			return matchGames;
+			return matchGame;
 		}
 
 		public async Task SetAsGeneratedAsync(MatchGame matchGame, CancellationToken cancellationToken)
@@ -231,6 +232,28 @@ namespace hrvster.Infrastructure.MatchGames
 				HasBeenGenerated = reader.GetBoolean("is_generated"),
 				ReadyToBeGenerated = reader.GetBoolean("ready_to_generate")
 			};
+		}
+
+		public MatchGame Get(Guid matchGameUid, CancellationToken cancellationToken)
+		{
+			var matchGame = default(MatchGame);
+
+			using (var conn = new MySqlConnection(_database.GetConnectionString()))
+			{
+				var command = conn.CreateCommand();
+				command.CommandText = "match_game_get_by_uid";
+				command.CommandType = CommandType.StoredProcedure;
+				command.AddParameter("matchGameUid", matchGameUid);
+
+				conn.Open();
+				using var reader = command.ExecuteReader();
+				while (reader.Read())
+				{
+					matchGame = CreateFrom(reader);
+				}
+			}
+
+			return matchGame;
 		}
 	}
 }

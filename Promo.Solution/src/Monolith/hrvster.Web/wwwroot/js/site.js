@@ -33,4 +33,13 @@ $(document).ready(function () {
         destroy: true,
         searching: true,
     });
+
+    $(document).on('click', '.prize-image-box', function () {
+        $('.prize-image-box').removeClass('selected');
+        $(this).addClass('selected');
+
+        var imageUid = $(this).data('uid');
+
+        $('#ImageUid').attr('value', imageUid);
+    });
 });

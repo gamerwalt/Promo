@@ -104,6 +104,7 @@ namespace hrvster.ApplicationServices.Tests
 				.RuleFor(m => m.Name, f => f.Lorem.Word())
 				.RuleFor(m => m.Description, f => f.Lorem.Sentence())
 				.RuleFor(m => m.Value, f => f.Random.Int())
+				.RuleFor(m => m.Quantity, f => 10)
 				.RuleFor(m => m.Image, f => matchImage);
 		}
 

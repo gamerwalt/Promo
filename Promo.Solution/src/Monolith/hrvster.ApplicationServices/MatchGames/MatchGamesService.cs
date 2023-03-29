@@ -13,6 +13,7 @@ namespace hrvster.ApplicationServices.MatchGames
 		Task CreateMatchGameAsync(MatchGame matchGame, string timeZone, bool isDaylight, CancellationToken cancellationToken);
 		Task<IEnumerable<MatchGame>> GetAccountMatchGamesAsync(Guid userUid, CancellationToken cancellationToken);
 		Task<IEnumerable<MatchGame>> GetCampaignMatchGamesAsync(Guid campaignUid, CancellationToken cancellationToken);
+		MatchGame GetMatchGame(Guid matchGameUid);
 		Task<MatchGame> GetMatchGameAsync(Guid matchGameUid, CancellationToken cancellationToken);
 		IEnumerable<MatchGameRule> GetRulesMatching(string watchValue);
 		Task SetAsReadyToBeProcessedAsync(MatchGame matchGame, CancellationToken cancellationToken);
@@ -60,6 +61,14 @@ namespace hrvster.ApplicationServices.MatchGames
 				throw new ArgumentNullException(nameof(campaignUid));
 
 			return await _repository.GetByCampaignAsync(campaignUid, cancellationToken);
+		}
+
+		public MatchGame GetMatchGame(Guid matchGameUid)
+		{
+			if (matchGameUid == Guid.Empty)
+				throw new ArgumentNullException(nameof(matchGameUid));
+
+			return _repository.Get(matchGameUid, default(CancellationToken));
 		}
 
 		public async Task<MatchGame> GetMatchGameAsync(Guid matchGameUid, CancellationToken cancellationToken)

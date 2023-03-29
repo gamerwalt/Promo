@@ -77,7 +77,8 @@ namespace hrvster.Games.Match.Tests
                 .RuleFor(p => p.Name, f => f.Lorem.Random.Word())
                 .RuleFor(p => p.Description, f => f.Lorem.Sentences(3))
                 .RuleFor(p => p.Value, f => f.Random.Number())
-                .RuleFor(p => p.Image, f => new MatchImage());
+				.RuleFor(m => m.Quantity, f => 10)
+				.RuleFor(p => p.Image, f => new MatchImage());
 
             var prize1 = prizeFaker.Generate();
             var prize2 = prizeFaker.Generate();
@@ -129,7 +130,8 @@ namespace hrvster.Games.Match.Tests
                 .RuleFor(p => p.Name, f => f.Lorem.Random.Word())
                 .RuleFor(p => p.Description, f => f.Lorem.Sentences(3))
                 .RuleFor(p => p.Value, f => f.Random.Number())
-                .RuleFor(p => p.Image, f => new MatchImage());
+				.RuleFor(m => m.Quantity, f => 10)
+				.RuleFor(p => p.Image, f => new MatchImage());
 
             var prize1 = prizeFaker.Generate();
             var prize2 = prizeFaker.Generate();

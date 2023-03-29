@@ -7,5 +7,8 @@ namespace hrvster.Web.Models
 		public UpdateMatchGame MatchGame { get; set; }
 		public List<MatchImage> MatchImages { get; set; }
 		public List<MatchRule> MatchRules { get; set; }
+		public List<MatchPrize> MatchPrizes { get; set; }
+		public bool Generated { get; set; }
+		public bool ReadyToBeGenerated { get; set; }
 	}
 }

@@ -12,6 +12,8 @@ namespace hrvster.Infrastructure.MatchGames
 	public interface IMatchPrizesRepository
 	{
 		Task CreateAsync(MatchPrize matchPrize, CancellationToken cancellationToken);
+		Task<MatchPrize> GetAsync(Guid prizeUid, CancellationToken cancellationToken);
+		IEnumerable<MatchPrize> GetForMatchGame(Guid matchGameUid, object value);
 		Task<IEnumerable<MatchPrize>> GetForMatchGameAsync(Guid matchGameUid, CancellationToken cancellationToken);
 	}
 
@@ -34,6 +36,7 @@ namespace hrvster.Infrastructure.MatchGames
 				.AddParameter("matchPrizeName", matchPrize.Name)
 				.AddParameter("matchPrizeDescription", matchPrize.Description)
 				.AddParameter("matchPrizeValue", matchPrize.Value)
+				.AddParameter("quantity", matchPrize.Quantity)
 				.AddParameter("matchImageUid", matchPrize.Image.Uid);
 
 			await conn.OpenAsync(cancellationToken);
@@ -70,6 +73,7 @@ namespace hrvster.Infrastructure.MatchGames
 				Name = reader.GetString("prize_name"),
 				Description = reader.GetString("prize_description"),
 				Value = reader.GetDecimal("prize_value"),
+				Quantity = reader.GetInt32("quantity"),
 				MatchGame = new MatchGame
 				{
 					Id = reader.GetInt32("match_game_id"),
@@ -78,8 +82,54 @@ namespace hrvster.Infrastructure.MatchGames
 				Image = new MatchImage
 				{
 					Id = reader.GetInt32("image_id"),
-					Uid = reader.GetGuid("image_uid")
+					Uid = reader.GetGuid("image_uid"),
+					Name = reader.GetStringValue("image_name"),
+					LocationUrl = reader.GetStringValue("location_url")
 				}
 			};
+
+		public IEnumerable<MatchPrize> GetForMatchGame(Guid matchGameUid, object value)
+		{
+			var matchPrizes = new List<MatchPrize>();
+
+			using (var conn = new MySqlConnection(_database.GetConnectionString()))
+			{
+				var command = conn.CreateCommand();
+				command.CommandText = "match_prizes_get_by_match_game_uid";
+				command.CommandType = CommandType.StoredProcedure;
+				command.AddParameter("matchGameUid", matchGameUid);
+
+				conn.Open();
+				using var reader = command.ExecuteReader();
+				while (reader.Read())
+				{
+					matchPrizes.Add(CreateFrom(reader));
+				}
+			}
+
+			return matchPrizes;
+		}
+
+		public async Task<MatchPrize> GetAsync(Guid prizeUid, CancellationToken cancellationToken)
+		{
+			var matchPrize = default(MatchPrize);
+
+			using (var conn = new MySqlConnection(_database.GetConnectionString()))
+			{
+				var command = conn.CreateCommand();
+				command.CommandText = "match_prize_get";
+				command.CommandType = CommandType.StoredProcedure;
+				command.AddParameter("prizeUid", prizeUid);
+
+				await conn.OpenAsync(cancellationToken);
+				using var reader = await command.ExecuteReaderAsync(cancellationToken);
+				while (await reader.ReadAsync(cancellationToken))
+				{
+					matchPrize = CreateFrom(reader);
+				}
+			}
+
+			return matchPrize;
+		}
 	}
 }

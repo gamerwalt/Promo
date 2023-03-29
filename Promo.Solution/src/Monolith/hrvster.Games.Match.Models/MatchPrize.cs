@@ -9,5 +9,6 @@
 		public string Description { get; set; }
 		public decimal Value { get; set; }
 		public MatchImage Image { get; set; }
+		public int Quantity { get; set; }
 	}
 }

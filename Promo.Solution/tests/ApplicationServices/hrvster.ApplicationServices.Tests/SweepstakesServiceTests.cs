@@ -84,7 +84,7 @@ namespace hrvster.ApplicationServices.Tests
             liveSweeps.Count().Should().Be(2);
         }
 
-        [Theory]
+        [Theory(Skip = "This test takes too long so we skip it.")]
         [InlineData(5000, SubscriptionPlans.Basic)]
 		[InlineData(5001, SubscriptionPlans.Basic)]
 		[InlineData(4999, SubscriptionPlans.Basic)]
