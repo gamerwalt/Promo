@@ -16,6 +16,7 @@ namespace hrvster.Infrastructure.MatchGames
 		Task<MatchPrize> GetAsync(Guid prizeUid, CancellationToken cancellationToken);
 		IEnumerable<MatchPrize> GetForMatchGame(Guid matchGameUid, object value);
 		Task<IEnumerable<MatchPrize>> GetForMatchGameAsync(Guid matchGameUid, CancellationToken cancellationToken);
+		Task UpdateAsync(Guid prizeUid, string name, string description, int quantity, decimal value, Guid imageUid, CancellationToken cancellationToken);
 	}
 
 	public class MatchPrizesRepository : IMatchPrizesRepository
@@ -153,6 +154,31 @@ namespace hrvster.Infrastructure.MatchGames
 			}
 
 			return matchPrize;
+		}
+
+		public async Task UpdateAsync(
+			Guid prizeUid, 
+			string name, 
+			string description, 
+			int quantity, 
+			decimal value, 
+			Guid imageUid, 
+			CancellationToken cancellationToken)
+		{
+			using var conn = new MySqlConnection(_database.GetConnectionString());
+			var command = conn.CreateCommand();
+			command.CommandText = "match_prize_update";
+			command.CommandType = CommandType.StoredProcedure;
+			command
+				.AddParameter("matchPrizeUid", prizeUid)
+				.AddParameter("matchPrizeName", name)
+				.AddParameter("matchPrizeDescription", description)
+				.AddParameter("matchPrizeValue", value)
+				.AddParameter("quantity", quantity)
+				.AddParameter("matchImageUid", imageUid);
+
+			await conn.OpenAsync(cancellationToken);
+			await command.ExecuteNonQueryAsync(cancellationToken);
 		}
 	}
 }

@@ -172,14 +172,40 @@ namespace hrvster.Web.Controllers
 
 			if(ModelState.IsValid)
 			{
-				_notificationService.AddSuccessToastMessage("Yay!");
+				_logger.LogInformation("Updating the match prize with uid {matchPrizeUid} and name {prizeName}",
+					prizeUid,
+					matchPrize.Name);
+				
+				await _matchPrizeService.UpdateAsync(
+					prizeUid, 
+					Uid, 
+					form.Name, 
+					form.Description, 
+					form.Quantity, 
+					form.Value, 
+					form.ImageUid, 
+					cancellationToken);
+
+				_notificationService.AddSuccessToastMessage("Match prize updated successfully.");
+
+				_logger.LogInformation("Match prize with uid {matchPrizeUid} and name {prizeName} updated successfully.",
+					prizeUid,
+					matchPrize.Name);
 
 				return RedirectToAction(actionName ?? "View", controllerName ?? "MatchGames", new { Uid = Uid });
 			}
 
 			_notificationService.AddErrorToastMessage(ModelState.BuildMessageFromErrors());
 
-			return RedirectToAction(actionName ?? "View", controllerName ?? "MatchGames", new { Uid = Uid });
+			return RedirectToAction(
+				"Update", 
+				"MatchPrizes", 
+				new { 
+					prizeUid = prizeUid, 
+					Uid = Uid, 
+					actionName = actionName, 
+					controllerName = controllerName 
+				});
 		}
 
 		private async Task<UpdateMatchPrize> BuildUpdateMatchPrize(

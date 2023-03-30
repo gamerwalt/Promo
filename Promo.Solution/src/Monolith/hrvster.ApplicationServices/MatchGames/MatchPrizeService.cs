@@ -16,6 +16,7 @@ namespace hrvster.ApplicationServices.MatchGames
 		MatchPrize GetPrize(Guid matchPrizeUid);
 		Task<MatchPrize> GetPrizeAsync(Guid prizeUid, CancellationToken cancellationToken);
 		int GetTotalPrizesForGame(Guid matchGameUid);
+		Task UpdateAsync(Guid prizeUid, Guid uid, string name, string description, int quantity, decimal value, Guid imageUid, CancellationToken cancellationToken);
 	}
 
 	public class MatchPrizeService : IMatchPrizeService
@@ -66,5 +67,29 @@ namespace hrvster.ApplicationServices.MatchGames
 
 			return allPrizes.Sum(p => p.Quantity);
 		}
+
+		/// <summary>
+		/// Update a match prize
+		/// </summary>
+		/// <param name="prizeUid"></param>
+		/// <param name="uid"></param>
+		/// <param name="name"></param>
+		/// <param name="description"></param>
+		/// <param name="quantity"></param>
+		/// <param name="value"></param>
+		/// <param name="imageUid"></param>
+		/// <param name="cancellationToken"></param>
+		/// <returns></returns>
+		/// <exception cref="NotImplementedException"></exception>
+		public async Task UpdateAsync(
+			Guid prizeUid,
+			Guid uid,
+			string name,
+			string description,
+			int quantity,
+			decimal value,
+			Guid imageUid,
+			CancellationToken cancellationToken)
+			=> await _repository.UpdateAsync(prizeUid, name, description, quantity, value, imageUid, cancellationToken);
 	}
 }
