@@ -1,6 +1,7 @@
 ﻿using hrvster.Games.Match.Models;
 using hrvster.Infrastructure.Extensions;
 using MySqlConnector;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -12,6 +13,7 @@ namespace hrvster.Infrastructure.MatchGames
 	public interface IMatchPrizesRepository
 	{
 		Task CreateAsync(MatchPrize matchPrize, CancellationToken cancellationToken);
+		Task DeleteAsync(Guid prizeUid, CancellationToken cancellationToken);
 		MatchPrize Get(Guid matchPrizeUid);
 		Task<MatchPrize> GetAsync(Guid prizeUid, CancellationToken cancellationToken);
 		IEnumerable<MatchPrize> GetForMatchGame(Guid matchGameUid, object value);
@@ -176,6 +178,19 @@ namespace hrvster.Infrastructure.MatchGames
 				.AddParameter("matchPrizeValue", value)
 				.AddParameter("quantity", quantity)
 				.AddParameter("matchImageUid", imageUid);
+
+			await conn.OpenAsync(cancellationToken);
+			await command.ExecuteNonQueryAsync(cancellationToken);
+		}
+
+		public async Task DeleteAsync(Guid prizeUid, CancellationToken cancellationToken)
+		{
+			using var conn = new MySqlConnection(_database.GetConnectionString());
+			var command = conn.CreateCommand();
+			command.CommandText = "match_prize_delete";
+			command.CommandType = CommandType.StoredProcedure;
+			command
+				.AddParameter("matchPrizeUid", prizeUid);
 
 			await conn.OpenAsync(cancellationToken);
 			await command.ExecuteNonQueryAsync(cancellationToken);

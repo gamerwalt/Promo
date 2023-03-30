@@ -12,6 +12,7 @@ namespace hrvster.ApplicationServices.MatchGames
 	public interface IMatchPrizeService
 	{
 		Task CreateAsync(Guid uid, string name, string description, decimal value, int quantity, Guid imageUid, CancellationToken cancellationToken);
+		Task DeleteAsync(Guid prizeUid, CancellationToken cancellationToken);
 		Task<IEnumerable<MatchPrize>> GetAllForMatchGameAsync(Guid uid, CancellationToken cancellationToken);
 		MatchPrize GetPrize(Guid matchPrizeUid);
 		Task<MatchPrize> GetPrizeAsync(Guid prizeUid, CancellationToken cancellationToken);
@@ -48,6 +49,9 @@ namespace hrvster.ApplicationServices.MatchGames
 					Quantity = quantity,
 					Image = new MatchImage { Uid = imageUid }
 				}, cancellationToken);
+
+		public async Task DeleteAsync(Guid prizeUid, CancellationToken cancellationToken)
+			=> await _repository.DeleteAsync(prizeUid, cancellationToken);
 
 		public async Task<IEnumerable<MatchPrize>> GetAllForMatchGameAsync(Guid uid, CancellationToken cancellationToken)
 			=> await _repository.GetForMatchGameAsync(uid, cancellationToken);

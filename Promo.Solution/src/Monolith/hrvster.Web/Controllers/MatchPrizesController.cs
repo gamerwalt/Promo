@@ -208,6 +208,111 @@ namespace hrvster.Web.Controllers
 				});
 		}
 
+		[HttpGet]
+		[Route("/matchprizes/{prizeUid:Guid}/matchgame/{Uid:Guid}/delete")]
+		public async Task<IActionResult> Delete(
+			Guid prizeUid,
+			Guid Uid,
+			string controllerName,
+			string actionName,
+			CancellationToken cancellationToken)
+		{
+			var matchGame = await _matchGameService.GetMatchGameAsync(Uid, cancellationToken);
+			if (matchGame == null)
+			{
+				_logger.LogWarning("Could not find the match game with uid {uid}", Uid);
+				_notificationService.AddWarningToastMessage("Could not find the match game.");
+
+				return RedirectToAction(actionName ?? "View", controllerName ?? "MatchGames", new { Uid = Uid });
+			}
+
+			var matchPrize = await _matchPrizeService.GetPrizeAsync(prizeUid, cancellationToken);
+			if (matchPrize == null)
+			{
+				_logger.LogWarning("Could not find the match prize with uid {prizeUid}", prizeUid);
+
+				_notificationService.AddWarningToastMessage("Could not find the prize.");
+
+				return RedirectToAction(actionName ?? "View", controllerName ?? "MatchGames", new { Uid = Uid });
+			}
+
+			var matchImages = await _matchImageService.GetForMatchGameAsync(Uid, cancellationToken);
+
+			var model = new DeleteMatchPrize
+			{
+				Description = matchPrize.Description,
+				Name = matchPrize.Name,
+				MatchPrizeUid = prizeUid,
+				Quantity = matchPrize.Quantity,
+				Value = matchPrize.Value,
+				MatchGameName = matchGame.Name,
+				MatchGameUid = matchGame.Uid,
+				ImageLocationUrl = matchImages.FirstOrDefault(mi => mi.Uid == matchPrize.Image.Uid).LocationUrl,
+				ControllerName = controllerName,
+				ActionName = actionName
+			};
+
+			return View(model);
+		}
+
+		[HttpPost]
+		[Route("/matchprizes/{prizeUid:Guid}/matchgame/{Uid:Guid}/delete")]
+		public async Task<IActionResult> Delete(
+			Guid prizeUid,
+			Guid Uid,
+			string controllerName,
+			string actionName,
+			DeleteMatchPrize form,
+			CancellationToken cancellationToken)
+		{
+			var matchGame = await _matchGameService.GetMatchGameAsync(Uid, cancellationToken);
+			if (matchGame == null)
+			{
+				_logger.LogWarning("Could not find the match game with uid {uid}", Uid);
+				_notificationService.AddWarningToastMessage("Could not find the match game.");
+
+				return RedirectToAction(actionName ?? "View", controllerName ?? "MatchGames", new { Uid = Uid });
+			}
+
+			var matchPrize = await _matchPrizeService.GetPrizeAsync(prizeUid, cancellationToken);
+			if (matchPrize == null)
+			{
+				_logger.LogWarning("Could not find the match prize with uid {prizeUid}", prizeUid);
+
+				_notificationService.AddWarningToastMessage("Could not find the prize.");
+
+				return RedirectToAction(actionName ?? "View", controllerName ?? "MatchGames", new { Uid = Uid });
+			}
+
+			if(ModelState.IsValid)
+			{
+				_logger.LogInformation("Deleting the match prize with uid {matchPrizeUid} and name {prizeName}",
+					prizeUid,
+					matchPrize.Name);
+
+				await _matchPrizeService.DeleteAsync(prizeUid, cancellationToken);
+
+				_notificationService.AddSuccessToastMessage("Match prize deleted successfully.");
+
+				_logger.LogInformation("Match prize with uid {matchPrizeUid} and name {prizeName} deleted successfully.",
+					prizeUid,
+					matchPrize.Name);
+
+				return RedirectToAction(actionName ?? "View", controllerName ?? "MatchGames", new { Uid = Uid });
+			}
+
+			_notificationService.AddErrorToastMessage(ModelState.BuildMessageFromErrors());
+
+			return RedirectToAction("Delete", "MatchPrizes", new
+			{
+				prizeUid = prizeUid,
+				Uid = Uid,
+				controllerName = controllerName,
+				actionName = actionName
+			});
+		}
+
+
 		private async Task<UpdateMatchPrize> BuildUpdateMatchPrize(
 			Guid prizeUid,
 			Guid Uid,
