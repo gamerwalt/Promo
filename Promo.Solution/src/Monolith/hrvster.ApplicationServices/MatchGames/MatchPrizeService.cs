@@ -13,6 +13,7 @@ namespace hrvster.ApplicationServices.MatchGames
 	{
 		Task CreateAsync(Guid uid, string name, string description, decimal value, int quantity, Guid imageUid, CancellationToken cancellationToken);
 		Task<IEnumerable<MatchPrize>> GetAllForMatchGameAsync(Guid uid, CancellationToken cancellationToken);
+		MatchPrize GetPrize(Guid matchPrizeUid);
 		Task<MatchPrize> GetPrizeAsync(Guid prizeUid, CancellationToken cancellationToken);
 		int GetTotalPrizesForGame(Guid matchGameUid);
 	}
@@ -49,6 +50,9 @@ namespace hrvster.ApplicationServices.MatchGames
 
 		public async Task<IEnumerable<MatchPrize>> GetAllForMatchGameAsync(Guid uid, CancellationToken cancellationToken)
 			=> await _repository.GetForMatchGameAsync(uid, cancellationToken);
+
+		public MatchPrize GetPrize(Guid matchPrizeUid)
+			=> _repository.Get(matchPrizeUid);
 
 		public async Task<MatchPrize> GetPrizeAsync(Guid prizeUid, CancellationToken cancellationToken)
 			=> await _repository.GetAsync(prizeUid, cancellationToken);

@@ -12,6 +12,7 @@ namespace hrvster.Infrastructure.MatchGames
 	public interface IMatchPrizesRepository
 	{
 		Task CreateAsync(MatchPrize matchPrize, CancellationToken cancellationToken);
+		MatchPrize Get(Guid matchPrizeUid);
 		Task<MatchPrize> GetAsync(Guid prizeUid, CancellationToken cancellationToken);
 		IEnumerable<MatchPrize> GetForMatchGame(Guid matchGameUid, object value);
 		Task<IEnumerable<MatchPrize>> GetForMatchGameAsync(Guid matchGameUid, CancellationToken cancellationToken);
@@ -124,6 +125,28 @@ namespace hrvster.Infrastructure.MatchGames
 				await conn.OpenAsync(cancellationToken);
 				using var reader = await command.ExecuteReaderAsync(cancellationToken);
 				while (await reader.ReadAsync(cancellationToken))
+				{
+					matchPrize = CreateFrom(reader);
+				}
+			}
+
+			return matchPrize;
+		}
+
+		public MatchPrize Get(Guid prizeUid)
+		{
+			var matchPrize = default(MatchPrize);
+
+			using (var conn = new MySqlConnection(_database.GetConnectionString()))
+			{
+				var command = conn.CreateCommand();
+				command.CommandText = "match_prize_get";
+				command.CommandType = CommandType.StoredProcedure;
+				command.AddParameter("prizeUid", prizeUid);
+
+				conn.Open();
+				using var reader = command.ExecuteReader();
+				while (reader.Read())
 				{
 					matchPrize = CreateFrom(reader);
 				}

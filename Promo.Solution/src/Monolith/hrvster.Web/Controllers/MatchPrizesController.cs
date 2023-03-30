@@ -125,7 +125,7 @@ namespace hrvster.Web.Controllers
 			}
 
 			var matchPrize = await _matchPrizeService.GetPrizeAsync(prizeUid, cancellationToken);
-			if(matchPrize == null)
+			if (matchPrize == null)
 			{
 				_logger.LogWarning("Could not find the match prize with uid {prizeUid}", prizeUid);
 
@@ -134,6 +134,63 @@ namespace hrvster.Web.Controllers
 				return RedirectToAction(actionName ?? "View", controllerName ?? "MatchGames", new { Uid = Uid });
 			}
 
+			var model = await BuildUpdateMatchPrize(
+				prizeUid, Uid, controllerName, actionName, matchGame, matchPrize, cancellationToken);
+
+			return View(model);
+		}
+		
+
+		[HttpPost]
+		[Route("/matchprizes/{prizeUid:Guid}/matchgame/{Uid:Guid}/edit")]
+		public async Task<IActionResult> Update(
+			Guid prizeUid, 
+			Guid Uid, 
+			string controllerName, 
+			string actionName,
+			UpdateMatchPrize form,
+			CancellationToken cancellationToken)
+		{
+			var matchGame = await _matchGameService.GetMatchGameAsync(Uid, cancellationToken);
+			if (matchGame == null)
+			{
+				_logger.LogWarning("Could not find the match game with uid {uid}", Uid);
+				_notificationService.AddWarningToastMessage("Could not find the match game.");
+
+				return RedirectToAction(actionName ?? "View", controllerName ?? "MatchGames", new { Uid = Uid });
+			}
+
+			var matchPrize = await _matchPrizeService.GetPrizeAsync(prizeUid, cancellationToken);
+			if (matchPrize == null)
+			{
+				_logger.LogWarning("Could not find the match prize with uid {prizeUid}", prizeUid);
+
+				_notificationService.AddWarningToastMessage("Could not find the prize.");
+
+				return RedirectToAction(actionName ?? "View", controllerName ?? "MatchGames", new { Uid = Uid });
+			}
+
+			if(ModelState.IsValid)
+			{
+				_notificationService.AddSuccessToastMessage("Yay!");
+
+				return RedirectToAction(actionName ?? "View", controllerName ?? "MatchGames", new { Uid = Uid });
+			}
+
+			_notificationService.AddErrorToastMessage(ModelState.BuildMessageFromErrors());
+
+			return RedirectToAction(actionName ?? "View", controllerName ?? "MatchGames", new { Uid = Uid });
+		}
+
+		private async Task<UpdateMatchPrize> BuildUpdateMatchPrize(
+			Guid prizeUid,
+			Guid Uid,
+			string controllerName,
+			string actionName,
+			Games.Match.Models.MatchGame matchGame,
+			Games.Match.Models.MatchPrize matchPrize,
+			CancellationToken cancellationToken)
+		{
 			var matchImages = await _matchImageService.GetForMatchGameAsync(Uid, cancellationToken);
 			var matchPrizes = await _matchPrizeService.GetAllForMatchGameAsync(Uid, cancellationToken);
 			var matchImagesUpdated = matchImages
@@ -152,10 +209,10 @@ namespace hrvster.Web.Controllers
 				MatchGameUid = matchGame.Uid,
 				MatchImages = _mapper.Map<List<MatchImage>>(matchImagesUpdated),
 				ControllerName = controllerName ?? "MatchGames",
-				ActionName = actionName ?? "View"
+				ActionName = actionName ?? "View",
+				PreviousQuantity = matchPrize.Quantity
 			};
-
-			return View(model);
+			return model;
 		}
 	}
 }

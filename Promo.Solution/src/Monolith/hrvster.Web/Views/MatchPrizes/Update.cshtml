@@ -3,9 +3,17 @@
 	ViewData["Title"] = $"Update Prize for {Model.MatchGameName}";
 }
 <div class="card card-bordered">
-	<form asp-controller="MatchImages" asp-action="Update" class="form-horizontal form-material mx-2">
+	<form 
+		asp-route-prizeUid="@Model.MatchPrizeUid"
+		asp-route-Uid="@Model.MatchGameUid"
+		asp-route-controllerName="@Model.ControllerName"
+		asp-route-actionName="@Model.ActionName"
+		asp-controller="MatchPrizes" 
+		asp-action="Update" 
+		class="form-horizontal form-material mx-2">
 		<div class="card-body">
 			<input asp-for="MatchGameUid" hidden />
+			<input asp-for="PreviousQuantity" hidden />
 			<div class="d-flex flex-column flex-lg-row">
 				<div class="flex-lg-row-fluid me-lg-15 order-2 order-lg-1 mb-10 mb-lg-0">
 					<div class="fv-row mb-8 w-lg-300px">
