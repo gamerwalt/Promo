@@ -145,6 +145,7 @@ namespace hrvster.Web.Controllers
 						form.WinProbability,
 						form.StartDate,
 						form.EndDate,
+						form.GenerateBoardDate,
 						_hrvsterUser.WindowsTimeZone,
 						_hrvsterUser.IsDaylight)
 					))
@@ -270,14 +271,15 @@ namespace hrvster.Web.Controllers
 			=> new CreateMatchGame()
 			{
 				Promotions = campaigns
-									.Where(p => p.IsActive() || p.WillBeInProgress())
-									.Select(a => new SelectListItem()
-									{
-										Text = $"{a.CampaignName} - {a.StartDate.ToString("d")} to {a.EndDate.ToString("d")}",
-										Value = a.CampaignUid.ToString()
-									}),
+					.Where(p => p.IsActive() || p.WillBeInProgress())
+					.Select(a => new SelectListItem()
+					{
+						Text = $"{a.CampaignName} - {a.StartDate.ToString("d")} to {a.EndDate.ToString("d")}",
+						Value = a.CampaignUid.ToString()
+					}),
 				StartDate = DateTime.Now.AddDays(1),
-				EndDate = DateTime.Now.AddDays(30)
+				EndDate = DateTime.Now.AddDays(30),
+				GenerateBoardDate = DateTime.Now
 			};
 	}
 }

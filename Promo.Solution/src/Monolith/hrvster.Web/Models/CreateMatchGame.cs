@@ -15,6 +15,7 @@ namespace hrvster.Web.Models
 		public int WinProbability { get; set; }
 		public DateTime StartDate { get; set; }
 		public DateTime EndDate { get; set; }
+		public DateTime GenerateBoardDate { get; set; }
 		public bool AcceptTerms { get; set; }
 	}
 }

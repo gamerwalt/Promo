@@ -34,6 +34,7 @@ namespace hrvster.Core.Handlers.Tests
 				model.WinProbability,
 				model.StartDate,
 				model.EndDate,
+                model.GenerateBoardDate,
 				TestData.WindowsTimezone,
 				false
 				);

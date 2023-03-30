@@ -36,11 +36,13 @@ namespace hrvster.Infrastructure.MatchGames
 		{
 			var startDateUtc = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(matchGame.StartDate, TimeZoneInfo.Local.Id, timezone);
 			var endDateUtc = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(matchGame.EndDate, TimeZoneInfo.Local.Id, timezone);
+			var generateBoardDateUtc = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(matchGame.GenerateBoardDate, TimeZoneInfo.Local.Id, timezone);
 
 			if (!isDaylight)
 			{
 				startDateUtc = startDateUtc.AddHours(-2);
 				endDateUtc = endDateUtc.AddHours(-2);
+				generateBoardDateUtc = generateBoardDateUtc.AddHours(-2);
 			}
 
 			using var conn = new MySqlConnection(_database.GetConnectionString());
@@ -59,7 +61,9 @@ namespace hrvster.Infrastructure.MatchGames
 				.AddParameter("startDate", matchGame.StartDate)
 				.AddParameter("startDateUtc", startDateUtc)
 				.AddParameter("endDate", matchGame.EndDate)
-				.AddParameter("endDateUtc", endDateUtc);
+				.AddParameter("endDateUtc", endDateUtc)
+				.AddParameter("generateBoardDate", matchGame.GenerateBoardDate)
+				.AddParameter("generateBoardDateUtc", generateBoardDateUtc);
 
 			await conn.OpenAsync(cancellationToken);
 			await command.ExecuteNonQueryAsync(cancellationToken);
@@ -230,7 +234,9 @@ namespace hrvster.Infrastructure.MatchGames
 				EndDate = reader.GetDateTime("end_date"),
 				EndDateUtc = reader.GetDateTime("end_date_utc"),
 				HasBeenGenerated = reader.GetBoolean("is_generated"),
-				ReadyToBeGenerated = reader.GetBoolean("ready_to_generate")
+				ReadyToBeGenerated = reader.GetBoolean("ready_to_generate"),
+				GenerateBoardDate = reader.GetDateTime("generate_board_date"),
+				GenerateBoardDateUtc = reader.GetDateTime("generate_board_date_utc")
 			};
 		}
 

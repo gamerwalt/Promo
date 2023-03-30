@@ -81,7 +81,19 @@ namespace hrvster.Web.Validation
 				.NotNull()
 				.Must((matchGame, endDate) => GreaterThan(matchGame, endDate))
 				.WithMessage("The end date should be greater than the start date.");
+			RuleFor(f => f.GenerateBoardDate)
+				.NotEmpty()
+				.WithMessage("You must supply a date to generate the boards.")
+				.NotNull()
+				.WithMessage("You must supply a date to generate the boards.")
+				.Must((matchGame, generateBoardDate) => LessThan(matchGame, generateBoardDate))
+				.WithMessage("The generate board date should be less than the start date");
 
+		}
+
+		private bool LessThan(CreateMatchGame matchGame, DateTime generateBoardDate)
+		{
+			return generateBoardDate < matchGame.StartDate;
 		}
 
 		private bool PromotionShouldExist(Guid promotionUid)

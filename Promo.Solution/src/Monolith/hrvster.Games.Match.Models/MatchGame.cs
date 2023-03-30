@@ -20,5 +20,7 @@ namespace hrvster.Games.Match.Models
 		public DateTime StartDateUtc { get; set; }
 		public DateTime EndDate { get; set; }
 		public DateTime EndDateUtc { get; set; }
+		public DateTime GenerateBoardDate { get; set; }
+		public DateTime GenerateBoardDateUtc { get; set; }
 	}
 }

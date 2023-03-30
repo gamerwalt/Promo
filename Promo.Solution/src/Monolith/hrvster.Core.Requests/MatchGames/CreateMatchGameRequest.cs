@@ -15,10 +15,11 @@ namespace hrvster.Core.Requests.MatchGames
 		private int _winProbability;
 		private DateTime _startDate;
 		private DateTime _endDate;
+		private DateTime _generateBoardDate;
 		private string _timeZone;
 		private bool _isDaylight;
 
-		public CreateMatchGameRequest(Guid matchGameUid, Guid accountUid, Guid promotionUid, string name, string description, int numberOfBoards, int winnableBoards, int winProbability, DateTime startDate, DateTime endDate, string timeZone, bool isDaylight)
+		public CreateMatchGameRequest(Guid matchGameUid, Guid accountUid, Guid promotionUid, string name, string description, int numberOfBoards, int winnableBoards, int winProbability, DateTime startDate, DateTime endDate, DateTime generateBoardDate, string timeZone, bool isDaylight)
 		{
 			_matchGammeUid = matchGameUid;
 			_accountUid = accountUid;
@@ -30,6 +31,7 @@ namespace hrvster.Core.Requests.MatchGames
 			_winProbability = winProbability;
 			_startDate = startDate;
 			_endDate = endDate;
+			_generateBoardDate = generateBoardDate;
 			_timeZone = timeZone;
 			_isDaylight = isDaylight;
 		}
@@ -44,6 +46,7 @@ namespace hrvster.Core.Requests.MatchGames
 		public int WinProbability { get { return _winProbability; } }
 		public DateTime StartDate { get { return _startDate; } }
 		public DateTime EndDate { get { return _endDate; } }
+		public DateTime GenerateBoardDate { get { return _generateBoardDate; } }
 		public string TimeZone { get { return _timeZone; } }
 		public bool IsDayLight { get { return _isDaylight; } }
 	}

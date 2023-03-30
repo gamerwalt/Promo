@@ -53,7 +53,9 @@ namespace hrvster.Core.Handlers.MatchGame
 				Uid = request.MatchGameUid,
 				WinProbability = request.WinProbability,
 				StartDate = request.StartDate,
-				EndDate = request.EndDate
+				EndDate = request.EndDate,
+				GenerateBoardDate = request.GenerateBoardDate
+				
 			};
 
 			_logger.LogInformation("Creating match game {matchGame} for account {accountUid}",
