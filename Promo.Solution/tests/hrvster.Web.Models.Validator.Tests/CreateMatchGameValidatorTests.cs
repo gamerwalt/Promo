@@ -57,7 +57,8 @@ namespace hrvster.Web.Models.Validator.Tests
 				.RuleFor(x => x.WinnableBoards, f => f.Random.Number(minNumberOfBoards + 1, maxNumberOfBoards - 1))
 				.RuleFor(x => x.WinProbability, f => f.Random.Number(1, 9))
 				.RuleFor(x => x.StartDate, f => f.Date.Between(DateTime.Now.AddHours(3), DateTime.Now.AddHours(12)))
-				.RuleFor(x => x.EndDate, f => f.Date.Between(DateTime.Now.AddDays(30), DateTime.Now.AddDays(30).AddDays(30)));
+				.RuleFor(x => x.EndDate, f => f.Date.Between(DateTime.Now.AddDays(30), DateTime.Now.AddDays(30).AddDays(30)))
+				.RuleFor(x => x.GenerateBoardDate, f => DateTime.Now);
 
 			var createMatchGame = createMatchGameFaker.Generate();
 			createMatchGame.Name = string.Empty;
@@ -85,7 +86,8 @@ namespace hrvster.Web.Models.Validator.Tests
 				.RuleFor(x => x.WinnableBoards, f => f.Random.Number(minNumberOfBoards + 1, maxNumberOfBoards - 1))
 				.RuleFor(x => x.WinProbability, f => f.Random.Number(1, 9))
 				.RuleFor(x => x.StartDate, f => f.Date.Between(DateTime.Now.AddHours(3), DateTime.Now.AddHours(12)))
-				.RuleFor(x => x.EndDate, f => f.Date.Between(DateTime.Now.AddDays(30), DateTime.Now.AddDays(30).AddDays(30)));
+				.RuleFor(x => x.EndDate, f => f.Date.Between(DateTime.Now.AddDays(30), DateTime.Now.AddDays(30).AddDays(30)))
+				.RuleFor(x => x.GenerateBoardDate, f => DateTime.Now);
 
 			var createMatchGame = createMatchGameFaker.Generate();
 			createMatchGame.NumberOfBoards = 0;
@@ -113,7 +115,8 @@ namespace hrvster.Web.Models.Validator.Tests
 				.RuleFor(x => x.WinnableBoards, f => f.Random.Number(minNumberOfBoards + 1, maxNumberOfBoards - 1))
 				.RuleFor(x => x.WinProbability, f => f.Random.Number(1, 9))
 				.RuleFor(x => x.StartDate, f => f.Date.Between(DateTime.Now.AddHours(3), DateTime.Now.AddHours(12)))
-				.RuleFor(x => x.EndDate, f => f.Date.Between(DateTime.Now.AddDays(30), DateTime.Now.AddDays(30).AddDays(30)));
+				.RuleFor(x => x.EndDate, f => f.Date.Between(DateTime.Now.AddDays(30), DateTime.Now.AddDays(30).AddDays(30)))
+				.RuleFor(x => x.GenerateBoardDate, f => DateTime.Now);
 
 			var createMatchGame = createMatchGameFaker.Generate();
 			createMatchGame.NumberOfBoards = 1001;
@@ -137,7 +140,8 @@ namespace hrvster.Web.Models.Validator.Tests
 				.RuleFor(x => x.NumberOfBoards, f => 100)
 				.RuleFor(x => x.WinProbability, f => f.Random.Number(1, 9))
 				.RuleFor(x => x.StartDate, f => f.Date.Between(DateTime.Now.AddHours(3), DateTime.Now.AddHours(12)))
-				.RuleFor(x => x.EndDate, f => f.Date.Between(DateTime.Now.AddDays(30), DateTime.Now.AddDays(30).AddDays(30)));
+				.RuleFor(x => x.EndDate, f => f.Date.Between(DateTime.Now.AddDays(30), DateTime.Now.AddDays(30).AddDays(30)))
+				.RuleFor(x => x.GenerateBoardDate, f => DateTime.Now);
 
 			var createMatchGame = createMatchGameFaker.Generate();
 			createMatchGame.WinnableBoards = 101;
@@ -161,7 +165,8 @@ namespace hrvster.Web.Models.Validator.Tests
 				.RuleFor(x => x.NumberOfBoards, f => 100)
 				.RuleFor(x => x.WinProbability, f => f.Random.Number(1, 9))
 				.RuleFor(x => x.StartDate, f => f.Date.Between(DateTime.Now.AddHours(3), DateTime.Now.AddHours(12)))
-				.RuleFor(x => x.EndDate, f => f.Date.Between(DateTime.Now.AddDays(30), DateTime.Now.AddDays(30).AddDays(30)));
+				.RuleFor(x => x.EndDate, f => f.Date.Between(DateTime.Now.AddDays(30), DateTime.Now.AddDays(30).AddDays(30)))
+				.RuleFor(x => x.GenerateBoardDate, f => DateTime.Now);
 
 			var createMatchGame = createMatchGameFaker.Generate();
 			createMatchGame.WinnableBoards = 0;
@@ -186,7 +191,8 @@ namespace hrvster.Web.Models.Validator.Tests
 				.RuleFor(x => x.WinnableBoards, f => 90)
 				.RuleFor(x => x.WinProbability, f => f.Random.Number(1, 9))
 				.RuleFor(x => x.StartDate, f => f.Date.Between(DateTime.Now.AddHours(3), DateTime.Now.AddHours(12)))
-				.RuleFor(x => x.EndDate, f => f.Date.Between(DateTime.Now.AddDays(30), DateTime.Now.AddDays(30).AddDays(30)));
+				.RuleFor(x => x.EndDate, f => f.Date.Between(DateTime.Now.AddDays(30), DateTime.Now.AddDays(30).AddDays(30)))
+				.RuleFor(x => x.GenerateBoardDate, f => DateTime.Now);
 
 			var createMatchGame = createMatchGameFaker.Generate();
 			createMatchGame.WinProbability = 0;
@@ -218,7 +224,8 @@ namespace hrvster.Web.Models.Validator.Tests
 				.RuleFor(x => x.WinnableBoards, f => 90)
 				.RuleFor(x => x.WinProbability, f => f.Random.Number(1, 9))
 				.RuleFor(x => x.StartDate, f => f.Date.Between(DateTime.Now.AddHours(3), DateTime.Now.AddHours(12)))
-				.RuleFor(x => x.EndDate, f => f.Date.Between(DateTime.Now.AddDays(30), DateTime.Now.AddDays(30).AddDays(30)));
+				.RuleFor(x => x.EndDate, f => f.Date.Between(DateTime.Now.AddDays(30), DateTime.Now.AddDays(30).AddDays(30)))
+				.RuleFor(x => x.GenerateBoardDate, f => DateTime.Now);
 
 			var createMatchGame = createMatchGameFaker.Generate();
 			createMatchGame.StartDate = DateTime.Now.AddHours(-5);
@@ -242,7 +249,8 @@ namespace hrvster.Web.Models.Validator.Tests
 				.RuleFor(x => x.WinnableBoards, f => 90)
 				.RuleFor(x => x.WinProbability, f => f.Random.Number(1, 9))
 				.RuleFor(x => x.StartDate, f => f.Date.Between(DateTime.Now.AddHours(3), DateTime.Now.AddHours(12)))
-				.RuleFor(x => x.EndDate, f => f.Date.Between(DateTime.Now.AddDays(30), DateTime.Now.AddDays(30).AddDays(30)));
+				.RuleFor(x => x.EndDate, f => f.Date.Between(DateTime.Now.AddDays(30), DateTime.Now.AddDays(30).AddDays(30)))
+				.RuleFor(x => x.GenerateBoardDate, f => DateTime.Now);
 
 			var createMatchGame = createMatchGameFaker.Generate();
 			createMatchGame.StartDate = DateTime.Now.AddHours(5);
@@ -266,7 +274,8 @@ namespace hrvster.Web.Models.Validator.Tests
 				.RuleFor(x => x.WinnableBoards, f => 90)
 				.RuleFor(x => x.WinProbability, f => f.Random.Number(1, 9))
 				.RuleFor(x => x.StartDate, f => f.Date.Between(DateTime.Now.AddHours(3), DateTime.Now.AddHours(12)))
-				.RuleFor(x => x.EndDate, f => f.Date.Between(DateTime.Now.AddDays(30), DateTime.Now.AddDays(30).AddDays(30)));
+				.RuleFor(x => x.EndDate, f => f.Date.Between(DateTime.Now.AddDays(30), DateTime.Now.AddDays(30).AddDays(30)))
+				.RuleFor(x => x.GenerateBoardDate, f => DateTime.Now);
 
 			var createMatchGame = createMatchGameFaker.Generate();
 			createMatchGame.StartDate = DateTime.Now.AddHours(5);
@@ -291,7 +300,8 @@ namespace hrvster.Web.Models.Validator.Tests
 				.RuleFor(x => x.WinnableBoards, f => 90)
 				.RuleFor(x => x.WinProbability, f => f.Random.Number(1, 9))
 				.RuleFor(x => x.StartDate, f => f.Date.Between(DateTime.Now.AddHours(3), DateTime.Now.AddHours(12)))
-				.RuleFor(x => x.EndDate, f => f.Date.Between(DateTime.Now.AddDays(30), DateTime.Now.AddDays(30).AddDays(30)));
+				.RuleFor(x => x.EndDate, f => f.Date.Between(DateTime.Now.AddDays(30), DateTime.Now.AddDays(30).AddDays(30)))
+				.RuleFor(x => x.GenerateBoardDate, f => DateTime.Now);
 
 			var createMatchGame = createMatchGameFaker.Generate();
 			createMatchGame.StartDate = DateTime.Now.AddHours(5);
@@ -324,7 +334,8 @@ namespace hrvster.Web.Models.Validator.Tests
 				.RuleFor(x => x.WinnableBoards, f => 90)
 				.RuleFor(x => x.WinProbability, f => f.Random.Number(1, 9))
 				.RuleFor(x => x.StartDate, f => f.Date.Between(DateTime.Now.AddHours(3), DateTime.Now.AddHours(12)))
-				.RuleFor(x => x.EndDate, f => f.Date.Between(DateTime.Now.AddDays(30), DateTime.Now.AddDays(30).AddDays(30)));
+				.RuleFor(x => x.EndDate, f => f.Date.Between(DateTime.Now.AddDays(30), DateTime.Now.AddDays(30).AddDays(30)))
+				.RuleFor(x => x.GenerateBoardDate, f => DateTime.Now);
 
 			var createMatchGame = createMatchGameFaker.Generate();
 			createMatchGame.Name = updatedName;
@@ -392,7 +403,8 @@ namespace hrvster.Web.Models.Validator.Tests
 				.RuleFor(x => x.NumberOfWinnableBoards, f => f.Random.Number(1 + 1, 1000 - 1))
 				.RuleFor(x => x.WinProbability, f => f.Random.Number(1, 9))
 				.RuleFor(x => x.StartDate, f => f.Date.Between(DateTime.Now.AddHours(3), DateTime.Now.AddHours(12)))
-				.RuleFor(x => x.EndDate, f => f.Date.Between(DateTime.Now.AddDays(30), DateTime.Now.AddDays(30).AddDays(30)));
+				.RuleFor(x => x.EndDate, f => f.Date.Between(DateTime.Now.AddDays(30), DateTime.Now.AddDays(30).AddDays(30)))
+				.RuleFor(x => x.GenerateBoardDate, f => DateTime.Now);
 
 			var games = createMatchGameFaker.Generate(10);
 
@@ -408,7 +420,8 @@ namespace hrvster.Web.Models.Validator.Tests
 				.RuleFor(x => x.NumberOfWinnableBoards, f => f.Random.Number(1 + 1, 1000 - 1))
 				.RuleFor(x => x.WinProbability, f => f.Random.Number(1, 9))
 				.RuleFor(x => x.StartDate, f => f.Date.Between(DateTime.Now.AddHours(3), DateTime.Now.AddHours(12)))
-				.RuleFor(x => x.EndDate, f => f.Date.Between(DateTime.Now.AddDays(30), DateTime.Now.AddDays(30).AddDays(30)));
+				.RuleFor(x => x.EndDate, f => f.Date.Between(DateTime.Now.AddDays(30), DateTime.Now.AddDays(30).AddDays(30)))
+				.RuleFor(x => x.GenerateBoardDate, f => DateTime.Now);
 
 			var games = createMatchGameFaker.Generate(10);
 			games.FirstOrDefault().Name = name;

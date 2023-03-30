@@ -128,6 +128,7 @@ namespace hrvster.Infrastructure.Tests
 				.RuleFor(m => m.NumberOfWinnableBoards, f => f.Random.Number(1, 100))
 				.RuleFor(m => m.WinProbability, f => f.Random.Number(1, 9))
 				.RuleFor(m => m.StartDate, f => DateTime.Now)
-				.RuleFor(m => m.EndDate, f => DateTime.Now.AddDays(30));
+				.RuleFor(m => m.EndDate, f => DateTime.Now.AddDays(30))
+				.RuleFor(m => m.GenerateBoardDate, f => DateTime.Now);
 	}
 }

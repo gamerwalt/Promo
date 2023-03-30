@@ -124,6 +124,54 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
+CREATE DEFINER=`hrvster_user`@`%` PROCEDURE `account_get_all_rules`(IN accountUid VARCHAR(50))
+BEGIN
+	SELECT
+		SR.rule_id,
+        SR.rule_uid,
+        SR.active_ind,
+        SW.start_date,
+        SW.start_date_utc,
+        SW.end_date,
+        SW.end_date_utc,
+        SW.sweep_id as game_id,
+        SW.sweep_uid as game_uid
+    FROM sweep_rules as SR
+    INNER JOIN sweep as SW ON SW.sweep_id = SR.sweep_id
+    INNER JOIN accounts as AC ON AC.account_id = SW.account_id
+    WHERE AC.account_uid = accountUid
+    UNION ALL
+    SELECT
+		MGR.rule_id,
+        MGR.rule_uid,
+        MGR.active_ind,
+        MG.start_date,
+        MG.start_date_utc,
+        MG.end_date,
+        MG.end_date_utc,
+        MG.match_game_id as game_id,
+        MG.match_game_uid as game_uid
+    FROM match_game_rules as MGR
+    INNER JOIN match_games as MG ON MG.match_game_id = MGR.match_game_id
+    INNER JOIN campaigns as CM ON CM.campaign_id = MG.campaign_id
+    INNER JOIN accounts as AC ON AC.account_id = CM.account_id
+    WHERE AC.account_uid = accountUid;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `account_get_by_displayname` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
 CREATE DEFINER=`hrvster_user`@`%` PROCEDURE `account_get_by_displayname`(IN displayName VARCHAR(500))
 BEGIN
 	SELECT *
@@ -1671,6 +1719,64 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
+CREATE DEFINER=`hrvster_user`@`%` PROCEDURE `match_games_get_rules_matching`(IN watchValue VARCHAR(500))
+BEGIN
+	SELECT
+		mgr.rule_id,
+        mgr.rule_uid,
+		mgr.watch_value,
+        mgr.must_be_following,
+        mgr.notify_winners,
+        mgr.scheduled_ind,
+        mgr.active_ind,
+        mgr.external_id,
+        wt.watch_type_code,
+        wt.watch_type_name,
+        mg.match_game_id,
+        mg.match_game_uid,
+        mg.match_game_name,
+        mg.match_game_description,
+        mg.number_of_boards,
+        mg.tile_count_per_board,
+        mg.number_of_winnable_boards,
+        mg.win_probability_per_board,
+        mg.ready_to_generate,
+        mg.is_generated,
+        mg.start_date,
+        mg.start_date_utc,
+        mg.end_date,
+        mg.end_date_utc,
+        c.campaign_uid,
+        c.campaign_id,
+        c.campaign_name,
+        CT.campaign_type_name,
+        CT.campaign_type_code,
+        CT.campaign_type_uid,
+        A.account_id,
+        A.account_uid
+    FROM match_game_rules as mgr
+    INNER JOIN watch_types as wt ON mgr.watch_type_id = wt.watch_type_id
+    INNER JOIN match_games as mg ON mg.match_game_id = mgr.match_game_id
+    INNER JOIN campaigns as c ON c.campaign_id = mg.campaign_id
+    INNER JOIN campaign_types as CT on CT.campaign_type_id = c.campaign_type_id
+    INNER JOIN accounts as A on A.account_id = c.account_id
+    WHERE mgr.watch_value = watchValue;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `match_game_create` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
 CREATE DEFINER=`hrvster_user`@`%` PROCEDURE `match_game_create`(
 	IN campaignId INT,
     IN matchGameUid VARCHAR(50),
@@ -2031,6 +2137,27 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
+CREATE DEFINER=`hrvster_user`@`%` PROCEDURE `match_image_delete`(IN imageUid VARCHAR(50))
+BEGIN
+	DELETE 
+    FROM match_images
+    WHERE image_uid = imageUid;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `match_image_get_by_uid` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
 CREATE DEFINER=`hrvster_user`@`%` PROCEDURE `match_image_get_by_uid`(IN matchImageUid VARCHAR(50))
 BEGIN
 	SELECT
@@ -2043,6 +2170,29 @@ BEGIN
     FROM match_images as MI
     INNER JOIN match_games as MG ON MI.match_game_id = MG.match_game_id
     WHERE MI.image_uid = matchImageUid;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `match_image_update` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`hrvster_user`@`%` PROCEDURE `match_image_update`(IN imageUid VARCHAR(50), IN locationUrl VARCHAR(5000))
+BEGIN
+
+    UPDATE match_images
+		SET location_url = locationUrl,
+			updated_date = CURRENT_TIMESTAMP()
+	WHERE image_uid = imageUid;
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -2073,7 +2223,7 @@ BEGIN
         MI.image_uid
     FROM match_prizes AS MP
     INNER JOIN match_games as MG ON MG.match_game_id = MP.match_game_id
-    INNER JOIN match_images as MI ON MI.image_id = MP.image_id
+    INNER JOIN match_images as MI ON MI.image_id = MP.match_image_id
     WHERE MG.match_game_uid = matchGameUid;
 END ;;
 DELIMITER ;
@@ -2119,7 +2269,7 @@ BEGIN
     (
 		prize_uid,
         match_game_id,
-        image_id,
+        match_image_id,
         prize_name,
         prize_description,
         prize_value,
