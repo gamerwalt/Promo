@@ -21,6 +21,7 @@ namespace hrvster.Infrastructure.MatchGames
 		Task SetAsReadyToBeGeneratedAsync(MatchGame game, CancellationToken cancellationToken);
 		Task UpdateAsync(MatchGame matchGame, string timezone, bool isDaylight, CancellationToken cancellationToken);
 		MatchGame Get(Guid matchGameUid, CancellationToken cancellationToken);
+		Task<IEnumerable<MatchGame>> GetGameReadyForGenerationAsync(CancellationToken token);
 	}
 
 	public class MatchGamesRepository : IMatchGamesRepository
@@ -260,6 +261,27 @@ namespace hrvster.Infrastructure.MatchGames
 			}
 
 			return matchGame;
+		}
+
+		public async Task<IEnumerable<MatchGame>> GetGameReadyForGenerationAsync(CancellationToken cancellationToken)
+		{
+			var matchGames = new List<MatchGame>();
+
+			using (var conn = new MySqlConnection(_database.GetConnectionString()))
+			{
+				var command = conn.CreateCommand();
+				command.CommandText = "match_games_get_ready_for_generation";
+				command.CommandType = CommandType.StoredProcedure;
+
+				await conn.OpenAsync(cancellationToken);
+				using var reader = await command.ExecuteReaderAsync(cancellationToken);
+				while (await reader.ReadAsync(cancellationToken))
+				{
+					matchGames.Add(CreateFrom(reader));
+				}
+			}
+
+			return matchGames;
 		}
 	}
 }

@@ -27,7 +27,7 @@ namespace hrvster.Games.Match
 
 			for (var index = 0; index < boardCount; index++)
 			{
-				var board = new MatchBoard(rowTileCount, columnTileCount);
+				var board = new MatchBoard();
 				board.Uid = Guid.NewGuid();
 				if(allWins)
 				{
@@ -87,11 +87,11 @@ namespace hrvster.Games.Match
 		{
 			var tiles = boards.FirstOrDefault().Tiles;
 
-			return tiles.Length;
+			return tiles.Count;
 		}
 
 		private void SetTileWinIndicators(
-			MatchTile[][] tiles, int rowCount, int possiblity, MatchPrize matchPrize)
+			List<List<MatchTile>> tiles, int rowCount, int possiblity, MatchPrize matchPrize)
 		{
 			if(rowCount * rowCount == possiblity)
 			{
@@ -126,7 +126,7 @@ namespace hrvster.Games.Match
 		
 		}
 
-		private void SetTileWinnabilityAndPrizeImage(MatchTile[][] tiles, MatchPrize matchPrize, int rowIndex, int colIndex)
+		private void SetTileWinnabilityAndPrizeImage(List<List<MatchTile>> tiles, MatchPrize matchPrize, int rowIndex, int colIndex)
 		{
 			SetTilePrizeAndImage(tiles, rowIndex, colIndex, matchPrize);
 
@@ -134,7 +134,7 @@ namespace hrvster.Games.Match
 		}
 
 		private static void SetTilePrizeAndImage(
-			MatchTile[][] tiles, int rowIndex, int colIndex, MatchPrize matchPrize)
+			List<List<MatchTile>> tiles, int rowIndex, int colIndex, MatchPrize matchPrize)
 		{
 			tiles[rowIndex][colIndex].WinIndicator = true;
 			tiles[rowIndex][colIndex].Prize = matchPrize;

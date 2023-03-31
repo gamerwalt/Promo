@@ -13,6 +13,7 @@ namespace hrvster.Extensions.Configuration
 		public static IServiceCollection AddMatchGameService(this IServiceCollection services)
 			=> services.AddTransient<IMatchGamesService, MatchGamesService>()
 				.AddTransient<IMatchGameReadinessService, MatchGameReadinessService>()
+				.AddTransient<IMatchGameBoardService, MatchGameBoardService>()
 				.AddTransient<IMatchRulesService, MatchRulesService>()
 				.AddTransient<IMatchPrizeService, MatchPrizeService>()
 				.AddTransient<IMatchImageService, MatchImagesService>();

@@ -55,6 +55,7 @@ namespace hrvster.Services
 					services.AddSingleton<IService, FlutterwaveEventService>();
 					services.AddSingleton<IService, HarvesterRestarterService>();
 					services.AddSingleton<IService, SweepsGoingLiveService>();
+					services.AddSingleton<IService, MatchGameBoardService>();
 
 					services
 						.AddDatabaseConfiguration(Configuration)
@@ -80,7 +81,9 @@ namespace hrvster.Services
 						.AddSweepstakesServices()
 						.AddAccountsService()
 						.AddPaymentServices(Configuration)
-						.AddAutoMapper(typeof(EntityMap));
+						.AddAutoMapper(typeof(EntityMap))
+						.AddMatchGameRepositories()
+						.AddMatchGameService();
 
 					LoadServices(services);
 					AddMediator(services);

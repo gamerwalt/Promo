@@ -15,6 +15,7 @@ namespace hrvster.ApplicationServices.MatchGames
 		Task<IEnumerable<MatchGame>> GetCampaignMatchGamesAsync(Guid campaignUid, CancellationToken cancellationToken);
 		MatchGame GetMatchGame(Guid matchGameUid);
 		Task<MatchGame> GetMatchGameAsync(Guid matchGameUid, CancellationToken cancellationToken);
+		Task<IEnumerable<MatchGame>> GetMatchGamesToGenerateBoardAsync(CancellationToken token);
 		IEnumerable<MatchGameRule> GetRulesMatching(string watchValue);
 		Task SetAsReadyToBeProcessedAsync(MatchGame matchGame, CancellationToken cancellationToken);
 		Task SetMatchGameAsProcessedAsync(MatchGame matchGame, CancellationToken cancellationToken);
@@ -78,6 +79,9 @@ namespace hrvster.ApplicationServices.MatchGames
 
 			return await _repository.GetAsync(matchGameUid, cancellationToken);
 		}
+
+		public async Task<IEnumerable<MatchGame>> GetMatchGamesToGenerateBoardAsync(CancellationToken token)
+			=> await _repository.GetGameReadyForGenerationAsync(token);
 
 		public IEnumerable<MatchGameRule> GetRulesMatching(string watchValue)
 			=> _matchRulesService.GetRulesMatching(watchValue);
