@@ -69,12 +69,12 @@ namespace hrvster.Infrastructure.Tests
 			=> MatchGameRuleFaker = new Faker<MatchGameRule>()
 				.RuleFor(m => m.Uid, f => Guid.NewGuid())
 				.RuleFor(m => m.MatchGame, f => matchGame)
-				.RuleFor(m => m.WatchType, f => new WatchType { WatchTypeCode = watchTypeCode.ToString() })
+				.RuleFor(m => m.WatchTypeCode, f => WatchTypeCode.Hashtag)
 				.RuleFor(m => m.WatchValue, f => f.Random.Word())
 				.RuleFor(m => m.MustBeFollowing, f => f.Random.Bool())
 				.RuleFor(m => m.NotifyWinners, f => f.Random.Bool())
-				.RuleFor(m => m.ScheduledIndicator, f => f.Random.Bool())
-				.RuleFor(m => m.ActiveIndicator, f => f.Random.Bool())
+				.RuleFor(m => m.ScheduledInd, f => f.Random.Bool())
+				.RuleFor(m => m.ActiveInd, f => f.Random.Bool())
 				.RuleFor(m => m.ExternalId, f => f.Random.Long().ToString());
 
 		private void CreateFakeMatchGame(Campaign campaign)

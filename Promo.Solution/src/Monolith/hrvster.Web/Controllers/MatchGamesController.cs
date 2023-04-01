@@ -236,7 +236,7 @@ namespace hrvster.Web.Controllers
 		private MatchGameDetails BuildMatchGameDetails(
 			Games.Match.Models.MatchGame matchGame,
 			IEnumerable<Games.Match.Models.MatchImage> images,
-			IEnumerable<Games.Match.Models.MatchGameRule> rules,
+			IEnumerable<Rule> rules,
 			IEnumerable<Games.Match.Models.MatchPrize> prizes,
 			List<Campaign> campaigns)
 				=> new MatchGameDetails

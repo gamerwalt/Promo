@@ -105,7 +105,7 @@ namespace hrvster.ApplicationServices
 			}
 		}
 
-		private IEnumerable<MatchGameRule> GetRulesMatchingForMatchGames(string watchValue)
+		private IEnumerable<Rule> GetRulesMatchingForMatchGames(string watchValue)
 			=> _matchGameService.GetRulesMatching(watchValue);
 
 		private IEnumerable<Rule> GetRulesMatchingForSweeps(string watchValue)

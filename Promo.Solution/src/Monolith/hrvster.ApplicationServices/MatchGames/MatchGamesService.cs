@@ -18,7 +18,7 @@ namespace hrvster.ApplicationServices.MatchGames
 		Task<MatchGame> GetMatchGameAsync(Guid matchGameUid, CancellationToken cancellationToken);
 		Task<IEnumerable<MatchGame>> GetMatchGamesToGenerateBoardAsync(CancellationToken token);
 		Task<IEnumerable<Rule>> GetRulesAsync(CancellationToken cancellationToken);
-		IEnumerable<MatchGameRule> GetRulesMatching(string watchValue);
+		IEnumerable<Rule> GetRulesMatching(string watchValue);
 		Task SetAsReadyToBeProcessedAsync(MatchGame matchGame, CancellationToken cancellationToken);
 		Task SetMatchGameAsProcessedAsync(MatchGame matchGame, CancellationToken cancellationToken);
 		Task UpdateMatchGameAsync(MatchGame matchGame, string timeZone, bool isDaylight, CancellationToken cancellationToken);
@@ -88,7 +88,7 @@ namespace hrvster.ApplicationServices.MatchGames
 		public async Task<IEnumerable<Rule>> GetRulesAsync(CancellationToken cancellationToken)
 			=> await _repository.GetRulesAsync(cancellationToken);
 
-		public IEnumerable<MatchGameRule> GetRulesMatching(string watchValue)
+		public IEnumerable<Rule> GetRulesMatching(string watchValue)
 			=> _matchRulesService.GetRulesMatching(watchValue);
 
 		public async Task SetAsReadyToBeProcessedAsync(MatchGame matchGame, CancellationToken cancellationToken)

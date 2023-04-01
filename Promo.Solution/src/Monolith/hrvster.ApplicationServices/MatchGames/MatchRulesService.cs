@@ -1,5 +1,6 @@
 ﻿using hrvster.Games.Match.Models;
 using hrvster.Infrastructure.MatchGames;
+using hrvster.Models;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -10,8 +11,8 @@ namespace hrvster.ApplicationServices.MatchGames
 {
 	public interface IMatchRulesService
 	{
-		Task<IEnumerable<MatchGameRule>> GetAsync(Guid gameUid, CancellationToken cancellationToken);
-		IEnumerable<MatchGameRule> GetRulesMatching(string watchValue);
+		Task<IEnumerable<Rule>> GetAsync(Guid gameUid, CancellationToken cancellationToken);
+		IEnumerable<Rule> GetRulesMatching(string watchValue);
 	}
 
 	public class MatchRulesService : IMatchRulesService
@@ -25,10 +26,10 @@ namespace hrvster.ApplicationServices.MatchGames
 			_matchGameRulesRepository = matchGameRulesRepository;
 		}
 
-		public async Task<IEnumerable<MatchGameRule>> GetAsync(Guid gameUid, CancellationToken cancellationToken)
+		public async Task<IEnumerable<Rule>> GetAsync(Guid gameUid, CancellationToken cancellationToken)
 			=> await _matchGameRulesRepository.GetAllRulesAsync(gameUid, cancellationToken);
 
-		public IEnumerable<MatchGameRule> GetRulesMatching(string watchValue)
+		public IEnumerable<Rule> GetRulesMatching(string watchValue)
 			=> _matchGameRulesRepository.GetRulesMatching(watchValue);
 	}
 }

@@ -99,21 +99,18 @@ namespace hrvster.Core.Handlers.Rules.NotificationHandlers
 
 		private async Task CreateMatchRuleAsync(RulePublished notification, Guid ruleUid, string watchTypeCodeSelected)
 		{
-			await _matchGameRulesRepository.CreateAsync(new MatchGameRule
+			await _matchGameRulesRepository.CreateAsync(new Rule
 			{
-				Uid = ruleUid,
-				MatchGame = new Games.Match.Models.MatchGame
+				RuleUid = ruleUid,
+				Game = new Games.Match.Models.MatchGame
 				{
 					Uid = notification.GameUid,
 					Id = notification.GameId
 				},
-				WatchType = new WatchType
-				{
-					WatchTypeCode = watchTypeCodeSelected
-				},
+				WatchTypeCode = Enum.Parse<WatchTypeCode>(watchTypeCodeSelected),
 				WatchValue = notification.Message.Hashtag,
 				ExternalId = notification.ExternalId,
-				ActiveIndicator = true,
+				ActiveInd = true,
 				MustBeFollowing = notification.MustBeFollowing,
 				ScheduledInd = false,
 				NotifyWinners = true

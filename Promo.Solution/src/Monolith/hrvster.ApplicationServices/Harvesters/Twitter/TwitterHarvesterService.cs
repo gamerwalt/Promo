@@ -45,10 +45,10 @@ namespace hrvster.ApplicationServices.Harvesters.Twitter
 			{
 				if (rule.ActiveInd)
 				{
-					_logger.LogInformation("Adding the Hashtag {hashTag} belonging to Campaign Name {campaignName} and Sweep Name {sweepName} to listen to...",
+					_logger.LogInformation("Adding the Hashtag {hashTag} belonging to Campaign Name {campaignName} and Game Name {gameName} to listen to...",
 						rule.WatchValue,
 						rule.Campaign.CampaignName,
-						rule.Sweep.Name);
+						rule.Game?.Name ?? rule.Sweep.Name);
 
 					stream.AddTrack(rule.WatchValue);
 				}
