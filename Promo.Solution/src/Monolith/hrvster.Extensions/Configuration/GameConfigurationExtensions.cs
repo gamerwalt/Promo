@@ -7,8 +7,7 @@ namespace hrvster.Extensions.Configuration
 	public static class GameConfigurationExtensions
 	{
 		public static IServiceCollection AddMatchEngineServices(this IServiceCollection services)
-			=> services.AddTransient<MatchEngine>()
-				.AddMatchGameService();
+			=> services.AddMatchGameService();
 
 		public static IServiceCollection AddMatchGameService(this IServiceCollection services)
 			=> services.AddTransient<IMatchGamesService, MatchGamesService>()
