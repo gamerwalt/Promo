@@ -22,6 +22,7 @@ namespace hrvster.Infrastructure.MatchGames
 		Task UpdateAsync(MatchGame matchGame, string timezone, bool isDaylight, CancellationToken cancellationToken);
 		MatchGame Get(Guid matchGameUid, CancellationToken cancellationToken);
 		Task<IEnumerable<MatchGame>> GetGameReadyForGenerationAsync(CancellationToken token);
+		Task<IEnumerable<Models.Rule>> GetRulesAsync(CancellationToken cancellationToken);
 	}
 
 	public class MatchGamesRepository : IMatchGamesRepository
@@ -282,6 +283,35 @@ namespace hrvster.Infrastructure.MatchGames
 			}
 
 			return matchGames;
+		}
+
+		public async Task<IEnumerable<Models.Rule>> GetRulesAsync(CancellationToken cancellationToken)
+		{
+			var matchGameRules = new List<MatchGameRule>();
+
+			using (var conn = new MySqlConnection(_database.GetConnectionString()))
+			{
+				var command = conn.CreateCommand();
+				command.CommandText = "match_games_get_rules";
+				command.CommandType = CommandType.StoredProcedure;
+
+				await conn.OpenAsync(cancellationToken);
+				using var reader = await command.ExecuteReaderAsync(cancellationToken);
+				while (await reader.ReadAsync(cancellationToken))
+				{
+					matchGameRules.Add(CreateRuleFrom(reader));
+				}
+			}
+
+			return matchGameRules;
+		}
+
+		private MatchGameRule CreateRuleFrom(MySqlDataReader reader)
+		{
+			return new MatchGameRule
+			{
+
+			};
 		}
 	}
 }

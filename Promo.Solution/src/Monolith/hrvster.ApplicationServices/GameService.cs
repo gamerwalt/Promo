@@ -20,6 +20,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection.Metadata.Ecma335;
 using System.Security.Cryptography;
+using System.Threading;
 using System.Threading.Tasks;
 using Tweetinvi.Core.Models;
 
@@ -29,6 +30,7 @@ namespace hrvster.ApplicationServices
 	{
 		Task CreateRuleTweetAsync(HrvsterUser hrvsterUser, string gameType, Guid gameUid, int gameId, int watchTypeId, string watchValue, string tweetText, bool postNow, DateTime scheduledDate, IFormFile media1, IFormFile media2, IFormFile media3, IFormFile media4, bool following);
 		Task<GameDetail> GetGameDetailsAsync(string gameType, Guid uid);
+		Task<IEnumerable<Rule>> GetRulesAsync(GameTypesEnum gameType, CancellationToken cancellationToken);
 		IEnumerable<Rule> GetRulesMatching(string gameType, string watchValue);
 	}
 
@@ -59,6 +61,23 @@ namespace hrvster.ApplicationServices
 			_accountsService = accountsService;
 			_accountSubscriptionService = accountSubscriptionService;
 		}
+
+		public async Task<IEnumerable<Rule>> GetRulesAsync(GameTypesEnum gameType, CancellationToken cancellationToken)
+		{
+			var rules = new List<Rule>();
+
+			switch(gameType)
+			{
+				case GameTypesEnum.MatchGames:
+					rules.AddRange(await GetMatchGameRulesAsync(cancellationToken));
+					break;
+			}
+
+			return rules;
+		}
+
+		private async Task<IEnumerable<Rule>> GetMatchGameRulesAsync(CancellationToken cancellationToken)
+			=> await _matchGameService.GetRulesAsync(cancellationToken);
 
 		public async Task<GameDetail> GetGameDetailsAsync(string gameType, Guid uid)
 		{

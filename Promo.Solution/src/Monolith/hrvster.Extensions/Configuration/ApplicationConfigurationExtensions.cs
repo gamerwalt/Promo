@@ -1,5 +1,6 @@
 ﻿using hrvster.ApplicationServices;
 using hrvster.ApplicationServices.Accounts;
+using hrvster.ApplicationServices.Caching;
 using hrvster.ApplicationServices.Common;
 using hrvster.ApplicationServices.Harvesters.Twitter;
 using hrvster.ApplicationServices.Mails;
@@ -47,5 +48,8 @@ namespace hrvster.Extensions.Configuration
 
 		public static IServiceCollection AddGameService(this IServiceCollection services)
 			=> services.AddTransient<IGameService, GameService>();
+
+		public static IServiceCollection AddCacheService(this IServiceCollection services)
+			=> services.AddSingleton<ICacheDataService, RedisCacheService>();
 	}
 }

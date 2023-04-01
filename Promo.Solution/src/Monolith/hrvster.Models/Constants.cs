@@ -27,4 +27,10 @@
 	{
 		public const int DismissInSeconds = 10;
 	}
+
+	public class CacheKeys
+	{
+		public const string GameBoards = "game_boards_";
+		public const string GameTiles = "game_tiles_";
+	}
 }

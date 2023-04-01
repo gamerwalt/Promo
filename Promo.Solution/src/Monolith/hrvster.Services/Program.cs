@@ -83,6 +83,7 @@ namespace hrvster.Services
 						.AddPaymentServices(Configuration)
 						.AddAutoMapper(typeof(EntityMap))
 						.AddMatchGameRepositories()
+						.AddCacheService()
 						.AddMatchGameService();
 
 					LoadServices(services);

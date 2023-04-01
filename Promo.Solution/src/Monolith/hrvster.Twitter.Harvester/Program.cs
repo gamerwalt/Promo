@@ -52,6 +52,8 @@ namespace hrvster.Twitter.Harvester
 						.AddTwitterClient(Configuration)
 						.AddApplicationCronServices()
 						.AddPublishers()
+						.AddGameService()
+						.AddMatchEngineServices()
 						.AddHarvsterConfigurationOption(Configuration);
 
 					AddDatabases(services);
