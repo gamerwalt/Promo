@@ -1,10 +1,11 @@
-﻿using hrvster.Models.WebModels.Sweeps;
+﻿using hrvster.Models;
+using hrvster.Models.WebModels.Sweeps;
 using MediatR;
 using System;
 
 namespace hrvster.Core.Requests.WebRequests.Sweeps
 {
-	public class GetSweepEntryRuleByUid : IRequest<EntryRule>
+	public class GetSweepEntryRuleByUid : IRequest<SweepEntryRule>
 	{
 		private Guid sweepEntryUid;
 

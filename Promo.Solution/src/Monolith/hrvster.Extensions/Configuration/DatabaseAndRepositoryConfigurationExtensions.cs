@@ -3,6 +3,7 @@ using hrvster.Infrastructure.Accounts;
 using hrvster.Infrastructure.Core;
 using hrvster.Infrastructure.Harvester;
 using hrvster.Infrastructure.MatchGames;
+using hrvster.Infrastructure.Reporting;
 using hrvster.Infrastructure.Scheduling;
 using hrvster.Infrastructure.Subscriptions;
 using Microsoft.Extensions.Configuration;
@@ -80,6 +81,9 @@ namespace hrvster.Extensions.Configuration
 				.AddTransient<IMatchImagesRepository, MatchImagesRepository>()
 				.AddTransient<IMatchPrizesRepository, MatchPrizesRepository>()
 				.AddTransient<IMatchBoardsRepository, MatchBoardsRepository>()
-				.AddTransient<IMatchTilesRepository, MatchTilesRepository>();
+				.AddTransient<IMatchTilesRepository, MatchTilesRepository>()
+				.AddTransient<ISignatureRepository, SignatureRepository>()
+				.AddTransient<IMatchGamePlayReportingRepository, MatchGamePlayReportingRepository>()
+				.AddTransient<IMatchPlayRulesRepository, MatchPlayRulesRepository>();
 	}
 }

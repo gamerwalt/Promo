@@ -62,13 +62,13 @@ namespace hrvster.Core.Requests.Notifications.Handlers
 			{
 				case CampaignTypeCode.AutoAll:
 					break;
-				case CampaignTypeCode.AutoEnterSweepsFromHashtag:
+				case CampaignTypeCode.AutoPlayFromHashtag:
 					if (await CanEnterSweepstakes(notification, campaign, sweepStakesToEnter, blacklistedUsers))
 					{
 						await EnterSweepsAsync(notification, campaign, sweepStakesToEnter);
 					}
 					break;
-				case CampaignTypeCode.AutoEnterSweepsFromTweet:
+				case CampaignTypeCode.AutoPlayFromTweet:
 					break;
 				case CampaignTypeCode.AutoReplyDM:
 					break;

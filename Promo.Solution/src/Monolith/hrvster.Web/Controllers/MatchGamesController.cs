@@ -28,6 +28,8 @@ namespace hrvster.Web.Controllers
 		private readonly IMatchImageService _matchImageService;
 		private readonly IMatchRulesService _matchRuleService;
 		private readonly IMatchPrizeService _matchPrizeService;
+		private readonly IMatchPlayRulesService _playRulesService;
+
 		private readonly IToastNotification _notificationService;
 		private readonly ISessionManager _sessionManager;
 		private readonly IMapper _mapper;
@@ -40,6 +42,7 @@ namespace hrvster.Web.Controllers
 			IMatchImageService matchImageService,
 			IMatchRulesService matchRulesService,
 			IMatchPrizeService matchPrizeService,
+			IMatchPlayRulesService playRulesService,
 			IToastNotification notificationService,
 			ISessionManager sessionManager,
 			IMapper mapper,
@@ -49,6 +52,7 @@ namespace hrvster.Web.Controllers
 			_matchImageService = matchImageService;
 			_matchRuleService = matchRulesService;
 			_matchPrizeService = matchPrizeService;
+			_playRulesService = playRulesService;
 			_notificationService = notificationService;
 			_sessionManager = sessionManager;
 			_mapper = mapper;
@@ -185,6 +189,7 @@ namespace hrvster.Web.Controllers
 			var imagesTask = _matchImageService.GetForMatchGameAsync(Uid, cancellationToken);
 			var matchRulesTask = _matchRuleService.GetAsync(Uid, cancellationToken);
 			var matchPrizeTask = _matchPrizeService.GetAllForMatchGameAsync(Uid, cancellationToken);
+			var playRulesTask = _playRulesService.GetAllForMatchGameAsync(Uid, cancellationToken);
 
 			var tasks = new List<Task>
 			{
@@ -192,7 +197,8 @@ namespace hrvster.Web.Controllers
 				campaignsTask,
 				imagesTask,
 				matchRulesTask,
-				matchPrizeTask
+				matchPrizeTask,
+				playRulesTask
 			};
 
 			await Task.WhenAll(tasks);
@@ -202,6 +208,7 @@ namespace hrvster.Web.Controllers
 			var images = imagesTask.Result;
 			var rules = matchRulesTask.Result;
 			var prizes = matchPrizeTask.Result;
+			var playRules = playRulesTask.Result;
 
 			if (matchGame == null)
 			{
@@ -228,7 +235,7 @@ namespace hrvster.Web.Controllers
 				return RedirectToAction("Index");
 			}
 
-			var model = BuildMatchGameDetails(matchGame, images, rules, prizes, campaigns);
+			var model = BuildMatchGameDetails(matchGame, images, rules, prizes, playRules, campaigns);
 
 			return View(model);
 		}
@@ -238,6 +245,7 @@ namespace hrvster.Web.Controllers
 			IEnumerable<Games.Match.Models.MatchImage> images,
 			IEnumerable<Rule> rules,
 			IEnumerable<Games.Match.Models.MatchPrize> prizes,
+			Games.Match.Models.MatchPlayRule playRules,
 			List<Campaign> campaigns)
 				=> new MatchGameDetails
 				{
@@ -264,7 +272,8 @@ namespace hrvster.Web.Controllers
 					},
 					MatchImages = _mapper.Map<List<MatchImage>>(images),
 					MatchRules = _mapper.Map<List<MatchRule>>(rules),
-					MatchPrizes = _mapper.Map<List<MatchPrize>>(prizes)
+					MatchPrizes = _mapper.Map<List<MatchPrize>>(prizes),
+					MatchPlayRule = _mapper.Map<MatchPlayRule>(playRules)
 				};
 
 		private static CreateMatchGame BuildCreateGameModel(List<Campaign> campaigns)

@@ -12,7 +12,7 @@ namespace hrvster.Core.Validators.Sweepstakes
 {
 	public interface ISweepRuleUpdateValidator
 	{
-		Task<ValidatorStatus> CanUpdateAsync(Sweep sweep, EntryRule sweepEntryRule);
+		Task<ValidatorStatus> CanUpdateAsync(Sweep sweep, SweepEntryRule sweepEntryRule);
 	}
 
 	public class SweepRuleUpdateValidator : ISweepRuleUpdateValidator
@@ -28,7 +28,7 @@ namespace hrvster.Core.Validators.Sweepstakes
 			_sweepEntriesRepository = sweepsEntriesRepository;
 		}
 
-		public async Task<ValidatorStatus> CanUpdateAsync(Sweep sweep, EntryRule sweepEntryRule)
+		public async Task<ValidatorStatus> CanUpdateAsync(Sweep sweep, SweepEntryRule sweepEntryRule)
 		{
 			if (IsLive(sweep))
 			{

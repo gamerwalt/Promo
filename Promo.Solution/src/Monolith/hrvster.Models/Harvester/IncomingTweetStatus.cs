@@ -6,7 +6,7 @@
 		Processing,
 		Retrying,
 		CompletedUserNotFollowing,
-		CompletedCampaignOrSweepstakeNotRunning,
+		CompletedCampaignOrGameNotRunning,
 		CompletedTooManyTweets,
 		Completed,
 		Failed

@@ -13,6 +13,7 @@ namespace hrvster.ApplicationServices.MatchGames
 	{
 		Task<IEnumerable<Rule>> GetAsync(Guid gameUid, CancellationToken cancellationToken);
 		IEnumerable<Rule> GetRulesMatching(string watchValue);
+		Task<IEnumerable<Rule>> GetRulesMatchingAsync(string watchValue, CancellationToken cancellationToken);
 	}
 
 	public class MatchRulesService : IMatchRulesService
@@ -31,5 +32,8 @@ namespace hrvster.ApplicationServices.MatchGames
 
 		public IEnumerable<Rule> GetRulesMatching(string watchValue)
 			=> _matchGameRulesRepository.GetRulesMatching(watchValue);
+
+		public Task<IEnumerable<Rule>> GetRulesMatchingAsync(string watchValue, CancellationToken cancellationToken)
+			=> _matchGameRulesRepository.GetRulesMatchingAsync(watchValue, cancellationToken);
 	}
 }

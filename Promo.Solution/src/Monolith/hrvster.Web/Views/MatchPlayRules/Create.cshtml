@@ -1,0 +1,46 @@
+﻿@model CreateMatchPlayRule
+@{
+	ViewData["Title"] = "Create Play Rules";
+
+	var cardTitle = $"Create Play Rules for {Model.GameName}";
+}
+<div class="card card-bordered">
+	<div class="card-header">
+		<h3 class="card-title">@cardTitle</h3>
+	</div>
+	<form asp-controller="MatchPlayRules"
+		  asp-action="Create"
+		  asp-route-Uid="@Model.GameUid"
+		  asp-route-actionName="@Model.ActionName"
+		  asp-route-controllerName=@Model.ControllerName
+	class="form-horizontal form-material mx-2">
+		<div class="card-body">
+			<input asp-for="GameUid" hidden />
+			<div class="d-flex flex-column flex-lg-row">
+				<div class="flex-lg-row-fluid me-lg-15 order-2 order-lg-1 mb-10 mb-lg-0">
+					<div class="fv-row mb-8">
+						<label class="required d-flex align-items-center fs-6 fw-semibold form-label mb-2">
+							Play Per User
+						</label>
+						<input asp-for="PlayPerUser" class="form-control w-lg-100px" />
+						<span asp-validation-for="PlayPerUser"></span>
+					</div>
+					<div class="fv-row mb-8">
+						<label class="required d-flex align-items-center fs-6 fw-semibold form-label mb-2">
+							Play Per Tweet
+						</label>
+						<input asp-for="PlayPerTweet" class="form-control w-lg-100px" />
+						<span asp-validation-for="PlayPerTweet"></span>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="card-footer">
+			<div class="card-toolbar">
+				<button type="submit" class="btn btn-md btn-light btn-primary">
+					Create Play Rule
+				</button>
+			</div>
+		</div>
+	</form>
+</div>

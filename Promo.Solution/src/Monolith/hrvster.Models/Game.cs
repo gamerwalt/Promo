@@ -12,5 +12,6 @@ namespace hrvster.Models
 		public DateTime StartDateUtc { get; set; }
 		public DateTime EndDate { get; set; }
 		public DateTime EndDateUtc { get; set; }
+		public GameTypesEnum GameType { get; set; }
 	}
 }

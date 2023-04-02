@@ -15,6 +15,7 @@ namespace hrvster.Extensions.Configuration
 				.AddTransient<IMatchGameBoardService, MatchGameBoardService>()
 				.AddTransient<IMatchRulesService, MatchRulesService>()
 				.AddTransient<IMatchPrizeService, MatchPrizeService>()
+				.AddTransient<IMatchPlayRulesService, MatchPlayRulesService>()
 				.AddTransient<IMatchImageService, MatchImagesService>();
 	}
 }

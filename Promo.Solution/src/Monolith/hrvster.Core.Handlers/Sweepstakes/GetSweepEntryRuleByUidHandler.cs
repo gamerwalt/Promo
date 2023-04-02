@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using hrvster.Core.Requests.WebRequests.Sweeps;
 using hrvster.Infrastructure;
-using hrvster.Models.WebModels.Sweeps;
+using hrvster.Models;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using System.Threading;
@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace hrvster.Core.Handlers.Sweepstakes
 {
-	public class GetSweepEntryRuleByUidHandler : IRequestHandler<GetSweepEntryRuleByUid, EntryRule>
+	public class GetSweepEntryRuleByUidHandler : IRequestHandler<GetSweepEntryRuleByUid, SweepEntryRule>
 	{
 		private readonly ILogger<GetSweepEntryRuleByUidHandler> _logger;
 		private readonly ISweepEntryRulesRepository _repository;
@@ -25,7 +25,7 @@ namespace hrvster.Core.Handlers.Sweepstakes
 			_mapper = mapper;
 		}
 
-		public async Task<EntryRule> Handle(GetSweepEntryRuleByUid request, CancellationToken cancellationToken)
+		public async Task<SweepEntryRule> Handle(GetSweepEntryRuleByUid request, CancellationToken cancellationToken)
 		{
 			_logger.LogInformation("Handling handler for {handlerName} for sweep entry rule with uid: {sweepEntryRuleUid}",
 				nameof(CreateSweepEntryRuleRequestHandler),
@@ -37,7 +37,7 @@ namespace hrvster.Core.Handlers.Sweepstakes
 				nameof(CreateSweepEntryRuleRequestHandler),
 				request.SweepEntryUid);
 
-			return _mapper.Map<EntryRule>(entryRule);
+			return _mapper.Map<SweepEntryRule>(entryRule);
 		}
 	}
 }

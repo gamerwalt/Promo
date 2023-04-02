@@ -1,5 +1,6 @@
 ﻿using FluentValidation;
 using hrvster.ApplicationServices;
+using hrvster.Models;
 using hrvster.Web.Models;
 using Microsoft.AspNetCore.Http;
 using System;
@@ -96,7 +97,7 @@ namespace hrvster.Web.Validation
 
 		private bool MustNotExistAlready(CreateRuleTweet model)
 		{
-			var existingRecord = _gameService.GetRulesMatching(model.GameType, model.WatchValue);
+			var existingRecord = _gameService.GetRulesMatching(Enum.Parse<GameTypesEnum>(model.GameType), model.WatchValue);
 
 			return !existingRecord.Any(c => c.ActiveInd);
 		}

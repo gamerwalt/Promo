@@ -58,9 +58,9 @@
 		AutoReplyDM,
 		AutoReplyHashtag,
 		AutoReplyLikedTweet,
-		AutoEnterSweepsFromTweet,
-		AutoEnterSweepsFromHashtag,
-		AutoEnterSweepsFromTweetReplyHashtag
+		AutoPlayFromTweet,
+		AutoPlayFromHashtag,
+		AutoPlayFromTweetReplyHashtag
 	}
 
 	public enum UserIdentifierType

@@ -14,6 +14,8 @@ using System.Runtime.CompilerServices;
 using hrvster.ApplicationServices.Common;
 using Org.BouncyCastle.Asn1.X509.Qualified;
 using System.Linq;
+using hrvster.ApplicationServices;
+using Tweetinvi.Models.Entities;
 
 namespace hrvster.Core.Handlers.ServiceHandlers
 {
@@ -25,6 +27,7 @@ namespace hrvster.Core.Handlers.ServiceHandlers
 		private readonly IHarvesterRepository _harvesterRepository;
 		private readonly IIncomingTweetsRepository _incomingTweetsRepository;
 		private readonly IUserRateLimiterService _userRateLimiterService;
+		private readonly IGameService _gameService;
 
 		public ProcessNewTweet(
 			ILoggerFactory loggerFactory,
@@ -32,7 +35,8 @@ namespace hrvster.Core.Handlers.ServiceHandlers
 			ISweepRulesRepository sweepRulesRepository,
 			IHarvesterRepository harvesterRepository,
 			IIncomingTweetsRepository incomingTweetsRepository,
-			IUserRateLimiterService userRateLimiterService)
+			IUserRateLimiterService userRateLimiterService,
+			IGameService gameService)
 		{
 			_logger = loggerFactory.CreateLogger<ProcessNewTweet>();
 			_mediator = mediator;
@@ -40,18 +44,25 @@ namespace hrvster.Core.Handlers.ServiceHandlers
 			_harvesterRepository = harvesterRepository;
 			_incomingTweetsRepository = incomingTweetsRepository;
 			_userRateLimiterService = userRateLimiterService;
+			_gameService = gameService;
 		}
 
 		async protected override Task Handle(ProcessNewTweetRequest request, CancellationToken cancellationToken)
 		{
+			using(
+				_logger.BeginScope(
+					new { IncomingTweetUid = request.IncomingTweet.IncomingTweetUid }
+					)
+				)
+
 			_logger.LogInformation("Received the request to process the tweet with Id {tweetId} and text {tweetText}. Incoming tweet guid {tweetGuid}",
 				request.Tweet.Id,
 				request.Tweet.Text,
 				request.IncomingTweet.IncomingTweetUid);
 
-			if(!await _userRateLimiterService.IsAllowedAsync(
-				request.Tweet.CreatedBy.IdStr, 
-				request.Tweet.Hashtags, 
+			if (!await _userRateLimiterService.IsAllowedAsync(
+				request.Tweet.CreatedBy.IdStr,
+				request.Tweet.Hashtags,
 				UserIdentifierType.TwitterHandle))
 			{
 				_logger.LogWarning("Cannot continue processing this tweet {tweetGuid}. User has tweeted to many times.", request.IncomingTweet.IncomingTweetUid);
@@ -64,7 +75,7 @@ namespace hrvster.Core.Handlers.ServiceHandlers
 			_logger.LogInformation("Updating incoming tweet {tweetGuid} status as Processing", request.IncomingTweet.IncomingTweetUid);
 
 			await _incomingTweetsRepository.UpdateStatusAsync(
-				request.IncomingTweet.IncomingTweetUid, 
+				request.IncomingTweet.IncomingTweetUid,
 				Models.Harvester.IncomingTweetStatus.Processing);
 
 			//For Optimized approach, we can throw in a queue or
@@ -74,21 +85,8 @@ namespace hrvster.Core.Handlers.ServiceHandlers
 			var tasks = new List<Task>();
 
 			_logger.LogInformation("Loading rules and other details for tweet {tweetGuid}", request.IncomingTweet.IncomingTweetUid);
-
-			foreach (var hashtag in request.Tweet.Hashtags)
-			{
-				_logger.LogInformation("Loading the rules for the hashtag #{hashTag}", hashtag.Text);
-
-				var sweepRules = await _sweepRulesRepository.GetRuleByHashTagAsync($"#{hashtag.Text}");
-
-				_logger.LogDebug("Retrieved the sweep rules {sweepRules} for the hashtag {hashTag}.",
-					sweepRules.ToJsonString(),
-					hashtag.Text);
-
-				rules.AddRange(sweepRules);
-
-				await _userRateLimiterService.UpsertAsync(hashtag, request.Tweet.CreatedBy.IdStr, UserIdentifierType.TwitterHandle);
-			}
+			
+			await GetRulesAsync(request, rules, cancellationToken);
 
 			var newUserUid = Guid.NewGuid();
 			var tweetUid = Guid.NewGuid();
@@ -127,6 +125,7 @@ namespace hrvster.Core.Handlers.ServiceHandlers
 						request.Tweet.Text,
 						request.IncomingTweet.IncomingTweetUid);
 
+					//PROCESS THE TWEET
 					await _mediator.Publish(new TweetReceived(
 						request.IncomingTweet, rule, harvestedUid, newUserUid, request.Tweet));
 				}
@@ -146,9 +145,48 @@ namespace hrvster.Core.Handlers.ServiceHandlers
 				await _harvesterRepository.RollbackTransaction();
 
 				await _incomingTweetsRepository.UpdateStatusAsync(
-					request.IncomingTweet.IncomingTweetUid, 
+					request.IncomingTweet.IncomingTweetUid,
 					Models.Harvester.IncomingTweetStatus.Failed);
 			}
+		}
+
+		private async Task GetRulesAsync(ProcessNewTweetRequest request, List<Rule> rules, CancellationToken cancellationToken)
+		{
+			foreach (var hashtag in request.Tweet.Hashtags)
+			{
+				var sweepRules = await GetSweepRulesResponsibleFor(hashtag);
+				var gameRules = await GetGameRulesResponsibleForAsync(hashtag, cancellationToken);
+
+				rules.AddRange(sweepRules);
+				rules.AddRange(gameRules);
+
+				await _userRateLimiterService.UpsertAsync(hashtag, request.Tweet.CreatedBy.IdStr, UserIdentifierType.TwitterHandle);
+			}
+		}
+
+		private async Task<IEnumerable<Rule>> GetGameRulesResponsibleForAsync(IHashtagEntity hashtag, CancellationToken cancellationToken)
+		{
+			_logger.LogInformation("Loading the rules for the hashtag #{hashTag} from the Game Service", hashtag.Text);
+
+			var rules = await _gameService.GetRulesMatchingAsync(GameTypesEnum.MatchGames, $"#{hashtag.Text}", cancellationToken);
+
+			_logger.LogDebug("Retrieved the rules {rules} for the hashtag {hashTag}.",
+				rules.ToJsonString(),
+				hashtag.Text);
+
+			return rules;
+		}
+
+		private async Task<IEnumerable<Rule>> GetSweepRulesResponsibleFor(IHashtagEntity hashtag)
+		{
+			_logger.LogInformation("Loading the rules for the hashtag #{hashTag}", hashtag.Text);
+
+			var sweepRules = await _sweepRulesRepository.GetRuleByHashTagAsync($"#{hashtag.Text}");
+
+			_logger.LogDebug("Retrieved the sweep rules {sweepRules} for the hashtag {hashTag}.",
+				sweepRules.ToJsonString(),
+				hashtag.Text);
+			return sweepRules;
 		}
 	}
 }

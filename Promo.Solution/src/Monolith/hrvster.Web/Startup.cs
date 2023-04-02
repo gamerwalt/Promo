@@ -89,6 +89,7 @@ namespace hrvster.Web
 				.AddPaymentServices(Configuration)
 				.AddHttpClient()
 				.AddFlutterwaveHttpClient()
+				.AddSignatureUtility()
 				.AddProvidersService();
 		}
 

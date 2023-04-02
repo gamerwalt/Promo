@@ -12,5 +12,7 @@
 		public int ServiceWaitInSeconds { get; set; } = 10;
 		public string ServiceUri { get; set; }
 		public bool NotifyWinners { get; set; }
+		public string SignatureKey { get; set; }
+		public int SignatureExpiryInMinutes { get; set; }
 	}
 }

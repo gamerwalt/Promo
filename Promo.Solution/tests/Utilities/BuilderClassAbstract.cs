@@ -99,7 +99,7 @@ namespace TestUtilities
 			=> new CampaignType
 			{
 				CampaignTypeName = TestData.CampaignTypeName,
-				CampaignTypeCode = CampaignTypeCode.AutoEnterSweepsFromTweetReplyHashtag,
+				CampaignTypeCode = CampaignTypeCode.AutoPlayFromTweetReplyHashtag,
 				CampaignTypeId = TestData.CampaignTypeId,
 				CampaignTypeUid = TestData.CampaignTypeUid,
 				IsActive = true,

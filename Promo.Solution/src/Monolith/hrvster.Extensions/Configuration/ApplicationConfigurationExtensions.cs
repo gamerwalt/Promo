@@ -16,7 +16,6 @@ namespace hrvster.Extensions.Configuration
 	{
 		public static IServiceCollection AddApplicationCronServices(this IServiceCollection services)
 			=> services
-				.AddTransient<ITwitterHarvesterService, TwitterHarvesterService>()
 				.AddTransient<ITweetProcessor, TweetProcessor>()
 				.AddTransient<IDrawService, DrawService>()
 				.AddTransient<IMailService, MailService>()
@@ -51,5 +50,8 @@ namespace hrvster.Extensions.Configuration
 
 		public static IServiceCollection AddCacheService(this IServiceCollection services)
 			=> services.AddSingleton<ICacheDataService, RedisCacheService>();
+
+		public static IServiceCollection AddSignatureUtility(this IServiceCollection services)
+			=> services.AddScoped<SignatureUtility>();
 	}
 }

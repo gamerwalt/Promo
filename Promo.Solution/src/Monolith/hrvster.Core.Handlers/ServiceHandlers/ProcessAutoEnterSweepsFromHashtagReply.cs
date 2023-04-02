@@ -197,7 +197,7 @@ namespace hrvster.Core.Handlers.ServiceHandlers
 
 				await _incomingTweetsRepository.UpdateStatusAsync(
 					request.IncomingTweet.IncomingTweetUid, 
-					Models.Harvester.IncomingTweetStatus.CompletedCampaignOrSweepstakeNotRunning);
+					Models.Harvester.IncomingTweetStatus.CompletedCampaignOrGameNotRunning);
 			}
 		}
 

@@ -16,11 +16,13 @@
 	public class GameTypes
 	{
 		public const string Sweepstake = "Sweepstakes";
+		public const string MatchGame = "MatchGames";
 	}
 
 	public class UrlTypes
 	{
 		public const string DashboardLink = "Dashboard";
+		public const string MatchGamePlayLink = "PlayMatchGame/{GameUid}";
 	}
 
 	public class NotificationService

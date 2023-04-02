@@ -31,7 +31,8 @@ namespace hrvster.ApplicationServices
 		Task CreateRuleTweetAsync(HrvsterUser hrvsterUser, string gameType, Guid gameUid, int gameId, int watchTypeId, string watchValue, string tweetText, bool postNow, DateTime scheduledDate, IFormFile media1, IFormFile media2, IFormFile media3, IFormFile media4, bool following);
 		Task<GameDetail> GetGameDetailsAsync(string gameType, Guid uid);
 		Task<IEnumerable<Rule>> GetRulesAsync(GameTypesEnum gameType, CancellationToken cancellationToken);
-		IEnumerable<Rule> GetRulesMatching(string gameType, string watchValue);
+		IEnumerable<Rule> GetRulesMatching(GameTypesEnum gameType, string watchValue);
+		Task<IEnumerable<Rule>> GetRulesMatchingAsync(GameTypesEnum gameType, string text, CancellationToken cancellationToken);
 	}
 
 	public class GameService : IGameService
@@ -92,9 +93,32 @@ namespace hrvster.ApplicationServices
 			}
 		}
 
-		public IEnumerable<Rule> GetRulesMatching(string gameType, string watchValue)
+		public async Task<IEnumerable<Rule>> GetRulesMatchingAsync(
+			GameTypesEnum gameType, string watchValue, CancellationToken cancellationToken)
 		{
-			switch(Enum.Parse<GameTypesEnum>(gameType))
+			switch (gameType)
+			{
+				case GameTypesEnum.Sweeps:
+					return await GetRulesMatchingForSweepsAsync(watchValue);
+				case GameTypesEnum.MatchGames:
+					return await GetRulesMatchingForMatchGamesAsync(watchValue, cancellationToken);
+				default:
+					return await GetRulesMatchingForSweepsAsync(watchValue);
+			}
+		}
+
+		private async Task<IEnumerable<Rule>> GetRulesMatchingForMatchGamesAsync(
+			string watchValue, CancellationToken cancellationToken)
+			=> await _matchGameService.GetRulesMatchingAsync(watchValue, cancellationToken);
+
+		private Task<IEnumerable<Rule>> GetRulesMatchingForSweepsAsync(string watchValue)
+		{
+			throw new NotImplementedException();
+		}
+
+		public IEnumerable<Rule> GetRulesMatching(GameTypesEnum gameType, string watchValue)
+		{
+			switch(gameType)
 			{
 				case GameTypesEnum.Sweeps:
 					return GetRulesMatchingForSweeps(watchValue);

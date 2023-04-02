@@ -1,3 +1,4 @@
+using hrvster.ApplicationServices.Harvesters.Twitter;
 using hrvster.Core.Handlers.ServiceHandlers;
 using hrvster.Core.Requests.ServiceRequests;
 using hrvster.Extensions.Configuration;
@@ -9,6 +10,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Serilog;
 using System;
+using Tweetinvi.Client.V2;
 
 namespace hrvster.Twitter.Harvester
 {
@@ -59,7 +61,10 @@ namespace hrvster.Twitter.Harvester
 						.AddSubscriptionRepositories()
 						.AddSubscriptionService()
 						.AddAccountsService()
+						.AddSignatureUtility()
 						.AddHarvsterConfigurationOption(Configuration);
+
+					services.AddHttpClient<ITwitterHarvesterService, TwitterHarvesterService>();
 
 					AddDatabases(services);
 					AddMediator(services);
