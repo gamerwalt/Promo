@@ -113,7 +113,7 @@ namespace hrvster.Web.Controllers
 				HttpContext.Session.SetString(SessionConstants.ReturnAction, actionName);
 				HttpContext.Session.SetString(SessionConstants.GameType, gameType);
 
-				var authorizationUrl = await _watchTypeProvider.GetAuthorizationUrl(form.ProviderCode, Request.Scheme, Request.Host.Value, $"/SweepRules/Validate{form.ProviderCode}Auth");
+				var authorizationUrl = await _watchTypeProvider.GetAuthorizationUrl(form.ProviderCode, Request.Scheme, Request.Host.Value, $"/Providers/Validate{form.ProviderCode}Auth");
 
 				return new RedirectResult(authorizationUrl);
 			}

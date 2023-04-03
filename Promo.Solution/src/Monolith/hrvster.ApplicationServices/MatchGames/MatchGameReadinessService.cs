@@ -20,17 +20,20 @@ namespace hrvster.ApplicationServices.MatchGames
 		private readonly IMatchGamesRepository _repository;
 		private readonly IMatchPrizesRepository _matchPrizesRepository;
 		private readonly IMatchImagesRepository _matchImagesRepository;
+		private readonly IMatchBoardsRepository _matchBoardsRepository;
 
 		public MatchGameReadinessService(
 			ILoggerFactory loggerFactory, 
 			IMatchGamesRepository repository,
 			IMatchPrizesRepository matchPrizesRepository,
-			IMatchImagesRepository matchImagesRepository)
+			IMatchImagesRepository matchImagesRepository,
+			IMatchBoardsRepository matchBoardsRepository)
 		{ 
 			_logger = loggerFactory.CreateLogger<MatchGameReadinessService>();
 			_repository = repository;
 			_matchPrizesRepository = matchPrizesRepository;
 			_matchImagesRepository = matchImagesRepository;
+			_matchBoardsRepository = matchBoardsRepository;
 		}
 
 		public async Task<bool> IsReadyToGenerateBoardsAsync(Guid matchGameUid, CancellationToken cancellationToken)
@@ -43,6 +46,9 @@ namespace hrvster.ApplicationServices.MatchGames
 
 			var images = await _matchImagesRepository.GetForMatchGamesAsync(matchGameUid, cancellationToken);
 			if (images.Count() == 0) return false;
+
+			var boards = await _matchBoardsRepository.GetForMatchGameAsync(matchGameUid, cancellationToken);
+			if (boards.Count() > 0) return false;
 
 			return true;
 		}

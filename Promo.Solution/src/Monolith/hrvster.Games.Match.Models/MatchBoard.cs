@@ -11,5 +11,6 @@ namespace hrvster.Games.Match.Models
 		public MatchGame MatchGame { get; set; }
 		public List<List<MatchTile>> Tiles { get; set; }
 		public double WinProbability { get; set; }
+		public bool PlayedIndicator { get; set; }
 	}
 }

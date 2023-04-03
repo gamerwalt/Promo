@@ -15,21 +15,37 @@ namespace hrvster.ApplicationServices.Common
 			_hrvsterSettings = harvesterSettings;
 		}
 
-		public string CreateSignature(long userId, string handle, Guid gameUid)
+		public string CreateSignature(Guid signatureUid, long userId, string handle, Guid gameUid)
 		{
-			var message = $"{userId}:{handle}:{gameUid}";
+			var message = $"{signatureUid}:{userId}:{handle}:{gameUid}";
 
-			using var hmac = new HMACSHA256(Encoding.UTF8.GetBytes(_hrvsterSettings.SignatureKey));
-			var hash = hmac.ComputeHash(Encoding.UTF8.GetBytes(message));
-
-			return Convert.ToBase64String(hash);
+			using (var hmac = new HMACSHA256(Encoding.UTF8.GetBytes(_hrvsterSettings.SignatureKey)))
+			{
+				var hash = hmac.ComputeHash(Encoding.UTF8.GetBytes(message));
+				return Base64UrlEncode(hash);
+			}
 		}
 
-		public bool VerifySignature(long userId, string handle, DateTime expiryDate, Guid gameUid, string signature)
+		public bool VerifySignature(Guid signatureUid, long userId, string handle, Guid gameUid, string signature)
 		{
-			var expectedSignature = CreateSignature(userId, handle, gameUid);
+			var expectedSignature = CreateSignature(signatureUid, userId, handle, gameUid);
 
-			return expectedSignature == signature;
+			return string.Equals(expectedSignature, signature, StringComparison.Ordinal);
+		}
+
+		private static string Base64UrlEncode(byte[] input)
+		{
+			return Convert.ToBase64String(input).TrimEnd('=').Replace('+', '-').Replace('/', '_');
+		}
+
+		private static byte[] Base64UrlDecode(string input)
+		{
+			string base64 = input.Replace('_', '/').Replace('-', '+');
+			while (base64.Length % 4 != 0)
+			{
+				base64 += "=";
+			}
+			return Convert.FromBase64String(base64);
 		}
 	}
 }

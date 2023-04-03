@@ -34,5 +34,6 @@
 	{
 		public const string GameBoards = "game_boards_";
 		public const string GameTiles = "game_tiles_";
+		public const string BoardKeys = "board_keys";
 	}
 }

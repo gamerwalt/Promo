@@ -21,5 +21,9 @@
 		public const string Uid = "_Uid";
 
 		public const string GameType = "_GameType";
+		public const string GameUid = "_GameUid";
+		public const string Signature = "_Signature";
+		public const string UserDetails = "_UserDetails";
+		public const string SignatureUid = "_SignatureUid";
 	}
 }

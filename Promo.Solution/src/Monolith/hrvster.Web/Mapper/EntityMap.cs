@@ -84,6 +84,18 @@ namespace hrvster.Web.Mapper
 				.ForMember(dest => dest.Uid, opt => opt.MapFrom(src => src.EntryRuleUid))
 				.ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
 				.ReverseMap();
+
+			CreateMap<MatchBoard, Models.Plays.MatchBoard>()
+				.ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
+				.ForMember(dest => dest.Uid, opt => opt.MapFrom(src => src.Uid))
+				.ForMember(dest => dest.Tiles, opt => opt.MapFrom(src => src.Tiles))
+				.ReverseMap();
+
+			CreateMap<MatchTile, Models.Plays.MatchTile>()
+				.ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
+				.ForMember(dest => dest.Uid, opt => opt.MapFrom(src => src.Uid))
+				.ForMember(dest => dest.MatchImage, opt => opt.MapFrom(src => src.Image))
+				.ReverseMap();
 		}
 	}
 }

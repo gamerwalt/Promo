@@ -90,6 +90,7 @@ namespace hrvster.Web
 				.AddHttpClient()
 				.AddFlutterwaveHttpClient()
 				.AddSignatureUtility()
+				.AddCacheService()
 				.AddProvidersService();
 		}
 

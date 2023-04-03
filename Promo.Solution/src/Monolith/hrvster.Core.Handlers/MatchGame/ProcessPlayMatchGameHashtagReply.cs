@@ -123,7 +123,9 @@ namespace hrvster.Core.Handlers.MatchGame
 
 			_logger.LogInformation("Creating a signature to use for the game play.");
 
-			var signature = CreateSignature(request.Rule.Game.Uid, request.Tweet);
+			var signatureUid = Guid.NewGuid();
+
+			var signature = CreateSignature(signatureUid, request.Rule.Game.Uid, request.Tweet);
 			var url = new Uri(_harvesterSettings.HrvsterUrl)
 				.GenerateUrl(UrlTypes.MatchGamePlayLink)
 				.ToString()
@@ -148,7 +150,7 @@ namespace hrvster.Core.Handlers.MatchGame
 
 					await SendLinkToPlayGameAsync(link, request.Rule, request.Tweet, profile);
 
-					await SaveSignatureAsync(link, signature, request, playRules, cancellationToken);
+					await SaveSignatureAsync(signatureUid, link, signature, request, playRules, cancellationToken);
 				}
 				else
 				{
@@ -168,6 +170,7 @@ namespace hrvster.Core.Handlers.MatchGame
 		}
 
 		private async Task SaveSignatureAsync(
+			Guid signatureUid,
 			string link, 
 			string signature, 
 			ProcessPlayMatchGameHashtagReplyRequest request,
@@ -176,7 +179,7 @@ namespace hrvster.Core.Handlers.MatchGame
 		{
 			
 			await _signatureRepository.CreateAsync(
-				Guid.NewGuid(), 
+				signatureUid, 
 				signature, 
 				link, 
 				DateTime.UtcNow.AddMinutes(_harvesterSettings.SignatureExpiryInMinutes), 
@@ -274,8 +277,8 @@ namespace hrvster.Core.Handlers.MatchGame
 			return report.Plays < playRules.PlayPerGame;
 		}
 
-		private string CreateSignature(Guid gameUid, ITweet tweet)
-			=> _signatureUtility.CreateSignature(tweet.CreatedBy.Id, tweet.CreatedBy.ScreenName, gameUid);
+		private string CreateSignature(Guid signatureUid, Guid gameUid, ITweet tweet)
+			=> _signatureUtility.CreateSignature(signatureUid, tweet.CreatedBy.Id, tweet.CreatedBy.ScreenName, gameUid);
 		
 	}
 }

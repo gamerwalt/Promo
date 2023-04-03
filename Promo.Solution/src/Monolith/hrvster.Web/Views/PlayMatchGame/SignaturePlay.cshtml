@@ -1,0 +1,40 @@
+﻿@using hrvster.Web.Models.Plays;
+@model PlayMatchGame
+@{
+    Layout = "";
+    ViewData["Title"] = "Play Pick 3 Match Game";
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="~/css/gameboard.css">
+    <title>3x3 Gameboard</title>
+</head>
+<body>
+    <form>
+        <input type="text" id="selected-tiles" name="selected-tiles" readonly>
+        <div class="gameboard">
+            <div class="tile" data-uid="1"></div>
+            <div class="tile" data-uid="2"></div>
+            <div class="tile" data-uid="3"></div>
+            <div class="tile" data-uid="4"></div>
+            <div class="tile" data-uid="5"></div>
+            <div class="tile" data-uid="6"></div>
+            <div class="tile" data-uid="7"></div>
+            <div class="tile" data-uid="8"></div>
+            <div class="tile" data-uid="9"></div>
+            <div class="button-container">
+                <div class="button-wrapper">
+                    <button type="submit" class="btn btn-submit btn-primary btn-block">Submit</button>
+                </div>
+                <div class="button-wrapper">
+                    <button type="button" id="reset" class="btn btn-reset">Reset</button>
+                </div>
+            </div>
+        </div>
+    </form>
+    <script src="~/js/playGameboard.js"></script>
+</body>
+</html>

@@ -3,9 +3,11 @@ using hrvster.Games.Match.Models;
 using hrvster.Infrastructure.MatchGames;
 using hrvster.Models;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -14,6 +16,7 @@ namespace hrvster.ApplicationServices.MatchGames
 	public interface IMatchGameBoardService
 	{
 		Task GenerateBoardsAsync(MatchGame matchGame, CancellationToken cancellationToken);
+		Task<MatchBoard> GetRandomBoardAsync(Guid gameUid, CancellationToken cancellationToken);
 	}
 
 	public class MatchGameBoardService : IMatchGameBoardService
@@ -274,16 +277,18 @@ namespace hrvster.ApplicationServices.MatchGames
 			List<MatchBoard> generatedBoards, 
 			CancellationToken cancellationToken)
 		{
+			var boardKeys = new List<Guid>();
+
 			_logger.LogInformation("Saving the boards for match game with uid {matchGameUid} and name {matchName}",
 				matchGame.Uid,
 				matchGame.Name);
-
-			var tasks = new List<Task>();
 
 			foreach(var board in generatedBoards) 
 			{
 				_logger.LogInformation("Adding the board with uid {boardUid} to the database.", board.Uid);
 				await _matchBoardsRepository.CreateAsync(board, cancellationToken);
+
+				boardKeys.Add(board.Uid);
 
 				_logger.LogInformation("Adding the board with uid {boardUid} to the cache.", board.Uid);
 				await _cahceDataService.SetAsync($"{CacheKeys.GameBoards}{board.Uid}", board);
@@ -293,7 +298,6 @@ namespace hrvster.ApplicationServices.MatchGames
 				matchGame.Uid,
 				matchGame.Name);
 
-			tasks = new List<Task>();
 			foreach(var board in generatedBoards)
 			{
 				foreach(var tiles in board.Tiles)
@@ -302,14 +306,36 @@ namespace hrvster.ApplicationServices.MatchGames
 					{
 						_logger.LogInformation("Saving the tile with uid {tileUid} to the database", tile.Uid);
 						await _matchTilesRepository.CreateAsync(tile, cancellationToken);
-
-						_logger.LogInformation("Adding the tile with uid {tileUid} to the cache.", tile.Uid);
-						await _cahceDataService.SetAsync($"{CacheKeys.GameTiles}{tile.Uid}", tile);
 					}
 				}
 			}
 
-			await Task.WhenAll(tasks);
+			await _cahceDataService.SetAsync($"{CacheKeys.BoardKeys}", JsonConvert.SerializeObject(boardKeys));
+
+			//Todo: set game as board generated
+		}
+
+		public async Task<MatchBoard> GetRandomBoardAsync(Guid gameUid, CancellationToken cancellationToken)
+		{
+			//Get all boardkeys and put in a list
+			var boardKeysString = await _cahceDataService.GetAsync<string>(CacheKeys.BoardKeys);
+			var boardKeys = JsonConvert.DeserializeObject<List<Guid>>(boardKeysString);
+
+			if(boardKeys == null || boardKeys.Count == 0)
+			{
+				//Todo: do something
+			}
+
+			var randomIndex = RandomNumberGenerator.GetInt32(boardKeys.Count);
+			var randomBoardKey = boardKeys[randomIndex];
+			
+			var board = await _cahceDataService.GetAsync<MatchBoard>($"{CacheKeys.GameBoards}{randomBoardKey}");
+			if(board == null)
+			{
+				//Todo: Load from database.
+			}
+
+			return board;
 		}
 	}
 }
