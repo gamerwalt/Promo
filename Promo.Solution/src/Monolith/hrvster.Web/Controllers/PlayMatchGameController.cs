@@ -1,18 +1,18 @@
 ﻿using AutoMapper;
-using hrvster.ApplicationServices;
 using hrvster.ApplicationServices.Common;
 using hrvster.ApplicationServices.MatchGames;
 using hrvster.Core.Authentication;
 using hrvster.Core.Clients;
+using hrvster.Games.Match.Models;
 using hrvster.Infrastructure.Core;
 using hrvster.Models;
+using hrvster.Models.Core;
 using hrvster.Web.Models.Plays;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using NToastNotify;
 using System;
 using System.Collections.Generic;
-using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -28,6 +28,7 @@ namespace hrvster.Web.Controllers
 		private readonly IToastNotification _notificationService;
 		private readonly IMatchGamesService _matchGameService;
 		private readonly IMatchGameBoardService _gameBoardService;
+		private readonly IMatchGameplayService _gameplayService;
 		private readonly IMapper _mapper;
 
 		public PlayMatchGameController(
@@ -39,6 +40,7 @@ namespace hrvster.Web.Controllers
 			IToastNotification notificationService,
 			IMatchGamesService matchGameService,
 			IMatchGameBoardService gameBoardService,
+			IMatchGameplayService gameplayService,
 			IMapper mapper)
 		{
 			_logger = loggerFactory.CreateLogger<PlayMatchGameController>();
@@ -49,28 +51,26 @@ namespace hrvster.Web.Controllers
 			_notificationService = notificationService;
 			_matchGameService = matchGameService;
 			_gameBoardService = gameBoardService;
+			_gameplayService = gameplayService;
 			_mapper = mapper;
 		}
 
 		[HttpGet]
-		[Route("/PlayMatchGame/{Uid:Guid}")]
-		public async Task<IActionResult> Play(Guid Uid, string signature, CancellationToken cancellationToken)
+		[Route("/PlayMatchGame")]
+		public async Task<IActionResult> Play(string signature, CancellationToken cancellationToken)
 		{
 			using (_logger.BeginScope(new Dictionary<string, object>
 			{
-				{ "GameUid", Uid },
 				{ "Signature", signature }
 			}))
 			{
-				_logger.LogInformation("Received a request to play a Match game with uid {uid}", Uid);
+				_logger.LogInformation("Received a request to play a Match game with signature {signature}", signature);
 
 				_logger.LogInformation("Requesting the user to logon to twitter.");
 
-				_sessionManager.SetKeyValue(SessionConstants.GameUid, Uid.ToString());
 				_sessionManager.SetKeyValue(SessionConstants.Signature, signature);
 
 				var authorizationUrl = await _watchTypeProvider.GetAuthorizationUrl(Constants.TwitterProvider, Request.Scheme, Request.Host.Value, $"/PlayMatchGame/Validate{Constants.TwitterProvider}Auth");
-
 
 				return new RedirectResult(authorizationUrl);
 			}
@@ -82,7 +82,10 @@ namespace hrvster.Web.Controllers
 		}
 
 
-		public async Task<IActionResult> ValidateTwitterAuth(Guid tweetinvi_auth_request_id, string oauth_token, string oauth_verifier)
+		public async Task<IActionResult> ValidateTwitterAuth(
+			Guid tweetinvi_auth_request_id,
+			string oauth_token,
+			string oauth_verifier)
 		{
 			_logger.LogInformation("Validation of twitter auth successful.");
 
@@ -105,12 +108,8 @@ namespace hrvster.Web.Controllers
 			}
 
 			var signatureSession = _sessionManager.GetValue(SessionConstants.Signature);
-			var gameUidSession = _sessionManager.GetValue(SessionConstants.GameUid);
 
-			var signature = await _signatureRepository.GetAsync(
-				gameUidSession.ToString(), 
-				signatureSession, 
-				userDetails.ScreenName);
+			var signature = await _signatureRepository.GetAsync(signatureSession, userDetails.ScreenName);
 
 			if (signature == null)
 			{
@@ -126,146 +125,124 @@ namespace hrvster.Web.Controllers
 				return RedirectToAction("SignatureExpired");
 			}
 
+			_logger.LogInformation("Signature with uid {signatureUid} not expired.", signature.Uid);
+
 			_logger.LogInformation("Verifying the signature with details received from Twitter");
 
-			if (!VerifySignature(signature.Uid, userDetails, signatureSession, gameUidSession))
+			if (!VerifySignature(signature.GamePlayUid, userDetails, signatureSession))
 			{
 				return RedirectToAction("SignatureFailed");
 			}
 
-			if (await SignatureIsExpiredAsync(gameUidSession, signatureSession, userDetails.ScreenName))
-			{
-				return RedirectToAction("SignatureExpired");
-			}
+			_logger.LogInformation("Signature verified for signature with uid {signatureUid}", signature.Uid);
 
-			_sessionManager.SetKeyValue(SessionConstants.Signature, signatureSession);
-			_sessionManager.SetKeyValue(SessionConstants.UserDetails, userDetails.ScreenName);
+			SetSessionVariables(userDetails, signature);
 
-			//add another unique uid to the signature so the SignaturePlay isn't that vulnerable
-			var newUid = Guid.NewGuid();
-			//Update the previous signature with the new uid and update the signature itself
-			var signatureToUpdate = await _signatureRepository.GetByUidAsync(signature.Uid);
-			//Todo: Check if it exists, if not, Get out
+			_logger.LogInformation("Generating new game play uid.");
 
-			var UidToUpdate = signatureToUpdate.Uid;
-			var idToUpdate = signatureToUpdate.Id;
-
-			signatureToUpdate = signature;
-			signatureToUpdate.Uid = newUid;
-			signatureToUpdate.Signature = _signatureUtility.CreateSignature(
-				newUid,
-				Convert.ToInt64(signatureToUpdate.ExternalUserId),
-				signatureToUpdate.ExternalUserHandle, 
-				signatureToUpdate.GameUid);
-
-			_sessionManager.SetKeyValue(SessionConstants.SignatureUid, newUid.ToString());
-
-			await _signatureRepository.UpdateSignatureAsync(signatureToUpdate, UidToUpdate, idToUpdate);
-
-			return RedirectToAction("SignaturePlay", new { Uid = gameUidSession, Sig = signatureToUpdate.Signature, externalId = userDetails.ExternalProfileId, screenName = userDetails.ScreenName });
+			return RedirectToAction(nameof(SignaturePlay), new { Uid = signature.GameUid, gameplayUid = signature.GamePlayUid });
 		}
 
 		[HttpGet]
-		[Route("/PlayMatchGame/{Uid:Guid}/SignaturePlay/{Sig}/ScreenName/{screenName}/Id/{externalId}")]
-		public async Task<IActionResult> SignaturePlay(
-			Guid Uid, string Sig, string screenName, string externalId, CancellationToken cancellationToken)
+		[Route("/PlayMatchGame/{Uid:Guid}/gameplay/{gameplayUid:Guid}")]
+		public async Task<IActionResult> SignaturePlay(Guid Uid, Guid gameplayUid, CancellationToken cancellationToken)
 		{
 			using (_logger.BeginScope(new Dictionary<string, object>
 			{
 				{ "GameUid", Uid },
+				{ "GamePlayUid", gameplayUid }
 			}))
 
-			_logger.LogInformation("Received a request play a match game.");
+			_logger.LogInformation("Verifying the game.");
 
-			var signatureUidInSession = _sessionManager.GetValue(SessionConstants.SignatureUid);
-
-			var signature = await _signatureRepository.GetByUidAsync(Guid.Parse(signatureUidInSession));
-			if (signature == null)
+			if (!await _matchGameService.GamePlayableAsync(Uid, cancellationToken))
 			{
-				_notificationService.AddErrorToastMessage("Signature has expired.");
+				_notificationService.AddErrorToastMessage("Unable to play the game or the game doesn't exist.");
 
-				return RedirectToAction("SignatureExpired");
+				return RedirectToAction("GameUnplayable");
 			}
 
-			if(signature.Signature != Sig)
+			_logger.LogInformation("Verifying the gameplay and the gameboard");
+			if (!await _gameBoardService.IsBoardPlayableByGameplayAsync(gameplayUid, cancellationToken))
 			{
-				_notificationService.AddErrorToastMessage("Cannot play.");
+				_notificationService.AddErrorToastMessage("Unable to play this game.");
 
-				return RedirectToAction("CannotPlay");
+				return RedirectToAction("BoardUnplayable");
 			}
 
-			if (DateTime.UtcNow > signature.ExpiryDate)
+			var gameplay = await _gameplayService.GetAsync(gameplayUid, cancellationToken);
+			var gameboard = await _gameBoardService.GetGameBoardAsync(gameplay.MatchBoard.Uid, cancellationToken);
+			var tiles = await _gameBoardService.GetTilesAsync(gameboard.Uid, cancellationToken);
+			if(tiles == null)
 			{
-				_notificationService.AddErrorToastMessage("Signature has expired.");
+				_notificationService.AddErrorToastMessage("Unable to play the game at this time. Please contact support. Rest assurred, we have been notified about this issue.");
 
-				return RedirectToAction("SignatureExpired");
+				//Raise an event here with medaitor to contact support
+
+				return RedirectToAction("NotTilesAvailable");
 			}
-
-			var numberOfPlays = signature.GamePlayCount;
-
-			if (!_signatureUtility.VerifySignature(Guid.Parse(signatureUidInSession), Convert.ToInt64(externalId), screenName, Uid, Sig))
-			{
-				_notificationService.AddErrorToastMessage("Signature has failed.");
-
-				return RedirectToAction("SignatureFailed");
-			}
-
-			if (await SignatureIsExpiredAsync(Uid.ToString(), Sig, screenName))
-			{
-				_notificationService.AddErrorToastMessage("Signature has expired.");
-
-				return RedirectToAction("SignatureExpired");
-			}
-
-			var game = _matchGameService.GetMatchGame(Uid);
-			if(game == null)
-			{
-				_notificationService.AddErrorToastMessage("Invalid game.");
-
-				return RedirectToAction("InvalidGame");
-			}
-
-			if(DateTime.UtcNow > game.EndDateUtc || DateTime.UtcNow < game.StartDateUtc)
-			{
-				_notificationService.AddErrorToastMessage("Cannot play at this time.");
-
-				return RedirectToAction("InvalidGameTime");
-			}
-
-			var board = await _gameBoardService.GetRandomBoardAsync(gameUid: Uid, cancellationToken);
 
 			var model = new PlayMatchGame
 			{
-				GameUid = Uid,
-				GameName = game.Name,
-				Signature = Sig,
-				NumberOfGamePlays = numberOfPlays,
-				MatchBoard = _mapper.Map<MatchBoard>(board),
-				SelectedTiles = new List<Guid>()
+				GameUid = gameboard.MatchGame.Uid,
+				GameName = gameboard.MatchGame.Name,
+				MatchBoard = _mapper.Map<Models.Plays.MatchBoard>(gameboard),
+				Tiles = LoadTiles(tiles)
 			};
 
 			return View(model);
 		}
 
-		private async Task<bool> SignatureIsExpiredAsync(string gameUidSession, string signatureSession, string screenName)
+		[HttpPost]
+		[Route("/PlayMatchGame/{Uid:Guid}/gameplay/{gameplayUid:Guid}")]
+		public async Task<IActionResult> SignaturePlay(
+			Guid Uid,
+			Guid gameplayUid,
+			PlayMatchGame form,
+			CancellationToken cancellationToken)
 		{
-			var signature = await _signatureRepository.GetAsync(gameUidSession, signatureSession, screenName);
+			// verify the game
+			//Verify if it's not yet game end date
+			//verify the gameboard is reserved and is not played
+			//Verify the gameplay and if it has been played
+			//if played, redirect out.
 
-			if (signature == null) return true;
+			//if we get here...
+			//Once played and posted, we commit as played for the gameplay as well as the gameplay and put in the 
+			//gameplay table if won or not. 
+			//also put in the selected tiles (uid/id)
 
-			return DateTime.UtcNow > signature.ExpiryDate;
+			return new OkObjectResult("Time to play");
+		}
+
+		private List<Guid> LoadTiles(IEnumerable<MatchTile> tiles)
+		{
+			var tileList = new List<Guid>();
+
+			foreach (var tile in tiles)
+			{
+				tileList.Add(tile.Uid);
+			}
+
+			return tileList;
+		}
+
+		private void SetSessionVariables(UserProviderDetails userDetails, SignatureModel signature)
+		{
+			_sessionManager.SetKeyValue(SessionConstants.UserDetails, userDetails.ScreenName);
+			_sessionManager.SetKeyValue(SessionConstants.GameplayUid, signature.GamePlayUid.ToString());
+			_sessionManager.SetKeyValue(SessionConstants.GameUid, signature.GameUid.ToString());
+			_sessionManager.SetKeyValue(SessionConstants.Signature, signature.Signature);
 		}
 
 		private bool VerifySignature(
-			Guid signatureUid, 
-			UserProviderDetails userDetails, 
-			string signatureSession, 
-			string gameUidSession)
+			Guid gameplayUid,
+			UserProviderDetails userDetails,
+			string signatureSession)
 				=> _signatureUtility.VerifySignature(
-					signatureUid,
+					gameplayUid,
 					Convert.ToInt64(userDetails.ExternalProfileId),
 					userDetails.ScreenName,
-					Guid.Parse(gameUidSession),
 					signatureSession);
 
 	}

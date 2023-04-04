@@ -14,9 +14,9 @@ namespace hrvster.Core.Requests.MatchGames.Harvester
 		private Profile _profile;
 
 		public SendTwitterLinkToPlayGameRequest(
-			string url, 
-			Rule rule, 
-			ITweet tweet, 
+			string url,
+			Rule rule,
+			ITweet tweet,
 			Profile profile)
 		{
 			_url = url;

@@ -9,6 +9,9 @@ body {
     height: 100vh;
     margin: 0;
     font-family: sans-serif;
+    background-image: url('/images/Pick3Background.jpg');
+    background-size: cover;
+    background-position: center;
 }
 
 form {

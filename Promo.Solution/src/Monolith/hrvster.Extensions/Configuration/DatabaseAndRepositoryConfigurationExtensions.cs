@@ -84,6 +84,7 @@ namespace hrvster.Extensions.Configuration
 				.AddTransient<IMatchTilesRepository, MatchTilesRepository>()
 				.AddTransient<ISignatureRepository, SignatureRepository>()
 				.AddTransient<IMatchGamePlayReportingRepository, MatchGamePlayReportingRepository>()
+				.AddTransient<IMatchGamePlayRepository, MatchGamePlayRepository>()
 				.AddTransient<IMatchPlayRulesRepository, MatchPlayRulesRepository>();
 	}
 }

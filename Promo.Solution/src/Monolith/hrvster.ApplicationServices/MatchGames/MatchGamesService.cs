@@ -12,6 +12,7 @@ namespace hrvster.ApplicationServices.MatchGames
 	public interface IMatchGamesService
 	{
 		Task CreateMatchGameAsync(MatchGame matchGame, string timeZone, bool isDaylight, CancellationToken cancellationToken);
+		Task<bool> GamePlayableAsync(Guid uid, CancellationToken cancellationToken);
 		Task<IEnumerable<MatchGame>> GetAccountMatchGamesAsync(Guid userUid, CancellationToken cancellationToken);
 		Task<IEnumerable<MatchGame>> GetCampaignMatchGamesAsync(Guid campaignUid, CancellationToken cancellationToken);
 		MatchGame GetMatchGame(Guid matchGameUid);
@@ -49,6 +50,32 @@ namespace hrvster.ApplicationServices.MatchGames
 				throw new ArgumentException("Match game campaign needs to be supplied.");
 
 			await _repository.CreateAsync(matchGame, timeZone, isDaylight, cancellationToken);
+		}
+
+		public async Task<bool> GamePlayableAsync(Guid uid, CancellationToken cancellationToken)
+		{
+			_logger.LogInformation("Verifying if the game {uid} is playable", uid);
+
+			var game = await _repository.GetAsync(uid, cancellationToken);
+			if (game == null)
+			{
+				_logger.LogWarning("Game does not exist.");
+				return false;
+			}
+
+			if (DateTime.UtcNow > game.EndDateUtc || DateTime.UtcNow < game.StartDateUtc)
+			{
+				_logger.LogWarning("Game is not playable. Current date not within game start and end dates.");
+				return false;
+			}
+
+			if(!game.HasBeenGenerated)
+			{
+				_logger.LogWarning("Gameboards for the game has not been generated.");
+				return false;
+			}
+
+			return true;
 		}
 
 		public async Task<IEnumerable<MatchGame>> GetAccountMatchGamesAsync(Guid userUid, CancellationToken cancellationToken)

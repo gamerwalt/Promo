@@ -22,7 +22,7 @@
 	public class UrlTypes
 	{
 		public const string DashboardLink = "Dashboard";
-		public const string MatchGamePlayLink = "PlayMatchGame/{GameUid}";
+		public const string MatchGamePlayLink = "PlayMatchGame";
 	}
 
 	public class NotificationService

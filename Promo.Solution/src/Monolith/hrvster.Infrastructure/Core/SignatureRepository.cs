@@ -12,8 +12,18 @@ namespace hrvster.Infrastructure.Core
 {
 	public interface ISignatureRepository
 	{
-		Task CreateAsync(Guid Uid, string signature, string link, DateTime expiryDate, Guid gameUid, string externalUserId, string externalUserHandle, int gamePlayCount, CancellationToken cancellationToken);
-		Task<SignatureModel> GetAsync(string gameUidSession, string signatureSession, string screenName);
+		Task CreateAsync(
+			Guid Uid, 
+			Guid gameplayUid, 
+			string signature, 
+			string link, 
+			DateTime expiryDate, 
+			Guid gameUid, 
+			string externalUserId, 
+			string externalUserHandle, 
+			int gamePlayCount, 
+			CancellationToken cancellationToken);
+		Task<SignatureModel> GetAsync(string signatureSession, string screenName);
 		Task<SignatureModel> GetByUidAsync(Guid uid);
 		Task UpdateSignatureAsync(SignatureModel signatureToUpdate, Guid uidToUpdate, int idToUpdate);
 	}
@@ -28,6 +38,7 @@ namespace hrvster.Infrastructure.Core
 
 		public async Task CreateAsync(
 			Guid Uid,
+			Guid gameplayUid,
 			string signature,
 			string link,
 			DateTime expiryDate,
@@ -39,10 +50,11 @@ namespace hrvster.Infrastructure.Core
 		{
 			using var conn = new MySqlConnection(_database.GetConnectionString());
 			var command = conn.CreateCommand();
-			command.CommandText = "signature_add";
+			command.CommandText = "signature_create";
 			command.CommandType = CommandType.StoredProcedure;
 			command
 				.AddParameter("Uid", Uid)
+				.AddParameter("gameplayUid", gameplayUid)
 				.AddParameter("signature", signature)
 				.AddParameter("link", link)
 				.AddParameter("expiryDate", expiryDate)
@@ -77,7 +89,7 @@ namespace hrvster.Infrastructure.Core
 			await command.ExecuteNonQueryAsync();
 		}
 
-		public async Task<SignatureModel> GetAsync(string gameUidSession, string signatureSession, string screenName)
+		public async Task<SignatureModel> GetAsync(string signatureSession, string screenName)
 		{
 			//signature_get
 			var signature = default(SignatureModel);
@@ -87,8 +99,7 @@ namespace hrvster.Infrastructure.Core
 				var command = conn.CreateCommand();
 				command.CommandText = "signature_get";
 				command.CommandType = CommandType.StoredProcedure;
-				command.AddParameter("gameUid", gameUidSession)
-					.AddParameter("signature", signatureSession)
+				command.AddParameter("signature", signatureSession)
 					.AddParameter("screenName", screenName);
 
 				await conn.OpenAsync();
@@ -130,6 +141,7 @@ namespace hrvster.Infrastructure.Core
 			{
 				Id = reader.GetInt32("id"),
 				Uid = reader.GetGuid("uid"),
+				GamePlayUid = reader.GetGuid("gameplay_uid"),
 				ExpiryDate = reader.GetDateTime("expiry_date"),
 				GamePlayCount = reader.GetInt32("game_play_count"),
 				ExternalUserHandle = reader.GetString("external_user_handle"),

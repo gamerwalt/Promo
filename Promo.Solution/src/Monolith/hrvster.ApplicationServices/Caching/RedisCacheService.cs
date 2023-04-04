@@ -1,7 +1,9 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using StackExchange.Redis;
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace hrvster.ApplicationServices.Caching
@@ -10,6 +12,7 @@ namespace hrvster.ApplicationServices.Caching
 	{
 		Task SetAsync<T>(string key, T value, TimeSpan? expiresIn = null);
 		Task<T> GetAsync<T>(string key);
+		Task RemoveItemFromCacheAsync(string key);
 	}
 
 	public class RedisCacheService : ICacheDataService
@@ -51,5 +54,8 @@ namespace hrvster.ApplicationServices.Caching
 
 			return JsonConvert.DeserializeObject<T>(json);
 		}
+
+		public async Task RemoveItemFromCacheAsync(string key)
+			=> await _cache.KeyDeleteAsync(key);
 	}
 }

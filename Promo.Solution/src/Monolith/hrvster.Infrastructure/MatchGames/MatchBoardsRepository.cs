@@ -15,6 +15,9 @@ namespace hrvster.Infrastructure.MatchGames
 	{
 		Task CreateAsync(MatchBoard board, CancellationToken cancellationToken);
 		Task<IEnumerable<MatchBoard>> GetForMatchGameAsync(Guid matchGameUid, CancellationToken cancellationToken);
+		Task<MatchBoard> GetGameBoardAsync(Guid gameboardUid);
+		Task<IEnumerable<Guid>> GetGameBoardUidsAsync(Guid gameUid, CancellationToken cancellationToken);
+		Task ReserveBoardAsync(Guid uid, CancellationToken cancellationToken);
 	}
 
 	public class MatchBoardsRepository : IMatchBoardsRepository
@@ -67,6 +70,55 @@ namespace hrvster.Infrastructure.MatchGames
 			return matchBoards;
 		}
 
+		public async Task<MatchBoard> GetGameBoardAsync(Guid gameboardUid)
+		{
+			var matchBoard = default(MatchBoard);
+
+			using (var conn = new MySqlConnection(_database.GetConnectionString()))
+			{
+				var command = conn.CreateCommand();
+				command.CommandText = "match_board_get_by_uid";
+				command.CommandType = CommandType.StoredProcedure;
+				command.AddParameter("gameBoardUid", gameboardUid);
+
+				await conn.OpenAsync();
+				using var reader = await command.ExecuteReaderAsync();
+				while (await reader.ReadAsync())
+				{
+					matchBoard = CreateFrom(reader);
+				}
+			}
+
+			return matchBoard;
+		}
+
+		public async Task<IEnumerable<Guid>> GetGameBoardUidsAsync(Guid gameUid, CancellationToken cancellationToken)
+		{
+			var matchBoardUids = new List<Guid>();
+
+			using (var conn = new MySqlConnection(_database.GetConnectionString()))
+			{
+				var command = conn.CreateCommand();
+				command.CommandText = "match_board_uids_get_by_game_uid";
+				command.CommandType = CommandType.StoredProcedure;
+				command.AddParameter("gameUid", gameUid);
+
+				await conn.OpenAsync();
+				using var reader = await command.ExecuteReaderAsync();
+				while (await reader.ReadAsync())
+				{
+					matchBoardUids.Add(ReadGuidFrom(reader));
+				}
+			}
+
+			return matchBoardUids;
+		}
+
+		private Guid ReadGuidFrom(MySqlDataReader reader)
+		{
+			return reader.GetGuid("board_uid");
+		}
+
 		private MatchBoard CreateFrom(MySqlDataReader reader)
 		{
 			var isWinnable = reader.GetBoolean("is_winnable");
@@ -81,6 +133,12 @@ namespace hrvster.Infrastructure.MatchGames
 					{
 						Uid = reader.GetGuid("prize_uid"),
 						Id = reader.GetInt32("prize_id")
+					},
+					MatchGame = new MatchGame
+					{
+						Name = reader.GetString("match_game_name"),
+						Uid = reader.GetGuid("match_game_uid"),
+						Id = reader.GetInt32("match_game_id")
 					}
 				};
 			}
@@ -89,8 +147,27 @@ namespace hrvster.Infrastructure.MatchGames
 			{
 				Id = reader.GetInt32("board_id"),
 				Uid = reader.GetGuid("board_uid"),
-				IsWinnable = isWinnable
+				IsWinnable = isWinnable,
+				MatchGame = new MatchGame
+				{
+					Name = reader.GetString("match_game_name"),
+					Uid = reader.GetGuid("match_game_uid"),
+					Id = reader.GetInt32("match_game_id")
+				}
 			};
+		}
+
+		public async Task ReserveBoardAsync(Guid uid, CancellationToken cancellationToken)
+		{
+			using var conn = new MySqlConnection(_database.GetConnectionString());
+			var command = conn.CreateCommand();
+			command.CommandText = "match_board_reserve";
+			command.CommandType = CommandType.StoredProcedure;
+			command
+				.AddParameter("boardUid", uid);
+
+			await conn.OpenAsync(cancellationToken);
+			await command.ExecuteNonQueryAsync(cancellationToken);
 		}
 	}
 }

@@ -14,12 +14,12 @@ document.getElementById('reset').addEventListener('click', () => {
     document.querySelectorAll('.tile').forEach(tile => {
         tile.classList.remove('selected');
     });
-    document.getElementById('selected-tiles').value = '';
+    document.getElementById('SelectedTiles').value = '';
 });
 
 function updateSelectedTilesInput() {
     const selectedTiles = document.querySelectorAll('.tile.selected');
     const uids = Array.from(selectedTiles).map(tile => tile.dataset.uid);
-    const input = document.getElementById('selected-tiles');
+    const input = document.getElementById('SelectedTiles');
     input.value = uids.join(',');
 }

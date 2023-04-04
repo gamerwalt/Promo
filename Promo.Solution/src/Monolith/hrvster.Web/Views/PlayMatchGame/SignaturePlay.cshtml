@@ -13,18 +13,19 @@
     <title>3x3 Gameboard</title>
 </head>
 <body>
-    <form>
-        <input type="text" id="selected-tiles" name="selected-tiles" readonly>
+    <form 
+        asp-action="SignaturePlay"
+        asp-controller="PlayMatchGame"
+        asp-route-Uid="@Model.GameUid"
+        asp-route-Sig="@Model.Signature"
+        asp-route-externalId="@Model.ExternalId"
+        asp-route-screenName="@Model.ScreenName">
+        <input type="text" asp-for="@Model.SelectedTiles" name="selected-tiles">
         <div class="gameboard">
-            <div class="tile" data-uid="1"></div>
-            <div class="tile" data-uid="2"></div>
-            <div class="tile" data-uid="3"></div>
-            <div class="tile" data-uid="4"></div>
-            <div class="tile" data-uid="5"></div>
-            <div class="tile" data-uid="6"></div>
-            <div class="tile" data-uid="7"></div>
-            <div class="tile" data-uid="8"></div>
-            <div class="tile" data-uid="9"></div>
+            @foreach(var uid in Model.Tiles)
+            {
+                <div class="tile" data-uid="@uid"></div>
+            }
             <div class="button-container">
                 <div class="button-wrapper">
                     <button type="submit" class="btn btn-submit btn-primary btn-block">Submit</button>

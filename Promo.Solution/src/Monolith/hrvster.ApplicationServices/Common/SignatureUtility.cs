@@ -15,9 +15,9 @@ namespace hrvster.ApplicationServices.Common
 			_hrvsterSettings = harvesterSettings;
 		}
 
-		public string CreateSignature(Guid signatureUid, long userId, string handle, Guid gameUid)
+		public string CreateSignature(Guid gameplayUid, long userId, string handle)
 		{
-			var message = $"{signatureUid}:{userId}:{handle}:{gameUid}";
+			var message = $"{gameplayUid}:{userId}:{handle}";
 
 			using (var hmac = new HMACSHA256(Encoding.UTF8.GetBytes(_hrvsterSettings.SignatureKey)))
 			{
@@ -26,9 +26,9 @@ namespace hrvster.ApplicationServices.Common
 			}
 		}
 
-		public bool VerifySignature(Guid signatureUid, long userId, string handle, Guid gameUid, string signature)
+		public bool VerifySignature(Guid gameplayUid, long userId, string handle, string signature)
 		{
-			var expectedSignature = CreateSignature(signatureUid, userId, handle, gameUid);
+			var expectedSignature = CreateSignature(gameplayUid, userId, handle);
 
 			return string.Equals(expectedSignature, signature, StringComparison.Ordinal);
 		}

@@ -45,7 +45,7 @@ namespace hrvster.Core.Handlers.MatchGame
 
 			var rulesText = $"Visit {rulesLink} for Rules";
 
-			var playText = $"Visit {request.Url} to play";
+			var playText = $"A gameboard has been reserved for you alone. Visit {request.Url} to play";
 
 			await PublishTweetAsync(request, tweetText, playText, rulesText);
 		}

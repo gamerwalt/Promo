@@ -6,6 +6,7 @@ namespace hrvster.Models.Core
 	{
 		public int Id { get; set; }
 		public Guid Uid { get; set; }
+		public Guid GamePlayUid { get; set; }
 		public DateTime ExpiryDate { get; set; }
 		public int GamePlayCount { get; set; }
 		public string ExternalUserHandle { get; set; }
