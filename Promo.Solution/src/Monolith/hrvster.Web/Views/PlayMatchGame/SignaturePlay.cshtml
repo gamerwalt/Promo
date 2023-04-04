@@ -17,10 +17,10 @@
         asp-action="SignaturePlay"
         asp-controller="PlayMatchGame"
         asp-route-Uid="@Model.GameUid"
-        asp-route-Sig="@Model.Signature"
-        asp-route-externalId="@Model.ExternalId"
-        asp-route-screenName="@Model.ScreenName">
-        <input type="text" asp-for="@Model.SelectedTiles" name="selected-tiles">
+        asp-route-gameplayUid="@Model.GameplayUid">
+        <input type="text" asp-for="@Model.SelectedTiles" hidden>
+        @Html.HiddenFor(m => m.GameUid)
+        @Html.HiddenFor(m => m.GameplayUid)
         <div class="gameboard">
             @foreach(var uid in Model.Tiles)
             {
@@ -28,10 +28,10 @@
             }
             <div class="button-container">
                 <div class="button-wrapper">
-                    <button type="submit" class="btn btn-submit btn-primary btn-block">Submit</button>
+                    <button type="submit" class="btn btn-submit btn-primary btn-block" disabled>Submit</button>
                 </div>
                 <div class="button-wrapper">
-                    <button type="button" id="reset" class="btn btn-reset">Reset</button>
+                    <button type="button" id="reset" class="btn btn-reset" disabled>Reset</button>
                 </div>
             </div>
         </div>

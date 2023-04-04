@@ -1,0 +1,30 @@
+﻿@using hrvster.Web.Models.Plays;
+@model GameplayLoss
+@{
+    Layout = "";
+    ViewData["Title"] = "Play Pick 3 Match Game";
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="~/css/gameboard.css">
+    <title>3x3 Gameboard</title>
+</head>
+<body>
+    <form 
+        asp-action="SignaturePlay"
+        asp-controller="PlayMatchGame"
+        asp-route-Uid="@Model.GameUid"
+        asp-route-gameplayUid="@Model.GameplayUid">
+        <div class="gameboard">
+            @foreach(var uid in Model.Tiles)
+            {
+                <div class="tile" data-uid="@uid"></div>
+            }
+        </div>
+    </form>
+    <script src="~/js/playGameboard.js"></script>
+</body>
+</html>

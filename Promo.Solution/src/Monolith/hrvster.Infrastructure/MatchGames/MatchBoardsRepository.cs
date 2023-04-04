@@ -18,6 +18,7 @@ namespace hrvster.Infrastructure.MatchGames
 		Task<MatchBoard> GetGameBoardAsync(Guid gameboardUid);
 		Task<IEnumerable<Guid>> GetGameBoardUidsAsync(Guid gameUid, CancellationToken cancellationToken);
 		Task ReserveBoardAsync(Guid uid, CancellationToken cancellationToken);
+		Task UpdateAsPlayedAsync(Guid boardUid, CancellationToken cancellationToken);
 	}
 
 	public class MatchBoardsRepository : IMatchBoardsRepository
@@ -165,6 +166,18 @@ namespace hrvster.Infrastructure.MatchGames
 			command.CommandType = CommandType.StoredProcedure;
 			command
 				.AddParameter("boardUid", uid);
+
+			await conn.OpenAsync(cancellationToken);
+			await command.ExecuteNonQueryAsync(cancellationToken);
+		}
+
+		public async Task UpdateAsPlayedAsync(Guid boardUid, CancellationToken cancellationToken)
+		{
+			using var conn = new MySqlConnection(_database.GetConnectionString());
+			var command = conn.CreateCommand();
+			command.CommandText = "match_board_mark_as_played";
+			command.CommandType = CommandType.StoredProcedure;
+			command.AddParameter("boardUid", boardUid);
 
 			await conn.OpenAsync(cancellationToken);
 			await command.ExecuteNonQueryAsync(cancellationToken);

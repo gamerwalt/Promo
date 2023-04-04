@@ -12,6 +12,8 @@ namespace hrvster.Infrastructure.MatchGames
 	{
 		Task CreateAsync(Guid gameplayUid, int id, CancellationToken cancellationToken);
 		Task<MatchPlay> GetAsync(Guid gameplayUid, CancellationToken cancellationToken);
+		Task MarkAsPlayedAndLossAsync(Guid gameplayUid, string selectedTiles, CancellationToken cancellationToken);
+		Task MarkAsPlayedAndWonAsync(Guid gameplayUid, string selectedTiles, CancellationToken cancellationToken);
 	}
 
 	public class MatchGamePlayRepository : IMatchGamePlayRepository
@@ -59,6 +61,34 @@ namespace hrvster.Infrastructure.MatchGames
 			return matchPlay;
 		}
 
+		public async Task MarkAsPlayedAndLossAsync(Guid gameplayUid, string selectedTiles, CancellationToken cancellationToken)
+		{
+			using var conn = new MySqlConnection(_database.GetConnectionString());
+			var command = conn.CreateCommand();
+			command.CommandText = "match_play_mark_as_played_and_loss";
+			command.CommandType = CommandType.StoredProcedure;
+			command
+				.AddParameter("gameplayUid", gameplayUid)
+				.AddParameter("selectedTiles", selectedTiles);
+
+			await conn.OpenAsync(cancellationToken);
+			await command.ExecuteNonQueryAsync(cancellationToken);
+		}
+
+		public async Task MarkAsPlayedAndWonAsync(Guid gameplayUid, string selectedTiles, CancellationToken cancellationToken)
+		{
+			using var conn = new MySqlConnection(_database.GetConnectionString());
+			var command = conn.CreateCommand();
+			command.CommandText = "match_play_mark_as_played_and_won";
+			command.CommandType = CommandType.StoredProcedure;
+			command
+				.AddParameter("gameplayUid", gameplayUid)
+				.AddParameter("selectedTiles", selectedTiles);
+
+			await conn.OpenAsync(cancellationToken);
+			await command.ExecuteNonQueryAsync(cancellationToken);
+		}
+
 		private MatchPlay CreateFrom(MySqlDataReader reader)
 		{
 			return new MatchPlay
@@ -66,6 +96,8 @@ namespace hrvster.Infrastructure.MatchGames
 				Id = reader.GetInt32("game_play_id"),
 				Uid = reader.GetGuid("game_play_uid"),
 				PlayedIndicator = reader.GetBoolean("played_ind"),
+				WinIndicator = reader.GetBoolean("win_ind"),
+				SelectedTiles = reader.GetString("selected_tiles"),
 				MatchBoard = new MatchBoard
 				{
 					Id = reader.GetInt32("board_id"),

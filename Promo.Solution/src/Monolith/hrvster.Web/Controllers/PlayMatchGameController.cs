@@ -3,16 +3,22 @@ using hrvster.ApplicationServices.Common;
 using hrvster.ApplicationServices.MatchGames;
 using hrvster.Core.Authentication;
 using hrvster.Core.Clients;
+using hrvster.Extensions.ModelExtensions;
 using hrvster.Games.Match.Models;
 using hrvster.Infrastructure.Core;
 using hrvster.Models;
 using hrvster.Models.Core;
+using hrvster.Models.Extensions;
+using hrvster.Models.Options;
 using hrvster.Web.Models.Plays;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using NToastNotify;
+using NToastNotify.Helpers;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -29,6 +35,7 @@ namespace hrvster.Web.Controllers
 		private readonly IMatchGamesService _matchGameService;
 		private readonly IMatchGameBoardService _gameBoardService;
 		private readonly IMatchGameplayService _gameplayService;
+		private readonly HarvesterSettingsOptions _harvesterSettings;
 		private readonly IMapper _mapper;
 
 		public PlayMatchGameController(
@@ -41,6 +48,7 @@ namespace hrvster.Web.Controllers
 			IMatchGamesService matchGameService,
 			IMatchGameBoardService gameBoardService,
 			IMatchGameplayService gameplayService,
+			HarvesterSettingsOptions harvesterSettings,
 			IMapper mapper)
 		{
 			_logger = loggerFactory.CreateLogger<PlayMatchGameController>();
@@ -52,6 +60,7 @@ namespace hrvster.Web.Controllers
 			_matchGameService = matchGameService;
 			_gameBoardService = gameBoardService;
 			_gameplayService = gameplayService;
+			_harvesterSettings = harvesterSettings;
 			_mapper = mapper;
 		}
 
@@ -184,6 +193,7 @@ namespace hrvster.Web.Controllers
 
 			var model = new PlayMatchGame
 			{
+				GameplayUid = gameplay.Uid,
 				GameUid = gameboard.MatchGame.Uid,
 				GameName = gameboard.MatchGame.Name,
 				MatchBoard = _mapper.Map<Models.Plays.MatchBoard>(gameboard),
@@ -201,18 +211,103 @@ namespace hrvster.Web.Controllers
 			PlayMatchGame form,
 			CancellationToken cancellationToken)
 		{
-			// verify the game
-			//Verify if it's not yet game end date
-			//verify the gameboard is reserved and is not played
-			//Verify the gameplay and if it has been played
-			//if played, redirect out.
+			using (_logger.BeginScope(new Dictionary<string, object>
+			{
+				{ "GameUid", Uid },
+				{ "GamePlayUid", gameplayUid }
+			}))
 
-			//if we get here...
-			//Once played and posted, we commit as played for the gameplay as well as the gameplay and put in the 
-			//gameplay table if won or not. 
-			//also put in the selected tiles (uid/id)
+			_logger.LogInformation("Posted gameplay with the following. {Content}", form.ToJsonString());
+			_logger.LogInformation("Verifying the game.");
 
-			return new OkObjectResult("Time to play");
+			if (!await _matchGameService.GamePlayableAsync(Uid, cancellationToken))
+			{
+				_notificationService.AddErrorToastMessage("Unable to play the game or the game doesn't exist.");
+
+				return RedirectToAction("GameUnplayable");
+			}
+
+			_logger.LogInformation("Verifying the gameplay and the gameboard");
+
+			if (!await _gameBoardService.IsBoardPlayableByGameplayAsync(gameplayUid, cancellationToken))
+			{
+				_notificationService.AddErrorToastMessage("Unable to play this game.");
+
+				return RedirectToAction("BoardUnplayable");
+			}
+
+			if (ModelState.IsValid)
+			{
+				return await ReturnWinOrLossAsync(Uid, gameplayUid, form, cancellationToken);
+			}
+
+			_notificationService.AddErrorToastMessage(ModelState.BuildMessageFromErrors());
+
+			return Redirect(_harvesterSettings.HrvsterUrl);
+		}
+
+		[HttpGet]
+		[Route("/PlayMatchGame/win/{Uid:Guid}/gameplay/{gameplayUid:Guid}")]
+		public async Task<IActionResult> MatchGameWin(
+			Guid Uid,
+			Guid gameplayUid,
+			CancellationToken cancellationToken)
+		{
+			var gameplay = await _gameplayService.GetAsync(gameplayUid, cancellationToken);
+
+			if (!gameplay.PlayedIndicator && !gameplay.MatchBoard.PlayedIndicator && !gameplay.WinIndicator)
+			{
+				_notificationService.AddWarningToastMessage("Unable to locate your win. Something went wrong.");
+
+				return Redirect(_harvesterSettings.HrvsterUrl);
+			}
+
+			var gameboard = await _gameBoardService.GetGameBoardAsync(gameplay.MatchBoard.Uid, cancellationToken);
+			var tiles = await _gameBoardService.GetTilesAsync(gameboard.Uid, cancellationToken);
+			
+			var model = new GameplayWin
+			{
+				GameplayUid = gameplay.Uid,
+				GameUid = gameboard.MatchGame.Uid,
+				GameName = gameboard.MatchGame.Name,
+				MatchBoard = _mapper.Map<Models.Plays.MatchBoard>(gameboard),
+				Tiles = LoadTiles(tiles),
+				SelectedTiles = LoadTileStrings(gameplay.SelectedTiles)
+			};
+
+			return View(model);
+		}
+
+		[HttpGet]
+		[Route("/PlayMatchGame/loss/{Uid:Guid}/gameplay/{gameplayUid:Guid}")]
+		public async Task<IActionResult> MatchGameLoss(
+			Guid Uid,
+			Guid gameplayUid,
+			CancellationToken cancellationToken)
+		{
+			var gameplay = await _gameplayService.GetAsync(gameplayUid, cancellationToken);
+
+			if (!gameplay.PlayedIndicator && !gameplay.MatchBoard.PlayedIndicator && gameplay.WinIndicator)
+			{
+				_notificationService.AddWarningToastMessage("Unable to locate your win. Something went wrong.");
+
+				return Redirect(_harvesterSettings.HrvsterUrl);
+			}
+
+			var gameboard = await _gameBoardService.GetGameBoardAsync(gameplay.MatchBoard.Uid, cancellationToken);
+			var tiles = await _gameBoardService.GetTilesAsync(gameboard.Uid, cancellationToken);
+
+			var model = new GameplayLoss
+			{
+				GameplayUid = gameplay.Uid,
+				GameUid = gameboard.MatchGame.Uid,
+				GameName = gameboard.MatchGame.Name,
+				MatchBoard = _mapper.Map<Models.Plays.MatchBoard>(gameboard),
+				Tiles = LoadTiles(tiles),
+				SelectedTiles = LoadTileStrings(gameplay.SelectedTiles)
+			};
+
+			return View(model);
 		}
 
 		private List<Guid> LoadTiles(IEnumerable<MatchTile> tiles)
@@ -225,6 +320,20 @@ namespace hrvster.Web.Controllers
 			}
 
 			return tileList;
+		}
+
+		private List<Guid> LoadTileStrings(string tileUids)
+		{
+			var tiles = new List<Guid>();
+
+			var tileList = tileUids.Split(',').ToList();
+
+			foreach (var tileUid in tileList)
+			{
+				tiles.Add(Guid.Parse(tileUid));
+			}
+
+			return tiles;
 		}
 
 		private void SetSessionVariables(UserProviderDetails userDetails, SignatureModel signature)
@@ -244,6 +353,42 @@ namespace hrvster.Web.Controllers
 					Convert.ToInt64(userDetails.ExternalProfileId),
 					userDetails.ScreenName,
 					signatureSession);
+
+		private async Task<IActionResult> ReturnWinOrLossAsync(Guid Uid, Guid gameplayUid, PlayMatchGame form, CancellationToken cancellationToken)
+		{
+			if (await _gameplayService.IsAWinAsync(gameUid: Uid, gameplayUid, form.SelectedTiles, cancellationToken))
+			{
+				await SetGameplayAsWonAsync(gameplayUid, form, cancellationToken);
+
+				return RedirectToAction("MatchGameWin", new { Uid = Uid, gameplayUid = gameplayUid });
+			}
+
+			await SetGameplayAsLossAsync(gameplayUid, form, cancellationToken);
+
+			return RedirectToAction("MatchGameLoss", new { Uid = Uid, gameplayUid = gameplayUid });
+		}
+
+		private async Task SetGameplayAsWonAsync(Guid gameplayUid, PlayMatchGame form, CancellationToken cancellationToken)
+		{
+			_logger.LogInformation("The gameplay with uid {gameplayUid} was won with the tiles {selectedTiles}",
+				gameplayUid,
+				form.SelectedTiles);
+
+			_logger.LogInformation("Setting the gameplay as a win.");
+
+			await _gameplayService.MarkAsPlayedAndWinAsync(gameplayUid, form.SelectedTiles, cancellationToken);
+		}
+
+		private async Task SetGameplayAsLossAsync(Guid gameplayUid, PlayMatchGame form, CancellationToken cancellationToken)
+		{
+			_logger.LogInformation("The gameplay with uid {gameplayUid} was lost with the tiles {selectedTiles}",
+				gameplayUid, 
+				form.SelectedTiles);
+
+			_logger.LogInformation("Setting the gameplay as a loss.");
+
+			await _gameplayService.MarkAsPlayedAndLostAsync(gameplayUid, form.SelectedTiles, cancellationToken);
+		}
 
 	}
 }

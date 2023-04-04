@@ -14,6 +14,7 @@ namespace hrvster.Infrastructure.MatchGames
 		Task CreateAsync(MatchTile tile, CancellationToken cancellationToken);
 		Task<IEnumerable<MatchTile>> GetForBoardAsync(Guid uid, CancellationToken cancellationToken);
 		Task<IEnumerable<MatchTile>> GetForMatchGameAsync(Guid matchGameUid, CancellationToken cancellationToken);
+		Task<MatchTile> GetTileAsync(string tileUid, CancellationToken cancellationToken);
 	}
 
 	public class MatchTilesRepository : IMatchTilesRepository
@@ -89,6 +90,28 @@ namespace hrvster.Infrastructure.MatchGames
 			}
 
 			return matchTiles;
+		}
+
+		public async Task<MatchTile> GetTileAsync(string tileUid, CancellationToken cancellationToken)
+		{
+			var matchTile = default(MatchTile);
+
+			using (var conn = new MySqlConnection(_database.GetConnectionString()))
+			{
+				var command = conn.CreateCommand();
+				command.CommandText = "match_tile_get";
+				command.CommandType = CommandType.StoredProcedure;
+				command.AddParameter("tileUid", tileUid);
+
+				await conn.OpenAsync(cancellationToken);
+				using var reader = await command.ExecuteReaderAsync(cancellationToken);
+				while (await reader.ReadAsync(cancellationToken))
+				{
+					matchTile = CreateFrom(reader);
+				}
+			}
+
+			return matchTile;
 		}
 
 		private MatchTile CreateFrom(MySqlDataReader reader)
