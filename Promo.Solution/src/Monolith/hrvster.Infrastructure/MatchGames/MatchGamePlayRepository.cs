@@ -97,7 +97,7 @@ namespace hrvster.Infrastructure.MatchGames
 				Uid = reader.GetGuid("game_play_uid"),
 				PlayedIndicator = reader.GetBoolean("played_ind"),
 				WinIndicator = reader.GetBoolean("win_ind"),
-				SelectedTiles = reader.GetString("selected_tiles"),
+				SelectedTiles = reader.GetStringValue("selected_tiles"),
 				MatchBoard = new MatchBoard
 				{
 					Id = reader.GetInt32("board_id"),

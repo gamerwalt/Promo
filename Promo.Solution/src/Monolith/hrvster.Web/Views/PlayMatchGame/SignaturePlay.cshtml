@@ -18,7 +18,7 @@
         asp-controller="PlayMatchGame"
         asp-route-Uid="@Model.GameUid"
         asp-route-gameplayUid="@Model.GameplayUid">
-        <input type="text" asp-for="@Model.SelectedTiles" hidden>
+        <input type="text" asp-for="@Model.SelectedTiles">
         @Html.HiddenFor(m => m.GameUid)
         @Html.HiddenFor(m => m.GameplayUid)
         <div class="gameboard">
@@ -36,6 +36,7 @@
             </div>
         </div>
     </form>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="~/js/playGameboard.js"></script>
 </body>
 </html>

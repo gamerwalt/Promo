@@ -271,11 +271,27 @@ namespace hrvster.Web.Controllers
 				GameUid = gameboard.MatchGame.Uid,
 				GameName = gameboard.MatchGame.Name,
 				MatchBoard = _mapper.Map<Models.Plays.MatchBoard>(gameboard),
-				Tiles = LoadTiles(tiles),
+				Tiles = GetMatchTiles(tiles),
 				SelectedTiles = LoadTileStrings(gameplay.SelectedTiles)
 			};
 
 			return View(model);
+		}
+
+		private List<Models.MatchTile> GetMatchTiles(IEnumerable<MatchTile> tiles)
+		{
+			var matchTiles = new List<Models.MatchTile>();
+
+			foreach(var tile in tiles)
+			{
+				matchTiles.Add(new Models.MatchTile
+				{
+					Uid = tile.Uid,
+					ImageUrl = tile.Prize.Image.LocationUrl
+				});
+			}
+
+			return matchTiles;
 		}
 
 		[HttpGet]

@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Threading;
 using System.Threading.Tasks;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace hrvster.Infrastructure.MatchGames
 {
@@ -130,12 +131,19 @@ namespace hrvster.Infrastructure.MatchGames
 				Prize = winIndicator ? new MatchPrize
 				{
 					Uid = reader.GetGuid("prize_uid"),
-					Id = reader.GetInt32("prize_id")
+					Id = reader.GetInt32("prize_id"),
+					Image = new MatchImage
+					{
+						Uid = reader.GetGuid("image_uid"),
+						Id = reader.GetInt32("image_id"),
+						LocationUrl = reader.GetString("location_url")
+					}
 				} : null,
 				Image = new MatchImage
 				{
 					Uid = reader.GetGuid("image_uid"),
-					Id = reader.GetInt32("image_id")
+					Id = reader.GetInt32("image_id"),
+					LocationUrl = reader.GetString("location_url")
 				}
 			};
 		}
