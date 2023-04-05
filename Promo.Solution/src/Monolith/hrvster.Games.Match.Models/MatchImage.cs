@@ -9,5 +9,6 @@ namespace hrvster.Games.Match.Models
 		public string Name { get; set; }
 		public MatchGame MatchGame { get; set; }
 		public string LocationUrl { get; set; }
+		public bool IsLoss { get; set; }
 	}
 }

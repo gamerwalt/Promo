@@ -120,6 +120,7 @@ namespace hrvster.Infrastructure.MatchGames
 				Uid = reader.GetGuid("image_uid"),
 				LocationUrl = reader.GetString("location_url"),
 				Name = reader.GetString("image_name"),
+				IsLoss = reader.GetBoolean("is_loss"),
 				MatchGame = new MatchGame
 				{
 					Uid = reader.GetGuid("match_game_uid"),

@@ -135,3 +135,15 @@ form {
     box-sizing: border-box;
     cursor: pointer;
 }
+
+
+.heading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.heading h1 {
+    text-align: center
+}

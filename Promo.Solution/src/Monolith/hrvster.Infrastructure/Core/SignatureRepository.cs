@@ -1,5 +1,6 @@
 ﻿using hrvster.Infrastructure.Extensions;
 using hrvster.Models.Core;
+using Microsoft.Extensions.Logging;
 using MySqlConnector;
 using System;
 using System.Collections.Generic;
@@ -23,16 +24,19 @@ namespace hrvster.Infrastructure.Core
 			string externalUserHandle, 
 			int gamePlayCount, 
 			CancellationToken cancellationToken);
-		Task<SignatureModel> GetAsync(string signatureSession, string screenName);
+		Task<SignatureModel> GetAsync(string signatureSession, string screenName, string userId);
 		Task<SignatureModel> GetByUidAsync(Guid uid);
 		Task UpdateSignatureAsync(SignatureModel signatureToUpdate, Guid uidToUpdate, int idToUpdate);
 	}
 
 	public class SignatureRepository : ISignatureRepository
 	{
+		private readonly ILogger<SignatureRepository> _logger;
 		private readonly IDatabase _database;
-		public SignatureRepository(IDatabase database)
+
+		public SignatureRepository(ILoggerFactory loggerFactory, IDatabase database)
 		{
+			_logger = loggerFactory.CreateLogger<SignatureRepository>();
 			_database = database;
 		}
 
@@ -89,7 +93,7 @@ namespace hrvster.Infrastructure.Core
 			await command.ExecuteNonQueryAsync();
 		}
 
-		public async Task<SignatureModel> GetAsync(string signatureSession, string screenName)
+		public async Task<SignatureModel> GetAsync(string signatureSession, string screenName, string userId)
 		{
 			//signature_get
 			var signature = default(SignatureModel);
@@ -99,11 +103,13 @@ namespace hrvster.Infrastructure.Core
 				var command = conn.CreateCommand();
 				command.CommandText = "signature_get";
 				command.CommandType = CommandType.StoredProcedure;
-				command.AddParameter("signature", signatureSession)
-					.AddParameter("screenName", screenName);
+				command.AddParameter("signatureParameter", signatureSession)
+					.AddParameter("screenName", screenName)
+					.AddParameter("userId", userId);
 
 				await conn.OpenAsync();
 				using var reader = await command.ExecuteReaderAsync();
+
 				while (await reader.ReadAsync())
 				{
 					signature = CreateRecordFrom(reader);

@@ -118,7 +118,7 @@ namespace hrvster.Web.Controllers
 
 			var signatureSession = _sessionManager.GetValue(SessionConstants.Signature);
 
-			var signature = await _signatureRepository.GetAsync(signatureSession, userDetails.ScreenName);
+			var signature = await _signatureRepository.GetAsync(signatureSession, userDetails.ScreenName, userDetails.ExternalProfileId);
 
 			if (signature == null)
 			{
@@ -156,6 +156,7 @@ namespace hrvster.Web.Controllers
 		[Route("/PlayMatchGame/{Uid:Guid}/gameplay/{gameplayUid:Guid}")]
 		public async Task<IActionResult> SignaturePlay(Guid Uid, Guid gameplayUid, CancellationToken cancellationToken)
 		{
+			_sessionManager.RemoveKeyValue(SessionConstants.Signature);
 			using (_logger.BeginScope(new Dictionary<string, object>
 			{
 				{ "GameUid", Uid },
@@ -287,7 +288,7 @@ namespace hrvster.Web.Controllers
 				matchTiles.Add(new Models.MatchTile
 				{
 					Uid = tile.Uid,
-					ImageUrl = tile.Prize.Image.LocationUrl
+					ImageUrl = tile.Image.LocationUrl
 				});
 			}
 
@@ -319,7 +320,7 @@ namespace hrvster.Web.Controllers
 				GameUid = gameboard.MatchGame.Uid,
 				GameName = gameboard.MatchGame.Name,
 				MatchBoard = _mapper.Map<Models.Plays.MatchBoard>(gameboard),
-				Tiles = LoadTiles(tiles),
+				Tiles = GetMatchTiles(tiles),
 				SelectedTiles = LoadTileStrings(gameplay.SelectedTiles)
 			};
 

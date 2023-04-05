@@ -57,12 +57,13 @@ namespace hrvster.ApplicationServices.Common
 			{
 				var records = await _repository.GetByWatchValue(hashtag.Text, userIdentifierType);
 
-				if (records.Any(
-					r => 
-						r.ExternalUserId == externalUserId 
-						&& IsNotAllowed(r))
-					)
-					return false;
+				//Todo: RateLimiter
+				//if (records.Any(
+				//	r => 
+				//		r.ExternalUserId == externalUserId)
+				//		//&& IsNotAllowed(r))
+				//	)
+				//	return false;
 			}
 
 			return true;

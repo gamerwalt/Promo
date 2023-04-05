@@ -78,6 +78,7 @@ namespace hrvster.ApplicationServices.MatchGames
 			var prizes = await _matchPrizeService.GetAllForMatchGameAsync(matchGame.Uid, cancellationToken);
 			var prizeList = prizes.ToList();
 			var images = await _matchImageService.GetForMatchGameAsync(matchGame.Uid, cancellationToken);
+			var lossImage = images.FirstOrDefault(c => c.IsLoss);
 			var availablePrizes = new List<MatchPrize>();
 
 			_logger.LogInformation("Retrieved a total of {totalPrizeCount} prizes for match game with uid {matchGameUid} and name {matchName}",
@@ -123,7 +124,8 @@ namespace hrvster.ApplicationServices.MatchGames
 					tiles,
 					winningTilesCount,
 					placedWinningTiles,
-					board);
+					board,
+					lossImage);
 
 				board.Id = i;
 				board.IsWinnable = true;
@@ -136,7 +138,7 @@ namespace hrvster.ApplicationServices.MatchGames
 			}
 
 			// Initialize remaining boards
-			GenerateRemainingBoards(matchGame, rows, columns, numberOfBoards, generatedBoards, images);
+			GenerateRemainingBoards(matchGame, rows, columns, numberOfBoards, generatedBoards, images, lossImage);
 
 			//shuffle
 			ShuffleBoards(numberOfBoards, random, generatedBoards);
@@ -169,7 +171,8 @@ namespace hrvster.ApplicationServices.MatchGames
 			int columns, 
 			int numberOfBoards, 
 			List<MatchBoard> generatedBoards, 
-			IEnumerable<MatchImage> images)
+			IEnumerable<MatchImage> images,
+			MatchImage lossImage)
 		{
 			for (int i = matchGame.NumberOfWinnableBoards; i < numberOfBoards; i++)
 			{
@@ -177,7 +180,7 @@ namespace hrvster.ApplicationServices.MatchGames
 
 				var tiles = new List<List<MatchTile>>(rows);
 
-				GenerateTiles(rows, columns, images, board, tiles);
+				GenerateTiles(rows, columns, images, board, tiles, lossImage);
 
 				CreateBoard(matchGame, generatedBoards, i, board, tiles);
 			}
@@ -188,14 +191,15 @@ namespace hrvster.ApplicationServices.MatchGames
 			int columns, 
 			IEnumerable<MatchImage> images, 
 			MatchBoard board, 
-			List<List<MatchTile>> tiles)
+			List<List<MatchTile>> tiles,
+			MatchImage lossImage)
 		{
 			for (int row = 0; row < rows; row++)
 			{
 				tiles.Add(new List<MatchTile>(columns));
 				for (int col = 0; col < columns; col++)
 				{
-					AddTile(columns, images, board, tiles, row, col);
+					AddTile(columns, images, board, tiles, row, col, lossImage);
 				}
 			}
 		}
@@ -206,7 +210,8 @@ namespace hrvster.ApplicationServices.MatchGames
 			MatchBoard board, 
 			List<List<MatchTile>> tiles, 
 			int row, 
-			int col)
+			int col,
+			MatchImage lossImage)
 		{
 			tiles[row].Add(
 				new MatchTile
@@ -215,7 +220,7 @@ namespace hrvster.ApplicationServices.MatchGames
 					WinIndicator = false,
 					Uid = Guid.NewGuid(),
 					Board = board,
-					Image = images.FirstOrDefault(i => i.Uid == Guid.Parse(LossImageUid))
+					Image = lossImage
 				});
 		}
 
@@ -228,7 +233,8 @@ namespace hrvster.ApplicationServices.MatchGames
 			List<List<MatchTile>> tiles, 
 			int winningTilesCount, 
 			int placedWinningTiles, 
-			MatchBoard board)
+			MatchBoard board,
+			MatchImage lossImage)
 		{
 			for (int row = 0; row < rows; row++)
 			{
@@ -252,7 +258,7 @@ namespace hrvster.ApplicationServices.MatchGames
 
 					var image = isWinningTile ?
 								images.FirstOrDefault(i => i.Uid == selectedPrize.Image.Uid) :
-								images.FirstOrDefault(i => i.Uid == Guid.Parse(LossImageUid));
+								lossImage;
 					var prize = isWinningTile ? selectedPrize : null;
 
 					tiles[row].Add(
