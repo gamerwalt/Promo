@@ -59,7 +59,7 @@ namespace hrvster.Core.Handlers.MatchGame
 
 					_logger.LogInformation("Attempting to get a random gameboard uid.");
 
-					var gameboardUid = await _gameboardService.GetRandomGameboardUidAsync(cancellationToken);
+					var gameboardUid = await _gameboardService.GetRandomGameboardUidAsync(gameUid, cancellationToken);
 
 					if(gameboardUid == Guid.Empty)
 					{

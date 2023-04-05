@@ -9,7 +9,7 @@ namespace hrvster.Games.Match.Models
 		public bool IsWinnable { get; set; }
 		public MatchPrize Prize { get; set; }
 		public MatchGame MatchGame { get; set; }
-		public List<List<MatchTile>> Tiles { get; set; }
+		public List<MatchTile> Tiles { get; set; }
 		public double WinProbability { get; set; }
 		public bool PlayedIndicator { get; set; }
 		public bool IsReserved { get; set; }

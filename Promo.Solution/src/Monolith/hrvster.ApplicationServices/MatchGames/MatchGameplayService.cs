@@ -101,6 +101,12 @@ namespace hrvster.ApplicationServices.MatchGames
 
 			foreach(var tile in listOfTiles)
 			{
+				if (tile.Prize == null)
+				{
+					same = false;
+					break;
+				}
+
 				if (tile.Prize.Id != firstPrize.Id)
 				{
 					same = false;

@@ -150,6 +150,8 @@ namespace hrvster.ApplicationServices.Harvesters.Twitter
 
 			var ruleIds = new List<string>();
 
+			var metaResult = getRulesJson["meta"].ToString();
+
 			foreach (var rule in getRulesJson["data"])
 			{
 				ruleIds.Add(rule["id"].ToString());
