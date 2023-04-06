@@ -189,7 +189,7 @@ namespace hrvster.Web.Controllers
 
 				//Raise an event here with medaitor to contact support
 
-				return RedirectToAction("NotTilesAvailable");
+				return RedirectToAction("NoTilesAvailable");
 			}
 
 			var model = new PlayMatchGame
@@ -279,22 +279,6 @@ namespace hrvster.Web.Controllers
 			return View(model);
 		}
 
-		private List<Models.MatchTile> GetMatchTiles(IEnumerable<MatchTile> tiles)
-		{
-			var matchTiles = new List<Models.MatchTile>();
-
-			foreach(var tile in tiles)
-			{
-				matchTiles.Add(new Models.MatchTile
-				{
-					Uid = tile.Uid,
-					ImageUrl = tile.Image.LocationUrl
-				});
-			}
-
-			return matchTiles;
-		}
-
 		[HttpGet]
 		[Route("/PlayMatchGame/loss/{Uid:Guid}/gameplay/{gameplayUid:Guid}")]
 		public async Task<IActionResult> MatchGameLoss(
@@ -325,6 +309,41 @@ namespace hrvster.Web.Controllers
 			};
 
 			return View(model);
+		}
+
+		[HttpGet]
+		[Route("/PlayMatchGame/BoardUnplayable")]
+		public async Task<IActionResult> BoardUnplayable()
+		{
+			return View();
+		}
+
+		[HttpGet]
+		[Route("/PlayMatchGame/GameUnplayable")]
+		public async Task<IActionResult> GameUnplayable()
+		{
+			return View();
+		}
+
+		[HttpGet]
+		[Route("/PlayMatchGame/NoTilesAvailable")]
+		public async Task<IActionResult> NoTilesAvailable()
+		{
+			return View();
+		}
+
+		[HttpGet]
+		[Route("/PlayMatchGame/SignatureExpired")]
+		public async Task<IActionResult> SignatureExpired()
+		{
+			return View();
+		}
+
+		[HttpGet]
+		[Route("/PlayMatchGame/SignatureFailed")]
+		public async Task<IActionResult> SignatureFailed()
+		{
+			return View();
 		}
 
 		private List<Guid> LoadTiles(IEnumerable<MatchTile> tiles)
@@ -371,18 +390,54 @@ namespace hrvster.Web.Controllers
 					userDetails.ScreenName,
 					signatureSession);
 
-		private async Task<IActionResult> ReturnWinOrLossAsync(Guid Uid, Guid gameplayUid, PlayMatchGame form, CancellationToken cancellationToken)
+		private async Task<IActionResult> ReturnWinOrLossAsync(
+			Guid Uid, Guid gameplayUid, PlayMatchGame form, CancellationToken cancellationToken)
 		{
+			var screenName = _sessionManager.GetValue(SessionConstants.UserDetails);
+			var signature = _sessionManager.GetValue(SessionConstants.Signature);
+
 			if (await _gameplayService.IsAWinAsync(gameUid: Uid, gameplayUid, form.SelectedTiles, cancellationToken))
 			{
 				await SetGameplayAsWonAsync(gameplayUid, form, cancellationToken);
+
+				if(!string.IsNullOrWhiteSpace(screenName) && !string.IsNullOrWhiteSpace(signature))
+				{
+					await _signatureRepository.SetAsCompletedAsync(
+					signature,
+					screenName,
+					cancellationToken);
+				}				
 
 				return RedirectToAction("MatchGameWin", new { Uid = Uid, gameplayUid = gameplayUid });
 			}
 
 			await SetGameplayAsLossAsync(gameplayUid, form, cancellationToken);
 
+			if (!string.IsNullOrWhiteSpace(screenName) && !string.IsNullOrWhiteSpace(signature))
+			{
+				await _signatureRepository.SetAsCompletedAsync(
+				signature,
+				screenName,
+				cancellationToken);
+			}
+
 			return RedirectToAction("MatchGameLoss", new { Uid = Uid, gameplayUid = gameplayUid });
+		}
+
+		private List<Models.MatchTile> GetMatchTiles(IEnumerable<MatchTile> tiles)
+		{
+			var matchTiles = new List<Models.MatchTile>();
+
+			foreach (var tile in tiles)
+			{
+				matchTiles.Add(new Models.MatchTile
+				{
+					Uid = tile.Uid,
+					ImageUrl = tile.Image.LocationUrl
+				});
+			}
+
+			return matchTiles;
 		}
 
 		private async Task SetGameplayAsWonAsync(Guid gameplayUid, PlayMatchGame form, CancellationToken cancellationToken)

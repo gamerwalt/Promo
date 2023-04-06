@@ -186,12 +186,9 @@ namespace hrvster.ApplicationServices.MatchGames
 
 			foreach (var board in generatedBoards)
 			{
-				_logger.LogInformation("Adding the board with uid {boardUid} to the database.", board.Uid);
 				await _matchBoardsRepository.CreateAsync(board, cancellationToken);
 
 				boardKeys.Add(board.Uid);
-
-				_logger.LogInformation("Adding the board with uid {boardUid} to the cache.", board.Uid);
 
 				var createdBoard = await _matchBoardsRepository.GetGameBoardAsync(board.Uid);
 
@@ -208,9 +205,7 @@ namespace hrvster.ApplicationServices.MatchGames
 			{
 				foreach (var tile in board.Tiles)
 				{
-					_logger.LogInformation("Saving the tile with uid {tileUid} to the database", tile.Uid);
 					await _matchTilesRepository.CreateAsync(tile, cancellationToken);
-
 				}
 			}
 
@@ -232,20 +227,15 @@ namespace hrvster.ApplicationServices.MatchGames
 
 		public async Task<MatchBoard> GetRandomBoardAsync(Guid gameUid, CancellationToken cancellationToken)
 		{
-			var boardKeys = await GetBoardKeysAsync(gameUid);
-
-			if (boardKeys == null || boardKeys.Count == 0)
-			{
-				//Todo: do something
-			}
+			var boardKeys = await GetBoardKeysFromCahceOrDatabase(gameUid, cancellationToken);
 
 			var randomIndex = RandomNumberGenerator.GetInt32(boardKeys.Count);
-			var randomBoardKey = boardKeys[randomIndex];
+			var randomBoardUid = boardKeys[randomIndex];
 
-			var board = await _cahceDataService.GetAsync<MatchBoard>($"{CacheKeys.GameBoards}{randomBoardKey}");
+			var board = await _cahceDataService.GetAsync<MatchBoard>($"{CacheKeys.GameBoards}{randomBoardUid}");
 			if (board == null)
 			{
-				//Todo: Load from database.
+				board = await _matchBoardsRepository.GetGameBoardAsync(randomBoardUid);
 			}
 
 			return board;
@@ -253,23 +243,31 @@ namespace hrvster.ApplicationServices.MatchGames
 
 		public async Task<Guid> GetRandomGameboardUidAsync(Guid gameUid, CancellationToken cancellationToken)
 		{
-			var boardKeys = await GetBoardKeysAsync(gameUid);
-
-			if (boardKeys == null || boardKeys.Count == 0)
-			{
-				return Guid.Empty;
-			}
+			var boardKeys = await GetBoardKeysFromCahceOrDatabase(gameUid, cancellationToken);
 
 			var randomIndex = RandomNumberGenerator.GetInt32(boardKeys.Count);
 
 			return boardKeys[randomIndex];
 		}
 
+		private async Task<List<Guid>> GetBoardKeysFromCahceOrDatabase(Guid gameUid, CancellationToken cancellationToken)
+		{
+			var boardKeys = await GetBoardKeysAsync(gameUid);
+
+			if (boardKeys == null || boardKeys.Count == 0)
+			{
+				var boardUids = await _matchBoardsRepository.GetGameBoardUidsAsync(gameUid, cancellationToken);
+				boardKeys = boardUids.ToList();
+			}
+
+			return boardKeys;
+		}
+
 		private async Task<List<Guid>> GetBoardKeysAsync(Guid gameUid)
 		{
 			var boardKeysString = await _cahceDataService.GetAsync<string>(GenerateMatchBoardKeysForTheUids(gameUid));
-			var boardKeys = JsonConvert.DeserializeObject<List<Guid>>(boardKeysString);
-			return boardKeys;
+			
+			return JsonConvert.DeserializeObject<List<Guid>>(boardKeysString);
 		}
 
 		public async Task<MatchBoard> GetGameBoardAsync(Guid gameboardUid, CancellationToken cancellationToken)

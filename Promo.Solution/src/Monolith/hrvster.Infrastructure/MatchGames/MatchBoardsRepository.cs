@@ -16,6 +16,12 @@ namespace hrvster.Infrastructure.MatchGames
 		Task CreateAsync(MatchBoard board, CancellationToken cancellationToken);
 		Task<IEnumerable<MatchBoard>> GetForMatchGameAsync(Guid matchGameUid, CancellationToken cancellationToken);
 		Task<MatchBoard> GetGameBoardAsync(Guid gameboardUid);
+		/// <summary>
+		/// Get a list of all the Board Uids for a specific game
+		/// </summary>
+		/// <param name="gameUid">The game unique identifier</param>
+		/// <param name="cancellationToken">Cancellation Token</param>
+		/// <returns>List<Guid></Guid></returns>
 		Task<IEnumerable<Guid>> GetGameBoardUidsAsync(Guid gameUid, CancellationToken cancellationToken);
 		Task ReserveBoardAsync(Guid uid, CancellationToken cancellationToken);
 		Task UpdateAsPlayedAsync(Guid boardUid, CancellationToken cancellationToken);
@@ -93,6 +99,12 @@ namespace hrvster.Infrastructure.MatchGames
 			return matchBoard;
 		}
 
+		/// <summary>
+		/// Get a list of all the Board Uids for a specific game
+		/// </summary>
+		/// <param name="gameUid">The game unique identifier</param>
+		/// <param name="cancellationToken">Cancellation Token</param>
+		/// <returns>List<Guid></Guid></returns>
 		public async Task<IEnumerable<Guid>> GetGameBoardUidsAsync(Guid gameUid, CancellationToken cancellationToken)
 		{
 			var matchBoardUids = new List<Guid>();

@@ -151,20 +151,25 @@ namespace hrvster.ApplicationServices.Harvesters.Twitter
 			var ruleIds = new List<string>();
 
 			var metaResult = getRulesJson["meta"].ToString();
+			var meta = JsonConvert.DeserializeObject<Meta>(metaResult);
+			if(meta != null && meta.ResultCount >= 1)
+			{
+				foreach (var rule in getRulesJson["data"])
+				{
+					ruleIds.Add(rule["id"].ToString());
+				}
 
-			foreach (var rule in getRulesJson["data"])
-			{
-				ruleIds.Add(rule["id"].ToString());
+				if (ruleIds.Count > 0)
+				{
+					await DeleteRulesAsync(ruleIds);
+				}
+				else
+				{
+					_logger.LogInformation("No rules to delete.");
+				}
 			}
 
-			if (ruleIds.Count > 0)
-			{
-				await DeleteRulesAsync(ruleIds);
-			}
-			else
-			{
-				_logger.LogInformation("No rules to delete.");
-			}
+			
 		}
 
 		private async Task DeleteRulesAsync(List<string> ruleIds)
@@ -199,5 +204,14 @@ namespace hrvster.ApplicationServices.Harvesters.Twitter
 			var tweetId = tweetObject["data"]["id"];
 			return tweetId;
 		}
+	}
+
+	public class Meta
+	{
+		[JsonProperty("sent")]
+		public DateTimeOffset Sent { get; set; }
+
+		[JsonProperty("result_count")]
+		public long ResultCount { get; set; }
 	}
 }

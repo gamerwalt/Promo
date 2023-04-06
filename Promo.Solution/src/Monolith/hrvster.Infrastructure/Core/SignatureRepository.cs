@@ -26,6 +26,7 @@ namespace hrvster.Infrastructure.Core
 			CancellationToken cancellationToken);
 		Task<SignatureModel> GetAsync(string signatureSession, string screenName, string userId);
 		Task<SignatureModel> GetByUidAsync(Guid uid);
+		Task SetAsCompletedAsync(string signature, string screenName, CancellationToken cancellationToken);
 		Task UpdateSignatureAsync(SignatureModel signatureToUpdate, Guid uidToUpdate, int idToUpdate);
 	}
 
@@ -156,6 +157,20 @@ namespace hrvster.Infrastructure.Core
 				Link = reader.GetString("link"),
 				Signature = reader.GetString("signature")
 			};
+		}
+
+		public async Task SetAsCompletedAsync(string signature, string screenName, CancellationToken cancellationToken)
+		{
+			using var conn = new MySqlConnection(_database.GetConnectionString());
+			var command = conn.CreateCommand();
+			command.CommandText = "signature_set_as_completed";
+			command.CommandType = CommandType.StoredProcedure;
+			command
+				.AddParameter("signatureParam", signature)
+				.AddParameter("screenName", screenName);
+
+			await conn.OpenAsync(cancellationToken);
+			await command.ExecuteNonQueryAsync(cancellationToken);
 		}
 	}
 }
