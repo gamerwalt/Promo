@@ -11,7 +11,7 @@ namespace hrvster.ApplicationServices.Reporting
 {
 	public interface IReportingService
 	{
-		Task SaveMatchGameAsync(Guid gameUid, Guid gameplayUid, Guid boardUid, ExternalClientType twitter, string screenName, string externalId, CancellationToken cancellationToken);
+		Task SaveMatchGameAsync(Guid gameUid, Guid gameplayUid, Guid boardUid, UserIdentifierType userIdentifierType, string screenName, string externalId, CancellationToken cancellationToken);
 	}
 
 	public class ReportingService : IReportingService
@@ -33,8 +33,8 @@ namespace hrvster.ApplicationServices.Reporting
 		public async Task SaveMatchGameAsync(
 			Guid gameUid, 
 			Guid gameplayUid, 
-			Guid boardUid, 
-			ExternalClientType externalClientType,
+			Guid boardUid,
+			UserIdentifierType userIdentifierType,
 			string screenName,
 			string externalId,
 			CancellationToken cancellationToken)
@@ -54,7 +54,7 @@ namespace hrvster.ApplicationServices.Reporting
 				boardUid, 
 				screenName, 
 				externalId,
-				externalClientType
+				userIdentifierType
 				);
 		}
 	}

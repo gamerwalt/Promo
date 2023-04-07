@@ -32,5 +32,20 @@ namespace hrvster.Web.Controllers
 
 			return View(sweepRulesAndPrizes);
 		}
+
+		[HttpGet]
+		[Route("GameRules/MatchGames/NG/en/{gameUid}")]
+		public async Task<IActionResult> MatchGames([FromRoute] Guid gameUid)
+		{
+			//var gameAndPrizes = await _mediator.Send(new GetMatchGameAndPrizesRequest(gameUid));
+
+			//if(gameAndPrizes.Profile == null)
+			//{
+			//	return Redirect("https://hrvster.com");
+			//}
+
+			//return View(gameAndPrizes);
+			return new OkObjectResult("OK");
+		}
 	}
 }

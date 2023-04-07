@@ -159,6 +159,10 @@ namespace hrvster.Core.Handlers.MatchGame
 					await SendLinkToPlayGameAsync(url, request.Rule, request.Tweet, profile);
 
 					await SaveSignatureAsync(Guid.NewGuid(), url, signature, request, playRules, gameplayUid, cancellationToken);
+
+					await _incomingTweetsRepository.UpdateStatusAsync(
+						request.IncomingTweet.IncomingTweetUid,
+						Models.Harvester.IncomingTweetStatus.Completed);
 				}
 				else
 				{

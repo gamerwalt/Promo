@@ -1,0 +1,200 @@
+﻿@using hrvster.Models.WebModels.Sweeps
+@using hrvster.Core
+
+@model SweepstakeRulesAndPrizes
+@inject LinkBuilder linkBuilder
+
+@{
+    Layout = "";
+    var TwitterUserLink = @linkBuilder.BuildTwitterHandleLink(Model.Profile.ScreenName);
+    var TwitterUser = $"@{Model.Profile.ScreenName}";
+}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+        <title>@Model.Sweepstake.Name} Official Rules</title>
+    </head>
+    <style>
+        body{
+            font-family: Arial,sans-serif;
+            font-weight: normal;
+            color: #fff;
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        p {
+            margin: 0 0 20px 0;
+            display: block;
+            margin-block-start: 1em;
+            margin-block-end: 1em;
+            margin-inline-start: 0px;
+            margin-inline-end: 0px;
+        }
+        li {
+            margin-bottom: 1em;
+        }
+        table {
+            margin-top: 1em;
+            margin-bottom: 2em;
+        }
+
+        .container {
+            max-width: 999px;
+            margin: 0 auto;
+            padding: 1em;
+            font-size: 14px;
+            color: black;
+        }
+        
+    </style>
+    <body class="container">
+        <h1 style="text-align: center">
+            Sweepstake Name: @Model.Sweepstake.Name
+            <br />
+            Promotion/Campaign Name: @Model.Sweepstake.Campaign.CampaignName
+            <br />
+            OFFICIAL RULES
+        </h1>
+        <p>
+            This Sweepstake is intended for viewing and participation in Nigeria only and shall be construed and evaluated according to the laws of Niger.
+            Please do not enter if you are not a legal resident of, and not located in, Nigeria at time of entry.
+            VOID OUTSIDE OF NIGERIA AND WHERE PROHIBITED BY LAW.
+        </p>
+        <p>
+            NO PURCHASE OR PAYMENT OF ANY KIND IS NECESSARY TO ENTER OR WIN. A PURCHASE WILL NOT INCREASE YOUR CHANCE OF WINNING.
+        </p>
+        <p>
+            Sweepstake Period: Sweepstake starts @Model.Sweepstake.StartDate.ToString("MMM dd, yyyy, hh:mm:ss tt") UTC and ends
+            @Model.Sweepstake.EndDate.ToString("MMM dd, yyyy, hh:mm:ss tt") UTC and will consist of a draw that will take place
+            @Model.Sweepstake.DrawDate.GetValueOrDefault().ToString("MMM dd, yyyy, hh:mm:ss tt")
+        </p>
+        <ol>
+            <li>
+                <strong>ELIGIBILITY</strong>: To enter and be eligible to win a prize, you must be a legal resident of Nigeria,
+                have a valid email address, reply to the original tweet with the hashtag, and be a follower of the twitter account of the tweet you replied to. 
+                Minors must have permission from a parent/legal guardian to participate in the Sweepstake. 
+                Persons in any of the following categories are NOT eligible to participate or win a prize: 
+                (a) any person who, at any time on or after @Model.Sweepstake.StartDate.ToString("d"), 
+                    was or is a director, officer, agent, representative, or employee of hrvster or its affiliates, subsidiaries, 
+                    or service agencies, who are directly involved in the planning or execution of the Sweepstake; 
+                (b) any other individuals engaged in the development, production or distribution of materials for the 
+                    Sweepstake or engaged in the administration or execution of this Sweepstake 
+                    (collectively, with the entities listed in 1(a), the “Sweepstake Entities”); 
+                (c) persons who are or purport to be immediate family members (defined as biological or step-mother/ father, sister, 
+                brother, daughter, son, dependent or spouse of any of the foregoing) 
+                of any person in any of the preceding categories, regardless of where they live, 
+                or any person who resides in the same household as any person in any of the preceding categories; and 
+                (d) persons who Sponsor is prohibited from allowing to participate in the Program under applicable law. 
+                ontest is subject to all applicable federal, state and local laws and regulations.
+            </li>
+            <li>
+                <strong>HOW TO ENTER: No Purchase Necessary</strong>Reply to the tweets below and make sure you at least key in the hashtag.
+                Please ensure your account on twitter is verifiable. All entries must be in the form of a reply to any of the tweets below and must be 
+                twitted by @Model.Sweepstake.EndDate.ToString("MMM dd, yyyy, hh:mm:ss tt") UTC.
+                <table cellpadding="6" cellspacing="6" align="center">
+                    <caption><strong>Rules</strong></caption>
+                    <thead>
+                        <tr>
+                            <th>Tweet</th>
+                            <th>Hashtag (Must be in your reply)</th>
+                            <th>Must Follow Account?</th>
+                        </tr>
+                        @foreach(var rule in Model.Rules)
+                        {
+                            <tr>
+                                <td>
+                                <a href="@linkBuilder.BuildTwitterLink(rule.ExternalId, rule.RuleUid, TwitterUser).Result" target="_blank">
+                                    @linkBuilder.BuildTwitterLink(rule.ExternalId, rule.RuleUid, TwitterUser).Result
+                                </a>
+                                </td>
+                                <td>
+                                    <i><strong>@rule.WatchValue</strong></i>
+                                </td>
+                                <td>
+                                    @rule.MustBeFollowing
+                                </td>
+                            </tr>
+                        }
+                    </thead>
+                </table>
+            </li>
+            <li>
+                <strong>PRIZES:</strong> The following prizes will be awarded when once the draw has happened. There will be a total of @Model.DrawRule.WinnerCount and @Model.DrawRule.WinnerBackupCount backup for each winner.
+                <table cellpadding="6" cellspacing="6" align="center">
+                    <caption><strong>Prizes</strong></caption>
+                    <thead>
+                        <tr>
+                            <th>Winner Place/Position</th>
+                            <th>Name</th>
+                            <th>Value</th>
+                        </tr>
+                        @foreach (var prize in Model.Prizes)
+                        {
+                            <tr>
+                                <td>
+                                    @prize.GetPrizePositionLiteral()
+                                </td>
+                                <td>
+                                    @prize.PrizeName
+                                </td>
+                                <td>
+                                    @prize.PrizeValue
+                                </td>
+                            </tr>
+                        }
+                    </thead>
+                </table>
+            </li>
+            <li>
+                hrvster or it's employees and founders are not responsible for fulfilling the prizes of the winners. 
+                And will not be held responsible for wrongful disbursing of prizes to the winners by the owner of the promotion/campaign's sweepstake.
+            </li>
+            <li>
+            <strong>HOW TO CLAIM YOUR PRIZE</strong> You will be notified either by a DM or a tweet on twitter if you are one of the selected winners.
+                The account owner <a href="@TwitterUserLink" target="_blank">@TwitterUser</a> will be responsible to disbursing and fulfilling the prizes to the winners.
+                However, hrvster will be responsible for performing the draw on behalf of <a href="@TwitterUserLink" target="_blank">@TwitterUser</a>
+            </li>
+            <li>
+                hrvster reserves the right to disqualify any entrant's entry into the Sweepstake (and void all associated entries) 
+                or entitlement to a prize if, in the sole discretion of hrvster, it determines or suspects that the entrant 
+                has attempted to undermine the legitimate operation of the Sweepstake by tampering, cheating, hacking, deception, 
+                or other fraudulent, deceptive or unfair playing practices (including any entries or points generated by script, macro, robotic, programmed, or any other automated means or any other means which subvert the entry process).
+            </li>
+            <li>
+                hrvster reserves the right in its sole discretion to cancel, modify and/or suspend this Sweepstake at any time if fraud, 
+                technical failures, including any network server or hardware failure, viruses, bugs, errors in programming, 
+                or any other errors or other causes impairs the administration, security, integrity or proper play of the Sweepstake. 
+                In the event of cancellation, hrvster reserves the right in its sole discretion, to randomly select the Winners for the drawing(s) from among all eligible. 
+                In no event will hrvster be liable for more than the stated number of prizes in these Official Rules.
+            </li>
+            <li>
+                Any attempt by anyone, to deliberately damage any website or undermine the legitimate operation of this Sweepstake, 
+                including but not limited to any fraudulent claims, may be a violation of criminal and civil laws. 
+                Should such an attempt be made, hrvster reserves the right to seek remedies and damages (including attorneys' fees) 
+                from any such individual, to the fullest extent permitted by law, 
+                including criminal prosecution. Entrants engaging in any of the foregoing activities may be disqualified (and all associated entries will be void) and will forfeit any prize won. 
+                hrvster’s failure to enforce any term of these Official Rules shall not constitute a waiver of that provision.
+            </li>
+            <li>
+                In the event of any conflict with any Sweepstake details contained in these Official Rules and Sweepstake details contained in 
+                Sweepstake Materials, the details of the Sweepstake as set forth in these Official Rules shall prevail.
+            </li>
+            <li>
+                This Contest is solely sponsored by <a href="@TwitterUserLink" target="_blank">@TwitterUser</a>.
+            </li>
+            <li>
+                The winners list for the Contest will be posted and updated online after the prizes for each Contest Draw have been awarded. However, once the draw has happened, winners will be notified by Direct Message or a Tweet.
+                Once you have been notified wait for <a href="@TwitterUserLink" target="_blank">@TwitterUser</a> to disburse prizes.
+            </li>
+            <li>
+                hrvster will not collect any personal information for the disbursement of prizes nor will it collect such for entry into the Sweepstake.
+            </li>
+        </ol>
+    </body>
+</html>

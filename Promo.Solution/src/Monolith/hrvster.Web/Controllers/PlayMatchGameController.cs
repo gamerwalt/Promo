@@ -281,7 +281,7 @@ namespace hrvster.Web.Controllers
 					Uid, 
 					gameplayUid, 
 					form.BoardUid, 
-					ExternalClientType.Twitter, 
+					UserIdentifierType.TwitterHandle, 
 					screenName,
 					externalId,
 					cancellationToken);
@@ -437,6 +437,8 @@ namespace hrvster.Web.Controllers
 		{
 			var screenName = _sessionManager.GetValue(SessionConstants.UserExternalScreenName);
 			var signature = _sessionManager.GetValue(SessionConstants.Signature);
+
+			//record gameplay
 
 			if (await _gameplayService.IsAWinAsync(gameUid: Uid, gameplayUid, form.SelectedTiles, cancellationToken))
 			{

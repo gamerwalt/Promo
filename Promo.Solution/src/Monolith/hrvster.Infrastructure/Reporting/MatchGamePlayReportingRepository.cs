@@ -11,7 +11,7 @@ namespace hrvster.Infrastructure.Reporting
 {
 	public interface IMatchGamePlayReportingRepository
 	{
-		Task CreateAsync(Guid gameUid, Guid campaignUid, Guid gameplayUid, Guid boardUid, string screenName, string externalId, ExternalClientType externalClientType);
+		Task CreateAsync(Guid gameUid, Guid campaignUid, Guid gameplayUid, Guid boardUid, string screenName, string externalId, UserIdentifierType userIdentifierType);
 		Task<MatchGamePlayReport> GetGamePlayReportAsync(Guid gameUid, Guid campaignUid, string userIdentifierType, string externalUserId, string screenName, CancellationToken cancellationToken);
 	}
 
@@ -24,7 +24,7 @@ namespace hrvster.Infrastructure.Reporting
 			_database = database;
 		}
 
-		public async Task CreateAsync(Guid gameUid, Guid campaignUid, Guid gameplayUid, Guid boardUid, string screenName, string externalUserId, ExternalClientType externalClientType)
+		public async Task CreateAsync(Guid gameUid, Guid campaignUid, Guid gameplayUid, Guid boardUid, string screenName, string externalUserId, UserIdentifierType userIdentifierType)
 		{
 			using var conn = new MySqlConnection(_database.GetReportingConnectionString());
 			var command = conn.CreateCommand();
@@ -34,7 +34,7 @@ namespace hrvster.Infrastructure.Reporting
 				.AddParameter("gameUid", gameUid)
 				.AddParameter("campaignUid", campaignUid)
 				.AddParameter("screenName", screenName)
-				.AddParameter("userIdentifierType", externalClientType.ToString())
+				.AddParameter("userIdentifierType", userIdentifierType.ToString())
 				.AddParameter("externalUserId", externalUserId)
 				.AddParameter("gameplayUid", gameplayUid);
 
@@ -86,7 +86,6 @@ namespace hrvster.Infrastructure.Reporting
 				ScreenName = reader.GetString("screen_name"),
 				UserIdentifierType = Enum.Parse<UserIdentifierType>(reader.GetString("user_identifier_type")),
 				ExternalUserId = reader.GetString("external_user_id"),
-				ExternalId = reader.GetString("external_id"),
 				Plays = reader.GetInt32("plays")
 			};
 		}
