@@ -94,6 +94,9 @@ namespace hrvster.Web.Mapper
 				.ForMember(dest => dest.Uid, opt => opt.MapFrom(src => src.Uid))
 				.ForMember(dest => dest.ImageUrl, opt => opt.MapFrom(src => src.Prize.Image.LocationUrl))
 				.ReverseMap();
+
+			CreateMap<Games.Match.Models.MatchPlay, Models.Plays.MatchPlay>()
+				.ReverseMap();
 		}
 	}
 }

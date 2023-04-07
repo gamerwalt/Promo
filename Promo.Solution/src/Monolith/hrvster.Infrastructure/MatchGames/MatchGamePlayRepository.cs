@@ -1,5 +1,6 @@
 ﻿using hrvster.Games.Match.Models;
 using hrvster.Infrastructure.Extensions;
+using hrvster.Models;
 using MySqlConnector;
 using System;
 using System.Collections.Generic;
@@ -131,7 +132,10 @@ namespace hrvster.Infrastructure.MatchGames
 					IsWinnable = reader.GetBoolean("is_winnable"),
 					PlayedIndicator = reader.GetBoolean("board_played_ind"),
 					IsReserved = reader.GetBoolean("is_reserved")
-				}
+				},
+				PrizeName = reader.GetStringValue("prize_name"),
+				ScreenName = reader.GetString("screen_name"),
+				UserIdentifierType = Enum.Parse<UserIdentifierType>(reader.GetString("user_identifier_type"))
 			};
 		}
 	}

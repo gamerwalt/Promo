@@ -13,6 +13,6 @@ namespace hrvster.Web.Models
 		public int PlayCount { get; set; }
 		public bool Generated { get; set; }
 		public bool ReadyToBeGenerated { get; set; }
-		public MatchPlay MatchPlays { get; set; }
+		public IEnumerable<MatchPlay> MatchPlays { get; set; }
 	}
 }

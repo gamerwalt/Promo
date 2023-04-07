@@ -282,7 +282,7 @@ namespace hrvster.Web.Controllers
 					MatchRules = _mapper.Map<List<MatchRule>>(rules),
 					MatchPrizes = _mapper.Map<List<MatchPrize>>(prizes),
 					MatchPlayRule = _mapper.Map<MatchPlayRule>(playRules),
-					MatchPlays = _mapper.Map<MatchPlay>(gamePlays)
+					MatchPlays = _mapper.Map<IEnumerable<MatchPlay>>(gamePlays)
 				};
 
 		private static CreateMatchGame BuildCreateGameModel(List<Campaign> campaigns)

@@ -13,5 +13,6 @@ namespace hrvster.Web.Models.Plays
 		public bool WinIndicator { get; set; }
 		public UserIdentifierType UserIdentifierType { get; set; }
 		public string ScreenName { get; set; }
+		public string PrizeName { get; set; }
 	}
 }
