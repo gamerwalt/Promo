@@ -2,6 +2,7 @@
 using hrvster.Infrastructure.Extensions;
 using MySqlConnector;
 using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Threading;
 using System.Threading.Tasks;
@@ -10,8 +11,9 @@ namespace hrvster.Infrastructure.MatchGames
 {
 	public interface IMatchGamePlayRepository
 	{
-		Task CreateAsync(Guid gameplayUid, int id, CancellationToken cancellationToken);
+		Task CreateAsync(Guid gameplayUid, int id, string screenName, Models.UserIdentifierType handle, CancellationToken cancellationToken);
 		Task<MatchPlay> GetAsync(Guid gameplayUid, CancellationToken cancellationToken);
+		Task<IEnumerable<MatchPlay>> GetForGamePlayAsync(Guid gameUid, CancellationToken cancellationToken);
 		Task MarkAsPlayedAndLossAsync(Guid gameplayUid, string selectedTiles, CancellationToken cancellationToken);
 		Task MarkAsPlayedAndWonAsync(Guid gameplayUid, string selectedTiles, CancellationToken cancellationToken);
 	}
@@ -25,7 +27,7 @@ namespace hrvster.Infrastructure.MatchGames
 			_database = database;
 		}
 
-		public async Task CreateAsync(Guid gameplayUid, int id, CancellationToken cancellationToken)
+		public async Task CreateAsync(Guid gameplayUid, int id, string screenName, Models.UserIdentifierType handleType, CancellationToken cancellationToken)
 		{
 			using var conn = new MySqlConnection(_database.GetConnectionString());
 			var command = conn.CreateCommand();
@@ -33,7 +35,9 @@ namespace hrvster.Infrastructure.MatchGames
 			command.CommandType = CommandType.StoredProcedure;
 			command
 				.AddParameter("gameplayUid", gameplayUid)
-				.AddParameter("gameId", id);
+				.AddParameter("gameId", id)
+				.AddParameter("screenName", screenName)
+				.AddParameter("userIdentifierType", handleType);
 
 			await conn.OpenAsync(cancellationToken);
 			await command.ExecuteNonQueryAsync(cancellationToken);
@@ -55,6 +59,28 @@ namespace hrvster.Infrastructure.MatchGames
 				while (await reader.ReadAsync(cancellationToken))
 				{
 					matchPlay = CreateFrom(reader);
+				}
+			}
+
+			return matchPlay;
+		}
+
+		public async Task<IEnumerable<MatchPlay>> GetForGamePlayAsync(Guid gameUid, CancellationToken cancellationToken)
+		{
+			var matchPlay = new List<MatchPlay>();
+
+			using (var conn = new MySqlConnection(_database.GetConnectionString()))
+			{
+				var command = conn.CreateCommand();
+				command.CommandText = "match_gameplay_get_by_game_uid";
+				command.CommandType = CommandType.StoredProcedure;
+				command.AddParameter("gameUid", gameUid);
+
+				await conn.OpenAsync(cancellationToken);
+				using var reader = await command.ExecuteReaderAsync(cancellationToken);
+				while (await reader.ReadAsync(cancellationToken))
+				{
+					matchPlay.Add(CreateFrom(reader));
 				}
 			}
 

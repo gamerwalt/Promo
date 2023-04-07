@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using hrvster.Web.Models.Plays;
+using System.Collections.Generic;
 
 namespace hrvster.Web.Models
 {
@@ -12,5 +13,6 @@ namespace hrvster.Web.Models
 		public int PlayCount { get; set; }
 		public bool Generated { get; set; }
 		public bool ReadyToBeGenerated { get; set; }
+		public MatchPlay MatchPlays { get; set; }
 	}
 }

@@ -1,5 +1,7 @@
 ﻿using hrvster.Games.Match.Models;
 using hrvster.Infrastructure.MatchGames;
+using hrvster.Infrastructure.Reporting;
+using hrvster.Models;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -12,6 +14,7 @@ namespace hrvster.ApplicationServices.MatchGames
 	public interface IMatchGameplayService
 	{
 		Task<bool> GameBeenPlayedAsync(Guid gameplayUid, CancellationToken cancellationToken);
+		Task<IEnumerable<MatchPlay>> GetAllGamePlays(Guid gameUid, CancellationToken cancellationToken);
 		Task<MatchPlay> GetAsync(Guid gameplayUid, CancellationToken cancellationToken);
 		Task<bool> IsAWinAsync(Guid gameUid, Guid gameplayUid, string selectedTiles, CancellationToken cancellationToken);
 		Task MarkAsPlayedAndLostAsync(Guid gameplayUid, string selectedTiles, CancellationToken cancellationToken);
@@ -24,17 +27,20 @@ namespace hrvster.ApplicationServices.MatchGames
 		private readonly IMatchGamePlayRepository _repository;
 		private readonly IMatchTilesRepository _tilesRepository;
 		private readonly IMatchBoardsRepository _boardsRepository;
+		private readonly IMatchGamePlayRepository _gameplayRepository;
 
 		public MatchGameplayService(
 			ILoggerFactory loggerFactory,
 			IMatchGamePlayRepository repository,
 			IMatchTilesRepository tilesRepository,
-			IMatchBoardsRepository boardsRepository)
+			IMatchBoardsRepository boardsRepository,
+			IMatchGamePlayRepository gameplayRepository)
 		{
 			_logger = loggerFactory.CreateLogger<MatchGameplayService>();
 			_repository = repository;
 			_tilesRepository = tilesRepository;
 			_boardsRepository = boardsRepository;
+			_gameplayRepository = gameplayRepository;
 		}
 
 		public async Task<bool> GameBeenPlayedAsync(Guid gameplayUid, CancellationToken cancellationToken)
@@ -43,6 +49,9 @@ namespace hrvster.ApplicationServices.MatchGames
 
 			return gameplay.PlayedIndicator;
 		}
+
+		public async Task<IEnumerable<MatchPlay>> GetAllGamePlays(Guid gameUid, CancellationToken cancellationToken)
+			=> await _gameplayRepository.GetForGamePlayAsync(gameUid, cancellationToken);
 
 		public async Task<MatchPlay> GetAsync(Guid gameplayUid, CancellationToken cancellationToken)
 			=> await _repository.GetAsync(gameplayUid, cancellationToken);

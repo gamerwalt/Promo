@@ -145,7 +145,7 @@ namespace hrvster.Core.Handlers.MatchGame
 						return;
 					}
 
-					var gameplayUid = await ReserveGameboardAsync(request);
+					var gameplayUid = await ReserveGameboardAsync(request, UserIdentifierType.TwitterHandle);
 
 					var signature = CreateSignature(gameplayUid, request.Tweet);
 					var link = new Uri(_harvesterSettings.HrvsterUrl)
@@ -181,9 +181,10 @@ namespace hrvster.Core.Handlers.MatchGame
 			}
 		}
 
-		private async Task<Guid> ReserveGameboardAsync(ProcessPlayMatchGameHashtagReplyRequest request)
+		private async Task<Guid> ReserveGameboardAsync(
+			ProcessPlayMatchGameHashtagReplyRequest request, UserIdentifierType handle)
 		{
-			return await _mediator.Send(new ReserveGameboardRequest(request.Rule.Game.Uid, request.Tweet));
+			return await _mediator.Send(new ReserveGameboardRequest(request.Rule.Game.Uid, request.Tweet, handle));
 		}
 
 		private async Task SaveSignatureAsync(

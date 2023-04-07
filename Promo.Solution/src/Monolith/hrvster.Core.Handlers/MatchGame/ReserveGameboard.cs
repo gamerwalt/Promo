@@ -79,7 +79,7 @@ namespace hrvster.Core.Handlers.MatchGame
 				}
 
 				//create a gameplay
-				var gameplayUid = await CreateGamePlayAsync(gameBoard, cancellationToken);
+				var gameplayUid = await CreateGamePlayAsync(gameBoard, screenName, request.Handle, cancellationToken);
 
 				await _gameboardService.ReserveBoardAsync(gameBoard, cancellationToken);
 
@@ -87,13 +87,14 @@ namespace hrvster.Core.Handlers.MatchGame
 			}
 		}
 
-		private async Task<Guid> CreateGamePlayAsync(MatchBoard gameBoard, CancellationToken cancellationToken)
+		private async Task<Guid> CreateGamePlayAsync(
+			MatchBoard gameBoard, string screenName, Models.UserIdentifierType handle, CancellationToken cancellationToken)
 		{
 			_logger.LogInformation("Creating a game play for the gameboard {gameboardUid}", gameBoard.Uid);
 
 			var gameplayUid = Guid.NewGuid();
 
-			await _gameplayRepository.CreateAsync(gameplayUid, gameBoard.Id, cancellationToken);
+			await _gameplayRepository.CreateAsync(gameplayUid, gameBoard.Id, screenName, handle, cancellationToken);
 
 			return gameplayUid;
 		}
