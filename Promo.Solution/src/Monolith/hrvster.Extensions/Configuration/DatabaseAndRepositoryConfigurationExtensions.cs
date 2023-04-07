@@ -56,6 +56,7 @@ namespace hrvster.Extensions.Configuration
 				.AddTransient<IBlacklistedUserRepository, BlacklistedUserRepository>()
 				.AddTransient<IHarvesterRepository, HarvesterRepository>()
 				.AddTransient<IIncomingTweetsRepository, IncomingTweetsRepository>()
+				.AddTransient<IMatchGamePlayReportingRepository, MatchGamePlayReportingRepository>()
 				.AddTransient<IUserLimiterRepository, UserLimiterRepository>();
 
 		public static IServiceCollection AddBlackListedSweepsUserRepository(this IServiceCollection services)

@@ -25,6 +25,7 @@ namespace hrvster.Infrastructure.Core
 			int gamePlayCount, 
 			CancellationToken cancellationToken);
 		Task<SignatureModel> GetAsync(string signatureSession, string screenName, string userId);
+		Task<SignatureModel> GetAsync(string signature, CancellationToken cancellationToken);
 		Task<SignatureModel> GetByUidAsync(Guid uid);
 		Task SetAsCompletedAsync(string signature, string screenName, CancellationToken cancellationToken);
 		Task UpdateSignatureAsync(SignatureModel signatureToUpdate, Guid uidToUpdate, int idToUpdate);
@@ -171,6 +172,28 @@ namespace hrvster.Infrastructure.Core
 
 			await conn.OpenAsync(cancellationToken);
 			await command.ExecuteNonQueryAsync(cancellationToken);
+		}
+
+		public async Task<SignatureModel> GetAsync(string signature, CancellationToken cancellationToken)
+		{
+			var signatureModel = default(SignatureModel);
+
+			using (var conn = new MySqlConnection(_database.GetConnectionString()))
+			{
+				var command = conn.CreateCommand();
+				command.CommandText = "signature_get_by_signature";
+				command.CommandType = CommandType.StoredProcedure;
+				command.AddParameter("signatureParam", signature);
+
+				await conn.OpenAsync(cancellationToken);
+				using var reader = await command.ExecuteReaderAsync(cancellationToken);
+				while (await reader.ReadAsync(cancellationToken))
+				{
+					signatureModel = CreateRecordFrom(reader);
+				}
+			}
+
+			return signatureModel;
 		}
 	}
 }

@@ -23,7 +23,8 @@
 		public const string GameType = "_GameType";
 		public const string GameUid = "_GameUid";
 		public const string Signature = "_Signature";
-		public const string UserDetails = "_UserDetails";
+		public const string UserExternalScreenName = "_UserScreenName";
+		public const string UserExternalId = "_UserExternalId";
 		public const string SignatureUid = "_SignatureUid";
 		public const string GameplayUid = "_GameplayUid";
 	}

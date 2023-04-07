@@ -52,7 +52,7 @@ namespace hrvster.Core.Handlers.ServiceHandlers
 
 			var totalValue = prizes.Sum(c => c.PrizeValue);
 
-			var tweetText = $"@{notification.Tweet.CreatedBy.ScreenName} {DateTime.UtcNow:MMM dd, yyyy hh:mm:fffff} - You just got entered into a sweepstakes entry. Total value of Ngn{string.Format("{0:n}", totalValue)} to be won.";
+			var tweetText = $"@{notification.Tweet.CreatedBy.ScreenName} {DateTime.UtcNow:MMM dd, yyyy hh:mm:fffff} - You just got entered into a sweepstakes. Total value of Ngn{string.Format("{0:n}", totalValue)} to be won.";
 			
 			if (profile == null)
 			{

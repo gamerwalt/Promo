@@ -5,6 +5,7 @@ using hrvster.ApplicationServices.Common;
 using hrvster.ApplicationServices.Harvesters.Twitter;
 using hrvster.ApplicationServices.Mails;
 using hrvster.ApplicationServices.Processors;
+using hrvster.ApplicationServices.Reporting;
 using hrvster.ApplicationServices.Sweepstakes;
 using hrvster.Core;
 using hrvster.Infrastructure;
@@ -21,6 +22,7 @@ namespace hrvster.Extensions.Configuration
 				.AddTransient<IMailService, MailService>()
 				.AddTransient<IAccountVerificationService, AccountVerificationService>()
 				.AddGameService()
+				.AddReportingService()
 				.AddUserRateLimiterService();
 
 		public static IServiceCollection AddRandomizer(this IServiceCollection services)
@@ -53,5 +55,8 @@ namespace hrvster.Extensions.Configuration
 
 		public static IServiceCollection AddSignatureUtility(this IServiceCollection services)
 			=> services.AddScoped<SignatureUtility>();
+
+		public static IServiceCollection AddReportingService(this IServiceCollection services)
+			=> services.AddTransient<IReportingService, ReportingService>();
 	}
 }

@@ -1,11 +1,13 @@
 ﻿using AutoMapper;
 using hrvster.ApplicationServices.Common;
 using hrvster.ApplicationServices.MatchGames;
+using hrvster.ApplicationServices.Reporting;
 using hrvster.Core.Authentication;
 using hrvster.Core.Clients;
 using hrvster.Extensions.ModelExtensions;
 using hrvster.Games.Match.Models;
 using hrvster.Infrastructure.Core;
+using hrvster.Infrastructure.Reporting;
 using hrvster.Models;
 using hrvster.Models.Core;
 using hrvster.Models.Extensions;
@@ -14,10 +16,8 @@ using hrvster.Web.Models.Plays;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using NToastNotify;
-using NToastNotify.Helpers;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -31,11 +31,11 @@ namespace hrvster.Web.Controllers
 		private readonly IWatchTypeProvider _watchTypeProvider;
 		private readonly ISessionManager _sessionManager;
 		private readonly ISignatureRepository _signatureRepository;
-		private readonly IToastNotification _notificationService;
 		private readonly IMatchGamesService _matchGameService;
 		private readonly IMatchGameBoardService _gameBoardService;
 		private readonly IMatchGameplayService _gameplayService;
 		private readonly HarvesterSettingsOptions _harvesterSettings;
+		private readonly IReportingService _reportingService;
 		private readonly IMapper _mapper;
 
 		public PlayMatchGameController(
@@ -44,11 +44,11 @@ namespace hrvster.Web.Controllers
 			IWatchTypeProvider watchTypeProvider,
 			ISessionManager sessionManager,
 			ISignatureRepository signatureRepository,
-			IToastNotification notificationService,
 			IMatchGamesService matchGameService,
 			IMatchGameBoardService gameBoardService,
 			IMatchGameplayService gameplayService,
 			HarvesterSettingsOptions harvesterSettings,
+			IReportingService reportingService,
 			IMapper mapper)
 		{
 			_logger = loggerFactory.CreateLogger<PlayMatchGameController>();
@@ -56,16 +56,16 @@ namespace hrvster.Web.Controllers
 			_watchTypeProvider = watchTypeProvider;
 			_sessionManager = sessionManager;
 			_signatureRepository = signatureRepository;
-			_notificationService = notificationService;
 			_matchGameService = matchGameService;
 			_gameBoardService = gameBoardService;
 			_gameplayService = gameplayService;
 			_harvesterSettings = harvesterSettings;
+			_reportingService = reportingService;
 			_mapper = mapper;
 		}
 
 		[HttpGet]
-		[Route("/PlayMatchGame")]
+		[Route("/PlayMatchGame/matchgame")]
 		public async Task<IActionResult> Play(string signature, CancellationToken cancellationToken)
 		{
 			using (_logger.BeginScope(new Dictionary<string, object>
@@ -74,6 +74,14 @@ namespace hrvster.Web.Controllers
 			}))
 			{
 				_logger.LogInformation("Received a request to play a Match game with signature {signature}", signature);
+
+				var signatureFromDb = await _signatureRepository.GetAsync(signature, cancellationToken);
+
+				if (signatureFromDb == null) return RedirectToAction(nameof(SignatureFailed), new
+				{
+					Uid = Guid.NewGuid(),
+					gameplayUid = Guid.NewGuid()
+				});
 
 				_logger.LogInformation("Requesting the user to logon to twitter.");
 
@@ -122,16 +130,31 @@ namespace hrvster.Web.Controllers
 
 			if (signature == null)
 			{
-				_notificationService.AddErrorToastMessage("Signature has expired.");
+				return RedirectToAction("SignatureFailed", new
+				{
+					Uid = Guid.NewGuid(),
+					gameplayUid = Guid.NewGuid()
+				});
+			}
 
-				return RedirectToAction("SignatureExpired");
+			if (signature.ExternalUserId != userDetails.ExternalProfileId ||
+				signature.ExternalUserHandle != userDetails.ScreenName)
+			{
+				return RedirectToAction("SignatureFailed", new
+				{
+					Uid = Guid.NewGuid(),
+					gameplayUid = Guid.NewGuid()
+				});
 			}
 
 			if (DateTime.UtcNow > signature.ExpiryDate)
 			{
-				_notificationService.AddErrorToastMessage("Signature has expired.");
 
-				return RedirectToAction("SignatureExpired");
+				return RedirectToAction("SignatureExpired", new
+				{
+					Uid = Guid.NewGuid(),
+					gameplayUid = Guid.NewGuid()
+				});
 			}
 
 			_logger.LogInformation("Signature with uid {signatureUid} not expired.", signature.Uid);
@@ -140,7 +163,11 @@ namespace hrvster.Web.Controllers
 
 			if (!VerifySignature(signature.GamePlayUid, userDetails, signatureSession))
 			{
-				return RedirectToAction("SignatureFailed");
+				return RedirectToAction("SignatureFailed", new
+                {
+                    Uid = Guid.NewGuid(),
+                    gameplayUid = Guid.NewGuid()
+                });
 			}
 
 			_logger.LogInformation("Signature verified for signature with uid {signatureUid}", signature.Uid);
@@ -163,33 +190,37 @@ namespace hrvster.Web.Controllers
 				{ "GamePlayUid", gameplayUid }
 			}))
 
-			_logger.LogInformation("Verifying the game.");
+				_logger.LogInformation("Verifying the game.");
 
 			if (!await _matchGameService.GamePlayableAsync(Uid, cancellationToken))
 			{
-				_notificationService.AddErrorToastMessage("Unable to play the game or the game doesn't exist.");
-
-				return RedirectToAction("GameUnplayable");
+				return RedirectToAction("GameUnplayable", new
+				{
+					Uid = Uid,
+					gameplayUid = gameplayUid
+				});
 			}
 
 			_logger.LogInformation("Verifying the gameplay and the gameboard");
 			if (!await _gameBoardService.IsBoardPlayableByGameplayAsync(gameplayUid, cancellationToken))
 			{
-				_notificationService.AddErrorToastMessage("Unable to play this game.");
-
-				return RedirectToAction("BoardUnplayable");
+				return RedirectToAction("BoardUnplayable", new
+				{
+					Uid = Uid,
+					gameplayUid = gameplayUid
+				});
 			}
 
 			var gameplay = await _gameplayService.GetAsync(gameplayUid, cancellationToken);
 			var gameboard = await _gameBoardService.GetGameBoardAsync(gameplay.MatchBoard.Uid, cancellationToken);
 			var tiles = await _gameBoardService.GetTilesAsync(gameboard.Uid, cancellationToken);
-			if(tiles == null)
+			if (tiles == null)
 			{
-				_notificationService.AddErrorToastMessage("Unable to play the game at this time. Please contact support. Rest assurred, we have been notified about this issue.");
-
-				//Raise an event here with medaitor to contact support
-
-				return RedirectToAction("NoTilesAvailable");
+				return RedirectToAction("NoTilesAvailable", new
+				{
+					Uid = Uid,
+					gameplayUid = gameplayUid
+				});
 			}
 
 			var model = new PlayMatchGame
@@ -223,26 +254,40 @@ namespace hrvster.Web.Controllers
 
 			if (!await _matchGameService.GamePlayableAsync(Uid, cancellationToken))
 			{
-				_notificationService.AddErrorToastMessage("Unable to play the game or the game doesn't exist.");
-
-				return RedirectToAction("GameUnplayable");
+				return RedirectToAction("GameUnplayable", new
+				{
+					Uid = Uid,
+					gameplayUid = gameplayUid
+				});
 			}
 
 			_logger.LogInformation("Verifying the gameplay and the gameboard");
 
 			if (!await _gameBoardService.IsBoardPlayableByGameplayAsync(gameplayUid, cancellationToken))
 			{
-				_notificationService.AddErrorToastMessage("Unable to play this game.");
-
-				return RedirectToAction("BoardUnplayable");
+				return RedirectToAction("BoardUnplayable", new
+                {
+                    Uid = Uid,
+                    gameplayUid = gameplayUid
+				});
 			}
 
 			if (ModelState.IsValid)
 			{
+				var screenName = _sessionManager.GetValue(SessionConstants.UserExternalScreenName);
+				var externalId = _sessionManager.GetValue(SessionConstants.UserExternalId);
+
+				await _reportingService.SaveMatchGameAsync(
+					Uid, 
+					gameplayUid, 
+					form.BoardUid, 
+					ExternalClientType.Twitter, 
+					screenName,
+					externalId,
+					cancellationToken);
+
 				return await ReturnWinOrLossAsync(Uid, gameplayUid, form, cancellationToken);
 			}
-
-			_notificationService.AddErrorToastMessage(ModelState.BuildMessageFromErrors());
 
 			return Redirect(_harvesterSettings.HrvsterUrl);
 		}
@@ -258,14 +303,12 @@ namespace hrvster.Web.Controllers
 
 			if (!gameplay.PlayedIndicator && !gameplay.MatchBoard.PlayedIndicator && !gameplay.WinIndicator)
 			{
-				_notificationService.AddWarningToastMessage("Unable to locate your win. Something went wrong.");
-
 				return Redirect(_harvesterSettings.HrvsterUrl);
 			}
 
 			var gameboard = await _gameBoardService.GetGameBoardAsync(gameplay.MatchBoard.Uid, cancellationToken);
 			var tiles = await _gameBoardService.GetTilesAsync(gameboard.Uid, cancellationToken);
-			
+
 			var model = new GameplayWin
 			{
 				GameplayUid = gameplay.Uid,
@@ -290,8 +333,6 @@ namespace hrvster.Web.Controllers
 
 			if (!gameplay.PlayedIndicator && !gameplay.MatchBoard.PlayedIndicator && gameplay.WinIndicator)
 			{
-				_notificationService.AddWarningToastMessage("Unable to locate your win. Something went wrong.");
-
 				return Redirect(_harvesterSettings.HrvsterUrl);
 			}
 
@@ -312,28 +353,28 @@ namespace hrvster.Web.Controllers
 		}
 
 		[HttpGet]
-		[Route("/PlayMatchGame/BoardUnplayable")]
+		[Route("/PlayMatchGame/{Uid:Guid}/gameplay{gameplayUid:Guid}/BoardUnplayable")]
 		public async Task<IActionResult> BoardUnplayable()
 		{
 			return View();
 		}
 
 		[HttpGet]
-		[Route("/PlayMatchGame/GameUnplayable")]
+		[Route("/PlayMatchGame/{Uid:Guid}/gameplay{gameplayUid:Guid}/GameUnplayable")]
 		public async Task<IActionResult> GameUnplayable()
 		{
 			return View();
 		}
 
 		[HttpGet]
-		[Route("/PlayMatchGame/NoTilesAvailable")]
+		[Route("/PlayMatchGame/{Uid:Guid}/gameplay{gameplayUid:Guid}/NoTilesAvailable")]
 		public async Task<IActionResult> NoTilesAvailable()
 		{
 			return View();
 		}
 
 		[HttpGet]
-		[Route("/PlayMatchGame/SignatureExpired")]
+		[Route("/PlayMatchGame/{Uid:Guid}/gameplay{gameplayUid:Guid}/SignatureExpired")]
 		public async Task<IActionResult> SignatureExpired()
 		{
 			return View();
@@ -374,7 +415,8 @@ namespace hrvster.Web.Controllers
 
 		private void SetSessionVariables(UserProviderDetails userDetails, SignatureModel signature)
 		{
-			_sessionManager.SetKeyValue(SessionConstants.UserDetails, userDetails.ScreenName);
+			_sessionManager.SetKeyValue(SessionConstants.UserExternalId, userDetails.ExternalProfileId);
+			_sessionManager.SetKeyValue(SessionConstants.UserExternalScreenName, userDetails.ScreenName);
 			_sessionManager.SetKeyValue(SessionConstants.GameplayUid, signature.GamePlayUid.ToString());
 			_sessionManager.SetKeyValue(SessionConstants.GameUid, signature.GameUid.ToString());
 			_sessionManager.SetKeyValue(SessionConstants.Signature, signature.Signature);
@@ -393,20 +435,20 @@ namespace hrvster.Web.Controllers
 		private async Task<IActionResult> ReturnWinOrLossAsync(
 			Guid Uid, Guid gameplayUid, PlayMatchGame form, CancellationToken cancellationToken)
 		{
-			var screenName = _sessionManager.GetValue(SessionConstants.UserDetails);
+			var screenName = _sessionManager.GetValue(SessionConstants.UserExternalScreenName);
 			var signature = _sessionManager.GetValue(SessionConstants.Signature);
 
 			if (await _gameplayService.IsAWinAsync(gameUid: Uid, gameplayUid, form.SelectedTiles, cancellationToken))
 			{
 				await SetGameplayAsWonAsync(gameplayUid, form, cancellationToken);
 
-				if(!string.IsNullOrWhiteSpace(screenName) && !string.IsNullOrWhiteSpace(signature))
+				if (!string.IsNullOrWhiteSpace(screenName) && !string.IsNullOrWhiteSpace(signature))
 				{
 					await _signatureRepository.SetAsCompletedAsync(
 					signature,
 					screenName,
 					cancellationToken);
-				}				
+				}
 
 				return RedirectToAction("MatchGameWin", new { Uid = Uid, gameplayUid = gameplayUid });
 			}
@@ -454,7 +496,7 @@ namespace hrvster.Web.Controllers
 		private async Task SetGameplayAsLossAsync(Guid gameplayUid, PlayMatchGame form, CancellationToken cancellationToken)
 		{
 			_logger.LogInformation("The gameplay with uid {gameplayUid} was lost with the tiles {selectedTiles}",
-				gameplayUid, 
+				gameplayUid,
 				form.SelectedTiles);
 
 			_logger.LogInformation("Setting the gameplay as a loss.");

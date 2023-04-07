@@ -222,6 +222,17 @@ namespace hrvster.Infrastructure
 						AccountUid = reader.GetGuid("account_uid")
 					}
 				},
+				Game = new Game
+				{
+					Id = reader.GetInt32("sweep_id"),
+					Uid = reader.GetGuid("sweep_uid"),
+					Name = reader.GetString("sweep_name"),
+					GameType = GameTypesEnum.Sweeps,
+					StartDate = reader.GetDateTime("start_date"),
+					StartDateUtc = reader.GetDateTime("start_date_utc"),
+					EndDate = reader.GetDateTime("end_date"),
+					EndDateUtc = reader.GetDateTime("end_date_utc")
+				},
 				RuleUid = reader.GetGuid("rule_uid"),
 				WatchValue = reader.GetStringValue("watch_value"),
 				WatchTypeCode = (WatchTypeCode)Enum.Parse(typeof(WatchTypeCode), reader.GetStringValue("watch_type_code")),

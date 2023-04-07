@@ -1,12 +1,9 @@
-﻿using FirebaseAdmin.Auth;
-using hrvster.Core.Requests.MatchGames.Harvester;
+﻿using hrvster.Core.Requests.MatchGames.Harvester;
 using hrvster.Core.Requests.ServiceRequests;
 using hrvster.Infrastructure;
 using hrvster.Infrastructure.Harvester;
-using hrvster.Infrastructure.MatchGames;
 using hrvster.Models;
 using hrvster.Models.Harvester;
-using hrvster.Models.WebModels.Sweeps;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using System;
@@ -48,15 +45,15 @@ namespace hrvster.ApplicationServices.Processors
 		}
 
 		public async Task ProcessTweetAsync(
-			IncomingTweet incomingTweet, 
+			IncomingTweet incomingTweet,
 			ITweet tweet,
-            Models.Rule rule, 
-			Guid userUid, 
+			Models.Rule rule,
+			Guid userUid,
 			Guid harvestedUid)
 		{
-			using (
-				_Logger.BeginScope(
-					"TweetProcessor.ProcessTweetAsync",
+			using 
+				(
+					_Logger.BeginScope(
 					new
 					{
 						IncomingTweetUid = incomingTweet.IncomingTweetUid,
@@ -64,28 +61,39 @@ namespace hrvster.ApplicationServices.Processors
 					})
 				)
 
-			if (rule.Campaign == null)
 			{
-				_Logger.LogInformation("Unable to continue in the {action} processing the tweet with uid {tweetGuid}, UserId {userId} and HarvestedUid {harvestedUid} because the campaign is null.",
-					nameof(TweetProcessor.ProcessTweetAsync),
-					incomingTweet.IncomingTweetUid,
-					userUid,
-					harvestedUid);
+				if (rule.Campaign == null)
+				{
+					_Logger.LogInformation("Unable to continue in the {action} processing the tweet with uid {tweetGuid}, UserId {userId} and HarvestedUid {harvestedUid} because the campaign is null.",
+						nameof(TweetProcessor.ProcessTweetAsync),
+						incomingTweet.IncomingTweetUid,
+						userUid,
+						harvestedUid);
 
-				return;
-			}
+					return;
+				}
 
-			//check game types
-			switch(rule.Game.GameType)
-			{
-				case GameTypesEnum.Sweeps:
-					await ProcessTweetForSweepstakesAsync(incomingTweet, tweet, rule, userUid, harvestedUid);
+				if(rule.Game == null)
+				{
+					_Logger.LogWarning("No game was added to the rule.");
 
-					break;
+					return;
+				}
+				
+				switch (rule.Game.GameType)
+				{
+					case GameTypesEnum.Sweeps:
+						await ProcessTweetForSweepstakesAsync(incomingTweet, tweet, rule, userUid, harvestedUid);
+						break;
 
-				case GameTypesEnum.MatchGames:
-					await ProcessTweetForMatchGameAsync(incomingTweet, tweet, rule, userUid, harvestedUid);
-					break;
+					case GameTypesEnum.MatchGames:
+						await ProcessTweetForMatchGameAsync(incomingTweet, tweet, rule, userUid, harvestedUid);
+						break;
+
+					default:
+						await ProcessTweetForSweepstakesAsync(incomingTweet, tweet, rule, userUid, harvestedUid);
+						break;
+				}
 			}
 		}
 
@@ -109,11 +117,11 @@ namespace hrvster.ApplicationServices.Processors
 		}
 
 		private async Task ValidateCampaignTypeForMatchGameAsync(
-			IncomingTweet incomingTweet, 
-			IEnumerable<BlacklistedUser> blacklisted, 
+			IncomingTweet incomingTweet,
+			IEnumerable<BlacklistedUser> blacklisted,
 			ITweet tweet,
-            Models.Rule rule, 
-			Guid userUid, 
+			Rule rule,
+			Guid userUid,
 			Guid harvestedUid)
 		{
 			switch (rule.Campaign.CampaignType.CampaignTypeCode)
@@ -128,7 +136,7 @@ namespace hrvster.ApplicationServices.Processors
 
 					await _mediator.Send(
 						new ProcessPlayMatchGameHashtagReplyRequest(
-							incomingTweet, blacklisted,  tweet, rule, userUid, harvestedUid));
+							incomingTweet, blacklisted, tweet, rule, userUid, harvestedUid));
 					break;
 				case CampaignTypeCode.AutoPlayFromHashtag:
 					break;
@@ -149,10 +157,10 @@ namespace hrvster.ApplicationServices.Processors
 
 		#region Sweepstakes
 		private async Task ProcessTweetForSweepstakesAsync(
-			IncomingTweet incomingTweet, 
+			IncomingTweet incomingTweet,
 			ITweet tweet,
-            Models.Rule rule, 
-			Guid userUid, 
+			Rule rule,
+			Guid userUid,
 			Guid harvestedUid)
 		{
 			if (rule.Sweep == null)
@@ -192,25 +200,25 @@ namespace hrvster.ApplicationServices.Processors
 
 		private async Task ValidateCampaignTypeForSweepsAsync(
 			IncomingTweet incomingTweet,
-			IEnumerable<BlacklistedSweepUser> blacklisted, 
-			SweepEntryRule entryRules, 
+			IEnumerable<BlacklistedSweepUser> blacklisted,
+			SweepEntryRule entryRules,
 			ITweet tweet,
-            Models.Rule rule, 
-			Guid userUid, 
+			Rule rule,
+			Guid userUid,
 			Guid harvestedUid,
 			SweepEntryReport userReport)
 		{
-			switch(rule.Campaign.CampaignType.CampaignTypeCode)
+			switch (rule.Campaign.CampaignType.CampaignTypeCode)
 			{
 				case CampaignTypeCode.AutoAll:
 					break;
 				case CampaignTypeCode.AutoPlayFromTweetReplyHashtag:
-					
+
 					_Logger.LogInformation("Processing the campaign type for the tweet uid {tweetGuid} and campaign name {campaignName}",
 						incomingTweet.IncomingTweetUid,
 						rule.Campaign.CampaignName);
 
-					await _mediator.Send( 
+					await _mediator.Send(
 						new ProcessAutoEnterSweepsFromHashtagReplyRequest
 						(
 							incomingTweet, blacklisted, entryRules, tweet, rule, userUid, harvestedUid, userReport

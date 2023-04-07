@@ -19,6 +19,7 @@ namespace hrvster.ApplicationServices.Sweepstakes
 	{
 		Task<IEnumerable<Sweep>> GetLiveSweepsAsync(CancellationToken cancellationToken);
 		IEnumerable<Rule> GetRulesMatching(string watchValue);
+		Task<IEnumerable<Rule>> GetRulesMatchingAsync(string watchValue);
 		Task<SweepProperty> GetSweepDrawPropertiesAndRules(Guid sweepUid, CancellationToken cancellationToken);
 		Task<IEnumerable<Sweep>> GetSweepsGoingLiveInHourAsync(int hour, CancellationToken cancellationToken);
 		Task<SweepNotification> GetSweepsNotificationAsync(Sweep sweep, CancellationToken cancellationToken);
@@ -66,6 +67,9 @@ namespace hrvster.ApplicationServices.Sweepstakes
 
 		public IEnumerable<Rule> GetRulesMatching(string watchValue)
 			=> _sweepRulesRepository.GetRuleMatching(watchValue);
+
+		public async Task<IEnumerable<Rule>> GetRulesMatchingAsync(string watchValue)
+			=> await _sweepRulesRepository.GetRuleByHashTagAsync(watchValue);
 
 		public async Task<SweepProperty> GetSweepDrawPropertiesAndRules(Guid sweepUid, CancellationToken cancellationToken)
 		{

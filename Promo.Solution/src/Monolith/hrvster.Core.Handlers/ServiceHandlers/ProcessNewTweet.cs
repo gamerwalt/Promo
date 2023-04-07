@@ -1,20 +1,19 @@
-﻿using hrvster.Core.Requests.ServiceRequests.Notifications;
+﻿using hrvster.ApplicationServices;
+using hrvster.ApplicationServices.Common;
+using hrvster.Core.Requests.MatchGames.Harvester;
 using hrvster.Core.Requests.ServiceRequests;
+using hrvster.Core.Requests.ServiceRequests.Notifications;
 using hrvster.Infrastructure;
+using hrvster.Infrastructure.Harvester;
+using hrvster.Models;
+using hrvster.Models.Extensions;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
-using System.Threading;
-using hrvster.Infrastructure.Harvester;
-using hrvster.Models;
-using hrvster.Models.Extensions;
-using System.Runtime.CompilerServices;
-using hrvster.ApplicationServices.Common;
-using Org.BouncyCastle.Asn1.X509.Qualified;
 using System.Linq;
-using hrvster.ApplicationServices;
+using System.Threading;
+using System.Threading.Tasks;
 using Tweetinvi.Models.Entities;
 
 namespace hrvster.Core.Handlers.ServiceHandlers
@@ -49,16 +48,16 @@ namespace hrvster.Core.Handlers.ServiceHandlers
 
 		async protected override Task Handle(ProcessNewTweetRequest request, CancellationToken cancellationToken)
 		{
-			using(
+			using (
 				_logger.BeginScope(
 					new { IncomingTweetUid = request.IncomingTweet.IncomingTweetUid }
 					)
 				)
 
-			_logger.LogInformation("Received the request to process the tweet with Id {tweetId} and text {tweetText}. Incoming tweet guid {tweetGuid}",
-				request.Tweet.Id,
-				request.Tweet.Text,
-				request.IncomingTweet.IncomingTweetUid);
+				_logger.LogInformation("Received the request to process the tweet with Id {tweetId} and text {tweetText}. Incoming tweet guid {tweetGuid}",
+					request.Tweet.Id,
+					request.Tweet.Text,
+					request.IncomingTweet.IncomingTweetUid);
 
 			if (!await _userRateLimiterService.IsAllowedAsync(
 				request.Tweet.CreatedBy.IdStr,
@@ -85,7 +84,7 @@ namespace hrvster.Core.Handlers.ServiceHandlers
 			var tasks = new List<Task>();
 
 			_logger.LogInformation("Loading rules and other details for tweet {tweetGuid}", request.IncomingTweet.IncomingTweetUid);
-			
+
 			await GetRulesAsync(request, rules, cancellationToken);
 
 			var newUserUid = Guid.NewGuid();
@@ -125,9 +124,8 @@ namespace hrvster.Core.Handlers.ServiceHandlers
 						request.Tweet.Text,
 						request.IncomingTweet.IncomingTweetUid);
 
-					//PROCESS THE TWEET
-					await _mediator.Publish(new TweetReceived(
-						request.IncomingTweet, rule, harvestedUid, newUserUid, request.Tweet));
+
+					await _mediator.Publish(new TweetReceived(request.IncomingTweet, rule, harvestedUid, newUserUid, request.Tweet));
 				}
 
 				_logger.LogInformation("Committing transaction for tweet uid {tweetUid}", request.IncomingTweet.IncomingTweetUid);
@@ -139,6 +137,8 @@ namespace hrvster.Core.Handlers.ServiceHandlers
 				_logger.LogError("An error occurred trying to save the Harvested Tweet for tweet guid {tweetGuid}. Exception Message: {message}",
 					request.IncomingTweet.IncomingTweetUid,
 					ex.Message);
+				_logger.LogError("Inner Exception Message: {message}", ex.InnerException?.Message);
+				_logger.LogError("Stack Trace: {trace}", ex.StackTrace);
 
 				_logger.LogInformation("Rolling back transaction");
 

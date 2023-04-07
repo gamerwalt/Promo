@@ -1,25 +1,24 @@
 ﻿using hrvster.ApplicationServices.Common;
 using hrvster.Core.Requests.MatchGames.Harvester;
+using hrvster.Games.Match.Models;
+using hrvster.Infrastructure.Accounts;
+using hrvster.Infrastructure.Core;
+using hrvster.Infrastructure.Harvester;
+using hrvster.Infrastructure.MatchGames;
+using hrvster.Infrastructure.Reporting;
 using hrvster.Models;
+using hrvster.Models.Extensions;
 using hrvster.Models.Options;
+using hrvster.Models.Profiles;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Tweetinvi.Models;
-using hrvster.Models.Extensions;
-using hrvster.Infrastructure.Core;
-using hrvster.Infrastructure.Reporting;
-using hrvster.Infrastructure.MatchGames;
-using System.Linq;
-using hrvster.Infrastructure.Accounts;
-using hrvster.Models.Profiles;
 using Tweetinvi;
-using hrvster.Core.Requests.ServiceRequests;
-using hrvster.Infrastructure.Harvester;
-using hrvster.Games.Match.Models;
+using Tweetinvi.Models;
 
 namespace hrvster.Core.Handlers.MatchGame
 {
@@ -75,6 +74,8 @@ namespace hrvster.Core.Handlers.MatchGame
 					{ "GameName", request.Rule.Game.Name}})
 				)
 			{
+				var profile = await _profilesRepository.GetProfileByCampaignUid(request.Rule.Campaign.CampaignUid, ProfileType.Twitter);
+
 				_logger.LogInformation("Checking if user can play the game.");
 
 				if (await CanPlayMatchGame(request.Rule, request.Tweet, cancellationToken))
@@ -82,6 +83,7 @@ namespace hrvster.Core.Handlers.MatchGame
 					_logger.LogInformation("User can play the game.");
 
 					_logger.LogInformation("Checking if the tweet is in reply to the rule/tweet of the hashtag setup.");
+
 					if (request.Tweet.InReplyToStatusId.Value.ToString() == request.Rule.ExternalId)
 					{
 						_logger.LogInformation("Tweet is in reply to the rule/tweet of the hashtag setup");
@@ -110,22 +112,29 @@ namespace hrvster.Core.Handlers.MatchGame
 				{
 					_logger.LogWarning("User with screen name {screenName} cannot play the game anymore.", request.Tweet.CreatedBy.ScreenName);
 
+					await _mediator.Send(new TwitterUserNotificationRequest(
+						request.Tweet, 
+						profile,
+						$"You have reached maximum gameplays for {request.Rule.Game.Name}")
+					);
+
 					return;
 				}
 
-				ContinueToProcessAsync(request, cancellationToken);
+				ContinueToProcessAsync(request, profile, cancellationToken);
 			}
 		}
 
-		private async void ContinueToProcessAsync(ProcessPlayMatchGameHashtagReplyRequest request, CancellationToken cancellationToken)
+		private async void ContinueToProcessAsync(
+			ProcessPlayMatchGameHashtagReplyRequest request, Profile profile, CancellationToken cancellationToken)
 		{
-			var profile = await _profilesRepository.GetProfileByCampaignUid(request.Rule.Campaign.CampaignUid, ProfileType.Twitter);
+			
 
 			_logger.LogInformation("Creating a signature to use for the game play.");
 
-			if(await IsFollowing(profile, request))
+			if (await IsFollowing(profile, request))
 			{
-				if(CampaignAndMatchGameIsStillRunning(request.Rule))
+				if (CampaignAndMatchGameIsStillRunning(request.Rule))
 				{
 					var playRules = await _matchPlayRulesRepository.GetAsync(request.Rule.Game.Uid, cancellationToken);
 
@@ -175,24 +184,24 @@ namespace hrvster.Core.Handlers.MatchGame
 
 		private async Task SaveSignatureAsync(
 			Guid signatureUid,
-			string link, 
-			string signature, 
+			string link,
+			string signature,
 			ProcessPlayMatchGameHashtagReplyRequest request,
 			MatchPlayRule playRules,
 			Guid gameplayUid,
 			CancellationToken cancellationToken)
 		{
-			
+
 			await _signatureRepository.CreateAsync(
-				signatureUid, 
+				signatureUid,
 				gameplayUid,
-				signature, 
-				link, 
-				DateTime.UtcNow.AddMinutes(_harvesterSettings.SignatureExpiryInMinutes), 
-				request.Rule.Game.Uid, 
-				request.Tweet.CreatedBy.IdStr, 
-				request.Tweet.CreatedBy.ScreenName, 
-				playRules.PlayPerTweet, 
+				signature,
+				link,
+				DateTime.UtcNow.AddMinutes(_harvesterSettings.SignatureExpiryInMinutes),
+				request.Rule.Game.Uid,
+				request.Tweet.CreatedBy.IdStr,
+				request.Tweet.CreatedBy.ScreenName,
+				playRules.PlayPerTweet,
 				cancellationToken);
 		}
 
@@ -203,7 +212,7 @@ namespace hrvster.Core.Handlers.MatchGame
 
 		private bool CampaignAndMatchGameIsStillRunning(Rule rule)
 		{
-			if(CampaignIsNotRunning(rule.Campaign))
+			if (CampaignIsNotRunning(rule.Campaign))
 			{
 				_logger.LogWarning("Campaign {campaignName} is not running. Campaign StartDate: {startDate}. Campaign EndDate: {endDate}",
 					rule.Campaign.CampaignName,
@@ -213,7 +222,7 @@ namespace hrvster.Core.Handlers.MatchGame
 				return false;
 			}
 
-			if(MatchGameIsNotActive(rule.Game))
+			if (MatchGameIsNotActive(rule.Game))
 			{
 				_logger.LogWarning("Match game {gameName} is not running or active. Game Start Date: {startDate}. Game End Date {endDate}",
 					rule.Game.Name,
@@ -285,6 +294,6 @@ namespace hrvster.Core.Handlers.MatchGame
 
 		private string CreateSignature(Guid gameplayUid, ITweet tweet)
 			=> _signatureUtility.CreateSignature(gameplayUid, tweet.CreatedBy.Id, tweet.CreatedBy.ScreenName);
-		
+
 	}
 }

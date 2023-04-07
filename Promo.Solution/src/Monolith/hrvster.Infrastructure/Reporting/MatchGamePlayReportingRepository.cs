@@ -3,10 +3,7 @@ using hrvster.Infrastructure.Extensions;
 using hrvster.Models;
 using MySqlConnector;
 using System;
-using System.Collections.Generic;
 using System.Data;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -14,6 +11,7 @@ namespace hrvster.Infrastructure.Reporting
 {
 	public interface IMatchGamePlayReportingRepository
 	{
+		Task CreateAsync(Guid gameUid, Guid campaignUid, Guid gameplayUid, Guid boardUid, string screenName, string externalId, ExternalClientType externalClientType);
 		Task<MatchGamePlayReport> GetGamePlayReportAsync(Guid gameUid, Guid campaignUid, string userIdentifierType, string externalUserId, string screenName, CancellationToken cancellationToken);
 	}
 
@@ -26,12 +24,30 @@ namespace hrvster.Infrastructure.Reporting
 			_database = database;
 		}
 
+		public async Task CreateAsync(Guid gameUid, Guid campaignUid, Guid gameplayUid, Guid boardUid, string screenName, string externalUserId, ExternalClientType externalClientType)
+		{
+			using var conn = new MySqlConnection(_database.GetReportingConnectionString());
+			var command = conn.CreateCommand();
+			command.CommandText = "match_game_plays_upsert";
+			command.CommandType = CommandType.StoredProcedure;
+			command
+				.AddParameter("gameUid", gameUid)
+				.AddParameter("campaignUid", campaignUid)
+				.AddParameter("screenName", screenName)
+				.AddParameter("userIdentifierType", externalClientType.ToString())
+				.AddParameter("externalUserId", externalUserId)
+				.AddParameter("gameplayUid", gameplayUid);
+
+			await conn.OpenAsync();
+			await command.ExecuteNonQueryAsync();
+		}
+
 		public async Task<MatchGamePlayReport> GetGamePlayReportAsync(
-			Guid gameUid, 
-			Guid campaignUid, 
-			string userIdentifierType, 
-			string externalUserId, 
-			string screenName, 
+			Guid gameUid,
+			Guid campaignUid,
+			string userIdentifierType,
+			string externalUserId,
+			string screenName,
 			CancellationToken cancellationToken)
 		{
 			var report = default(MatchGamePlayReport);

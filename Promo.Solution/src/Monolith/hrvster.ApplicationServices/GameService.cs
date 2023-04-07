@@ -111,10 +111,8 @@ namespace hrvster.ApplicationServices
 			string watchValue, CancellationToken cancellationToken)
 			=> await _matchGameService.GetRulesMatchingAsync(watchValue, cancellationToken);
 
-		private Task<IEnumerable<Rule>> GetRulesMatchingForSweepsAsync(string watchValue)
-		{
-			throw new NotImplementedException();
-		}
+		private async Task<IEnumerable<Rule>> GetRulesMatchingForSweepsAsync(string watchValue)
+			=> await _sweepService.GetRulesMatchingAsync(watchValue);
 
 		public IEnumerable<Rule> GetRulesMatching(GameTypesEnum gameType, string watchValue)
 		{

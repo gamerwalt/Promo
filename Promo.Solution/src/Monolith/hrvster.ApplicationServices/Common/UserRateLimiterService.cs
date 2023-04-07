@@ -58,12 +58,11 @@ namespace hrvster.ApplicationServices.Common
 				var records = await _repository.GetByWatchValue(hashtag.Text, userIdentifierType);
 
 				//Todo: RateLimiter
-				//if (records.Any(
-				//	r => 
-				//		r.ExternalUserId == externalUserId)
-				//		//&& IsNotAllowed(r))
-				//	)
-				//	return false;
+				if (records.Any(
+					r => 
+						r.ExternalUserId == externalUserId
+						&& IsNotAllowed(r)))
+					return false;
 			}
 
 			return true;
@@ -72,7 +71,10 @@ namespace hrvster.ApplicationServices.Common
 		private bool IsNotAllowed(UserLimiter userLimiter)
 		{
 			var timeSpanInMinutes = (TimeSinceLastUpdate(userLimiter) - DateTime.Now).TotalMinutes;
-			return Math.Abs(timeSpanInMinutes) < _hrvsterSettings.UserTweetRateLimiterInMinutes;
+
+			var absoluteMinutes = Math.Abs(timeSpanInMinutes);
+
+			return absoluteMinutes < _hrvsterSettings.UserTweetRateLimiterInMinutes;
 		}
 
 		private DateTime TimeSinceLastUpdate(UserLimiter userLimiter)

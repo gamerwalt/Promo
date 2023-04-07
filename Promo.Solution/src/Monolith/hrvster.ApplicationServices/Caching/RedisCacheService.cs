@@ -1,9 +1,7 @@
-﻿using Microsoft.Extensions.Caching.Distributed;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using StackExchange.Redis;
 using System;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace hrvster.ApplicationServices.Caching

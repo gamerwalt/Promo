@@ -7,9 +7,7 @@ using hrvster.Infrastructure.Harvester;
 using hrvster.Models;
 using hrvster.Models.Profiles;
 using MediatR;
-using MediatR.Pipeline;
 using Microsoft.Extensions.Logging;
-using Org.BouncyCastle.Asn1.X509.Qualified;
 using System;
 using System.Linq;
 using System.Threading;
@@ -63,7 +61,7 @@ namespace hrvster.Core.Handlers.ServiceHandlers
 
 			if (CanEnterSweepstakes(request))
 			{
-				if(!await _sweepstakeService.IsMaxedOut(request.Rule.Sweep, cancellationToken))
+				if (!await _sweepstakeService.IsMaxedOut(request.Rule.Sweep, cancellationToken))
 				{
 					_logger.LogInformation("User can enter sweeps with tweet uid {tweetGuid}",
 					request.IncomingTweet.IncomingTweetUid);
@@ -101,7 +99,7 @@ namespace hrvster.Core.Handlers.ServiceHandlers
 						await _mailRepository.CreateAsync(CreateMaxEntryEmail(request.Rule.Sweep, account));
 
 						await _sweepNotificationRepository.ToggleMaxEntriesAsync(
-							request.Rule.Sweep.SweepId, 
+							request.Rule.Sweep.SweepId,
 							cancellationToken);
 					}
 				}
@@ -142,7 +140,9 @@ namespace hrvster.Core.Handlers.ServiceHandlers
 
 			var followers = await _twitterClient.Users.GetFollowerIdsAsync(profile.ScreenName);
 
-			if(request.Rule.MustBeFollowing)
+			if (followers.Length == 0) return false;
+
+			if (request.Rule.MustBeFollowing)
 				return followers.Any(c => c.Equals(request.Tweet.CreatedBy.Id));
 
 			return true;
@@ -182,10 +182,10 @@ namespace hrvster.Core.Handlers.ServiceHandlers
 				});
 
 				await _mediator.Publish(new SweepEntryFromTweetRecorded(
-					request.IncomingTweet, 
-					request.Rule.Campaign, 
-					request.Rule.Sweep, 
-					request.Tweet, 
+					request.IncomingTweet,
+					request.Rule.Campaign,
+					request.Rule.Sweep,
+					request.Tweet,
 					UserIdentifierType.TwitterHandle));
 			}
 			else
@@ -196,7 +196,7 @@ namespace hrvster.Core.Handlers.ServiceHandlers
 				request.IncomingTweet.IncomingTweetUid);
 
 				await _incomingTweetsRepository.UpdateStatusAsync(
-					request.IncomingTweet.IncomingTweetUid, 
+					request.IncomingTweet.IncomingTweetUid,
 					Models.Harvester.IncomingTweetStatus.CompletedCampaignOrGameNotRunning);
 			}
 		}
@@ -228,7 +228,7 @@ namespace hrvster.Core.Handlers.ServiceHandlers
 			=> request.BlackListed.Any(c => c.TweetUserId.Equals(request.Tweet.CreatedBy.Id));
 
 		private bool TweetIsInReplyToRuleTweetId(ProcessAutoEnterSweepsFromHashtagReplyRequest request)
-			=> request.Tweet.InReplyToStatusId.Equals(request.Rule.ExternalId);
+			=> request.Tweet.InReplyToStatusId.ToString() == request.Rule.ExternalId;
 
 		private bool UserCanEnterSweepstakes(ProcessAutoEnterSweepsFromHashtagReplyRequest request)
 			=> request.SweepEntryReport == null

@@ -63,6 +63,8 @@ namespace hrvster.Twitter.Harvester
 						.AddAccountsService()
 						.AddSignatureUtility()
 						.AddCacheService()
+						.AddMailSettings(Configuration)
+						.AddEmailRepository()
 						.AddHarvsterConfigurationOption(Configuration);
 
 					services.AddHttpClient<ITwitterHarvesterService, TwitterHarvesterService>();
