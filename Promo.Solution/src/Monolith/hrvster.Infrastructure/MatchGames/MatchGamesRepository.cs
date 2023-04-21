@@ -313,41 +313,41 @@ namespace hrvster.Infrastructure.MatchGames
 			{
 				RuleId = reader.GetInt32("rule_id"),
 				RuleUid = reader.GetGuid("rule_uid"),
-				Campaign = new Models.Campaign
+				Campaign = new Campaign
 				{
 					CampaignId = reader.GetInt32("campaign_id"),
 					CampaignUid = reader.GetGuid("campaign_uid"),
-					CampaignName = reader.GetString("campaign_name"),
-					Description = reader.GetString("campaign_description"),
+					CampaignName = reader.GetStringValue("campaign_name"),
+					Description = reader.GetStringValue("campaign_description"),
 					ActiveInd = reader.GetBoolean("campaign_active_ind"),
 					StartDate = reader.GetDateTime("campaign_start_date"),
 					EndDate = reader.GetDateTime("campaign_end_date"),
 					StartDateUtc = reader.GetDateTime("campaign_start_date_utc"),
 					EndDateUtc	= reader.GetDateTime("campaign_end_date_utc"),
-					CampaignType = new Models.CampaignType
+					CampaignType = new CampaignType
 					{
-						CampaignTypeCode = Enum.Parse<CampaignTypeCode>(reader.GetString("campaign_type_code")),
-						CampaignTypeName = reader.GetString("campaign_type_name")
+						CampaignTypeCode = Enum.Parse<CampaignTypeCode>(reader.GetStringValue("campaign_type_code")),
+						CampaignTypeName = reader.GetStringValue("campaign_type_name")
 					},
 					Account = new Account
 					{
 						AccountUid = reader.GetGuid("account_uid"),
-						EmailAddress = reader.GetString("email_address"),
-						DisplayName = reader.GetString("display_name"),
-						LastName = reader.GetString("last_name"),
-						FirstName = reader.GetString("first_name")
+						EmailAddress = reader.GetStringValue("email_address"),
+						DisplayName = reader.GetStringValue("display_name"),
+						LastName = reader.GetStringValue("last_name"),
+						FirstName = reader.GetStringValue("first_name")
 					}
 				},
-				WatchValue = reader.GetString("watch_value"),
+				WatchValue = reader.GetStringValue("watch_value"),
 				ActiveInd = reader.GetBoolean("active_ind"),
 				ScheduledInd = reader.GetBoolean("scheduled_ind"),
 				MustBeFollowing = reader.GetBoolean("must_be_following"),
 				NotifyWinners = reader.GetBoolean("notify_winners"),
-				ExternalId = reader.GetString("external_id"),
+				ExternalId = reader.GetStringValue("external_id"),
 				MatchGame = new MatchGame
 				{
 					Id = reader.GetInt32("match_game_id"),
-					Name = reader.GetString("match_game_name"),
+					Name = reader.GetStringValue("match_game_name"),
 					Uid = reader.GetGuid("match_game_uid"),
 					StartDate = reader.GetDateTime("start_date"),
 					StartDateUtc = reader.GetDateTime("start_date_utc"),
@@ -357,7 +357,7 @@ namespace hrvster.Infrastructure.MatchGames
 				Game = new Game
 				{
 					Id = reader.GetInt32("match_game_id"),
-					Name = reader.GetString("match_game_name"),
+					Name = reader.GetStringValue("match_game_name"),
 					Uid = reader.GetGuid("match_game_uid"),
 					StartDate = reader.GetDateTime("start_date"),
 					StartDateUtc = reader.GetDateTime("start_date_utc"),

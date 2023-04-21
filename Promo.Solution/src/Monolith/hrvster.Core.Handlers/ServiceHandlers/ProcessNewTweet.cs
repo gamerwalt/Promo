@@ -55,12 +55,12 @@ namespace hrvster.Core.Handlers.ServiceHandlers
 				)
 
 				_logger.LogInformation("Received the request to process the tweet with Id {tweetId} and text {tweetText}. Incoming tweet guid {tweetGuid}",
-					request.Tweet.Id,
-					request.Tweet.Text,
+					request.Tweet.TweetId,
+					request.Tweet.TweetText,
 					request.IncomingTweet.IncomingTweetUid);
 
 			if (!await _userRateLimiterService.IsAllowedAsync(
-				request.Tweet.CreatedBy.IdStr,
+				request.Tweet.ExternalUserId,
 				request.Tweet.Hashtags,
 				UserIdentifierType.TwitterHandle))
 			{
@@ -93,7 +93,7 @@ namespace hrvster.Core.Handlers.ServiceHandlers
 			try
 			{
 				_logger.LogInformation("Starting a new transaction for tweet {tweetGuid} with hashtags {hashtags}", request.IncomingTweet.IncomingTweetUid,
-					string.Join(", ", request.Tweet.Hashtags.Select(c => c.Text)));
+					string.Join(", ", request.Tweet.Hashtags.Select(c => c)));
 
 				await _harvesterRepository.BeginTransaction();
 
@@ -109,10 +109,10 @@ namespace hrvster.Core.Handlers.ServiceHandlers
 
 					_logger.LogDebug("Creating the tweet for the user with uid {userUid}, actual tweet {tweet} for tweet uid {tweetGuid}",
 						newUserUid,
-						request.Tweet.Text,
+						request.Tweet.TweetText,
 						request.IncomingTweet.IncomingTweetUid);
 
-					await _harvesterRepository.CreateTweetUserAsync(newUserUid, request.Tweet.CreatedBy);
+					await _harvesterRepository.CreateTweetUserAsync(newUserUid, request.Tweet);
 
 					_logger.LogDebug("Creating the tweet record for incoming tweet uid {tweetGuid}",
 						request.IncomingTweet.IncomingTweetUid);
@@ -121,7 +121,7 @@ namespace hrvster.Core.Handlers.ServiceHandlers
 						tweetUid, harvestedUid, rule.RuleUid, newUserUid, request.Tweet);
 
 					_logger.LogDebug("Publishing that we have received a tweet {tweet} for tweet uid {tweetGuid}",
-						request.Tweet.Text,
+						request.Tweet.TweetText,
 						request.IncomingTweet.IncomingTweetUid);
 
 
@@ -160,32 +160,32 @@ namespace hrvster.Core.Handlers.ServiceHandlers
 				rules.AddRange(sweepRules);
 				rules.AddRange(gameRules);
 
-				await _userRateLimiterService.UpsertAsync(hashtag, request.Tweet.CreatedBy.IdStr, UserIdentifierType.TwitterHandle);
+				await _userRateLimiterService.UpsertAsync(hashtag, request.Tweet.ExternalUserId, UserIdentifierType.TwitterHandle);
 			}
 		}
 
-		private async Task<IEnumerable<Rule>> GetGameRulesResponsibleForAsync(IHashtagEntity hashtag, CancellationToken cancellationToken)
+		private async Task<IEnumerable<Rule>> GetGameRulesResponsibleForAsync(string hashtag, CancellationToken cancellationToken)
 		{
-			_logger.LogInformation("Loading the rules for the hashtag #{hashTag} from the Game Service", hashtag.Text);
+			_logger.LogInformation("Loading the rules for the hashtag #{hashTag} from the Game Service", hashtag);
 
-			var rules = await _gameService.GetRulesMatchingAsync(GameTypesEnum.MatchGames, $"#{hashtag.Text}", cancellationToken);
+			var rules = await _gameService.GetRulesMatchingAsync(GameTypesEnum.MatchGames, $"#{hashtag}", cancellationToken);
 
 			_logger.LogDebug("Retrieved the rules {rules} for the hashtag {hashTag}.",
 				rules.ToJsonString(),
-				hashtag.Text);
+				hashtag);
 
 			return rules;
 		}
 
-		private async Task<IEnumerable<Rule>> GetSweepRulesResponsibleFor(IHashtagEntity hashtag)
+		private async Task<IEnumerable<Rule>> GetSweepRulesResponsibleFor(string hashtag)
 		{
-			_logger.LogInformation("Loading the rules for the hashtag #{hashTag}", hashtag.Text);
+			_logger.LogInformation("Loading the rules for the hashtag #{hashTag}", hashtag);
 
-			var sweepRules = await _sweepRulesRepository.GetRuleByHashTagAsync($"#{hashtag.Text}");
+			var sweepRules = await _sweepRulesRepository.GetRuleByHashTagAsync($"#{hashtag}");
 
 			_logger.LogDebug("Retrieved the sweep rules {sweepRules} for the hashtag {hashTag}.",
 				sweepRules.ToJsonString(),
-				hashtag.Text);
+				hashtag);
 			return sweepRules;
 		}
 	}

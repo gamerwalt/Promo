@@ -1,5 +1,6 @@
 ﻿using hrvster.Models;
 using hrvster.Models.Harvester;
+using hrvster.Models.Twitter;
 using MediatR;
 using System;
 using System.Collections.Generic;
@@ -11,7 +12,7 @@ namespace hrvster.Core.Requests.ServiceRequests
 	{
 		private IEnumerable<BlacklistedSweepUser> _blacklisted;
 		private SweepEntryRule _entryRules;
-		private ITweet _tweet;
+		private Tweet _tweet;
 		private Rule _rule;
 		private Guid _userUid;
 		private Guid _harvestedUid;
@@ -22,7 +23,7 @@ namespace hrvster.Core.Requests.ServiceRequests
 			IncomingTweet incomingTweet, 
 			IEnumerable<BlacklistedSweepUser> blacklisted, 
 			SweepEntryRule entryRules, 
-			ITweet tweet, 
+			Tweet tweet, 
 			Rule rule, 
 			Guid userUid, 
 			Guid harvestedUid, 
@@ -40,7 +41,7 @@ namespace hrvster.Core.Requests.ServiceRequests
 
 		public IEnumerable<BlacklistedSweepUser> BlackListed { get { return _blacklisted; } }
 		public SweepEntryRule EntryRules { get { return _entryRules; } }
-		public ITweet Tweet { get { return _tweet; } }
+		public Tweet Tweet { get { return _tweet; } }
 		public Rule Rule { get { return _rule; } }
 		public Guid UserUid { get { return _userUid; } }
 		public Guid HarvestedUid { get { return _harvestedUid; } }

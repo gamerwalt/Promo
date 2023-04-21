@@ -1,9 +1,9 @@
 ﻿using hrvster.Models;
 using hrvster.Models.Harvester;
+using hrvster.Models.Twitter;
 using MediatR;
 using System;
 using System.Collections.Generic;
-using Tweetinvi.Models;
 
 namespace hrvster.Core.Requests.MatchGames.Harvester
 {
@@ -11,7 +11,7 @@ namespace hrvster.Core.Requests.MatchGames.Harvester
 	{
 		private IncomingTweet _incomingTweet;
 		private IEnumerable<BlacklistedUser> _blacklisted;
-		private ITweet _tweet;
+		private Tweet _tweet;
 		private Rule _rule;
 		private Guid _userUid;
 		private Guid _harvestedUid;
@@ -19,7 +19,7 @@ namespace hrvster.Core.Requests.MatchGames.Harvester
 		public ProcessPlayMatchGameHashtagReplyRequest(
 			IncomingTweet incomingTweet,
 			IEnumerable<BlacklistedUser> blacklisted,
-			ITweet tweet,
+			Tweet tweet,
 			Rule rule,
 			Guid userUid,
 			Guid harvestedUid)
@@ -34,7 +34,7 @@ namespace hrvster.Core.Requests.MatchGames.Harvester
 
 		public IncomingTweet IncomingTweet { get { return _incomingTweet; } }
 		public IEnumerable<BlacklistedUser> BlacklistedUsers { get { return _blacklisted; } }
-		public ITweet Tweet { get { return _tweet; } }
+		public Tweet Tweet { get { return _tweet; } }
 		public Rule Rule { get { return _rule; } }
 		public Guid UserUid { get { return _userUid; } }
 		public Guid HarvestedUid { get { return _harvestedUid; } }

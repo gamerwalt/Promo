@@ -1,6 +1,7 @@
 ﻿using hrvster.Core.Requests.Harvester;
 using hrvster.Core.Requests.ServiceRequests;
 using hrvster.Models.Extensions;
+using hrvster.Models.Twitter;
 using MediatR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -18,6 +19,7 @@ using Tweetinvi;
 using Tweetinvi.Client.V2;
 using Tweetinvi.Events;
 using Tweetinvi.Models;
+using Tweetinvi.Models.V2;
 using Tweetinvi.Parameters.V2;
 
 namespace hrvster.ApplicationServices.Harvesters.Twitter
@@ -113,13 +115,35 @@ namespace hrvster.ApplicationServices.Harvesters.Twitter
 						var tweetId = GetTweetId(line);
 
 						var tweet = await GetTweet(tweetId);
-						var tweetJson = ConvertTweetToJson(tweet);
 
-						var incomingTweet = await _mediator.Send(new SaveNewTweetReceivedRequest(line));
+						if (tweet == null) continue;
 
-						_logger.LogInformation("Sent tweet for processing.");
+						var authorId = tweet.Tweet.AuthorId;
+						var user = tweet.Includes.Users.FirstOrDefault(c => c.Id == authorId);
 
-						await _mediator.Send(new ProcessNewTweetRequest(tweet, line, incomingTweet));
+						if(tweet.Tweet.Entities.Hashtags != null)
+						{
+							var tweetModel = new Tweet
+							{
+								TweetId = tweet.Tweet.Id,
+								TweetText = tweet.Tweet.Text,
+								CreatedDate = tweet.Tweet.CreatedAt.DateTime,
+								Hashtags = tweet.Tweet.Entities.Hashtags.Select(c => c.Tag.Trim()).ToList(),
+								ScreenName = user.Username,
+								ExternalUserId = user.Id,
+								Location = user.Location,
+								Verified = user.Verified,
+								UserDescription = user.Description,
+								InReplyToTweetId = tweet.Tweet.ReferencedTweets.FirstOrDefault().Id,
+								ProfileImageUrl = user.ProfileImageUrl
+							};
+
+							var incomingTweet = await _mediator.Send(new SaveNewTweetReceivedRequest(line));
+
+							_logger.LogInformation("Sent tweet for processing.");
+
+							await _mediator.Send(new ProcessNewTweetRequest(tweetModel, line, incomingTweet));
+						}
 					}
 				}
 			}
@@ -187,15 +211,8 @@ namespace hrvster.ApplicationServices.Harvesters.Twitter
 			}
 		}
 
-		private async Task<ITweet> GetTweet(JToken tweetId)
-		{
-			var legacyTweet = await _twitterClient.Tweets.GetTweetAsync(long.Parse(tweetId.ToString()));
-
-			var hashTags = string.Join(",", legacyTweet.Hashtags.Select(h => h.Text));
-
-			_logger.LogInformation("New Tweet Received with hashtags {hashtags}", hashTags);
-			return legacyTweet;
-		}
+		private async Task<TweetV2Response> GetTweet(JToken tweetId)
+			=> await _twitterClient.TweetsV2.GetTweetAsync(long.Parse(tweetId.ToString()));
 
 		private static JToken GetTweetId(string line)
 		{

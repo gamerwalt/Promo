@@ -18,6 +18,7 @@ namespace hrvster.Web.Controllers
 {
 	[FirebaseAuthorize]
 	[ShouldBeSubscribed]
+	//Todo: Add is loss to UI to know which image to use for a loss
 	public class MatchPrizesController : Controller
 	{
 		private readonly ILogger<MatchPrizesController> _logger;

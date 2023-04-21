@@ -4,6 +4,7 @@ using hrvster.Infrastructure;
 using hrvster.Infrastructure.Harvester;
 using hrvster.Models;
 using hrvster.Models.Harvester;
+using hrvster.Models.Twitter;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using System;
@@ -16,7 +17,7 @@ namespace hrvster.ApplicationServices.Processors
 {
 	public interface ITweetProcessor
 	{
-		Task ProcessTweetAsync(IncomingTweet incomingTweet, ITweet tweet, Models.Rule rule, Guid userUid, Guid harvestedUid);
+		Task ProcessTweetAsync(IncomingTweet incomingTweet, Tweet tweet, Models.Rule rule, Guid userUid, Guid harvestedUid);
 	}
 
 	public class TweetProcessor : ITweetProcessor
@@ -46,12 +47,12 @@ namespace hrvster.ApplicationServices.Processors
 
 		public async Task ProcessTweetAsync(
 			IncomingTweet incomingTweet,
-			ITweet tweet,
-			Models.Rule rule,
+			Tweet tweet,
+			Rule rule,
 			Guid userUid,
 			Guid harvestedUid)
 		{
-			using 
+			using
 				(
 					_Logger.BeginScope(
 					new
@@ -73,13 +74,13 @@ namespace hrvster.ApplicationServices.Processors
 					return;
 				}
 
-				if(rule.Game == null)
+				if (rule.Game == null)
 				{
 					_Logger.LogWarning("No game was added to the rule.");
 
 					return;
 				}
-				
+
 				switch (rule.Game.GameType)
 				{
 					case GameTypesEnum.Sweeps:
@@ -99,7 +100,7 @@ namespace hrvster.ApplicationServices.Processors
 
 		#region MatchGames
 		private async Task ProcessTweetForMatchGameAsync(
-			IncomingTweet incomingTweet, ITweet tweet, Models.Rule rule, Guid userUid, Guid harvestedUid)
+			IncomingTweet incomingTweet, Tweet tweet, Models.Rule rule, Guid userUid, Guid harvestedUid)
 		{
 			if (rule.Game == null)
 			{
@@ -119,7 +120,7 @@ namespace hrvster.ApplicationServices.Processors
 		private async Task ValidateCampaignTypeForMatchGameAsync(
 			IncomingTweet incomingTweet,
 			IEnumerable<BlacklistedUser> blacklisted,
-			ITweet tweet,
+			Tweet tweet,
 			Rule rule,
 			Guid userUid,
 			Guid harvestedUid)
@@ -158,7 +159,7 @@ namespace hrvster.ApplicationServices.Processors
 		#region Sweepstakes
 		private async Task ProcessTweetForSweepstakesAsync(
 			IncomingTweet incomingTweet,
-			ITweet tweet,
+			Tweet tweet,
 			Rule rule,
 			Guid userUid,
 			Guid harvestedUid)
@@ -180,7 +181,7 @@ namespace hrvster.ApplicationServices.Processors
 			{
 				_Logger.LogInformation("There are no entry rules for the sweep {sweepName} and will not be able to continue to process the tweet received for hashtag {hashTag}",
 					rule.Sweep.Name,
-					string.Join(",", tweet.Hashtags.Select(c => c.Text)));
+					string.Join(",", tweet.Hashtags.Select(c => c)));
 
 				return;
 			}
@@ -188,9 +189,9 @@ namespace hrvster.ApplicationServices.Processors
 			var blacklisted = await _blacklistedSweepsUserRepository.GetBlacklistedSweepUsersAsync(rule.Sweep.SweepUid);
 
 			var userReport = await _reportingRepository.GetCampaignSweepUserReportAsync(
-									tweet.CreatedBy.ScreenName,
+									tweet.ScreenName,
 									UserIdentifierType.TwitterHandle.ToString(),
-									tweet.CreatedBy.IdStr,
+									tweet.ExternalUserId,
 									rule.Campaign.CampaignUid,
 									rule.Sweep.SweepUid);
 
@@ -202,7 +203,7 @@ namespace hrvster.ApplicationServices.Processors
 			IncomingTweet incomingTweet,
 			IEnumerable<BlacklistedSweepUser> blacklisted,
 			SweepEntryRule entryRules,
-			ITweet tweet,
+			Tweet tweet,
 			Rule rule,
 			Guid userUid,
 			Guid harvestedUid,

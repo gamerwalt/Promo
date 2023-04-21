@@ -428,7 +428,7 @@ namespace hrvster.Web.Controllers
 			string signatureSession)
 				=> _signatureUtility.VerifySignature(
 					gameplayUid,
-					Convert.ToInt64(userDetails.ExternalProfileId),
+					userDetails.ExternalProfileId,
 					userDetails.ScreenName,
 					signatureSession);
 

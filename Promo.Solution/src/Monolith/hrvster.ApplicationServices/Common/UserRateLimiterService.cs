@@ -6,14 +6,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Tweetinvi.Models.Entities;
 
 namespace hrvster.ApplicationServices.Common
 {
 	public interface IUserRateLimiterService
 	{
-		Task UpsertAsync(IHashtagEntity hashtag, string externalUserId, UserIdentifierType userIdentifierType);
-		Task<bool> IsAllowedAsync(string externalUserId, List<IHashtagEntity> hashtags, UserIdentifierType userIdentifierType);
+		Task UpsertAsync(string hashtag, string externalUserId, UserIdentifierType userIdentifierType);
+		Task<bool> IsAllowedAsync(string externalUserId, List<string> hashtags, UserIdentifierType userIdentifierType);
 	}
 
 	public class UserRateLimiterService : IUserRateLimiterService
@@ -23,7 +22,7 @@ namespace hrvster.ApplicationServices.Common
 		private readonly HarvesterSettingsOptions _hrvsterSettings;
 
 		public UserRateLimiterService(
-			ILoggerFactory loggerFactory, 
+			ILoggerFactory loggerFactory,
 			IUserLimiterRepository repository,
 			HarvesterSettingsOptions hrvsterSettings)
 		{
@@ -32,10 +31,10 @@ namespace hrvster.ApplicationServices.Common
 			_hrvsterSettings = hrvsterSettings;
 		}
 
-		public async Task UpsertAsync(IHashtagEntity hashtag, string externalUserId, UserIdentifierType userIdentifierType)
+		public async Task UpsertAsync(string hashtag, string externalUserId, UserIdentifierType userIdentifierType)
 		{
-			var records = await _repository.GetByWatchValue(hashtag.Text, userIdentifierType);
-			if(records.Any(r => r.ExternalUserId == externalUserId))
+			var records = await _repository.GetByWatchValue(hashtag, userIdentifierType);
+			if (records.Any(r => r.ExternalUserId == externalUserId))
 			{
 				var userLimiter = records.FirstOrDefault(r => r.ExternalUserId == externalUserId);
 
@@ -44,22 +43,22 @@ namespace hrvster.ApplicationServices.Common
 				return;
 			}
 
-			await _repository.CreateAsync(Guid.NewGuid(), externalUserId, userIdentifierType, hashtag.Text);
+			await _repository.CreateAsync(Guid.NewGuid(), externalUserId, userIdentifierType, hashtag);
 		}
-		
+
 
 		public async Task<bool> IsAllowedAsync(
 			string externalUserId,
-			List<IHashtagEntity> hashtags,
+			List<string> hashtags,
 			UserIdentifierType userIdentifierType)
 		{
 			foreach (var hashtag in hashtags)
 			{
-				var records = await _repository.GetByWatchValue(hashtag.Text, userIdentifierType);
+				var records = await _repository.GetByWatchValue(hashtag, userIdentifierType);
 
 				//Todo: RateLimiter
 				if (records.Any(
-					r => 
+					r =>
 						r.ExternalUserId == externalUserId
 						&& IsNotAllowed(r)))
 					return false;

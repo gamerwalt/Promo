@@ -27,10 +27,10 @@ namespace hrvster.Core.Handlers.ServiceHandlers
 				CampaignUid = notification.Campaign.CampaignUid,
 				SweepUid = notification.Sweep.SweepUid,
 				Entries = 1,
-				ScreenName = notification.Tweet.CreatedBy.ScreenName,
+				ScreenName = notification.Tweet.ScreenName,
 				UserIdentifierType = UserIdentifierType.TwitterHandle.ToString(),
-				ExternalId = notification.Tweet.IdStr,
-				ExternalUserId = notification.Tweet.CreatedBy.IdStr,
+				ExternalId = notification.Tweet.TweetId,
+				ExternalUserId = notification.Tweet.ExternalUserId,
 				SweepEntryUid = Guid.NewGuid()
 			});
 		}

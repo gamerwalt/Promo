@@ -29,17 +29,17 @@ namespace hrvster.Core.Handlers.ServiceHandlers
 
 		protected override async Task Handle(NotifyUserOfNotFollowingProfileRequest request, CancellationToken cancellationToken)
 		{
-			_logger.LogInformation("Notifying user {userName} of not following profile account.", request.Tweet.CreatedBy.ScreenName);
+			_logger.LogInformation("Notifying user {userName} of not following profile account.", request.Tweet.ScreenName);
 
 			var message = new Message
 			{
 				Profile = request.Profile,
-				Text = $"@{request.Tweet.CreatedBy.ScreenName} You need to be following @{request.Profile.ScreenName} to be entered into the sweepstakes."
+				Text = $"@{request.Tweet.ScreenName} You need to be following @{request.Profile.ScreenName} to be entered into the sweepstakes."
 			};
 
 			var twitterPublisher = _publisherResolver(ExternalClientType.Twitter);
 
-			await twitterPublisher.PublishResponse(message, request.Tweet.IdStr);
+			await twitterPublisher.PublishResponse(message, request.Tweet.TweetId);
 
 			await _repository.UpdateAsProcessedAsync(request.IncomingTweet.IncomingTweetUid, Models.Harvester.IncomingTweetStatus.CompletedUserNotFollowing);
 		}

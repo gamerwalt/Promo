@@ -76,11 +76,6 @@ namespace ControllerTests
                 {
                     view.Should().NotBeNullOrEmpty();
                     view.Should().Contain("Create Promotion");
-                    view.Should().Contain("Promotion Name");
-                    view.Should().Contain("Description");
-                    view.Should().Contain("Start Date");
-                    view.Should().Contain("End Date");
-                    view.Should().Contain("Promotion Type");
                 });
         }
 

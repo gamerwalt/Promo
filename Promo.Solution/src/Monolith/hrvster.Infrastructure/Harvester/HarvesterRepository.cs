@@ -7,14 +7,15 @@ using Tweetinvi.Models;
 using hrvster.Infrastructure.Extensions;
 using System.Collections;
 using System.Collections.Generic;
+using hrvster.Models.Twitter;
 
 namespace hrvster.Infrastructure.Harvester
 {
 	public interface IHarvesterRepository
 	{
 		Task CreateHarvestedRecordAsync(Guid harvestedUid, Guid ruleUid, string json);
-		Task CreateTweetUserAsync(Guid userUid, IUser user);
-		Task CreateTweetRecordAsync(Guid tweetUid, Guid harvestedUid, Guid ruleUid, Guid userUid, ITweet tweet);
+		Task CreateTweetUserAsync(Guid userUid, Tweet tweet);
+		Task CreateTweetRecordAsync(Guid tweetUid, Guid harvestedUid, Guid ruleUid, Guid userUid, Tweet tweet);
 		Task<HarvestedUser> GetHarvestedUserByUserIdentifierAsync(string userIdentifier);
 		Task BeginTransaction();
 		Task CommitTransaction();
@@ -70,7 +71,7 @@ namespace hrvster.Infrastructure.Harvester
 			await command.ExecuteNonQueryAsync();
 		}
 
-		public async Task CreateTweetRecordAsync(Guid tweetUid, Guid harvestedUid, Guid ruleUid, Guid userUid, ITweet tweet)
+		public async Task CreateTweetRecordAsync(Guid tweetUid, Guid harvestedUid, Guid ruleUid, Guid userUid, Tweet tweet)
 		{
 			var command = myConnection.CreateCommand();
 			command.Transaction = myTransaction;
@@ -80,15 +81,15 @@ namespace hrvster.Infrastructure.Harvester
 				.AddParameter(nameof(tweetUid), tweetUid)
 				.AddParameter(nameof(harvestedUid), harvestedUid)
 				.AddParameter(nameof(userUid), userUid)
-				.AddParameter("externalId", tweet.IdStr)
-				.AddParameter("body", tweet.FullText)
+				.AddParameter("externalId", tweet.TweetId)
+				.AddParameter("body", tweet.TweetText)
 				.AddParameter("retweeted", tweet.Retweeted)
-				.AddParameter("externalCreatedAt", tweet.CreatedAt);
+				.AddParameter("externalCreatedAt", tweet.CreatedDate);
 
 			await command.ExecuteNonQueryAsync();
 		}
 
-		public async Task CreateTweetUserAsync(Guid userUid, IUser user)
+		public async Task CreateTweetUserAsync(Guid userUid, Tweet tweet)
 		{
 			var command = myConnection.CreateCommand();
 			command.Transaction = myTransaction;
@@ -96,12 +97,12 @@ namespace hrvster.Infrastructure.Harvester
 			command.CommandType = CommandType.StoredProcedure;
 			command
 				.AddParameter("userUid", userUid)
-				.AddParameter("externalId", user.IdStr)
-				.AddParameter("profileImageUrl", user.ProfileImageUrlFullSize)
-				.AddParameter("verifiedInd", user.Verified)
-				.AddParameter("location", user.Location)
-				.AddParameter("description", user.Description)
-				.AddParameter("screenName", user.ScreenName);
+				.AddParameter("externalId", tweet.ExternalUserId)
+				.AddParameter("profileImageUrl", tweet.ProfileImageUrl)
+				.AddParameter("verifiedInd", tweet.Verified)
+				.AddParameter("location", tweet.Location)
+				.AddParameter("description", tweet.UserDescription)
+				.AddParameter("screenName", tweet.ScreenName);
 
 			await command.ExecuteNonQueryAsync();
 		}

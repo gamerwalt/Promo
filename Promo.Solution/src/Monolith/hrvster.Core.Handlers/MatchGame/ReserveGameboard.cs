@@ -8,7 +8,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -34,8 +33,8 @@ namespace hrvster.Core.Handlers.MatchGame
 		public async Task<Guid> Handle(ReserveGameboardRequest request, CancellationToken cancellationToken)
 		{
 			var gameUid = request.GameUid;
-			var screenName = request.Tweet.CreatedBy.ScreenName;
-			var userId = request.Tweet.IdStr;
+			var screenName = request.Tweet.ScreenName;
+			var userId = request.Tweet.TweetId;
 
 			using (_logger.BeginScope(new Dictionary<string, object>
 			{
@@ -53,7 +52,7 @@ namespace hrvster.Core.Handlers.MatchGame
 				var gameBoard = default(MatchBoard);
 
 				gameBoard = await _gameboardService.GetRandomBoardAsync(gameUid, cancellationToken);
-				if(gameBoard == null)
+				if (gameBoard == null)
 				{
 					_logger.LogInformation("Could not get a random gameboard from the cache.");
 
@@ -61,7 +60,7 @@ namespace hrvster.Core.Handlers.MatchGame
 
 					var gameboardUid = await _gameboardService.GetRandomGameboardUidAsync(gameUid, cancellationToken);
 
-					if(gameboardUid == Guid.Empty)
+					if (gameboardUid == Guid.Empty)
 					{
 						_logger.LogInformation("Getting all the gameboard uids of the game that are not reserved.");
 

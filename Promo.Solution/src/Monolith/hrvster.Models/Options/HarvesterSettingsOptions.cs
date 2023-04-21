@@ -14,5 +14,6 @@
 		public bool NotifyWinners { get; set; }
 		public string SignatureKey { get; set; }
 		public int SignatureExpiryInMinutes { get; set; }
+		public string RedisCache { get; set; } = "";
 	}
 }

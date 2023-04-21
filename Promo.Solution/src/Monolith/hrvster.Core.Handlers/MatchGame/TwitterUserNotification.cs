@@ -24,8 +24,8 @@ namespace hrvster.Core.Handlers.MatchGame
 
 		protected async override Task Handle(TwitterUserNotificationRequest request, CancellationToken cancellationToken)
 		{
-			var screenName = request.Tweet.CreatedBy.ScreenName;
-			var tweetId = request.Tweet.Id;
+			var screenName = request.Tweet.ScreenName;
+			var tweetId = request.Tweet.TweetId;
 
 			var message = $"@{screenName} {request.Message} - {DateTime.UtcNow:MMM dd, yyyy hh:mm:fffff}";
 
@@ -33,7 +33,7 @@ namespace hrvster.Core.Handlers.MatchGame
 			{
 				Text = message,
 				Profile = request.Profile
-			}, request.Tweet.IdStr);
+			}, tweetId);
 		}
 	}
 }

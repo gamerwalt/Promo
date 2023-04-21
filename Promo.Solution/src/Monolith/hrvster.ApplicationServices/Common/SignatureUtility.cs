@@ -15,7 +15,7 @@ namespace hrvster.ApplicationServices.Common
 			_hrvsterSettings = harvesterSettings;
 		}
 
-		public string CreateSignature(Guid gameplayUid, long userId, string handle)
+		public string CreateSignature(Guid gameplayUid, string userId, string handle)
 		{
 			var message = $"{gameplayUid}:{userId}:{handle}";
 
@@ -26,7 +26,7 @@ namespace hrvster.ApplicationServices.Common
 			}
 		}
 
-		public bool VerifySignature(Guid gameplayUid, long userId, string handle, string signature)
+		public bool VerifySignature(Guid gameplayUid, string userId, string handle, string signature)
 		{
 			var expectedSignature = CreateSignature(gameplayUid, userId, handle);
 

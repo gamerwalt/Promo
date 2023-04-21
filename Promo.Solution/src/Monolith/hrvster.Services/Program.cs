@@ -9,6 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Serilog;
 using System;
+using System.IO;
 
 namespace hrvster.Services
 {
@@ -22,8 +23,9 @@ namespace hrvster.Services
 			var env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
 
 			Configuration = new ConfigurationBuilder()
+				.SetBasePath(Directory.GetCurrentDirectory())
 				.AddJsonFile("appsettings.json")
-				.AddJsonFile($"appsettings.{env}.json")
+				.AddJsonFile($"appsettings.{env}.json", optional: true, reloadOnChange: true)
 				.Build();
 
 			Log.Logger = new LoggerConfiguration()

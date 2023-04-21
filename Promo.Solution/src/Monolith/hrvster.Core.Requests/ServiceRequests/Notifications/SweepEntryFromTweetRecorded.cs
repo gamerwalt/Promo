@@ -1,7 +1,7 @@
 ﻿using hrvster.Models;
 using hrvster.Models.Harvester;
+using hrvster.Models.Twitter;
 using MediatR;
-using Tweetinvi.Models;
 
 namespace hrvster.Core.Requests.ServiceRequests.Notifications
 {
@@ -9,15 +9,15 @@ namespace hrvster.Core.Requests.ServiceRequests.Notifications
 	{
 		private Campaign _campaign;
 		private Sweep _sweep;
-		private ITweet _tweet;
+		private Tweet _tweet;
 		private UserIdentifierType _userIdentifierType;
 		private IncomingTweet _incomingTweet;
 
 		public SweepEntryFromTweetRecorded(
 			IncomingTweet incomingTweet,
-			Campaign campaign, 
-			Sweep sweep, 
-			ITweet tweet, 
+			Campaign campaign,
+			Sweep sweep,
+			Tweet tweet,
 			UserIdentifierType userIdentifierType)
 		{
 			_incomingTweet = incomingTweet;
@@ -30,7 +30,7 @@ namespace hrvster.Core.Requests.ServiceRequests.Notifications
 		public IncomingTweet IncomingTweet { get { return _incomingTweet; } }
 		public Campaign Campaign { get { return _campaign; } }
 		public Sweep Sweep { get { return _sweep; } }
-		public ITweet Tweet { get { return _tweet; } }
+		public Tweet Tweet { get { return _tweet; } }
 		public UserIdentifierType UserIdentifierType { get { return _userIdentifierType; } }
 	}
 }

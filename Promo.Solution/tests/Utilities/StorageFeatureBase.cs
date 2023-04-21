@@ -54,7 +54,12 @@ namespace TestUtilities
 					.AddGameService()
 					.AddAccountsService()
 					.AddHarvesterAndReportingRepositories()
-                    .AddHttpClient();
+					.AddPaymentServices(Configuration)
+					.AddFlutterwaveHttpClient()
+					.AddSignatureUtility()
+					.AddCacheService()
+					.AddReportingService()
+					.AddHttpClient();
 
 				services.MockFirebaseAuthManager()
 					.MockExternalClient()

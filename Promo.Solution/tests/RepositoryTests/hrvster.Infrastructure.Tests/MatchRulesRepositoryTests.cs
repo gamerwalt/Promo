@@ -68,6 +68,7 @@ namespace hrvster.Infrastructure.Tests
 		private void CreateFakeMatchGameRule(MatchGame matchGame, WatchTypeCode watchTypeCode)
 			=> MatchGameRuleFaker = new Faker<MatchGameRule>()
 				.RuleFor(m => m.Uid, f => Guid.NewGuid())
+				.RuleFor(m => m.Game, f => new Game { Uid = matchGame.Uid})
 				.RuleFor(m => m.MatchGame, f => matchGame)
 				.RuleFor(m => m.WatchTypeCode, f => WatchTypeCode.Hashtag)
 				.RuleFor(m => m.WatchValue, f => f.Random.Word())

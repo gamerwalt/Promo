@@ -10,6 +10,7 @@ using hrvster.Models;
 using hrvster.Models.Extensions;
 using hrvster.Models.Options;
 using hrvster.Models.Profiles;
+using hrvster.Models.Twitter;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using System;
@@ -67,7 +68,7 @@ namespace hrvster.Core.Handlers.MatchGame
 				_logger.BeginScope(
 					new Dictionary<string, object> {
 					{"IncomingTweetUid", request.IncomingTweet.IncomingTweetUid },
-					{"TweetId", request.Tweet.Id },
+					{"TweetId", request.Tweet.TweetId },
 					{ "HarvestedUid", request.HarvestedUid },
 					{ "UserUid", request.UserUid },
 					{ "GameUid", request.Rule.Game.Uid },
@@ -84,21 +85,21 @@ namespace hrvster.Core.Handlers.MatchGame
 
 					_logger.LogInformation("Checking if the tweet is in reply to the rule/tweet of the hashtag setup.");
 
-					if (request.Tweet.InReplyToStatusId.Value.ToString() == request.Rule.ExternalId)
+					if (request.Tweet.InReplyToTweetId == request.Rule.ExternalId)
 					{
 						_logger.LogInformation("Tweet is in reply to the rule/tweet of the hashtag setup");
 
-						if (request.BlacklistedUsers.Any(c => c.UserId.Equals(request.Tweet.CreatedBy.IdStr)))
+						if (request.BlacklistedUsers.Any(c => c.UserId.Equals(request.Tweet.ExternalUserId)))
 						{
 							_logger.LogWarning("User with screen name {screenName} is within the blacklisted users.",
-								request.Tweet.CreatedBy.ScreenName);
+								request.Tweet.ScreenName);
 
 							return;
 						}
 						else
 						{
 							_logger.LogInformation("User with screen name {screenName} is not within the blacklisted list. User can play the game.",
-								request.Tweet.CreatedBy.ScreenName);
+								request.Tweet.ScreenName);
 						}
 					}
 					else
@@ -110,7 +111,7 @@ namespace hrvster.Core.Handlers.MatchGame
 				}
 				else
 				{
-					_logger.LogWarning("User with screen name {screenName} cannot play the game anymore.", request.Tweet.CreatedBy.ScreenName);
+					_logger.LogWarning("User with screen name {screenName} cannot play the game anymore.", request.Tweet.ScreenName);
 
 					await _mediator.Send(new TwitterUserNotificationRequest(
 						request.Tweet, 
@@ -174,7 +175,7 @@ namespace hrvster.Core.Handlers.MatchGame
 			else
 			{
 				_logger.LogInformation("The user {screenName} is not following Profile {accountScreenName}",
-							request.Tweet.CreatedBy.ScreenName,
+							request.Tweet.ScreenName,
 							profile.ScreenName);
 
 				//await _mediator.Send(new NotifyUserOfNotFollowingAccountToPlayMatchGameRequest(request.Tweet,profile, request.IncomingTweet));
@@ -204,13 +205,13 @@ namespace hrvster.Core.Handlers.MatchGame
 				link,
 				DateTime.UtcNow.AddMinutes(_harvesterSettings.SignatureExpiryInMinutes),
 				request.Rule.Game.Uid,
-				request.Tweet.CreatedBy.IdStr,
-				request.Tweet.CreatedBy.ScreenName,
+				request.Tweet.ExternalUserId,
+				request.Tweet.ScreenName,
 				playRules.PlayPerTweet,
 				cancellationToken);
 		}
 
-		private async Task SendLinkToPlayGameAsync(string link, Rule rule, ITweet tweet, Profile profile)
+		private async Task SendLinkToPlayGameAsync(string link, Rule rule, Tweet tweet, Profile profile)
 		{
 			await _mediator.Send(new SendTwitterLinkToPlayGameRequest(link, rule, tweet, profile));
 		}
@@ -264,7 +265,7 @@ namespace hrvster.Core.Handlers.MatchGame
 			var followers = await _twitterClient.Users.GetFollowerIdsAsync(profile.ScreenName);
 
 			if (request.Rule.MustBeFollowing)
-				return followers.Any(c => c.Equals(request.Tweet.CreatedBy.Id));
+				return followers.Any(c => c.ToString().Equals(request.Tweet.ExternalUserId));
 
 			return true;
 		}
@@ -278,14 +279,14 @@ namespace hrvster.Core.Handlers.MatchGame
 				accessTokenSecret);
 		}
 
-		private async Task<bool> CanPlayMatchGame(Rule rule, ITweet tweet, CancellationToken cancellationToken)
+		private async Task<bool> CanPlayMatchGame(Rule rule, Tweet tweet, CancellationToken cancellationToken)
 		{
 			var report = await _matchGamePlayReportingRepository.GetGamePlayReportAsync(
 				rule.Game.Uid,
 				rule.Campaign.CampaignUid,
 				UserIdentifierType.TwitterHandle.ToString(),
-				tweet.CreatedBy.IdStr,
-				tweet.CreatedBy.ScreenName,
+				tweet.ExternalUserId,
+				tweet.ScreenName,
 				cancellationToken);
 
 			if (report == null) return true;
@@ -297,8 +298,8 @@ namespace hrvster.Core.Handlers.MatchGame
 			return report.Plays < playRules.PlayPerGame;
 		}
 
-		private string CreateSignature(Guid gameplayUid, ITweet tweet)
-			=> _signatureUtility.CreateSignature(gameplayUid, tweet.CreatedBy.Id, tweet.CreatedBy.ScreenName);
+		private string CreateSignature(Guid gameplayUid, Tweet tweet)
+			=> _signatureUtility.CreateSignature(gameplayUid, tweet.ExternalUserId, tweet.ScreenName);
 
 	}
 }

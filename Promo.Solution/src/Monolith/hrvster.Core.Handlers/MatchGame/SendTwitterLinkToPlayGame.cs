@@ -6,9 +6,6 @@ using hrvster.Models.Options;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -37,8 +34,8 @@ namespace hrvster.Core.Handlers.MatchGame
 
 		protected override async Task Handle(SendTwitterLinkToPlayGameRequest request, CancellationToken cancellationToken)
 		{
-			var screenName = request.Tweet.CreatedBy.ScreenName;
-			var tweetId = request.Tweet.Id;
+			var screenName = request.Tweet.ScreenName;
+			var tweetId = request.Tweet.TweetId;
 			var rulesLink = GenerateRuleLink(request.Rule);
 
 			var tweetText = $"@{screenName} {DateTime.UtcNow:MMM dd, yyyy hh:mm:fffff} - You have been selected to play a Match Game. See next tweet for rules and play link for you alone.";
@@ -51,16 +48,16 @@ namespace hrvster.Core.Handlers.MatchGame
 		}
 
 		private async Task PublishTweetAsync(
-			SendTwitterLinkToPlayGameRequest request, 
-			string tweetText, 
-			string playText, 
+			SendTwitterLinkToPlayGameRequest request,
+			string tweetText,
+			string playText,
 			string rulesText)
 		{
 			var mainTweetId = await _twitterPublisher.PublishResponse(new Message
 			{
 				Text = tweetText,
 				Profile = request.Profile
-			}, request.Tweet.IdStr);
+			}, request.Tweet.TweetId);
 
 			var playTweetId = await _twitterPublisher.PublishResponse(new Message
 			{

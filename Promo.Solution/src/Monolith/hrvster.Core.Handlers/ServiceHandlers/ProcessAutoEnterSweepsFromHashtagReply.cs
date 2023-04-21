@@ -73,7 +73,7 @@ namespace hrvster.Core.Handlers.ServiceHandlers
 					else
 					{
 						_logger.LogInformation("The user {screenName} is not following Profile {accountScreenName}",
-							request.Tweet.CreatedBy.ScreenName,
+							request.Tweet.ScreenName,
 							profile.ScreenName);
 
 						await _mediator.Send(new NotifyUserOfNotFollowingProfileRequest(
@@ -143,7 +143,7 @@ namespace hrvster.Core.Handlers.ServiceHandlers
 			if (followers.Length == 0) return false;
 
 			if (request.Rule.MustBeFollowing)
-				return followers.Any(c => c.Equals(request.Tweet.CreatedBy.Id));
+				return followers.Any(c => c.ToString().Equals(request.Tweet.ExternalUserId));
 
 			return true;
 		}
@@ -166,7 +166,7 @@ namespace hrvster.Core.Handlers.ServiceHandlers
 				_logger.LogInformation("Campaign {campaignName} and Sweepstakes {sweepName} is running and User {screenName} can now be entered into the sweepstakes with tweet Guid {tweetGuid}",
 					request.Rule.Campaign.CampaignName,
 					request.Rule.Sweep.Name,
-					request.Tweet.CreatedBy.ScreenName,
+					request.Tweet.ScreenName,
 					request.IncomingTweet.IncomingTweetUid);
 
 				var sweepEntryUid = Guid.NewGuid();
@@ -176,7 +176,7 @@ namespace hrvster.Core.Handlers.ServiceHandlers
 					AcceptedTerms = true,
 					Sweep = request.Rule.Sweep,
 					Rule = request.Rule,
-					UserIdentifier = $"@{request.Tweet.CreatedBy.ScreenName}",
+					UserIdentifier = $"@{request.Tweet.ScreenName}",
 					UserIdentifierType = UserIdentifierType.TwitterHandle,
 					SweepEntryUid = sweepEntryUid
 				});
@@ -225,10 +225,10 @@ namespace hrvster.Core.Handlers.ServiceHandlers
 		}
 
 		private bool UserIsNotInBlacklistedUsers(ProcessAutoEnterSweepsFromHashtagReplyRequest request)
-			=> request.BlackListed.Any(c => c.TweetUserId.Equals(request.Tweet.CreatedBy.Id));
+			=> request.BlackListed.Any(c => c.TweetUserId.Equals(request.Tweet.ExternalUserId));
 
 		private bool TweetIsInReplyToRuleTweetId(ProcessAutoEnterSweepsFromHashtagReplyRequest request)
-			=> request.Tweet.InReplyToStatusId.ToString() == request.Rule.ExternalId;
+			=> request.Tweet.InReplyToTweetId == request.Rule.ExternalId;
 
 		private bool UserCanEnterSweepstakes(ProcessAutoEnterSweepsFromHashtagReplyRequest request)
 			=> request.SweepEntryReport == null

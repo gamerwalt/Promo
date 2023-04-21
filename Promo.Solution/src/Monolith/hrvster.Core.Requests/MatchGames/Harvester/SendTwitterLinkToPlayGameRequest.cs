@@ -1,8 +1,7 @@
 ﻿using hrvster.Models;
 using hrvster.Models.Profiles;
+using hrvster.Models.Twitter;
 using MediatR;
-using System;
-using Tweetinvi.Models;
 
 namespace hrvster.Core.Requests.MatchGames.Harvester
 {
@@ -10,13 +9,13 @@ namespace hrvster.Core.Requests.MatchGames.Harvester
 	{
 		private string _url;
 		private Rule _rule;
-		private ITweet _tweet;
+		private Tweet _tweet;
 		private Profile _profile;
 
 		public SendTwitterLinkToPlayGameRequest(
 			string url,
 			Rule rule,
-			ITweet tweet,
+			Tweet tweet,
 			Profile profile)
 		{
 			_url = url;
@@ -27,7 +26,7 @@ namespace hrvster.Core.Requests.MatchGames.Harvester
 
 		public string Url { get { return _url; } }
 		public Rule Rule { get { return _rule; } }
-		public ITweet Tweet { get { return _tweet; } }
+		public Tweet Tweet { get { return _tweet; } }
 		public Profile Profile { get { return _profile; } }
 	}
 }

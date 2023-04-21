@@ -24,7 +24,7 @@ namespace hrvster.Core.Handlers.Processors
 			_logger.LogInformation("{action} handling notification to process tweet with uid {tweetGuid} and hashtags {hashtags}.",
 				nameof(ProcessTweetReceived),
 				notification.IncomingTweet.IncomingTweetUid,
-				string.Join(", ", notification.Tweet.Hashtags.Select(c => c.Text)));
+				string.Join(", ", notification.Tweet.Hashtags.Select(c => c)));
 
 			await _tweetProcessor.ProcessTweetAsync(
 				notification.IncomingTweet,

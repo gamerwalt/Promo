@@ -1,18 +1,18 @@
 ﻿using hrvster.Models.Harvester;
 using hrvster.Models.Profiles;
+using hrvster.Models.Twitter;
 using MediatR;
-using Tweetinvi.Models;
 
 namespace hrvster.Core.Requests.ServiceRequests
 {
 	public class NotifyUserOfNotFollowingProfileRequest : IRequest
 	{
-		private ITweet _tweet;
+		private Tweet _tweet;
 		private Profile _profile;
 		private IncomingTweet _incomingTweet;
 
 		public NotifyUserOfNotFollowingProfileRequest(
-			ITweet tweet, 
+			Tweet tweet,
 			Profile profile,
 			IncomingTweet incomingTweet)
 		{
@@ -21,7 +21,7 @@ namespace hrvster.Core.Requests.ServiceRequests
 			_incomingTweet = incomingTweet;
 		}
 
-		public ITweet Tweet { get { return _tweet; } }
+		public Tweet Tweet { get { return _tweet; } }
 		public Profile Profile { get { return _profile; } }
 		public IncomingTweet IncomingTweet { get { return _incomingTweet; } }
 	}
