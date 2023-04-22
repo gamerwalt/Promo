@@ -80,7 +80,8 @@
 
 	public enum ProfileType
 	{
-		Twitter
+		Twitter,
+		Facebook,
 	}
 
 	public enum ScheduledStatus

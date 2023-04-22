@@ -1,5 +1,6 @@
 ﻿@using hrvster.Models.Extensions
 @using hrvster.Core
+@using hrvster.Models;
 
 @inject LinkBuilder linkBuilder
 @model ViewSweepstake
@@ -428,13 +429,15 @@
 						<div class="separator mb-4"></div>
 						@if (!Model.SweepNotification.DrawHappened || Model.SweepEntries.Count() <= 0)
 						{
-							<a class="btn btn-primary mb-4"
-								asp-controller="SweepRules"
+							<a 
 								asp-action="SelectProvider"
-								asp-route-sweepUid="@Model.Sweepstake.SweepUid"
+								asp-controller="Providers"
+								asp-route-uid="@Model.Sweepstake.SweepUid"
 								asp-route-actionName=@ViewContext.RouteData.Values["action"]
-								asp-route-controllerName=@ViewContext.RouteData.Values["controller"]>
-								Create New Watch
+								asp-route-controllerName=@ViewContext.RouteData.Values["controller"]
+								asp-route-gameType="@GameTypesEnum.Sweeps.ToString()"
+								class="btn btn-lg btn-primary">
+								Create Hashtag
 							</a>
 							<div class="separator"></div>
 						}

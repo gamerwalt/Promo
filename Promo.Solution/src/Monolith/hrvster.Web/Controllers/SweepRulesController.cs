@@ -13,6 +13,8 @@ using hrvster.Models;
 using hrvster.Models.Options;
 using hrvster.Web.Models;
 using MediatR;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Facebook;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -480,31 +482,18 @@ namespace hrvster.Web.Controllers
 
 			if (ModelState.IsValid)
 			{
-				//do we have a profile with access tokens already for this provider?
-				//Todo: We should determine if we need to get the access token again
-				var profile = await _mediator.Send(new GetUserProfile(_hrvsterUser.UserUid, ProfileType.Twitter));
-				if (profile != null && !string.IsNullOrWhiteSpace(profile.AccessToken))
-				{
-					switch (form.ProviderCode)
-					{
-						case Constants.TwitterProvider:
-							return RedirectToAction("CreateTweet",
-								new
-								{
-									sweepUid = sweepUid,
-									actionName = form.ReturnAction,
-									controllerName = form.ReturnController
-								});
-					}
-				}
-
 				HttpContext.Session.SetString(SessionConstants.SweepUid, sweepUid.ToString());
 				HttpContext.Session.SetString(SessionConstants.ReturnController, form.ReturnController ?? "SweepRules");
 				HttpContext.Session.SetString(SessionConstants.ReturnAction, form.ReturnAction ?? "CreateTweet");
 
 				var authorizationUrl = await _watchTypeProvider.GetAuthorizationUrl(form.ProviderCode, Request.Scheme, Request.Host.Value, $"/SweepRules/Validate{form.ProviderCode}Auth");
 
-				return new RedirectResult(authorizationUrl);
+				var authProperties = new AuthenticationProperties
+				{
+					RedirectUri = authorizationUrl
+				};
+
+				return Challenge(authProperties, FacebookDefaults.AuthenticationScheme);
 			}
 
 			form.Providers = watchTypeProviders
@@ -546,6 +535,27 @@ namespace hrvster.Web.Controllers
 
 			//update the profile
 			await _mediator.Publish(new ProfileValidated(userDetails, _hrvsterUser.UserUid, ProfileType.Twitter));
+
+			var sweepUid = HttpContext.Session.GetString(SessionConstants.SweepUid);
+			var returnController = HttpContext.Session.GetString(SessionConstants.ReturnController);
+			var returnAction = HttpContext.Session.GetString(SessionConstants.ReturnAction);
+
+			HttpContext.Session.Remove(SessionConstants.SweepUid);
+			HttpContext.Session.Remove(SessionConstants.ReturnController);
+			HttpContext.Session.Remove(SessionConstants.ReturnAction);
+
+			return RedirectToAction("CreateTweet",
+				new
+				{
+					sweepUid = sweepUid,
+					actionName = returnAction ?? "CreateTweet",
+					controllerName = returnController ?? "SweepRules"
+				});
+		}
+
+		public async Task<IActionResult> ValidateFBAuth()
+		{
+			_hrvsterUser = _sessionManager.GetUserInformation();
 
 			var sweepUid = HttpContext.Session.GetString(SessionConstants.SweepUid);
 			var returnController = HttpContext.Session.GetString(SessionConstants.ReturnController);

@@ -1,3 +1,4 @@
+using Facebook;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using hrvster.Extensions.Configuration;
@@ -7,6 +8,7 @@ using hrvster.Web.Mapper;
 using hrvster.Web.Validation;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Azure;
 using Microsoft.Extensions.Configuration;
@@ -93,6 +95,8 @@ namespace hrvster.Web
 				.AddCacheService()
 				.AddReportingService()
 				.AddProvidersService();
+
+			services.AddTransient(provider => new FacebookClient());
 		}
 
 
@@ -129,6 +133,11 @@ namespace hrvster.Web
 
 			//app.UseNotyf();
 			app.UseNToastNotify();
+
+			app.UseForwardedHeaders(new ForwardedHeadersOptions
+			{
+				ForwardedHeaders = ForwardedHeaders.All
+			});
 
 			app.UseStatusCodePages(async context =>
 			{

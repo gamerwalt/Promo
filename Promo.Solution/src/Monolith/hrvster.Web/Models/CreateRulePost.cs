@@ -5,12 +5,12 @@ using System.Collections.Generic;
 
 namespace hrvster.Web.Models
 {
-	public class CreateRuleTweet
+	public class CreateRulePost
 	{
 		public List<SelectListItem> WatchTypes { get; set; }
 		public int WatchTypeId { get; set; }
 		public string WatchValue { get; set; }
-		public string TweetText { get; set; }
+		public string Post { get; set; }
 		public string GameType { get; set; }
 		public int GameId { get; set; }
 		public Guid GameUid { get; set; }

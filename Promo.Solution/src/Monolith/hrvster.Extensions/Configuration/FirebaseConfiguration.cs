@@ -4,13 +4,22 @@ using FirebaseAdmin.Auth;
 using Google.Apis.Auth.OAuth2;
 using hrvster.Core.Authentication;
 using hrvster.Infrastructure.Authentication.ConfigurationOptions;
+using hrvster.Models.Options;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.Facebook;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authentication.OAuth;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 using System;
+using System.Text.Json;
+using System.Threading.Tasks;
 using FirebaseAuth = FirebaseAdmin.Auth.FirebaseAuth;
 using FirebaseConfig = hrvster.Infrastructure.Authentication.ConfigurationOptions.FirebaseConfig;
 
@@ -27,6 +36,11 @@ namespace hrvster.Extensions.Configuration
 			services.AddSingleton(c => BuildFirebaseApp(c, configuration));
 			services.AddSingleton(c => BuildFirebaseAuth(c, configuration));
 			services.AddSingleton(c => BuildFirebaseAuthProvider(c, configuration));
+
+			services
+				.Configure<FacebookConfigOptions>(configuration)
+				.Configure<FacebookConfigOptions>(configuration.GetSection(FacebookConfigOptions.SectionName))
+				.AddTransient(s => s.GetService<IOptions<FacebookConfigOptions>>().Value);
 
 			return services;
 		}
@@ -65,10 +79,17 @@ namespace hrvster.Extensions.Configuration
 		{
 			var googleServicesOptions = configuration.GetSection(GoogleServicesOptions.GoogleServices).Get<GoogleServicesOptions>();
 
+			var facebookOptions = configuration.GetSection(FacebookConfigOptions.SectionName).Get<FacebookConfigOptions>();
+
 			services.Configure<GoogleServicesOptions>(configuration);
 			services.Configure<GoogleServicesOptions>(configuration.GetSection(GoogleServicesOptions.GoogleServices));
 			services.AddTransient(p => p.GetService<IOptions<GoogleServicesOptions>>().Value);
-			services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+			services.AddAuthentication(options =>
+				{
+					options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+					options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+					options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme; // Set the default sign-in scheme to 'Cookies'
+				})
 				.AddJwtBearer(options =>
 				{
 					options.Authority = googleServicesOptions.FirebaseAppId;
@@ -89,6 +110,26 @@ namespace hrvster.Extensions.Configuration
 					o.ForwardForbid = o.AccessDeniedPath;
 					o.LoginPath = "/Session/SignIn";
 					o.ReturnUrlParameter = "returnUrl";
+				})
+				.AddFacebook(options =>
+				{
+					options.AppId = facebookOptions.AppId;
+					options.AppSecret = facebookOptions.AppSecret;
+					options.Scope.Add("email");
+					options.Scope.Add("public_profile");
+					options.Scope.Add("pages_manage_posts");
+					options.Scope.Add("user_location");
+					options.Scope.Add("user_link");
+
+					options.Events = new OAuthEvents
+					{
+						OnTicketReceived = context =>
+						{
+							context.Properties.ExpiresUtc = DateTimeOffset.UtcNow.AddMinutes(30);
+
+							return Task.CompletedTask;
+						}
+					};
 				});
 
 			services.AddSession(options =>

@@ -7,6 +7,7 @@ namespace hrvster.Extensions.Configuration
 	{
 		public static IServiceCollection AddAuthenticationForWatchProviders(this IServiceCollection services)
 			=> services.AddTransient<IWatchTypeProvider, WatchTypeProvider>()
-				.AddTransient<ITwitterWatchTypeProvider, TwitterWatchTypeProvider>();
+				.AddTransient<ITwitterWatchTypeProvider, TwitterWatchTypeProvider>()
+				.AddTransient<IFacebookWatchTypeProvider, FacebookWatchTypeProvider>();
 	}
 }

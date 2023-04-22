@@ -1,11 +1,11 @@
-﻿@model CreateRuleTweet
+﻿@model CreateRulePost
 @{
-    ViewData["Title"] = "Create/Publish Rule Tweet";
+    ViewData["Title"] = "Create/Publish Rule Post";
 }
 <div class="card card-bordered">
     <form 
         asp-controller="Providers" 
-        asp-action="CreateTweet"
+        asp-action="CreatePost"
         asp-route-Uid="@Model.GameUid"
         asp-route-returnAction=@Model.ActionName
         asp-route-returnController=@Model.ControllerName
@@ -16,7 +16,7 @@
         @Html.HiddenFor(m => m.ControllerName)
         @Html.HiddenFor(m => m.GameType)
         <div class="card-header">
-            <h3 class="card-title">Create/Publish Tweet for @Model.GameName</h3>
+            <h3 class="card-title">Create/Publish Post for @Model.GameName</h3>
         </div>
         <div class="card-body">
             <div class="d-flex flex-column flex-lg-row">
@@ -44,13 +44,13 @@
                     </div>
                     <div class="fv-row mb-8">
                         <label class="required d-flex align-items-center fs-6 fw-semibold form-label mb-2">
-                            Tweet - Must contain the hashtag (Max 140)
+                            Post - Must contain the hashtag (Max 140)
                         </label>
-                        <textarea name="TweetText"
+                        <textarea name="Post"
                                   class="form-control form-control-lg"
-                                  id="TweetText"
-                                  asp-for="TweetText" rows="5" cols="70" maxlength="135"></textarea>
-                        <span asp-validation-for="TweetText"></span>
+                                  id="Post"
+                                  asp-for="Post" rows="5" cols="70" maxlength="135"></textarea>
+                        <span asp-validation-for="Post"></span>
                     </div>
                     <div class="fv-row mb-8">
                         <label class="required d-flex align-items-center fs-6 fw-semibold form-label mb-2">
@@ -67,7 +67,7 @@
                                             Immediate
                                         </h2>
                                         <div class="fw-semibold opacity-50">
-                                            Tweet goes out immediately
+                                            Post goes out immediately
                                         </div>
                                     </div>
                                 </div>
@@ -83,7 +83,7 @@
                                             <span class="badge badge-light-success ms-2 fs-7">Most Recommended</span>
                                         </h2>
                                         <div class="fw-semibold opacity-50">
-                                            Tweet goes out at scheduled time
+                                            Post goes out at scheduled time
                                         </div>
                                     </div>
                                 </div>

@@ -32,7 +32,8 @@ namespace hrvster.ApplicationServices.Tests
 
             var emptyFile = new FormFile(Stream.Null, 0, 0, null, "");
 
-            await _feature.GameService.CreateRuleTweetAsync(
+            await _feature.GameService.CreateRulePostAsync(
+                ExternalClientType.Twitter.ToString(),
                 _feature.hrvsterUser,
                 GameTypesEnum.MatchGames.ToString(),
                 matchGame.Uid,
@@ -60,8 +61,9 @@ namespace hrvster.ApplicationServices.Tests
 
             var emptyFile = new FormFile(Stream.Null, 0, 0, null, "");
 
-            await _feature.GameService.CreateRuleTweetAsync(
-                _feature.hrvsterUser,
+            await _feature.GameService.CreateRulePostAsync(
+                ExternalClientType.Twitter.ToString(),
+				_feature.hrvsterUser,
                 GameTypesEnum.MatchGames.ToString(),
                 matchGame.Uid,
                 matchGame.Id,
@@ -90,8 +92,9 @@ namespace hrvster.ApplicationServices.Tests
 
             var emptyFile = new FormFile(Stream.Null, 0, 0, null, "");
 
-            await _feature.GameService.CreateRuleTweetAsync(
-                _feature.hrvsterUser,
+            await _feature.GameService.CreateRulePostAsync(
+				ExternalClientType.Twitter.ToString(),
+				_feature.hrvsterUser,
                 GameTypesEnum.MatchGames.ToString(),
                 matchGame.Uid,
                 matchGame.Id,
@@ -121,8 +124,9 @@ namespace hrvster.ApplicationServices.Tests
 
             var emptyFile = new FormFile(Stream.Null, 0, 0, null, "");
 
-            await _feature.GameService.CreateRuleTweetAsync(
-                _feature.hrvsterUser,
+            await _feature.GameService.CreateRulePostAsync(
+				ExternalClientType.Twitter.ToString(),
+				_feature.hrvsterUser,
                 GameTypesEnum.MatchGames.ToString(),
                 matchGame.Uid,
                 matchGame.Id,
@@ -137,8 +141,9 @@ namespace hrvster.ApplicationServices.Tests
                 emptyFile,
                 true);
 
-            await _feature.GameService.CreateRuleTweetAsync(
-                _feature.hrvsterUser,
+            await _feature.GameService.CreateRulePostAsync(
+				ExternalClientType.Twitter.ToString(),
+				_feature.hrvsterUser,
                 GameTypesEnum.MatchGames.ToString(),
                 matchGame.Uid,
                 matchGame.Id,

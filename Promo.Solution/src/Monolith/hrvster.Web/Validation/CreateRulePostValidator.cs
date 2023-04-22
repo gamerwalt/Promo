@@ -9,7 +9,7 @@ using System.Linq;
 
 namespace hrvster.Web.Validation
 {
-	public class CreateRuleTweetValidator : AbstractValidator<CreateRuleTweet>
+	public class CreateRulePostValidator : AbstractValidator<CreateRulePost>
 	{
 		private readonly IGameService _gameService;
 
@@ -17,7 +17,7 @@ namespace hrvster.Web.Validation
 		//private string[] AllowedExtensions = { ".jpeg", ".jpg", ".png", ".gif", ".mp4" };
 		private string[] AllowedExtensions = { ".jpeg", ".JPEG", ".jpg", ".JPG", ".png", ".PNG", ".gif", ".GIF" };
 
-		public CreateRuleTweetValidator(IGameService gameService)
+		public CreateRulePostValidator(IGameService gameService)
 		{
 			_gameService = gameService;
 
@@ -44,12 +44,12 @@ namespace hrvster.Web.Validation
 				.Must(c => MustNotExistAlready(c))
 				.WithMessage("We're sorry. That hashtag is already in use.");
 
-			RuleFor(c => c.TweetText)
+			RuleFor(c => c.Post)
 				.NotEmpty()
 				.NotNull()
 				.WithMessage("Please supply the tweet text.");
 
-			RuleFor(c => c.TweetText)
+			RuleFor(c => c.Post)
 				.Must(c => BeMaximumTweet(c))
 				.WithMessage("The text cannot go beyond 140.");
 
@@ -95,7 +95,7 @@ namespace hrvster.Web.Validation
 
 		}
 
-		private bool MustNotExistAlready(CreateRuleTweet model)
+		private bool MustNotExistAlready(CreateRulePost model)
 		{
 			var existingRecord = _gameService.GetRulesMatching(Enum.Parse<GameTypesEnum>(model.GameType), model.WatchValue);
 
@@ -127,7 +127,7 @@ namespace hrvster.Web.Validation
 			return true;
 		}
 
-		private bool ScheduledTimeShouldBeInTheFuture(CreateRuleTweet model)
+		private bool ScheduledTimeShouldBeInTheFuture(CreateRulePost model)
 		{
 			if (!model.PostNow)
 				return model.ScheduledDate >= DateTime.Now;
@@ -135,10 +135,10 @@ namespace hrvster.Web.Validation
 			return true;
 		}
 
-		private bool WatchValueShouldBeWithinTweetText(CreateRuleTweet model)
+		private bool WatchValueShouldBeWithinTweetText(CreateRulePost model)
 		{
-			if (!string.IsNullOrWhiteSpace(model.WatchValue) && !string.IsNullOrWhiteSpace(model.TweetText))
-				return model.TweetText.Contains(model.WatchValue);
+			if (!string.IsNullOrWhiteSpace(model.WatchValue) && !string.IsNullOrWhiteSpace(model.Post))
+				return model.Post.Contains(model.WatchValue);
 
 			return false;
 		}

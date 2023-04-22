@@ -27,5 +27,7 @@
 		public const string UserExternalId = "_UserExternalId";
 		public const string SignatureUid = "_SignatureUid";
 		public const string GameplayUid = "_GameplayUid";
+
+		public const string ExternalClientType = "_ExternalClientType";
 	}
 }
