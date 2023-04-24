@@ -27,5 +27,6 @@ namespace hrvster.Web.Models
 		public DateTime StartDate { get; set; }
 		public DateTime EndDate { get; set; }
 		public DateTime? DrawDate { get; set; }
+		public string PageId { get; set; }
 	}
 }

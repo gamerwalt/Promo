@@ -1,4 +1,5 @@
-﻿using hrvster.ApplicationServices.Subscription;
+﻿using hrvster.ApplicationServices.Harvesters.Facebook;
+using hrvster.ApplicationServices.Subscription;
 using hrvster.Core.Clients.Common;
 using hrvster.Core.Clients.Publishers;
 using hrvster.Core.Requests.Rules.Notifications;
@@ -7,41 +8,38 @@ using hrvster.Models.Profiles;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using Org.BouncyCastle.Asn1.Ocsp;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace hrvster.ApplicationServices.Publishing
 {
 	public interface IPublishService
 	{
-		Task<bool> PublishAsync(Profile profile, int gameId, Guid gameUid, GameTypesEnum gameType, IList<IFormFile> media, IList<string> mediaLocation, string token, Guid userUid, string watchValue, int watchTypeId, string tweetText, ExternalClientType externalClientType, bool following);
-		Task<bool> SaveScheduledTweetToPublishAsync(Guid userUid, int gameId, Guid gameUid, Profile profile, int watchTypeId, string watchValue, string tweetText, DateTime scheduledDate, IList<string> mediaLocation, ExternalClientType externalClientType, bool following);
+		Task<bool> PublishAsync(Profile profile, int gameId, Guid gameUid, GameTypesEnum gameType, IList<IFormFile> media, IList<string> mediaLocation, string token, Guid userUid, string watchValue, int watchTypeId, string tweetText, ExternalClientType externalClientType, bool following, string pageId);
+		Task<bool> SaveScheduledPostToPublishAsync(Guid userUid, int gameId, Guid gameUid, Profile profile, int watchTypeId, string watchValue, string tweetText, DateTime scheduledDate, IList<string> mediaLocation, ExternalClientType externalClientType, bool following, string pageId);
 	}
 
 	public class PublishService : IPublishService
 	{
 		private readonly ILogger<PublishService> _logger;
 		private readonly Func<ExternalClientType, IExternalClient> _publisherResolver;
-		private readonly IAccountSubscriptionService _accountSubscriptionService;
 		private readonly IMediator _mediator;
+		private readonly IFacebookPageSerivce _facebookPageService;
 
 		public PublishService(
 			ILoggerFactory loggerFactory,
 			Func<ExternalClientType, IExternalClient> publisherResolver,
-			IAccountSubscriptionService accountSubscriptionService,
-			IMediator mediator)
+			IMediator mediator,
+			IFacebookPageSerivce facebookPageSerivce)
 		{
 			_logger = loggerFactory.CreateLogger<PublishService>();
 			_publisherResolver = publisherResolver;
-			_accountSubscriptionService = accountSubscriptionService;
 			_mediator = mediator;
+			_facebookPageService = facebookPageSerivce;
 		}
 
-		public async Task<bool> PublishAsync(Profile profile, int gameId, Guid gameUid, GameTypesEnum gameType, IList<IFormFile> media, IList<string> mediaLocation, string token, Guid userUid, string watchValue, int watchTypeId, string tweetText, ExternalClientType externalClientType, bool following)
+		public async Task<bool> PublishAsync(Profile profile, int gameId, Guid gameUid, GameTypesEnum gameType, IList<IFormFile> media, IList<string> mediaLocation, string token, Guid userUid, string watchValue, int watchTypeId, string tweetText, ExternalClientType externalClientType, bool following, string pageId = "")
 		{
 			_logger.LogInformation("Publishing the tweet {tweetText} with the hashtag {watchValue} for the user with Uid {userUid} and profile name {screenName} for the External Client {externalClient}",
 				tweetText,
@@ -53,7 +51,13 @@ namespace hrvster.ApplicationServices.Publishing
 			var publisher = _publisherResolver(externalClientType);
 
 			var message = BuildMessage(gameUid, profile, mediaLocation, watchValue, watchTypeId, tweetText);
-
+			if(!string.IsNullOrWhiteSpace(pageId))
+			{
+				var page = await _facebookPageService.GetPageAsync(pageId);
+				message.PageId = pageId;
+				message.PageAccessToken = page.PageAccessToken;
+			}
+			
 			var externalId = await publisher.PublishAsync(message);
 
 			if (string.IsNullOrWhiteSpace(externalId))
@@ -88,7 +92,18 @@ namespace hrvster.ApplicationServices.Publishing
 			};
 		}
 
-		public async Task<bool> SaveScheduledTweetToPublishAsync(Guid userUid, int gameId, Guid gameUid, Profile profile, int watchTypeId, string watchValue, string tweetText, DateTime scheduledDate, IList<string> mediaLocation, ExternalClientType externalClientType, bool following)
+		public async Task<bool> SaveScheduledPostToPublishAsync(
+			Guid userUid, 
+			int gameId, 
+			Guid gameUid, 
+			Profile profile, 
+			int watchTypeId, 
+			string watchValue, 
+			string tweetText, 
+			DateTime scheduledDate, 
+			IList<string> mediaLocation, 
+			ExternalClientType externalClientType, 
+			bool following, string pageId = "")
 		{
 			_logger.LogInformation("Scheduling the tweet {tweetText} with the hashtag {watchValue} for the user with Uid {userUid} and profile name {screenName} for the External Client {externalClient}",
 				tweetText,
@@ -96,6 +111,9 @@ namespace hrvster.ApplicationServices.Publishing
 				userUid,
 				profile.ScreenName,
 				externalClientType.ToString());
+
+			//Todo: Finish the scheduling of posts
+			//Todo: Finish the sending of the scheduled posts
 
 			return true;
 		}

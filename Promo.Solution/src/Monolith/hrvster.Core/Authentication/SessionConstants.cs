@@ -29,5 +29,6 @@
 		public const string GameplayUid = "_GameplayUid";
 
 		public const string ExternalClientType = "_ExternalClientType";
+		public const string PageId = "_PageId";
 	}
 }

@@ -95,10 +95,7 @@ namespace hrvster.Web
 				.AddCacheService()
 				.AddReportingService()
 				.AddProvidersService();
-
-			services.AddTransient(provider => new FacebookClient());
 		}
-
 
 		private void AddValidators(IServiceCollection services)
 		{

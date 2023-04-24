@@ -1,24 +1,21 @@
-﻿using Firebase.Auth;
+﻿using Facebook;
+using Firebase.Auth;
 using FirebaseAdmin;
-using FirebaseAdmin.Auth;
 using Google.Apis.Auth.OAuth2;
+using hrvster.ApplicationServices.Harvesters.Facebook;
 using hrvster.Core.Authentication;
 using hrvster.Infrastructure.Authentication.ConfigurationOptions;
+using hrvster.Infrastructure.Facebook;
 using hrvster.Models.Options;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication.Facebook;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authentication.OAuth;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 using System;
-using System.Text.Json;
 using System.Threading.Tasks;
 using FirebaseAuth = FirebaseAdmin.Auth.FirebaseAuth;
 using FirebaseConfig = hrvster.Infrastructure.Authentication.ConfigurationOptions.FirebaseConfig;
@@ -58,7 +55,7 @@ namespace hrvster.Extensions.Configuration
 
 		private static FirebaseApp BuildFirebaseApp(IServiceProvider sp, IConfiguration configuration)
 		{
-			if(FirebaseApp.DefaultInstance == null)
+			if (FirebaseApp.DefaultInstance == null)
 			{
 				return FirebaseApp.Create(new AppOptions()
 				{
@@ -120,6 +117,8 @@ namespace hrvster.Extensions.Configuration
 					options.Scope.Add("pages_manage_posts");
 					options.Scope.Add("user_location");
 					options.Scope.Add("user_link");
+					options.Scope.Add("pages_manage_posts");
+					options.Scope.Add("pages_read_engagement");
 
 					options.Events = new OAuthEvents
 					{
@@ -132,6 +131,10 @@ namespace hrvster.Extensions.Configuration
 					};
 				});
 
+			services.AddTransient(provider => GetFacebookClient(facebookOptions));
+			services.AddTransient<IFacebookPageSerivce, FacebookPageSerivce>();
+			services.AddTransient<IFacebookPageRepository, FacebookPageRepository>();
+
 			services.AddSession(options =>
 			{
 				options.IdleTimeout = TimeSpan.FromMinutes(30);
@@ -141,6 +144,15 @@ namespace hrvster.Extensions.Configuration
 			});
 
 			return services;
+		}
+
+		private static FacebookClient GetFacebookClient(FacebookConfigOptions facebookOptions)
+		{
+			return new FacebookClient
+			{
+				AppId = facebookOptions.AppId,
+				AppSecret = facebookOptions.AppSecret
+			};
 		}
 	}
 }

@@ -17,6 +17,7 @@ namespace hrvster.Infrastructure.Accounts
 		Task<Profile> GetProfileByCampaignUid(Guid campaignUid, ProfileType profileType);
 		Task<Profile> GetProfileBelongingToSweepRuleAsync(Guid ruleUid, ProfileType profileType	);
 		Task RemoveProfileAsync(Guid accountUid, ProfileType profileType);
+		Task CreateProfileAsync(Profile profile);
 	}
 
 	public class ProfilesRepository : IProfilesRepository
@@ -192,6 +193,31 @@ namespace hrvster.Infrastructure.Accounts
 				await conn.OpenAsync();
 				await command.ExecuteNonQueryAsync();
 			}
+		}
+
+		public async Task CreateProfileAsync(Profile profile)
+		{
+			using var conn = new MySqlConnection(_database.GetConnectionString());
+			var command = conn.CreateCommand();
+			command.CommandText = "profile_create";
+			command.CommandType = CommandType.StoredProcedure;
+			command
+				.AddParameter("profileUid", profile.ProfileUid)
+				.AddParameter("externalProfileId", profile.ExternalProfileId)
+				.AddParameter("accountUid", profile.Account.AccountUid)
+				.AddParameter("profileType", profile.ProfileType)
+				.AddParameter("displayName", profile.DisplayName)
+				.AddParameter("screenName", profile.ScreenName)
+				.AddParameter("description", profile.Description)
+				.AddParameter("accessToken", profile.AccessToken)
+				.AddParameter("accessTokenSecret", profile.AccessTokenSecret)
+				.AddParameter("consumerKey", profile.ConsumerKey)
+				.AddParameter("consumerSecret", profile.ConsumerSecret)
+				.AddParameter("location", profile.Location)
+				.AddParameter("profileImageUrl", profile.ProfileImageUrl);
+
+			await conn.OpenAsync();
+			await command.ExecuteNonQueryAsync();
 		}
 	}
 }

@@ -16,6 +16,8 @@ namespace hrvster.Core.Clients.Common
 		public string Hashtag { get; set; }
 		public int WatchTypeId { get; set; }
 		public IEnumerable<string> Media { get; set; }
+		public string PageId { get; set; }
+		public string PageAccessToken { get; set; }
 	}
 
 	public class PublishTweetMessage : Message

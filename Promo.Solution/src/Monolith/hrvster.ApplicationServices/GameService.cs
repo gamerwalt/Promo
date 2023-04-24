@@ -6,6 +6,7 @@ using hrvster.ApplicationServices.Sweepstakes;
 using hrvster.Core.Requests.WebRequests.Files;
 using hrvster.Models;
 using hrvster.Models.Extensions;
+using hrvster.Models.Profiles;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
@@ -19,7 +20,7 @@ namespace hrvster.ApplicationServices
 {
 	public interface IGameService
 	{
-		Task CreateRulePostAsync(string externalClientType, HrvsterUser hrvsterUser, string gameType, Guid gameUid, int gameId, int watchTypeId, string watchValue, string post, bool postNow, DateTime scheduledDate, IFormFile media1, IFormFile media2, IFormFile media3, IFormFile media4, bool following);
+		Task CreateRulePostAsync(string externalClientType, HrvsterUser hrvsterUser, string gameType, Guid gameUid, int gameId, int watchTypeId, string watchValue, string post, bool postNow, DateTime scheduledDate, IFormFile media1, IFormFile media2, IFormFile media3, IFormFile media4, string pageId, bool following);
 		Task<GameDetail> GetGameDetailsAsync(string gameType, Guid uid);
 		Task<IEnumerable<Rule>> GetRulesAsync(GameTypesEnum gameType, CancellationToken cancellationToken);
 		IEnumerable<Rule> GetRulesMatching(GameTypesEnum gameType, string watchValue);
@@ -188,7 +189,9 @@ namespace hrvster.ApplicationServices
 			IFormFile media1,
 			IFormFile media2,
 			IFormFile media3,
-			IFormFile media4, bool following)
+			IFormFile media4, 
+			string pageId,
+			bool following)
 		{
 			//1. Publish the post
 			//2. Create the rule with the ID
@@ -213,10 +216,24 @@ namespace hrvster.ApplicationServices
 			switch (Enum.Parse<GameTypesEnum>(gameType))
 			{
 				case GameTypesEnum.Sweeps:
-					//await _mediator.Send(PublishSweepRuleTweetRequest())
+					await CreateSweepRulePostAsync(
+						externalClientType,
+						gameUid,
+						gameId,
+						GameTypesEnum.Sweeps,
+						media,
+						mediaLocation,
+						hrvsterUser,
+						watchValue,
+						watchTypeId,
+						post,
+						postNow,
+						scheduledDate,
+						following,
+						pageId);
 					break;
 				case GameTypesEnum.MatchGames:
-					if (await CreateMatchRulePostAsync(
+					await CreateMatchRulePostAsync(
 						externalClientType,
 						gameUid,
 						gameId,
@@ -229,10 +246,60 @@ namespace hrvster.ApplicationServices
 						post,
 						postNow,
 						scheduledDate,
-						following)) ;
-					//await _mediator.Send(PublishMatchGameRuleTweetRequest())
+						following,
+						pageId);
 					break;
 			}
+		}
+
+		private async Task<bool> CreateSweepRulePostAsync(
+			string externalClientType, 
+			Guid gameUid, 
+			int gameId, 
+			GameTypesEnum gameType, 
+			List<IFormFile> media, 
+			IEnumerable<string> mediaLocation, 
+			HrvsterUser hrvsterUser, 
+			string watchValue, 
+			int watchTypeId, 
+			string post, 
+			bool postNow, 
+			DateTime scheduledDate, 
+			bool following,
+			string pageId)
+		{
+			var profile = await _accountsService.GetProfileAsync(hrvsterUser.UserUid, GetProfileType(externalClientType));
+
+			if(profile == null)
+			{
+				_logger.LogError("Could not locate the profile for this account that matched with {profileType}",
+					GetProfileType(externalClientType));
+
+				return false;
+			}
+
+			var accountSubscription = await _accountSubscriptionService.GetAccountSubscriptionAsync(profile.Account.AccountUid);
+
+			if (accountSubscription == null)
+			{
+				_logger.LogWarning("Account with uid {accountUid} is not subscribed.", profile.Account.AccountUid);
+
+				return false;
+			}
+
+			var ruleCount = await GetGameRuleCountsForAsync(hrvsterUser.UserUid);
+
+			if (ruleCount >= accountSubscription.Plan.HashtagsPerMonth)
+			{
+				_logger.LogWarning("Account with uid {accountUid} has a total of {activeRulesCount} active hashtags and their current max is {maxHashtags}",
+						profile.Account.AccountUid,
+						ruleCount,
+						accountSubscription.Plan.HashtagsPerMonth);
+
+				return false;
+			}
+
+			return await PostMessageAsync(externalClientType, gameUid, gameId, gameType, media, mediaLocation, hrvsterUser, watchValue, watchTypeId, post, postNow, scheduledDate, following, profile, pageId);
 		}
 
 		private async Task<bool> CreateMatchRulePostAsync(
@@ -240,15 +307,15 @@ namespace hrvster.ApplicationServices
 			Guid gameUid,
 			int gameId,
 			GameTypesEnum gameType,
-			IList<IFormFile> media,
+			List<IFormFile> media,
 			IEnumerable<string> mediaLocation,
 			HrvsterUser hrvsterUser,
 			string watchValue,
 			int watchTypeId,
-			string postText,
+			string post,
 			bool postNow,
 			DateTime scheduledDate,
-			bool following)
+			bool following, string pageId)
 		{
 			var profile = await _accountsService.GetProfileAsync(hrvsterUser.UserUid, GetProfileType(externalClientType));
 
@@ -273,34 +340,21 @@ namespace hrvster.ApplicationServices
 				return false;
 			}
 
-			if (postNow)
-				return await _publishService.PublishAsync(
-					profile,
-					gameId,
-					gameUid,
-					gameType,
-					media,
-					mediaLocation == null ? null : mediaLocation.ToList(),
-					hrvsterUser.Token,
-					hrvsterUser.UserUid,
-					watchValue,
-					watchTypeId,
-					postText,
-					Enum.Parse<ExternalClientType>(externalClientType),
-					following);
+			return await PostMessageAsync(externalClientType, gameUid, gameId, gameType, media, mediaLocation, hrvsterUser, watchValue, watchTypeId, post, postNow, scheduledDate, following, profile, pageId);
+		}
 
-			return await _publishService.SaveScheduledTweetToPublishAsync(
-				hrvsterUser.UserUid,
-				gameId,
-				gameUid,
-				profile,
-				watchTypeId,
-				watchValue,
-				postText,
-				scheduledDate,
-				mediaLocation.ToList(),
-				Enum.Parse<ExternalClientType>(externalClientType),
-				following);
+		private async Task<bool> PostMessageAsync(string externalClientType, Guid gameUid, int gameId, GameTypesEnum gameType, List<IFormFile> media, IEnumerable<string> mediaLocation, HrvsterUser hrvsterUser, string watchValue, int watchTypeId, string post, bool postNow, DateTime scheduledDate, bool following, Profile profile, string pageId)
+		{
+			if (postNow)
+				return await _publishService.PublishAsync(profile, gameId, gameUid, gameType, media,
+					mediaLocation == null ? null : mediaLocation.ToList(),
+					hrvsterUser.Token, hrvsterUser.UserUid, watchValue, watchTypeId, post,
+					Enum.Parse<ExternalClientType>(externalClientType), following, pageId);
+
+			return await _publishService.SaveScheduledPostToPublishAsync(
+				hrvsterUser.UserUid, gameId, gameUid, profile, watchTypeId, watchValue, post, scheduledDate, 
+				mediaLocation == null ? null : mediaLocation.ToList(),
+				Enum.Parse<ExternalClientType>(externalClientType), following, pageId);
 		}
 
 		private ProfileType GetProfileType(string externalClientType)

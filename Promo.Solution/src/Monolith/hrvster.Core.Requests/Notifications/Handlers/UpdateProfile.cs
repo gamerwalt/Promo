@@ -27,6 +27,10 @@ namespace hrvster.Core.Requests.Notifications.Handlers
 			{
 				_logger.LogError("Unable to find a profile for user with Uid : {userUid}", notification.UserUid);
 				_logger.LogInformation("Will attempt to create a new profile for the user with uid : {userUid}", notification.UserUid);
+
+				await _repository.CreateProfileAsync(BuildProfile(notification));
+
+				return;
 			}
 
 			await _repository.UpsertProfileAsync(BuildProfile(notification));

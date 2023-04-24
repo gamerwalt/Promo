@@ -10,7 +10,7 @@ namespace hrvster.Extensions.Configuration
 	{
 		public static IServiceCollection AddPublishers(this IServiceCollection services)
 			=> services.AddTransient<TwitterClient>()
-				.AddTransient<FacebookClient>()
+				.AddTransient<FacebookPublisher>()
 				.AddTransient<InstagramClient>()
 				.AddTransient<Func<ExternalClientType, IExternalClient>>(sp => serviceTypeName =>
 				{
@@ -19,7 +19,7 @@ namespace hrvster.Extensions.Configuration
 						case ExternalClientType.Twitter:
 							return sp.GetService<TwitterClient>();
 						case ExternalClientType.Facebook:
-							return sp.GetService<FacebookClient>();
+							return sp.GetService<FacebookPublisher>();
 						case ExternalClientType.Instagram:
 							return sp.GetService<InstagramClient>();
 						default:

@@ -1,12 +1,13 @@
 ﻿using Facebook;
 using hrvster.ApplicationServices;
 using hrvster.ApplicationServices.Accounts;
+using hrvster.ApplicationServices.Harvesters.Facebook;
 using hrvster.Core.Authentication;
 using hrvster.Core.Clients;
-using hrvster.Core.Requests.Notifications;
 using hrvster.Core.Subscriptions;
 using hrvster.Extensions.ModelExtensions;
 using hrvster.Models;
+using hrvster.Models.Facebook;
 using hrvster.Models.Options;
 using hrvster.Web.Models;
 using Microsoft.AspNetCore.Authentication;
@@ -18,11 +19,9 @@ using NToastNotify;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
-using Tweetinvi.Core.Models;
 
 namespace hrvster.Web.Controllers
 {
@@ -37,6 +36,7 @@ namespace hrvster.Web.Controllers
 		private readonly IProvidersService _providersService;
 		private readonly IAccountsService _accountsService;
 		private readonly IGameService _gameService;
+		private readonly IFacebookPageSerivce _facebookPageService;
 		private readonly FacebookClient _facebookClient;
 		private readonly FacebookConfigOptions _facebookOptions;
 
@@ -50,6 +50,7 @@ namespace hrvster.Web.Controllers
 			IProvidersService providersService,
 			IAccountsService accountsService,
 			IGameService gameService,
+			IFacebookPageSerivce facebookPageSerivce,
 			FacebookClient facebookClient,
 			FacebookConfigOptions facebookOptions)
 		{
@@ -60,6 +61,7 @@ namespace hrvster.Web.Controllers
 			_providersService = providersService;
 			_accountsService = accountsService;
 			_gameService = gameService;
+			_facebookPageService = facebookPageSerivce;
 			_facebookClient = facebookClient;
 			_facebookOptions = facebookOptions;
 		}
@@ -98,7 +100,7 @@ namespace hrvster.Web.Controllers
 
 			var watchTypeProviders = await _providersService.GetWathcTypeProvidersAsync();
 
-			if(ModelState.IsValid)
+			if (ModelState.IsValid)
 			{
 				HttpContext.Session.SetString(SessionConstants.Uid, uid.ToString());
 				HttpContext.Session.SetString(SessionConstants.ReturnController, controllerName);
@@ -130,16 +132,40 @@ namespace hrvster.Web.Controllers
 
 		public IActionResult FailedAuthValidation()
 		{
-			return RedirectToActionPermanent("Index", "MatchGames");
+			var uid = HttpContext.Session.GetString(SessionConstants.Uid);
+			var controllerName = HttpContext.Session.GetString(SessionConstants.ReturnController);
+			var actionName = HttpContext.Session.GetString(SessionConstants.ReturnAction);
+			var gameType = HttpContext.Session.GetString(SessionConstants.GameType);
+
+			return RedirectToActionPermanent(actionName, controllerName, GetReturnObject(gameType, uid));
+		}
+
+		private static object GetReturnObject(string gameType, string uid)
+		{
+			if (gameType == GameTypes.Sweepstake.ToString())
+			{
+				return new { SweepUid = uid };
+			}
+			else if (gameType == GameTypes.MatchGame.ToString())
+			{
+				return new { Uid = uid };
+			}
+
+			return new { Uid = uid };
 		}
 
 		public async Task<IActionResult> ValidateTwitterAuth()
 		{
 			_hrvsterUser = _sessionManager.GetUserInformation();
 
+			var Uid = HttpContext.Session.GetString(SessionConstants.Uid);
+			var returnController = HttpContext.Session.GetString(SessionConstants.ReturnController);
+			var returnAction = HttpContext.Session.GetString(SessionConstants.ReturnAction);
+			var gameType = HttpContext.Session.GetString(SessionConstants.GameType);
+
 			if (Request.Query["denied"].Count > 0)
 			{
-				return RedirectToAction("FailedAuthValidation");
+				return RedirectToActionPermanent(returnAction, returnController, GetReturnObject(gameType, Uid));
 			}
 
 			var userDetails = await _watchTypeProvider.IsValidAuthorization(Constants.TwitterProvider, Request.QueryString.Value);
@@ -151,11 +177,6 @@ namespace hrvster.Web.Controllers
 			//update the profile
 			await _accountsService.RaiseProfileValidatedEventAsync(userDetails, _hrvsterUser.UserUid, ProfileType.Twitter);
 
-			var Uid = HttpContext.Session.GetString(SessionConstants.Uid);
-			var returnController = HttpContext.Session.GetString(SessionConstants.ReturnController);
-			var returnAction = HttpContext.Session.GetString(SessionConstants.ReturnAction);
-			var gameType = HttpContext.Session.GetString(SessionConstants.GameType);
-
 			HttpContext.Session.Remove(SessionConstants.Uid);
 			HttpContext.Session.Remove(SessionConstants.ReturnController);
 			HttpContext.Session.Remove(SessionConstants.ReturnAction);
@@ -163,7 +184,7 @@ namespace hrvster.Web.Controllers
 
 			_sessionManager.SetKeyValue(SessionConstants.ExternalClientType, ExternalClientType.Twitter.ToString());
 
-			if (string.IsNullOrWhiteSpace(returnController) || 
+			if (string.IsNullOrWhiteSpace(returnController) ||
 				string.IsNullOrWhiteSpace(gameType) ||
 				string.IsNullOrWhiteSpace(returnAction) ||
 				string.IsNullOrWhiteSpace(Uid))
@@ -185,13 +206,18 @@ namespace hrvster.Web.Controllers
 		{
 			_hrvsterUser = _sessionManager.GetUserInformation();
 
-			if(!string.IsNullOrWhiteSpace(error))
+			var Uid = HttpContext.Session.GetString(SessionConstants.Uid);
+			var returnController = HttpContext.Session.GetString(SessionConstants.ReturnController);
+			var returnAction = HttpContext.Session.GetString(SessionConstants.ReturnAction);
+			var gameType = HttpContext.Session.GetString(SessionConstants.GameType);
+
+			if (!string.IsNullOrWhiteSpace(error))
 			{
 				_logger.LogError("Facebook authentication failed for user with uid {userUid} with description {errorDescription}",
 					_hrvsterUser.UserUid,
 					error_description);
 
-				return RedirectToAction("FailedAuthValidation");
+				return RedirectToActionPermanent(returnAction, returnController, GetReturnObject(gameType, Uid));
 			}
 
 			var redirectUri = await _watchTypeProvider.GetCallbackUrl(Request.Scheme, Request.Host.Value, $"/Providers/Validate{Constants.FaceBookProvider}Auth");
@@ -213,7 +239,7 @@ namespace hrvster.Web.Controllers
 
 			var appSecretProof = GenerateAppSecretProof(_facebookClient.AppSecret, accessToken);
 
-			dynamic user = await _facebookClient.GetTaskAsync("me", new { fields = "id,name,email,location,link,picture.type(large)", appsecret_proof = appSecretProof});
+			dynamic user = await _facebookClient.GetTaskAsync("me", new { fields = "id,name,email,location,link,picture.type(large)", appsecret_proof = appSecretProof });
 
 			var userDict = (IDictionary<string, object>)user;
 
@@ -237,12 +263,7 @@ namespace hrvster.Web.Controllers
 				ProfileType.Twitter.ToString());
 
 			//update the profile
-			await _accountsService.RaiseProfileValidatedEventAsync(userDetails, _hrvsterUser.UserUid, ProfileType.Twitter);
-
-			var Uid = HttpContext.Session.GetString(SessionConstants.Uid);
-			var returnController = HttpContext.Session.GetString(SessionConstants.ReturnController);
-			var returnAction = HttpContext.Session.GetString(SessionConstants.ReturnAction);
-			var gameType = HttpContext.Session.GetString(SessionConstants.GameType);
+			await _accountsService.RaiseProfileValidatedEventAsync(userDetails, _hrvsterUser.UserUid, ProfileType.Facebook);
 
 			HttpContext.Session.Remove(SessionConstants.Uid);
 			HttpContext.Session.Remove(SessionConstants.ReturnController);
@@ -251,13 +272,46 @@ namespace hrvster.Web.Controllers
 
 			_sessionManager.SetKeyValue(SessionConstants.ExternalClientType, ExternalClientType.Facebook.ToString());
 
-			if (string.IsNullOrWhiteSpace(returnController) || 
+			if (string.IsNullOrWhiteSpace(returnController) ||
 				string.IsNullOrWhiteSpace(gameType) ||
 				string.IsNullOrWhiteSpace(returnAction) ||
 				string.IsNullOrWhiteSpace(Uid))
 			{
 				return RedirectToAction("Index", "Dashboard");
 			}
+
+			dynamic pages = await _facebookClient.GetTaskAsync("/me/accounts");
+			var facebookPages = new List<FacebookPage>();
+
+			foreach (var page in pages.data)
+			{
+				facebookPages.Add(new FacebookPage
+				{
+					Id = page.id,
+					Name = page.name,
+					PageAccessToken = page.access_token,
+				});
+			}
+
+			if (facebookPages.Count > 0)
+			{
+				//we need to save this
+				await _facebookPageService.CreateAsync(_hrvsterUser.UserUid, facebookPages);
+			}
+
+			//if the facebookPages.Count > 1, then we need the user to select which page first
+			//else, we just go ahead and createPost. Save the details in the session first
+			if(facebookPages.Count > 1)
+				return RedirectToAction("SelectPage",
+					new
+					{
+						Uid = Uid,
+						actionName = returnAction,
+						controllerName = returnController,
+						gameType = gameType
+					});
+
+			_sessionManager.SetKeyValue(SessionConstants.PageId, facebookPages.FirstOrDefault()?.Id);
 
 			return RedirectToAction("CreatePost",
 				new
@@ -267,6 +321,73 @@ namespace hrvster.Web.Controllers
 					controllerName = returnController,
 					gameType = gameType
 				});
+		}
+
+		[HttpGet]
+		[Route("/providers/pages/select")]
+		public async Task<IActionResult> SelectPage(
+			Guid Uid, 
+			string actionName, 
+			string controllerName, 
+			string gameType)
+		{
+			_hrvsterUser = _sessionManager.GetUserInformation();
+
+			var gameDetail = await _gameService.GetGameDetailsAsync(gameType, Uid);
+			var pages = await _facebookPageService.GetPagesAsync(_hrvsterUser.UserUid);
+
+			var model = new SelectPageToPost
+			{
+				GameName = gameDetail.Name,
+				ActionName = actionName,
+				ControllerName = controllerName,
+				GameUid = Uid,
+				Pages = pages.Select(a => new SelectListItem()
+				{
+					Text = a.Name,
+					Value = a.Id
+				}).ToList(),
+				GameType = gameType
+			};
+
+			return View(model);
+		}
+
+		[HttpPost]
+		[Route("/providers/pages/select")]
+		public async Task<IActionResult> SelectPage(
+			Guid Uid, 
+			string actionName, 
+			string controllerName, 
+			string gameType, 
+			SelectPageToPost form)
+		{
+			_hrvsterUser = _sessionManager.GetUserInformation();
+
+			var gameDetail = await _gameService.GetGameDetailsAsync(gameType, Uid);
+
+			if(ModelState.IsValid)
+			{
+				_sessionManager.SetKeyValue(SessionConstants.PageId, form.PageId);
+
+				return RedirectToAction("CreatePost", new
+				{
+					Uid = Uid,
+					actionName = actionName,
+					controllerName = controllerName,
+					gameType = gameType
+				});
+			}
+
+			_notificationService.AddErrorToastMessage(ModelState.BuildMessageFromErrors());
+
+			return RedirectToAction("SelectPage", new
+			{
+				Uid = Uid,
+				actionName = actionName,
+				controllerName = controllerName,
+				gameType = gameType
+			});
 		}
 
 		[HttpGet]
@@ -287,6 +408,8 @@ namespace hrvster.Web.Controllers
 			}
 
 			var model = GetCreateRulePost(Uid, actionName, controllerName, gameType, watchTypes, gameDetail);
+
+			model.PageId = _sessionManager.GetValue(SessionConstants.PageId);
 
 			var externalClientType = _sessionManager.GetValue(SessionConstants.ExternalClientType);
 
@@ -319,14 +442,14 @@ namespace hrvster.Web.Controllers
 				return RedirectToAction(actionName, controllerName, new { uid = Uid });
 			}
 
-			if(ModelState.IsValid)
+			if (ModelState.IsValid)
 			{
 				var externalClientType = _sessionManager.GetValue(SessionConstants.ExternalClientType);
 
-				if(string.IsNullOrWhiteSpace(externalClientType))
+				if (string.IsNullOrWhiteSpace(externalClientType))
 				{
 					_logger.LogWarning("Unable to determine the external client type required.");
-					
+
 					_notificationService.AddWarningToastMessage("Unable to determine the external client type requried.");
 
 					return RedirectToAction(actionName, controllerName, new { uid = Uid });
@@ -337,18 +460,19 @@ namespace hrvster.Web.Controllers
 				await _gameService.CreateRulePostAsync(
 					externalClientType,
 					_hrvsterUser,
-					gameType, 
-					Uid, 
-					form.GameId, 
-					form.WatchTypeId, 
-					form.WatchValue, 
-					form.Post, 
-					form.PostNow, 
-					form.ScheduledDate, 
-					form.Media1, 
-					form.Media2, 
-					form.Media3, 
+					gameType,
+					Uid,
+					form.GameId,
+					form.WatchTypeId,
+					form.WatchValue,
+					form.Post,
+					form.PostNow,
+					form.ScheduledDate,
+					form.Media1,
+					form.Media2,
+					form.Media3,
 					form.Media4,
+					form.PageId ?? _sessionManager.GetValue(SessionConstants.PageId),
 					true);
 
 				_notificationService.AddSuccessToastMessage("Post published successfully.");
