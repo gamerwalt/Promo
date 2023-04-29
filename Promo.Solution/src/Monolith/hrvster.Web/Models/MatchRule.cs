@@ -1,4 +1,5 @@
-﻿using System;
+﻿using hrvster.Models;
+using System;
 
 namespace hrvster.Web.Models
 {
@@ -11,5 +12,6 @@ namespace hrvster.Web.Models
 		public bool NotifyWinners { get; set; }
 		public string WatchValue { get; set; }
 		public string ExternalId { get; set; }
+		public ExternalClientType ExternalClientType { get; set; }
 	}
 }

@@ -199,6 +199,11 @@ namespace hrvster.Infrastructure
 					DrawDateUtc = reader.GetDateTime("draw_date_utc"),
 					DrawAttempted = reader.GetBoolean("draw_attempted"),
 					CreatedDate = reader.GetDateTime("sweep_created_date")
+				},
+				Rule = new Models.Rule
+				{
+					RuleUid = reader.GetGuid("rule_uid"),
+					RuleId = reader.GetInt32("rule_id")
 				}
 			};
 		}

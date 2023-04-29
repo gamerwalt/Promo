@@ -16,6 +16,7 @@ namespace hrvster.Infrastructure.MatchGames
 	{
 		Task CreateAsync(Models.Rule matchGameRule, CancellationToken cancellationToken);
 		Task<IEnumerable<Models.Rule>> GetAllRulesAsync(Guid gameUid, CancellationToken cancellationToken);
+		Task<Models.Rule> GetAsync(Guid ruleUid);
 		IEnumerable<Models.Rule> GetRulesMatching(string watchValue);
 		Task<IEnumerable<Models.Rule>> GetRulesMatchingAsync(string watchValue, CancellationToken cancellationToken);
 	}
@@ -69,6 +70,28 @@ namespace hrvster.Infrastructure.MatchGames
 			}
 
 			return rules;
+		}
+
+		public async Task<Models.Rule> GetAsync(Guid ruleUid)
+		{
+			var rule = default(Models.Rule);
+
+			using (var conn = new MySqlConnection(_database.GetConnectionString()))
+			{
+				var command = conn.CreateCommand();
+				command.CommandText = "match_game_rule_get_by_uid";
+				command.CommandType = CommandType.StoredProcedure;
+				command.AddParameter("ruleUid", ruleUid);
+
+				await conn.OpenAsync();
+				using var reader = await command.ExecuteReaderAsync();
+				while (await reader.ReadAsync())
+				{
+					rule = CreateFrom(reader);
+				}
+			}
+
+			return rule;
 		}
 
 		public IEnumerable<Models.Rule> GetRulesMatching(string watchValue)
@@ -166,6 +189,7 @@ namespace hrvster.Infrastructure.MatchGames
 						AccountId = reader.GetInt32("account_id")
 					}
 				},
+				ExternalClientType = Enum.Parse<ExternalClientType>(reader.GetString("provider_name"))
 			};
 		}
 	}

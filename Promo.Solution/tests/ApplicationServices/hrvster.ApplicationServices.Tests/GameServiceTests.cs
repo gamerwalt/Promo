@@ -47,6 +47,7 @@ namespace hrvster.ApplicationServices.Tests
                 emptyFile,
                 emptyFile,
                 emptyFile,
+                TestData.PageId,
                 true);
 
             _feature.MockedTwitterClient.Verify(m => m.PublishAsync(It.IsAny<Message>()), Times.Exactly(1));
@@ -76,7 +77,8 @@ namespace hrvster.ApplicationServices.Tests
                 emptyFile,
                 emptyFile,
                 emptyFile,
-                true);
+				TestData.PageId,
+				true);
 
             var blacklistedUsers = await _feature.BlacklistedUsersRepository.GetBlacklistedUsersAsync(matchGame.Uid);
 
@@ -107,7 +109,8 @@ namespace hrvster.ApplicationServices.Tests
                 emptyFile,
                 emptyFile,
                 emptyFile,
-                true);
+				TestData.PageId,
+				true);
 
             var matchGameRules = await _feature.MatchGameRulesRepository.GetAllRulesAsync(matchGame.Uid, default);
 
@@ -139,7 +142,8 @@ namespace hrvster.ApplicationServices.Tests
                 emptyFile,
                 emptyFile,
                 emptyFile,
-                true);
+				TestData.PageId,
+				true);
 
             await _feature.GameService.CreateRulePostAsync(
 				ExternalClientType.Twitter.ToString(),
@@ -156,7 +160,8 @@ namespace hrvster.ApplicationServices.Tests
                 emptyFile,
                 emptyFile,
                 emptyFile,
-                true);
+				TestData.PageId,
+				true);
 
             var matchGameRules = await _feature.MatchGameRulesRepository.GetAllRulesAsync(matchGame.Uid, default);
 

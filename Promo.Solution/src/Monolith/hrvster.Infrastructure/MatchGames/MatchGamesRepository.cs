@@ -363,7 +363,8 @@ namespace hrvster.Infrastructure.MatchGames
 					StartDateUtc = reader.GetDateTime("start_date_utc"),
 					EndDate = reader.GetDateTime("end_date"),
 					EndDateUtc = reader.GetDateTime("end_date_utc")
-				}
+				},
+				ExternalClientType = Enum.Parse<ExternalClientType>(reader.GetString("provider_name"))
 			};
 		}
 	}

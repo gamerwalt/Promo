@@ -48,6 +48,7 @@ namespace hrvster.Infrastructure
 				.AddParameter("externalId", rule.ExternalId)
 				.AddParameter("activeInd", rule.ActiveInd)
 				.AddParameter("mustBeFollowing", rule.MustBeFollowing)
+				.AddParameter("externalClientType", rule.ExternalClientType.ToString())
 				.AddParameter("scheduledInd", rule.ScheduledInd);
 
 			await conn.OpenAsync();
@@ -241,7 +242,8 @@ namespace hrvster.Infrastructure
 				MustBeFollowing = reader.GetBoolean("must_be_following"),
 				NotifyWinners = reader.GetBoolean("notify_winners"),
 				CreatedDate = reader.GetDateTime("created_date"),
-				UpdatedDate = reader.GetNullableDateTimeValue("updated_date")
+				UpdatedDate = reader.GetNullableDateTimeValue("updated_date"),
+				ExternalClientType = Enum.Parse<ExternalClientType>(reader.GetStringValue("provider_name"))
 			};
 		}
 

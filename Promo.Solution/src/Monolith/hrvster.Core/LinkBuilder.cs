@@ -51,6 +51,11 @@ namespace hrvster.Core
 				.Replace("{tweetId}", tweetId));
 		}
 
+		public async Task<Uri> BuildFacebookLink(string postId, Guid ruleUid)
+		{
+			return new Uri($"https://www.facebook.com/{postId}");
+		}
+
 		public async Task<Uri> BuildTwitterLink(string tweetId, Guid ruleUid, string twitterUser)
 		{
 			return new Uri(_services.TweetIdUrl

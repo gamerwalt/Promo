@@ -12,5 +12,6 @@ namespace hrvster.Models.WebModels.Sweeps
 		public bool MustBeFollowing { get; set; }
 		public bool NotifyWinners { get; set; }
 		public bool ScheduledInd { get; set; }
+		public ExternalClientType ExternalClientType { get; set; }
 	}
 }

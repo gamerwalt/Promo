@@ -74,6 +74,7 @@ namespace hrvster.Web.Mapper
 				.ForMember(dest => dest.WatchValue, opt => opt.MapFrom(src => src.WatchValue))
 				.ForMember(dest => dest.RuleUid, opt => opt.MapFrom(src => src.Uid))
 				.ForMember(dest => dest.RuleId, opt => opt.MapFrom(src => src.Id))
+				.ForMember(dest => dest.IsActive, opt => opt.MapFrom(src => src.ActiveInd))
 				.ReverseMap();
 
 			CreateMap<Games.Match.Models.MatchPrize, Models.MatchPrize>()

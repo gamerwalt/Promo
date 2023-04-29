@@ -16,6 +16,8 @@ using hrvster.Models.Subscriptions;
 using hrvster.Models;
 using hrvster.Infrastructure.MatchGames;
 using hrvster.Games.Match.Models;
+using hrvster.Infrastructure.Facebook;
+using hrvster.Models.Sweepstakes;
 
 namespace hrvster.Core.Handlers.Rules.NotificationHandlers
 {
@@ -28,7 +30,8 @@ namespace hrvster.Core.Handlers.Rules.NotificationHandlers
 		private readonly IHarvesterService _harvesterService;
 		private readonly IAccountsService _accountsService;
 		private readonly IAccountSubscriptionService _accountSubscriptionService;
-		private readonly IToastNotification _notificationService;
+		private readonly ISweepRulesPageRepository _sweepRulesPageRepository;
+		private readonly IMatchRulePageRepository _matchRulePageRepository;
 
 		public CreateGameRule(
 			ILoggerFactory loggerFactory,
@@ -38,7 +41,8 @@ namespace hrvster.Core.Handlers.Rules.NotificationHandlers
 			IHarvesterService harvesterService,
 			IAccountsService accountsService,
 			IAccountSubscriptionService accountSubscriptionService,
-			IToastNotification notificationService)
+			ISweepRulesPageRepository sweepRulesPageRepository,
+			IMatchRulePageRepository matchRulePageRepository)
 		{
 			_logger = loggerFactory.CreateLogger<CreateGameRule>();
 			_watchTypesRepository = watchTypesRepository;
@@ -47,7 +51,8 @@ namespace hrvster.Core.Handlers.Rules.NotificationHandlers
 			_harvesterService = harvesterService;
 			_accountsService = accountsService;
 			_accountSubscriptionService = accountSubscriptionService;
-			_notificationService = notificationService;
+			_sweepRulesPageRepository = sweepRulesPageRepository;
+			_matchRulePageRepository = matchRulePageRepository;
 		}
 
 		public async Task Handle(RulePublished notification, CancellationToken cancellationToken)
@@ -113,8 +118,18 @@ namespace hrvster.Core.Handlers.Rules.NotificationHandlers
 				ActiveInd = true,
 				MustBeFollowing = notification.MustBeFollowing,
 				ScheduledInd = false,
-				NotifyWinners = true
+				NotifyWinners = true,
+				ExternalClientType = notification.ExternalClientType
 			}, default);
+
+			var rule = await _matchGameRulesRepository.GetAsync(ruleUid);
+
+			await _matchRulePageRepository.CreateAsync(new MatchRulePage
+			{
+				Uid = Guid.NewGuid(),
+				PageId = notification.PageId,
+				MatchRuleId = rule.RuleId
+			});
 		}
 
 		private async Task CreateSweepRuleAsync(RulePublished notification, Guid ruleUid, string watchTypeCodeSelected)
@@ -124,14 +139,24 @@ namespace hrvster.Core.Handlers.Rules.NotificationHandlers
 				RuleUid = ruleUid,
 				Sweep = new Sweep
 				{
-					SweepUid = notification.Message.SweepUid,
+					SweepUid = notification.Message.SweepUid == Guid.Empty ? notification.GameUid : notification.Message.SweepUid,
 				},
 				WatchTypeCode = (WatchTypeCode)Enum.Parse(typeof(WatchTypeCode), watchTypeCodeSelected),
 				WatchValue = notification.Message.Hashtag,
 				ExternalId = notification.ExternalId,
 				ActiveInd = true,
 				MustBeFollowing = notification.MustBeFollowing,
-				ScheduledInd = false
+				ScheduledInd = false,
+				ExternalClientType = notification.ExternalClientType
+			});
+
+			var rule = await _sweepRulesRepository.GetAsync(ruleUid);
+
+			await _sweepRulesPageRepository.CreateAsync(new SweepRulesPage
+			{
+				Uid = Guid.NewGuid(),
+				PageId = notification.PageId,
+				SweepRuleId = rule.RuleId
 			});
 		}
 

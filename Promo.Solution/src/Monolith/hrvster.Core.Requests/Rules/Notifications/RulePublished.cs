@@ -15,8 +15,19 @@ namespace hrvster.Core.Requests.Rules.Notifications
 		private int _gameId;
 		private Guid _gameUid;
 		private GameTypesEnum _gameType;
+		private ExternalClientType _externalClientType;
+		private string _pageId;
 
-		public RulePublished(Profile profile, string externalId, Message message, bool following, int gameId, Guid gameUid, GameTypesEnum gameType)
+		public RulePublished(
+			Profile profile, 
+			string externalId, 
+			Message message, 
+			bool following, 
+			int gameId, 
+			Guid gameUid, 
+			GameTypesEnum gameType,
+			ExternalClientType externalClientType,
+			string pageId)
 		{
 			_profile = profile;
 			_externalId = externalId;
@@ -25,6 +36,8 @@ namespace hrvster.Core.Requests.Rules.Notifications
 			_gameId = gameId;
 			_gameUid = gameUid;
 			_gameType = gameType;
+			_externalClientType = externalClientType;
+			_pageId = pageId;
 		}
 
 		public Profile Profile { get { return _profile; } }
@@ -34,5 +47,7 @@ namespace hrvster.Core.Requests.Rules.Notifications
 		public int GameId { get { return _gameId; } }
 		public Guid GameUid { get { return _gameUid; } }
 		public GameTypesEnum GameType { get { return _gameType; } }
+		public ExternalClientType ExternalClientType { get { return _externalClientType; } }
+		public string PageId { get { return _pageId; } }
 	}
 }

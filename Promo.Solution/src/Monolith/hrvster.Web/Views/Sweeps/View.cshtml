@@ -282,7 +282,14 @@
 												}
 												else
 												{
-													<a href="@linkBuilder.BuildTwitterLink(rule.ExternalId, rule.RuleUid).Result" target="_blank">@rule.ExternalId</a>
+													@if(rule.ExternalClientType == ExternalClientType.Twitter)
+													{
+														<a href="@linkBuilder.BuildTwitterLink(rule.ExternalId, rule.RuleUid).Result" target="_blank">@rule.ExternalId</a>
+													}
+													else if(rule.ExternalClientType == ExternalClientType.Facebook)
+													{
+														<a href="@linkBuilder.BuildFacebookLink(rule.ExternalId, rule.RuleUid).Result" target="_blank">@rule.ExternalId</a>
+													}
 												}
 											</td>
 											<td>

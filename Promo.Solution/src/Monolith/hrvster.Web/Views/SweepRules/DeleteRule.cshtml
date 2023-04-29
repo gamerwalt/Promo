@@ -31,7 +31,14 @@
                 }
                 else
                 {
-                    <a href="@linkBuilder.BuildTwitterLink(Model.Rule.ExternalId, Model.Rule.RuleUid).Result" target="_blank">@Model.Rule.ExternalId</a>
+                    @if(Model.Rule.ExternalClientType == hrvster.Models.ExternalClientType.Twitter)
+                    {
+                        <a href="@linkBuilder.BuildTwitterLink(Model.Rule.ExternalId, Model.Rule.RuleUid).Result" target="_blank">@Model.Rule.ExternalId</a>
+                    }
+                    else
+                    {
+                        <a href="@linkBuilder.BuildFacebookLink(Model.Rule.ExternalId, Model.Rule.RuleUid).Result" target="_blank">@Model.Rule.ExternalId</a>
+                    }
                 }
             </p>
         </div>

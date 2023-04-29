@@ -72,7 +72,7 @@ namespace hrvster.ApplicationServices.Publishing
 				return false;
 			}
 
-			await _mediator.Publish(new RulePublished(profile, externalId, message, following, gameId, gameUid, gameType));
+			await _mediator.Publish(new RulePublished(profile, externalId, message, following, gameId, gameUid, gameType, externalClientType, pageId));
 
 			return true;
 		}

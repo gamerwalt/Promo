@@ -336,7 +336,7 @@ namespace hrvster.Web.Controllers
 				return RedirectToAction(actionName, controllerName);
 			}
 
-			var entriesExists = await _mediator.Send(new EntriesExistsForSweepsRequest(sweepUid));
+			var entriesExists = await _mediator.Send(new EntriesExistsForSweepsAndRuleRequest(ruleUid, sweepUid));
 
 			if (entriesExists)
 			{
@@ -391,7 +391,7 @@ namespace hrvster.Web.Controllers
 				return View(form);
 			}
 
-			var entriesExists = await _mediator.Send(new EntriesExistsForSweepsRequest(sweepUid));
+			var entriesExists = await _mediator.Send(new EntriesExistsForSweepsAndRuleRequest(ruleUid, sweepUid));
 
 			if (entriesExists)
 			{
@@ -408,6 +408,8 @@ namespace hrvster.Web.Controllers
 			if (ModelState.IsValid)
 			{
 				await _mediator.Send(new DeleteSweepTweetRuleRequest(sweepUid, ruleUid, _hrvsterUser.UserUid));
+
+				_notificationService.AddSuccessToastMessage("Rule deleted successfully. The post should have been deleted as well.");
 
 				return RedirectToAction(returnAction, returnController, new
 				{

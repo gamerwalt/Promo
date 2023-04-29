@@ -37,6 +37,7 @@ namespace hrvster.Extensions.Configuration
 		public static IServiceCollection AddSweepstakesRepositories(this IServiceCollection services)
 			=> services.AddTransient<ISweepsRepository, SweepsRepository>()
 				.AddTransient<ISweepRulesRepository, SweepRulesRepository>()
+				.AddTransient<ISweepRulesPageRepository, SweepRulesPageRepository>()
 				.AddTransient<ISweepsEntriesRepository, SweepsEntriesRepository>()
 				.AddTransient<ISweepEntryRulesRepository, SweepEntryRulesRepository>()
 				.AddTransient<ISweepDrawRuleRepository, SweepDrawRuleRepository>()
@@ -86,6 +87,7 @@ namespace hrvster.Extensions.Configuration
 				.AddTransient<ISignatureRepository, SignatureRepository>()
 				.AddTransient<IMatchGamePlayReportingRepository, MatchGamePlayReportingRepository>()
 				.AddTransient<IMatchGamePlayRepository, MatchGamePlayRepository>()
-				.AddTransient<IMatchPlayRulesRepository, MatchPlayRulesRepository>();
+				.AddTransient<IMatchPlayRulesRepository, MatchPlayRulesRepository>()
+				.AddTransient<IMatchRulePageRepository, MatchRulePageRepository>();
 	}
 }

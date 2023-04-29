@@ -23,12 +23,19 @@ namespace hrvster.Core.Clients.Publishers
 
 		public async Task DeleteAsync(string externalId, string accessToken, string accessTokenSecret)
 		{
-			if (string.IsNullOrWhiteSpace(accessToken))
-				throw new ArgumentNullException(nameof(accessToken));
+			try
+			{
+				if (string.IsNullOrWhiteSpace(accessToken))
+					throw new ArgumentNullException(nameof(accessToken));
 
-			_facebookClient.AccessToken = accessToken;
+				_facebookClient.AccessToken = accessToken;
 
-			await _facebookClient.DeleteTaskAsync(externalId);
+				await _facebookClient.DeleteTaskAsync($"/{externalId}");
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError("An error occurred while trying to delete the post with ID {id}.", externalId);
+			}
 		}
 
 		public async Task<string> PublishAsync(Common.Message message)
@@ -43,7 +50,7 @@ namespace hrvster.Core.Clients.Publishers
 
 			dynamic result = await _facebookClient.PostTaskAsync($"{message.PageId}/feed", messageParams);
 
-			return result.id;
+			return result["id"];
 		}
 
 		public async Task<string> PublishResponse(Common.Message message, string responseToId)
