@@ -330,7 +330,7 @@ namespace hrvster.ApplicationServices
 
 			var ruleCount = await GetGameRuleCountsForAsync(hrvsterUser.UserUid);
 
-			if (ruleCount >= accountSubscription.Plan.HashtagsPerMonth)
+			if (ruleCount >= accountSubscription.Plan.GetHashtagCount())
 			{
 				_logger.LogWarning("Account with uid {accountUid} has a total of {activeRulesCount} active hashtags and their current max is {maxHashtags}",
 						profile.Account.AccountUid,
@@ -377,9 +377,7 @@ namespace hrvster.ApplicationServices
 				return 0;
 			}
 
-			var activeRules = rules.Where(r => (r.ActiveInd && r.Game.IsActive()) || r.Game.WillBeInProgress()).ToList();
-
-			return activeRules.Count();
+			return rules.GetActiveRules().Count();
 		}
 	}
 }

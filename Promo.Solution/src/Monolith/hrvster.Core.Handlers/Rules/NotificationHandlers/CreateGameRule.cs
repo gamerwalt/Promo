@@ -69,7 +69,7 @@ namespace hrvster.Core.Handlers.Rules.NotificationHandlers
 
 			var ruleCount = await GetGameRuleCountsForAsync(notification.Profile.Account.AccountUid);
 
-			if (ruleCount >= accountSubscription.Plan.HashtagsPerMonth)
+			if (ruleCount >= accountSubscription.Plan.GetHashtagCount())
 			{
 				_logger.LogWarning("Account with uid {accountUid} has a total of {activeRulesCount} active hashtags and their current max is {maxHashtags}", notification.Profile.Account.AccountUid,
 				ruleCount,
@@ -82,7 +82,7 @@ namespace hrvster.Core.Handlers.Rules.NotificationHandlers
 
 			var watchTypes = await _watchTypesRepository.GetWatchTypesAsync();
 			var watchTypeCodeSelected = watchTypes.SingleOrDefault(c => c.WatchTypeId.Equals(notification.Message.WatchTypeId)).WatchTypeCode;
-			
+
 			await CreateGameRuleAsync(notification, ruleUid, watchTypeCodeSelected);
 
 			await _harvesterService.RestartAsync(cancellationToken);
@@ -166,9 +166,7 @@ namespace hrvster.Core.Handlers.Rules.NotificationHandlers
 
 			if (rules == null) return 0;
 
-			var activeRules = rules.Where(r => (r.ActiveInd && r.Game.IsActive()) || r.Game.WillBeInProgress()).ToList();
-
-			return activeRules.Count();
+			return rules.GetActiveRules().Count();
 		}
 	}
 }

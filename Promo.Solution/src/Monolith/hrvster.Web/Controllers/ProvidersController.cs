@@ -293,6 +293,19 @@ namespace hrvster.Web.Controllers
 				});
 			}
 
+			if(facebookPages.Count <= 0)
+			{
+				_notificationService.AddErrorToastMessage("You have to select a page for us to post to.");
+
+				return RedirectToAction("SelectProvider", new
+				{
+					uid = Uid,
+					actionName = returnAction,
+					controllerName = returnController,
+					gameType = gameType
+				});
+			}
+
 			if (facebookPages.Count > 0)
 			{
 				//we need to save this
@@ -394,6 +407,13 @@ namespace hrvster.Web.Controllers
 		[Route("/providers/create/post")]
 		public async Task<IActionResult> CreatePost(Guid Uid, string actionName, string controllerName, string gameType)
 		{
+			if (string.IsNullOrWhiteSpace(gameType) ||
+				string.IsNullOrWhiteSpace(actionName) ||
+				string.IsNullOrWhiteSpace(controllerName))
+			{
+				return RedirectToAction("index", "Dashboard");
+			}
+
 			_hrvsterUser = _sessionManager.GetUserInformation();
 
 			var watchTypes = await _providersService.GetWatchTypesAsync();
@@ -429,6 +449,14 @@ namespace hrvster.Web.Controllers
 		[Route("/providers/create/post")]
 		public async Task<IActionResult> CreatePost(Guid Uid, string actionName, string controllerName, string gameType, CreateRulePost form)
 		{
+
+			if(string.IsNullOrWhiteSpace(gameType) ||
+				string.IsNullOrWhiteSpace(actionName) ||
+				string.IsNullOrWhiteSpace(controllerName))
+			{
+				return RedirectToAction("index", "Dashboard");
+			}
+
 			_hrvsterUser = _sessionManager.GetUserInformation();
 
 			var watchTypes = await _providersService.GetWatchTypesAsync();
