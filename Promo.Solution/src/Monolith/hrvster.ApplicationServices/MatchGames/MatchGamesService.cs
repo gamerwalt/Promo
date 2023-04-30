@@ -1,7 +1,10 @@
 ﻿using hrvster.Games.Match.Models;
+using hrvster.Infrastructure.Accounts;
+using hrvster.Infrastructure.Facebook;
 using hrvster.Infrastructure.MatchGames;
 using hrvster.Models;
 using Microsoft.Extensions.Logging;
+using Org.BouncyCastle.Asn1.Ocsp;
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -12,6 +15,7 @@ namespace hrvster.ApplicationServices.MatchGames
 	public interface IMatchGamesService
 	{
 		Task CreateMatchGameAsync(MatchGame matchGame, string timeZone, bool isDaylight, CancellationToken cancellationToken);
+		Task DeleteGameRuleAsync(Guid ruleUid, Guid gameUid, Guid userUid, ExternalClientType externalClientType, string externalId, CancellationToken cancellationToken);
 		Task<bool> GamePlayableAsync(Guid uid, CancellationToken cancellationToken);
 		Task<IEnumerable<MatchGame>> GetAccountMatchGamesAsync(Guid userUid, CancellationToken cancellationToken);
 		Task<IEnumerable<MatchGame>> GetCampaignMatchGamesAsync(Guid campaignUid, CancellationToken cancellationToken);
@@ -30,16 +34,31 @@ namespace hrvster.ApplicationServices.MatchGames
 	{
 		private readonly ILogger<MatchGamesService> _logger;
 		private readonly IMatchGamesRepository _repository;
+		private readonly IMatchGameRulesRepository _matchGameRulesRepository;
 		private readonly IMatchRulesService _matchRulesService;
+		private readonly IMatchRulePageRepository _matchRulePageRepository;
+		private readonly IProfilesRepository _profilesRepository;
+		private readonly IFacebookPageRepository _facebookPageRepository;
+		private readonly Func<ExternalClientType, Core.Clients.Publishers.IExternalClient> _publisherResolver;
 
 		public MatchGamesService(
 			ILoggerFactory loggerFactory,
 			IMatchGamesRepository repository,
-			IMatchRulesService matchRulesService)
+			IMatchGameRulesRepository matchGameRulesRepository,
+			IMatchRulesService matchRulesService,
+			IMatchRulePageRepository matchRulePageRepository,
+			IProfilesRepository profilesRepository,
+			IFacebookPageRepository facebookPageRepository,
+			Func<ExternalClientType, Core.Clients.Publishers.IExternalClient> publisherResolver)
 		{
 			_logger = loggerFactory.CreateLogger<MatchGamesService>();
 			_repository = repository;
+			_matchGameRulesRepository = matchGameRulesRepository;
 			_matchRulesService = matchRulesService;
+			_matchRulePageRepository = matchRulePageRepository;
+			_profilesRepository = profilesRepository;
+			_facebookPageRepository = facebookPageRepository;
+			_publisherResolver = publisherResolver;
 		}
 
 		public async Task CreateMatchGameAsync(
@@ -50,6 +69,74 @@ namespace hrvster.ApplicationServices.MatchGames
 				throw new ArgumentException("Match game campaign needs to be supplied.");
 
 			await _repository.CreateAsync(matchGame, timeZone, isDaylight, cancellationToken);
+		}
+
+		public async Task DeleteGameRuleAsync(
+			Guid ruleUid, 
+			Guid gameUid, 
+			Guid userUid,
+			ExternalClientType externalClientType, 
+			string externalId, 
+			CancellationToken cancellationToken)
+		{
+			var rule = await _matchGameRulesRepository.GetAsync(ruleUid);
+
+			if(rule == null)
+			{
+				_logger.LogError("Unable to delete the game rule with uid {ruleUid} because we could not locate the rule.",
+					ruleUid);
+
+				return;
+			}
+
+			var profile = await _profilesRepository.GetProfileAsync(userUid, GetProfileType(externalClientType));
+			if (profile == null)
+			{
+				_logger.LogError("Could not load the profile with AccountUid: {userUid}", userUid);
+				return;
+			}
+
+			var accessToken = profile.AccessToken;
+
+			if (rule.ExternalClientType == ExternalClientType.Facebook)
+			{
+				var rulePage = await _matchRulePageRepository.GetByRuleId(rule.RuleId);
+
+				if (rulePage == null)
+				{
+					_logger.LogError("Unable to delete the game rule with uid {ruleUid} because we could not locate the rule page for rule with id of {ruleId}",
+						ruleUid,
+						rule.RuleId);
+
+					return;
+				}
+
+				var page = await _facebookPageRepository.GetPageAsync(rulePage.PageId);
+				if (page == null)
+				{
+					_logger.LogError("Unable to load the page to delete properly.");
+				}
+				else
+				{
+					accessToken = page.PageAccessToken;
+				}
+			}
+
+			var publisher = _publisherResolver(rule.ExternalClientType);
+
+			await publisher.DeleteAsync(externalId.ToString(), accessToken, profile.AccessTokenSecret);
+
+			await _matchGameRulesRepository.DeleteAsync(ruleUid, cancellationToken);
+		}
+
+		private ProfileType GetProfileType(ExternalClientType externalClientType)
+		{
+			if (externalClientType == ExternalClientType.Twitter)
+				return ProfileType.Twitter;
+			else if (externalClientType == ExternalClientType.Facebook)
+				return ProfileType.Facebook;
+
+			return ProfileType.Facebook;
 		}
 
 		public async Task<bool> GamePlayableAsync(Guid uid, CancellationToken cancellationToken)

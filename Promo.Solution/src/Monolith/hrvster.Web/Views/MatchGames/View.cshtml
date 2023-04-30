@@ -351,6 +351,18 @@
 												else
 												{
 													<div class="menu-item px-3">
+														<a 
+															asp-action="Delete"
+															asp-controller="MatchRules"
+															asp-route-gameUid="@Model.MatchGame.MatchGameUid"
+															asp-route-ruleUid="@rule.RuleUid"
+															asp-route-actionName=@ViewContext.RouteData.Values["action"]
+															asp-route-controllerName=@ViewContext.RouteData.Values["controller"]
+															class="menu-link flex-stack px-3">
+															Delete
+														</a>
+													</div>
+													<div class="menu-item px-3">
 														<a asp-action="View"
 														   asp-controller="MatchGamePlays"
 														   asp-route-gameUid="@Model.MatchGame.MatchGameUid"

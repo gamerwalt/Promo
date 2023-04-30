@@ -15,6 +15,7 @@ namespace hrvster.Infrastructure.MatchGames
 	public interface IMatchGameRulesRepository
 	{
 		Task CreateAsync(Models.Rule matchGameRule, CancellationToken cancellationToken);
+		Task DeleteAsync(Guid ruleUid, CancellationToken cancellationToken);
 		Task<IEnumerable<Models.Rule>> GetAllRulesAsync(Guid gameUid, CancellationToken cancellationToken);
 		Task<Models.Rule> GetAsync(Guid ruleUid);
 		IEnumerable<Models.Rule> GetRulesMatching(string watchValue);
@@ -46,6 +47,18 @@ namespace hrvster.Infrastructure.MatchGames
 				.AddParameter("mustBeFollowing", matchGameRule.MustBeFollowing)
 				.AddParameter("scheduledInd", matchGameRule.ScheduledInd)
 				.AddParameter("externalClientType", matchGameRule.ExternalClientType);
+
+			await conn.OpenAsync(cancellationToken);
+			await command.ExecuteNonQueryAsync(cancellationToken);
+		}
+
+		public async Task DeleteAsync(Guid ruleUid, CancellationToken cancellationToken)
+		{
+			using var conn = new MySqlConnection(_database.GetConnectionString());
+			var command = conn.CreateCommand();
+			command.CommandText = "match_game_rule_delete";
+			command.CommandType = CommandType.StoredProcedure;
+			command.AddParameter("ruleUid", ruleUid);
 
 			await conn.OpenAsync(cancellationToken);
 			await command.ExecuteNonQueryAsync(cancellationToken);
@@ -144,7 +157,9 @@ namespace hrvster.Infrastructure.MatchGames
 			return new MatchGameRule
 			{
 				Id = reader.GetInt32("rule_id"),
+				RuleId = reader.GetInt32("rule_id"),
 				Uid = reader.GetGuid("rule_uid"),
+				RuleUid = reader.GetGuid("rule_uid"),
 				MatchGame = new MatchGame
 				{
 					Id = reader.GetInt32("match_game_id"),
