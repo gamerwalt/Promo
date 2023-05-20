@@ -27,5 +27,7 @@ namespace hrvster.Web.Models
 		{
 			return DateTime.Now <= StartDate;
 		}
+
+		public bool IsGenerated { get; set; }
 	}
 }

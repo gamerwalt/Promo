@@ -140,20 +140,6 @@ namespace hrvster.Web.Controllers
 			return RedirectToActionPermanent(actionName, controllerName, GetReturnObject(gameType, uid));
 		}
 
-		private static object GetReturnObject(string gameType, string uid)
-		{
-			if (gameType == GameTypes.Sweepstake.ToString())
-			{
-				return new { SweepUid = uid };
-			}
-			else if (gameType == GameTypes.MatchGame.ToString())
-			{
-				return new { Uid = uid };
-			}
-
-			return new { Uid = uid };
-		}
-
 		public async Task<IActionResult> ValidateTwitterAuth()
 		{
 			_hrvsterUser = _sessionManager.GetUserInformation();
@@ -537,6 +523,20 @@ namespace hrvster.Web.Controllers
 			using var hmac = new HMACSHA256(Encoding.ASCII.GetBytes(appSecret));
 			byte[] hash = hmac.ComputeHash(Encoding.ASCII.GetBytes(accessToken));
 			return BitConverter.ToString(hash).Replace("-", "").ToLower();
+		}
+
+		private static object GetReturnObject(string gameType, string uid)
+		{
+			if (gameType == GameTypes.Sweepstake.ToString())
+			{
+				return new { SweepUid = uid };
+			}
+			else if (gameType == GameTypes.MatchGame.ToString())
+			{
+				return new { Uid = uid };
+			}
+
+			return new { Uid = uid };
 		}
 	}
 }

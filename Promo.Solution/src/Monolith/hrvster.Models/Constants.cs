@@ -23,6 +23,7 @@
 	{
 		public const string DashboardLink = "Dashboard";
 		public const string MatchGamePlayLink = "PlayMatchGame/matchgame";
+		public const string FacebookwebhookLink = "facebookhook/feedhook";
 	}
 
 	public class NotificationService

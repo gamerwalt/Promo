@@ -1,4 +1,5 @@
 ﻿using Facebook;
+using hrvster.Models.Options;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -12,13 +13,16 @@ namespace hrvster.Core.Clients.Publishers
 	{
 		private readonly ILogger<FacebookPublisher> _logger;
 		private readonly FacebookClient _facebookClient;
+		private readonly HarvesterSettingsOptions _hrvsterSettings;
 
 		public FacebookPublisher(
 			ILoggerFactory loggerFactory,
-			FacebookClient facebookClient)
+			FacebookClient facebookClient,
+			HarvesterSettingsOptions hrvsterSettings)
 		{
 			_logger = loggerFactory.CreateLogger<FacebookPublisher>();
 			_facebookClient = facebookClient;
+			_hrvsterSettings = hrvsterSettings;
 		}
 
 		public async Task DeleteAsync(string externalId, string accessToken, string accessTokenSecret)
@@ -40,13 +44,21 @@ namespace hrvster.Core.Clients.Publishers
 
 		public async Task<string> PublishAsync(Common.Message message)
 		{
-			var messageParams = new Dictionary<string, object>
-			{
-				["message"] = message.Text,
-				["appsecret_proof"] = GenerateAppSecretProof(_facebookClient.AppSecret, message.PageAccessToken)
-			};
+			var mediaIds = new List<string>();
+			var albumId = string.Empty;
 
 			_facebookClient.AccessToken = message.PageAccessToken;
+
+			if (message.Media != null)
+			{
+				_logger.LogInformation("We are not publishing any images yet for Facebook.");
+			}
+
+			var messageParams = new Dictionary<string, object>()
+			{
+				{ "message", message.Text },
+				{ "appsecret_proof", GenerateAppSecretProof(_facebookClient.AppSecret, message.PageAccessToken) }
+			};
 
 			dynamic result = await _facebookClient.PostTaskAsync($"{message.PageId}/feed", messageParams);
 

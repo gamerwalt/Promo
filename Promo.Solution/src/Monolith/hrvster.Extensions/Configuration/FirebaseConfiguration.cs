@@ -115,10 +115,17 @@ namespace hrvster.Extensions.Configuration
 					options.Scope.Add("email");
 					options.Scope.Add("public_profile");
 					options.Scope.Add("pages_manage_posts");
+					options.Scope.Add("pages_manage_metadata");
 					options.Scope.Add("user_location");
 					options.Scope.Add("user_link");
 					options.Scope.Add("pages_manage_posts");
+					options.Scope.Add("publish_pages");
+					options.Scope.Add("pages_manage_engagement");
+					options.Scope.Add("pages_read_user_content");
+					options.Scope.Add("publish_to_groups");
 					options.Scope.Add("pages_read_engagement");
+					options.Scope.Add("pages_show_list");
+					options.Scope.Add("manage_pages");
 
 					options.Events = new OAuthEvents
 					{

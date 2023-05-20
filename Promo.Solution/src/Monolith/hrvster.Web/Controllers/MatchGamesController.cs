@@ -184,6 +184,7 @@ namespace hrvster.Web.Controllers
 		}
 
 		[HttpGet]
+		[Route("/MatchGames/{Uid:Guid}/View")]
 		public async Task<IActionResult> View(Guid Uid, CancellationToken cancellationToken)
 		{
 			_hrvsterUser = _sessionManager.GetUserInformation();
@@ -247,6 +248,30 @@ namespace hrvster.Web.Controllers
 			return View(model);
 		}
 
+		[HttpPost]
+		[Route("/MatchGames/{Uid:Guid}/View")]
+		public async Task<IActionResult> View(Guid Uid, MatchGameDetails form, CancellationToken cancellationToken)
+		{
+			var matchGame = await _matchGamesService.GetMatchGameAsync(Uid, cancellationToken);
+			if (matchGame == null)
+			{
+				_notificationService.AddWarningToastMessage("Unable to locate the Match Game.");
+
+				return RedirectToAction("Index");
+			}
+
+			if(ModelState.IsValid)
+			{
+				_notificationService.AddSuccessToastMessage("Match game updated successfully.");
+
+				return RedirectToAction("View", new { Uid = Uid });
+			}
+
+			_notificationService.AddErrorToastMessage(ModelState.BuildMessageFromErrors());
+
+			return RedirectToAction("View", new { Uid = Uid });
+		}
+
 		private MatchGameDetails BuildMatchGameDetails(
 			Games.Match.Models.MatchGame matchGame,
 			IEnumerable<Games.Match.Models.MatchImage> images,
@@ -276,7 +301,8 @@ namespace hrvster.Web.Controllers
 						WinnableBoards = matchGame.NumberOfWinnableBoards,
 						WinProbability = matchGame.WinProbability,
 						StartDate = matchGame.StartDate,
-						EndDate = matchGame.EndDate
+						EndDate = matchGame.EndDate,
+						IsGenerated = matchGame.HasBeenGenerated
 					},
 					MatchImages = _mapper.Map<List<MatchImage>>(images),
 					MatchRules = _mapper.Map<List<MatchRule>>(rules),
