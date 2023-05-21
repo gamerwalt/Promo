@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\hrvster.Middleware\hrvster.Templates.Middleware.csproj" />
+    <ProjectReference Include="..\hrvster.Services\hrvster.Templates.Services.csproj" />
+  </ItemGroup>
+
+</Project>
