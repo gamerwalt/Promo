@@ -12,7 +12,7 @@
       "commandName": "Project",
       "dotnetRunMessages": true,
       "launchBrowser": true,
-      "applicationUrl": "https://mtn.localhost.com:7013;http://mtn.localhost.com:5013",
+      "applicationUrl": "https://airtel.localhost.com:7013;http://airtel.localhost.com:5013",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }

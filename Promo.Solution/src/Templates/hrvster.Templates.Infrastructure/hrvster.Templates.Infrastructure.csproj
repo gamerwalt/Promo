@@ -8,6 +8,13 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="6.0.0" />
+    <PackageReference Include="MySqlConnector" Version="2.1.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Monolith\hrvster.Infrastructure\hrvster.Infrastructure.csproj" />
+    <ProjectReference Include="..\hrvster.Core.Common\hrvster.Templates.Core.Common.csproj" />
+    <ProjectReference Include="..\hrvster.Templates.Models\hrvster.Templates.Models.csproj" />
   </ItemGroup>
 
 </Project>

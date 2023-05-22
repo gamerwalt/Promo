@@ -1,0 +1,15 @@
+﻿@using hrvster.Templates.Models.Layouts;
+@model LayoutProperty
+<footer class="border-top footer text-muted">
+	@if (Model.FooterType == "svg" || Model.FooterType == "png")
+	{
+		<img src="@Model.FooterLocation" alt="Footer Image" />
+	}
+	else
+	{
+		<p>@Model.FooterLocation</p>
+	}
+	<div class="container">
+		&copy; 2023 - hrvster.Template1.Web - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+	</div>
+</footer>

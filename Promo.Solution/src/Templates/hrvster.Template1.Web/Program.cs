@@ -1,6 +1,8 @@
 using hrvster.Middleware;
-using hrvster.Services;
+using hrvster.Templates.Services;
 using hrvster.Templates.Infrastructure;
+using hrvster.Templates.Infrastructure.Customizations;
+using hrvster.Templates.Core.Common;
 
 namespace hrvster.Template1.Web
 {
@@ -19,6 +21,13 @@ namespace hrvster.Template1.Web
 			{
 				return new MySqlDatabase("hrvsterAdmin", builder.Configuration);
 			});
+
+
+			//Services
+			builder.Services.AddScoped<ILayoutService, LayoutService>();
+
+			//Repositories
+			builder.Services.AddTransient<ILayoutRepository, LayoutRepository>();
 
 			var app = builder.Build();
 

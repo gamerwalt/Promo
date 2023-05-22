@@ -1,4 +1,6 @@
 ﻿using hrvster.Template1.Web.Models;
+using hrvster.Templates.Core.Common;
+using hrvster.Templates.Services;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 
@@ -7,14 +9,23 @@ namespace hrvster.Template1.Web.Controllers
 	public class HomeController : Controller
 	{
 		private readonly ILogger<HomeController> _logger;
+		private readonly ILayoutService _headerFooterService;
 
-		public HomeController(ILogger<HomeController> logger)
+		public HomeController(
+			ILogger<HomeController> logger, 
+			ILayoutService headerFooterService)
 		{
 			_logger = logger;
+			_headerFooterService = headerFooterService;
 		}
 
-		public IActionResult Index()
+		public async Task<IActionResult> Index(CancellationToken cancellationToken)
 		{
+			HttpContext.Items.TryGetValue(Constants.ContextItemsSubdomain, out var subdomain);
+			var subdomainName = subdomain.ToString();
+
+			ViewBag.TestData = subdomainName;
+
 			return View();
 		}
 
