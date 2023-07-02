@@ -13,8 +13,20 @@ namespace hrvster.Core.Requests.WebRequests.Accounts
 		private string _lastName;
 		private string _password;
 		private bool _acceptedTerms;
+		private string _companyName;
+		private string _subdomainName;
 
-		public CreateAccountRequest(Guid userUid, string emailAddress, string userName, string phoneNumber, string firstName, string lastName, string password, bool acceptedTerms)
+		public CreateAccountRequest(
+			Guid userUid, 
+			string emailAddress, 
+			string userName, 
+			string phoneNumber, 
+			string firstName, 
+			string lastName, 
+			string password, 
+			bool acceptedTerms,
+			string companyName,
+			string subdomainName)
 		{
 			_userUid = userUid;
 			_emailAddress = emailAddress;
@@ -24,6 +36,8 @@ namespace hrvster.Core.Requests.WebRequests.Accounts
 			_lastName = lastName;
 			_password = password;
 			_acceptedTerms = acceptedTerms;
+			_companyName = companyName;
+			_subdomainName = subdomainName;
 		}
 
 		public Guid UserUid { get { return _userUid; } }
@@ -34,5 +48,7 @@ namespace hrvster.Core.Requests.WebRequests.Accounts
 		public string LastName { get { return _lastName; } }
 		public string Password { get { return _password; } }
 		public bool AcceptedTerms { get { return _acceptedTerms; } }
+		public string CompanyName => _companyName;
+		public string SubdomainName => _subdomainName;
 	}
 }

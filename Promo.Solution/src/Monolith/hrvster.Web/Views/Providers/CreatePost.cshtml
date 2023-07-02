@@ -45,13 +45,14 @@
                     </div>
                     <div class="fv-row mb-8">
                         <label class="required d-flex align-items-center fs-6 fw-semibold form-label mb-2">
-                            Post - Must contain the hashtag (Max 140)
+                            Post - Must contain the hashtag (Max 100)
                         </label>
                         <textarea name="Post"
                                   class="form-control form-control-lg"
                                   id="Post"
-                                  asp-for="Post" rows="5" cols="70" maxlength="135"></textarea>
+                                  asp-for="Post" rows="6" cols="70" maxlength="100"></textarea>
                         <span asp-validation-for="Post"></span>
+                        <label id="remaining">100 characters remaining</label>
                     </div>
                     <div class="fv-row mb-8">
                         <label class="required d-flex align-items-center fs-6 fw-semibold form-label mb-2">

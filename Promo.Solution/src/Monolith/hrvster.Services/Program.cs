@@ -1,9 +1,14 @@
+using Facebook;
+using hrvster.ApplicationServices.Harvesters.Facebook;
 using hrvster.Core.Handlers.ServiceHandlers;
 using hrvster.Core.Requests.ServiceRequests;
 using hrvster.Extensions.Configuration;
 using hrvster.Extensions.OptionsConfiguration;
 using hrvster.Infrastructure;
+using hrvster.Infrastructure.Facebook;
+using hrvster.Models.Options;
 using MediatR;
+using Microsoft.AspNetCore.Authentication.Facebook;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -83,14 +88,31 @@ namespace hrvster.Services
 						.AddSweepstakesServices()
 						.AddAccountsService()
 						.AddPaymentServices(Configuration)
-						.AddAutoMapper(typeof(EntityMap))
+					.AddAutoMapper(typeof(EntityMap))
 						.AddMatchGameRepositories()
 						.AddCacheService()
 						.AddMatchGameService();
 
+					var facebookOptions = Configuration
+						.GetSection(FacebookConfigOptions.SectionName)
+						.Get<FacebookConfigOptions>();
+
+					services.AddTransient(provider => GetFacebookClient(facebookOptions));
+					services.AddTransient<IFacebookPageSerivce, FacebookPageSerivce>();
+					services.AddTransient<IFacebookPageRepository, FacebookPageRepository>();
+
 					LoadServices(services);
 					AddMediator(services);
 				});
+
+		private static FacebookClient GetFacebookClient(FacebookConfigOptions facebookOptions)
+		{
+			return new FacebookClient
+			{
+				AppId = facebookOptions.AppId,
+				AppSecret = facebookOptions.AppSecret
+			};
+		}
 
 		private static void AddMediator(IServiceCollection services)
 			=> services.AddMediatR(typeof(Program))

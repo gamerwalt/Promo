@@ -66,6 +66,7 @@
 	public enum UserIdentifierType
 	{
 		TwitterHandle,
+		FacebookHandle,
 		InstagramHandle,
 		Email,
 		Phone

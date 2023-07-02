@@ -1,0 +1,41 @@
+﻿@model ViewClientPages
+@{
+    ViewData["Title"] = "Client Pages and Images";
+}
+<div class="card card-flush">
+	<div class="card-header mt-5">
+		<div class="card-title flex-column">
+			<div class="fs-6 text-gray-400">Company Page Images</div>
+		</div>
+	</div>
+	<div class="card-body pt-0">
+		<div class="table-responsive">
+			<table id="kt_profile_overview_table" class="table table-row-bordered table-row-dashed gy-4 align-middle fw-bold">
+				<thead class="fs-7 text-gray-400 text-uppercase">
+					<tr>
+						<th class="min-w-100px">Type</th>
+						<th class="min-w-250px">Image</th>
+						<th class="min-w-250px">Actions</th>
+					</tr>
+				</thead>
+				<tbody class="fs-7">
+					<tr>
+						<td>Logo</td>
+						<td><img width="64" height="64" src="@Model.Images.LogoLocation" /></td>
+						<td>Actions</td>
+					</tr>
+					<tr>
+						<td>Header</td>
+						<td><img src="@Model.Images.HeaderLocation" /></td>
+						<td>Actions</td>
+					</tr>
+					<tr>
+						<td>Footer</td>
+						<td><img src="@Model.Images.FooterLocation" /></td>
+						<td>Actions</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	</div>
+</div>

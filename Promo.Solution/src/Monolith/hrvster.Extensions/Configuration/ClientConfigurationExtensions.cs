@@ -1,7 +1,9 @@
 ﻿using hrvster.ApplicationServices.Harvesters.Twitter;
 using hrvster.Core.Authentication;
+using hrvster.Core.Clients;
 using hrvster.Models;
 using hrvster.Models.Options;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Net.Http.Headers;
@@ -33,6 +35,25 @@ namespace hrvster.Extensions.Configuration
 				c.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
 					"Basic",
 					EncodeCredentials(harvesterServiceOptions.ServiceUsername, harvesterServiceOptions.ServicePassword));
+			});
+
+			return services;
+		}
+
+		public static IServiceCollection AddTwitterHttpService(this IServiceCollection services, IConfiguration config)
+		{
+			services.AddHttpClient<ITwitterHttpService, TwitterHttpService>(c =>
+			{
+				c.BaseAddress = new Uri("https://api.twitter.com/2/");
+				c.DefaultRequestHeaders.Clear();
+				c.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", config["TwitterAccount:AuthenticationToken"]);
+			});
+
+			services.AddHttpClient<ITwitterHttpImageUploaderService, TwitterHttpImageUploaderService>(c =>
+			{
+				c.BaseAddress = new Uri("https://upload.twitter.com/");
+				c.DefaultRequestHeaders.Clear();
+				c.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", config["TwitterAccount:AuthenticationToken"]);
 			});
 
 			return services;

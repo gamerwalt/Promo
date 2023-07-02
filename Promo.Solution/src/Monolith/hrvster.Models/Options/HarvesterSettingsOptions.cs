@@ -16,5 +16,8 @@
 		public int SignatureExpiryInMinutes { get; set; }
 		public string RedisCache { get; set; } = "";
 		public string FacebookwebhookSecret { get; set; }
+		public string RebrandlyApiKey { get; set; }
+		public string GameLinkReplaceText { get; set; }
+		public string HrvsterUrlForSubdomains { get; set; }
 	}
 }

@@ -1,4 +1,5 @@
 ﻿using hrvster.Models;
+using hrvster.Models.Company;
 using hrvster.Models.Profiles;
 using hrvster.Models.Subscriptions;
 using System.Collections.Generic;
@@ -24,5 +25,6 @@ namespace hrvster.Web.Models
 		public int TotalSweepstakes { get; set; }
 		public int TotalSweepEntries { get; set; }
 		public IEnumerable<Profile> Profiles { get; set; }
+		public IEnumerable<AccountCompany> Companies { get; set; }
 	}
 }

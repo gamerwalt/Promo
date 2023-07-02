@@ -1,15 +1,47 @@
 ﻿@using hrvster.Templates.Models.Layouts;
 @model LayoutProperty
-<footer class="border-top footer text-muted">
-	@if (Model.FooterType == "svg" || Model.FooterType == "png")
-	{
-		<img src="@Model.FooterLocation" alt="Footer Image" />
-	}
-	else
-	{
-		<p>@Model.FooterLocation</p>
-	}
-	<div class="container">
-		&copy; 2023 - hrvster.Template1.Web - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-	</div>
+<style>
+    .footer {
+        position: fixed;
+        bottom: 0;
+        width: 100%;
+        height: 120px;
+        background-color: #f8f9fa;
+        z-index: 1000; /* To make sure the footer is always on top */
+    }
+
+    .footer-background {
+        width: 100%;
+        height: 100%;
+    }
+
+        .footer-background img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+    .footer-content-container {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+</style>
+<footer class="footer">
+    <div class="footer-background">
+        @if (Model.FooterType == "svg" || Model.FooterType == "png")
+        {
+            <img src="@Model.FooterLocation" alt="Footer Image" />
+        }
+        else
+        {
+            <p>@Model.FooterLocation</p>
+        }
+    </div>
+    <div class="footer-content-container">
+        <div class="container-fluid text-center">
+            &copy; 2023 - hrvster.Template1.Web - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+        </div>
+    </div>
 </footer>

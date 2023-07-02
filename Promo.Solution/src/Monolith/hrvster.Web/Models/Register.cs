@@ -9,5 +9,7 @@
 		public string LastName { get; set; }
 		public string Password { get; set; }
 		public bool AcceptedTerms { get; set; }
+		public string CompanyName { get; set; }
+		public string SubdomainName { get; set; }
 	}
 }

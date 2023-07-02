@@ -14,8 +14,21 @@ namespace hrvster.Core.Requests.Notifications
 		private string _username;
 		private string _firstName;
 		private string _lastName;
+		private string _companyName;
+		private string _subdomainName;
 
-		public AccountCreatedViaFirebase(string emailAddress, Guid userUid, string phoneNumber, string username, string firstName, string lastName, string defaultPin, bool acceptedTerms, string verificationLink)
+		public AccountCreatedViaFirebase(
+			string emailAddress, 
+			Guid userUid, 
+			string phoneNumber, 
+			string username, 
+			string firstName, 
+			string lastName, 
+			string defaultPin, 
+			bool acceptedTerms, 
+			string verificationLink,
+			string companyName,
+			string subdomainName)
 		{
 			_emailAddress = emailAddress;
 			_userUid = userUid;
@@ -26,6 +39,8 @@ namespace hrvster.Core.Requests.Notifications
 			_pin = defaultPin;
 			_termsAccepted = acceptedTerms;
 			_verificationLink = verificationLink;
+			_companyName = companyName;
+			_subdomainName = subdomainName;
 		}
 
 		public string EmailAddress => _emailAddress;
@@ -37,5 +52,7 @@ namespace hrvster.Core.Requests.Notifications
 		public string Pin => _pin;
 		public bool TermsAccepted => _termsAccepted;
 		public string VerificationLink => _verificationLink;
+		public string CompanyName => _companyName;
+		public string SubdomainName => _subdomainName;
 	}
 }

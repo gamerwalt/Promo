@@ -4,20 +4,16 @@ using hrvster.ApplicationServices.Subscription;
 using hrvster.Core.Requests.Rules.Notifications;
 using hrvster.Infrastructure;
 using hrvster.Infrastructure.Core;
+using hrvster.Infrastructure.MatchGames;
+using hrvster.Models;
+using hrvster.Models.Extensions;
+using hrvster.Models.Sweepstakes;
 using MediatR;
 using Microsoft.Extensions.Logging;
-using NToastNotify;
 using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using hrvster.Models.Extensions;
-using hrvster.Models.Subscriptions;
-using hrvster.Models;
-using hrvster.Infrastructure.MatchGames;
-using hrvster.Games.Match.Models;
-using hrvster.Infrastructure.Facebook;
-using hrvster.Models.Sweepstakes;
 
 namespace hrvster.Core.Handlers.Rules.NotificationHandlers
 {
@@ -78,35 +74,33 @@ namespace hrvster.Core.Handlers.Rules.NotificationHandlers
 				return;
 			}
 
-			var ruleUid = Guid.NewGuid();
-
 			var watchTypes = await _watchTypesRepository.GetWatchTypesAsync();
 			var watchTypeCodeSelected = watchTypes.SingleOrDefault(c => c.WatchTypeId.Equals(notification.Message.WatchTypeId)).WatchTypeCode;
 
-			await CreateGameRuleAsync(notification, ruleUid, watchTypeCodeSelected);
+			await CreateGameRuleAsync(notification, watchTypeCodeSelected);
 
 			await _harvesterService.RestartAsync(cancellationToken);
 		}
 
-		private async Task CreateGameRuleAsync(RulePublished notification, Guid ruleUid, string watchTypeCodeSelected)
+		private async Task CreateGameRuleAsync(RulePublished notification, string watchTypeCodeSelected)
 		{
-			switch(notification.GameType)
+			switch (notification.GameType)
 			{
 				case GameTypesEnum.Sweeps:
-					await CreateSweepRuleAsync(notification, ruleUid, watchTypeCodeSelected);
+					await CreateSweepRuleAsync(notification, watchTypeCodeSelected);
 					break;
 				case GameTypesEnum.MatchGames:
-					await CreateMatchRuleAsync(notification, ruleUid, watchTypeCodeSelected);
+					await CreateMatchRuleAsync(notification, watchTypeCodeSelected);
 					break;
 			}
-			
+
 		}
 
-		private async Task CreateMatchRuleAsync(RulePublished notification, Guid ruleUid, string watchTypeCodeSelected)
+		private async Task CreateMatchRuleAsync(RulePublished notification, string watchTypeCodeSelected)
 		{
 			await _matchGameRulesRepository.CreateAsync(new Rule
 			{
-				RuleUid = ruleUid,
+				RuleUid = notification.RuleUid,
 				Game = new Games.Match.Models.MatchGame
 				{
 					Uid = notification.GameUid,
@@ -119,10 +113,11 @@ namespace hrvster.Core.Handlers.Rules.NotificationHandlers
 				MustBeFollowing = notification.MustBeFollowing,
 				ScheduledInd = false,
 				NotifyWinners = true,
-				ExternalClientType = notification.ExternalClientType
+				ExternalClientType = notification.ExternalClientType,
+				UrlLink = notification.UrlLink
 			}, default);
 
-			var rule = await _matchGameRulesRepository.GetAsync(ruleUid);
+			var rule = await _matchGameRulesRepository.GetAsync(notification.RuleUid);
 
 			await _matchRulePageRepository.CreateAsync(new MatchRulePage
 			{
@@ -132,11 +127,11 @@ namespace hrvster.Core.Handlers.Rules.NotificationHandlers
 			});
 		}
 
-		private async Task CreateSweepRuleAsync(RulePublished notification, Guid ruleUid, string watchTypeCodeSelected)
+		private async Task CreateSweepRuleAsync(RulePublished notification, string watchTypeCodeSelected)
 		{
 			await _sweepRulesRepository.CreateRuleAsync(new Rule
 			{
-				RuleUid = ruleUid,
+				RuleUid = notification.RuleUid,
 				Sweep = new Sweep
 				{
 					SweepUid = notification.Message.SweepUid == Guid.Empty ? notification.GameUid : notification.Message.SweepUid,
@@ -147,10 +142,11 @@ namespace hrvster.Core.Handlers.Rules.NotificationHandlers
 				ActiveInd = true,
 				MustBeFollowing = notification.MustBeFollowing,
 				ScheduledInd = false,
-				ExternalClientType = notification.ExternalClientType
+				ExternalClientType = notification.ExternalClientType,
+				UrlLink = notification.UrlLink
 			});
 
-			var rule = await _sweepRulesRepository.GetAsync(ruleUid);
+			var rule = await _sweepRulesRepository.GetAsync(notification.RuleUid);
 
 			await _sweepRulesPageRepository.CreateAsync(new SweepRulesPage
 			{

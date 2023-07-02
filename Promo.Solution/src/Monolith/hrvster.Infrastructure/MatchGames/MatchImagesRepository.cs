@@ -17,6 +17,7 @@ namespace hrvster.Infrastructure.MatchGames
 		Task<MatchImage> GetAsync(Guid uid, CancellationToken cancellationToken);
 		Task<IEnumerable<MatchImage>> GetForMatchGamesAsync(Guid matchGameUid, CancellationToken cancellationToken);
 		Task UpdateAsync(Guid matchImageUid, MatchImage matchImage, CancellationToken cancellationToken);
+		Task UpdateImageAsLossImageAsync(MatchImage image, CancellationToken cancellationToken);
 	}
 
 	public class MatchImagesRepository : IMatchImagesRepository
@@ -38,6 +39,18 @@ namespace hrvster.Infrastructure.MatchGames
 				.AddParameter("matchGameUid", image.MatchGame.Uid)
 				.AddParameter("imageName", image.Name)
 				.AddParameter("locationUrl", image.LocationUrl);
+
+			await conn.OpenAsync(cancellationToken);
+			await command.ExecuteNonQueryAsync(cancellationToken);
+		}
+
+		public async Task UpdateImageAsLossImageAsync(MatchImage image, CancellationToken cancellationToken)
+		{
+			using var conn = new MySqlConnection(_database.GetConnectionString());
+			var command = conn.CreateCommand();
+			command.CommandText = "match_image_set_as_loss_image";
+			command.CommandType = CommandType.StoredProcedure;
+			command.AddParameter("imageUid", image.Uid);
 
 			await conn.OpenAsync(cancellationToken);
 			await command.ExecuteNonQueryAsync(cancellationToken);

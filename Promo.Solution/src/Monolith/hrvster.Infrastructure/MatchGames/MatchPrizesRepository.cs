@@ -16,6 +16,7 @@ namespace hrvster.Infrastructure.MatchGames
 		Task DeleteAsync(Guid prizeUid, CancellationToken cancellationToken);
 		MatchPrize Get(Guid matchPrizeUid);
 		Task<MatchPrize> GetAsync(Guid prizeUid, CancellationToken cancellationToken);
+		Task<MatchPrize> GetByGameboardUidAsync(Guid gameboardUid, CancellationToken cancellationToken);
 		IEnumerable<MatchPrize> GetForMatchGame(Guid matchGameUid, object value);
 		Task<IEnumerable<MatchPrize>> GetForMatchGameAsync(Guid matchGameUid, CancellationToken cancellationToken);
 		Task UpdateAsync(Guid prizeUid, string name, string description, int quantity, decimal value, Guid imageUid, CancellationToken cancellationToken);
@@ -45,6 +46,28 @@ namespace hrvster.Infrastructure.MatchGames
 
 			await conn.OpenAsync(cancellationToken);
 			await command.ExecuteNonQueryAsync(cancellationToken);
+		}
+
+		public async Task<MatchPrize> GetByGameboardUidAsync(Guid gameboardUid, CancellationToken cancellationToken)
+		{
+			var matchPrize = default(MatchPrize);
+
+			using (var conn = new MySqlConnection(_database.GetConnectionString()))
+			{
+				var command = conn.CreateCommand();
+				command.CommandText = "match_prize_get_by_gameboard_uid";
+				command.CommandType = CommandType.StoredProcedure;
+				command.AddParameter("gameboardUid", gameboardUid);
+
+				await conn.OpenAsync(cancellationToken);
+				using var reader = await command.ExecuteReaderAsync(cancellationToken);
+				while (await reader.ReadAsync(cancellationToken))
+				{
+					matchPrize = CreateFrom(reader);
+				}
+			}
+
+			return matchPrize;
 		}
 
 		public async Task<IEnumerable<MatchPrize>> GetForMatchGameAsync(Guid matchGameUid, CancellationToken cancellationToken)

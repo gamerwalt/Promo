@@ -39,6 +39,10 @@ namespace hrvster.Web.Controllers
 		private readonly IFacebookPageSerivce _facebookPageService;
 		private readonly FacebookClient _facebookClient;
 		private readonly FacebookConfigOptions _facebookOptions;
+		private readonly HarvesterSettingsOptions _hrvsterOptions;
+		private readonly IRebrandlyService _rebrandlyService;
+		private readonly IHyperlinkService _hyperLinkService;
+		private readonly ITwitterHttpService _twitterHttpService;
 
 		private HrvsterUser _hrvsterUser;
 
@@ -52,7 +56,11 @@ namespace hrvster.Web.Controllers
 			IGameService gameService,
 			IFacebookPageSerivce facebookPageSerivce,
 			FacebookClient facebookClient,
-			FacebookConfigOptions facebookOptions)
+			FacebookConfigOptions facebookOptions,
+			HarvesterSettingsOptions hrvsterOptions,
+			IRebrandlyService rebrandlyService,
+			IHyperlinkService hyperLinkService,
+			ITwitterHttpService twitterHttpService)
 		{
 			_logger = loggerFactory.CreateLogger<ProvidersController>();
 			_sessionManager = sessionManager;
@@ -64,6 +72,10 @@ namespace hrvster.Web.Controllers
 			_facebookPageService = facebookPageSerivce;
 			_facebookClient = facebookClient;
 			_facebookOptions = facebookOptions;
+			_hrvsterOptions = hrvsterOptions;
+			_rebrandlyService = rebrandlyService;
+			_hyperLinkService = hyperLinkService;
+			_twitterHttpService = twitterHttpService;
 		}
 
 		[HttpGet]
@@ -107,9 +119,24 @@ namespace hrvster.Web.Controllers
 				HttpContext.Session.SetString(SessionConstants.ReturnAction, actionName);
 				HttpContext.Session.SetString(SessionConstants.GameType, gameType);
 
-				var authorizationUrl = await _watchTypeProvider.GetAuthorizationUrl(form.ProviderCode, Request.Scheme, Request.Host.Value, $"/Providers/Validate{form.ProviderCode}Auth");
+				var profile = await _accountsService.GetProfileAsync(_hrvsterUser.UserUid, ProfileType.Twitter);
+				if(profile == null || DateTime.Now >= profile.UpdatedDate.AddHours(2))
+				{
+					var url = _twitterHttpService.GetAuthorizationUrl(Request.Scheme, Request.Host.Value, $"/Providers/Validate{form.ProviderCode}Auth");
 
-				return new RedirectResult(authorizationUrl);
+					return new RedirectResult(url);
+				}
+
+				_sessionManager.SetKeyValue(SessionConstants.ExternalClientType, ExternalClientType.Twitter.ToString());
+
+				return RedirectToAction("CreatePost",
+				new
+				{
+					Uid = uid,
+					actionName = actionName ?? "View",
+					controllerName = controllerName ?? "MatchGames", //Use game type here to properly do the controllerName,
+					gameType = gameType
+				});
 			}
 
 			var model = new SelectWatchTypeProvider()
@@ -148,20 +175,28 @@ namespace hrvster.Web.Controllers
 			var returnController = HttpContext.Session.GetString(SessionConstants.ReturnController);
 			var returnAction = HttpContext.Session.GetString(SessionConstants.ReturnAction);
 			var gameType = HttpContext.Session.GetString(SessionConstants.GameType);
+			var code = Request.Query["code"].ToString();
 
-			if (Request.Query["denied"].Count > 0)
+			if (Request.Query["error"].Count > 0)
 			{
 				return RedirectToActionPermanent(returnAction, returnController, GetReturnObject(gameType, Uid));
 			}
 
-			var userDetails = await _watchTypeProvider.IsValidAuthorization(Constants.TwitterProvider, Request.QueryString.Value);
+			var profile = await _accountsService.GetProfileAsync(_hrvsterUser.UserUid, ProfileType.Twitter);
+			if (profile == null || DateTime.Now >= profile.UpdatedDate.AddHours(2))
+			{
+				var accessTokenObject = await _twitterHttpService.GetAccessTokenAsyncForOfflineAccess(
+				code, Request.Scheme, Request.Host.Value, $"/Providers/ValidateTWITTERAuth");
 
-			_logger.LogInformation("Profile validated for user with uid: {userUid} via {providerType}",
-				_hrvsterUser.UserUid,
-				ProfileType.Twitter.ToString());
+				var userDetails = await _twitterHttpService.GetAuthenticatedUserAsync(accessTokenObject);
 
-			//update the profile
-			await _accountsService.RaiseProfileValidatedEventAsync(userDetails, _hrvsterUser.UserUid, ProfileType.Twitter);
+				_logger.LogInformation("Profile validated for user with uid: {userUid} via {providerType}",
+					_hrvsterUser.UserUid,
+					ProfileType.Twitter.ToString());
+
+				//update the profile
+				await _accountsService.RaiseProfileValidatedEventAsync(userDetails, _hrvsterUser.UserUid, ProfileType.Twitter);
+			}
 
 			HttpContext.Session.Remove(SessionConstants.Uid);
 			HttpContext.Session.Remove(SessionConstants.ReturnController);
@@ -458,6 +493,8 @@ namespace hrvster.Web.Controllers
 
 			if (ModelState.IsValid)
 			{
+				var ruleUid = Guid.NewGuid();
+
 				var externalClientType = _sessionManager.GetValue(SessionConstants.ExternalClientType);
 
 				if (string.IsNullOrWhiteSpace(externalClientType))
@@ -469,9 +506,17 @@ namespace hrvster.Web.Controllers
 					return RedirectToAction(actionName, controllerName, new { uid = Uid });
 				}
 
-				_notificationService.AddSuccessToastMessage("Publishing and saving the tweet rule for this game.");
+				//var companyGameLink = await GetAccountCompanyLink(_hrvsterUser.UserUid, gameType, Uid);
+
+				//var link = await _rebrandlyService.GenerateShortLinkAsync($"{companyGameLink}?externalClient={externalClientType}&ruleUid={ruleUid}");
+				//var urlLink = $"https://{link}";
+				var urlLink = "https://games.hrvster.com/rzq";
+
+				form.Post = $"{form.Post}{Environment.NewLine}{urlLink}";
 
 				await _gameService.CreateRulePostAsync(
+					ruleUid,
+					urlLink,
 					externalClientType,
 					_hrvsterUser,
 					gameType,
@@ -499,6 +544,27 @@ namespace hrvster.Web.Controllers
 			var model = GetCreateRulePost(Uid, actionName, controllerName, gameType, watchTypes, gameDetail);
 
 			return View(model);
+		}
+
+		private async Task<string> GetAccountCompanyLink(Guid userUid, string gameType, Guid gameUid)
+		{
+			var companyLink = await _hyperLinkService.GetCompanyHyperlinkAsync(userUid);
+			var gameLink = string.Empty;
+
+			switch (gameType)
+			{
+				case GameTypes.Sweepstake:
+					gameLink = $"{companyLink}{GameUrlTypes.SweepGame}";
+					break;
+				case GameTypes.MatchGame:
+					gameLink = $"{companyLink}{GameUrlTypes.MatchGame}";
+					break;
+				default:
+					gameLink = $"{companyLink}{GameUrlTypes.SweepGame}";
+					break;
+			}
+
+			return gameLink.Replace(GameUrlTypeReplaceInformation.ReplaceableGameUid, $"{gameUid}");
 		}
 
 		private static CreateRulePost GetCreateRulePost(Guid Uid, string actionName, string controllerName, string gameType, IEnumerable<hrvster.Models.WebModels.WatchType> watchTypes, GameDetail gameDetail)

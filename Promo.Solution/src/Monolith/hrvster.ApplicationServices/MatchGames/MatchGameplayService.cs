@@ -3,9 +3,11 @@ using hrvster.Infrastructure.MatchGames;
 using hrvster.Infrastructure.Reporting;
 using hrvster.Models;
 using Microsoft.Extensions.Logging;
+using Org.BouncyCastle.Asn1.Ocsp;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -19,6 +21,8 @@ namespace hrvster.ApplicationServices.MatchGames
 		Task<bool> IsAWinAsync(Guid gameUid, Guid gameplayUid, string selectedTiles, CancellationToken cancellationToken);
 		Task MarkAsPlayedAndLostAsync(Guid gameplayUid, string selectedTiles, CancellationToken cancellationToken);
 		Task MarkAsPlayedAndWinAsync(Guid gameplayUid, string selectedTiles, CancellationToken cancellationToken);
+		Task<Guid> ReserveGameboardAsync(
+			Guid gameUid, string screenName, UserIdentifierType userIdentifierType, CancellationToken cancellationToken);
 	}
 
 	public class MatchGameplayService : IMatchGameplayService
@@ -28,19 +32,76 @@ namespace hrvster.ApplicationServices.MatchGames
 		private readonly IMatchTilesRepository _tilesRepository;
 		private readonly IMatchBoardsRepository _boardsRepository;
 		private readonly IMatchGamePlayRepository _gameplayRepository;
+		private readonly IMatchGameBoardService _gameboardService;
 
 		public MatchGameplayService(
 			ILoggerFactory loggerFactory,
 			IMatchGamePlayRepository repository,
 			IMatchTilesRepository tilesRepository,
 			IMatchBoardsRepository boardsRepository,
-			IMatchGamePlayRepository gameplayRepository)
+			IMatchGamePlayRepository gameplayRepository,
+			IMatchGameBoardService gameboardService)
 		{
 			_logger = loggerFactory.CreateLogger<MatchGameplayService>();
 			_repository = repository;
 			_tilesRepository = tilesRepository;
 			_boardsRepository = boardsRepository;
 			_gameplayRepository = gameplayRepository;
+			_gameboardService = gameboardService;
+		}
+
+		public async Task<Guid> ReserveGameboardAsync(
+			Guid gameUid, 
+			string screenName, 
+			UserIdentifierType userIdentifierType, 
+			CancellationToken cancellationToken)
+		{
+			var gameBoard = default(MatchBoard);
+
+			gameBoard = await _gameboardService.GetRandomBoardAsync(gameUid, cancellationToken);
+			if (gameBoard == null)
+			{
+				_logger.LogInformation("Could not get a random gameboard from the cache.");
+
+				_logger.LogInformation("Attempting to get a random gameboard uid.");
+
+				var gameboardUid = await _gameboardService.GetRandomGameboardUidAsync(gameUid, cancellationToken);
+
+				if (gameboardUid == Guid.Empty)
+				{
+					_logger.LogInformation("Getting all the gameboard uids of the game that are not reserved.");
+
+					var gameBoardUids = await _gameboardService.GetGameBoardUidsAsync(gameUid, cancellationToken);
+					var uids = gameBoardUids.ToList();
+
+					_logger.LogInformation("Retrieved a total of {count} gameboard uids that are not reserved.", uids.Count);
+
+					var randomIndex = RandomNumberGenerator.GetInt32(uids.Count);
+
+					gameboardUid = uids[randomIndex];
+				}
+
+				gameBoard = await _gameboardService.GetGameBoardAsync(gameboardUid, cancellationToken);
+			}
+
+			//create a gameplay
+			var gameplayUid = await CreateGamePlayAsync(gameBoard, screenName, userIdentifierType, cancellationToken);
+
+			await _gameboardService.ReserveBoardAsync(gameBoard, cancellationToken);
+
+			return gameplayUid;
+		}
+
+		private async Task<Guid> CreateGamePlayAsync(
+			MatchBoard gameBoard, string screenName, Models.UserIdentifierType handle, CancellationToken cancellationToken)
+		{
+			_logger.LogInformation("Creating a game play for the gameboard {gameboardUid}", gameBoard.Uid);
+
+			var gameplayUid = Guid.NewGuid();
+
+			await _gameplayRepository.CreateAsync(gameplayUid, gameBoard.Id, screenName, handle, cancellationToken);
+
+			return gameplayUid;
 		}
 
 		public async Task<bool> GameBeenPlayedAsync(Guid gameplayUid, CancellationToken cancellationToken)

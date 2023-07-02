@@ -1,0 +1,27 @@
+﻿body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    font-family: sans-serif;
+    background-image: url('/images/Pick3Background.jpg');
+    background-size: cover;
+    background-position: center;
+}
+.tile.matched {
+    border: 8px solid red;
+}
+
+.tile {
+    background-size: cover;
+    background-repeat: no-repeat;
+}
+
+.tile:not(.selected):not(.matched) {
+    opacity: 0.5;
+}
+
+.tile:not(.selected):not(.matched) {
+    filter: blur(3px);
+}

@@ -1,4 +1,5 @@
-﻿using hrvster.ApplicationServices.Subscription;
+﻿using hrvster.ApplicationServices.Accounts;
+using hrvster.ApplicationServices.Subscription;
 using hrvster.Core.Authentication;
 using hrvster.Core.Requests.WebRequests.Accounts;
 using hrvster.Core.Requests.WebRequests.Subscriptions;
@@ -22,6 +23,7 @@ namespace hrvster.Web.Controllers
 		private readonly IToastNotification _notificationService;
 		private readonly ISessionManager _sessionManager;
 		private readonly IAccountSubscriptionService _accountSubscriptionService;
+		private readonly IAccountCompanyService _accountCompanyService;
 
 		private HrvsterUser _hrvsterUser;
 
@@ -30,13 +32,15 @@ namespace hrvster.Web.Controllers
 			IMediator mediator,
 			IToastNotification notificationService,
 			ISessionManager sessionManager,
-			IAccountSubscriptionService accountSubscriptionService)
+			IAccountSubscriptionService accountSubscriptionService,
+			IAccountCompanyService accountCompanyService)
 		{
 			_logger = loggerFactory.CreateLogger<ProfileController>();
 			_mediator = mediator;
 			_notificationService = notificationService;
 			_sessionManager = sessionManager;
 			_accountSubscriptionService = accountSubscriptionService;
+			_accountCompanyService = accountCompanyService;
 		}
 
 		[HttpGet]
@@ -47,6 +51,7 @@ namespace hrvster.Web.Controllers
 			var account = await _mediator.Send(new GetAccountAndProfileRequest(_hrvsterUser.UserUid));
 			var totalsPerAccount = await _mediator.Send(new GetTotalResourcesRequest(_hrvsterUser.UserUid));
 			var accountSubscription = await _accountSubscriptionService.GetAccountSubscriptionAsync(_hrvsterUser.UserUid);
+			var accountCompanies = await _accountCompanyService.GetAccountCompaniesAsync(_hrvsterUser.UserUid);
 
 			var model = new UpdateAccount
 			{
@@ -56,7 +61,8 @@ namespace hrvster.Web.Controllers
 					Profiles = account.Profiles,
 					TotalSweepEntries = totalsPerAccount.TotalSweepEntries,
 					TotalPromotions = totalsPerAccount.TotalCampaigns,
-					TotalSweepstakes = totalsPerAccount.TotalSweeps
+					TotalSweepstakes = totalsPerAccount.TotalSweeps,
+					Companies = accountCompanies
 				},
 				DisplayName = account.DisplayName,
 				FirstName = account.FirstName,

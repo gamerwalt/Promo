@@ -58,12 +58,13 @@ namespace hrvster.Infrastructure.Accounts
 			{
 				ProfileUid = reader.GetGuid("profile_uid"),
 				ProfileType = (ProfileType)Enum.Parse(typeof(ProfileType), reader.GetString("profile_type")),
-				ExternalProfileId = reader.GetString("external_profile_id"),
-				DisplayName = reader.GetString("display_name"),
-				ScreenName = reader.GetString("screen_name"),
-				Description = reader.GetString("profile_description"),
-				AccessToken = reader.GetString("access_token"),
-				AccessTokenSecret = reader.GetString("access_token_secret"),
+				ExternalProfileId = reader.GetStringValue("external_profile_id"),
+				DisplayName = reader.GetStringValue("display_name"),
+				ScreenName = reader.GetStringValue("screen_name"),
+				Description = reader.GetStringValue("profile_description"),
+				RefreshToken = reader.GetStringValue("refresh_token"),
+				AccessToken = reader.GetStringValue("access_token"),
+				AccessTokenSecret = reader.GetStringValue("access_token_secret"),
 				ConsumerKey = GetStringValue(reader, "consumer_key"),
 				ConsumerSecret = GetStringValue(reader, "consumer_secret"),
 				Location = reader.GetStringValue("location"),
@@ -72,7 +73,8 @@ namespace hrvster.Infrastructure.Accounts
 				{
 					AccountId = reader.GetInt32("account_id"),
 					AccountUid = reader.GetGuid("account_uid")
-				}
+				},
+				UpdatedDate = reader.GetNullableDateTimeValue("updated_date").GetValueOrDefault()
 			};
 		}
 
@@ -90,6 +92,7 @@ namespace hrvster.Infrastructure.Accounts
 				.AddParameter("displayName", profile.DisplayName)
 				.AddParameter("screenName", profile.ScreenName)
 				.AddParameter("description", profile.Description)
+				.AddParameter("refreshToken", profile.RefreshToken)
 				.AddParameter("accessToken", profile.AccessToken)
 				.AddParameter("accessTokenSecret", profile.AccessTokenSecret)
 				.AddParameter("consumerKey", profile.ConsumerKey)
@@ -209,6 +212,7 @@ namespace hrvster.Infrastructure.Accounts
 				.AddParameter("displayName", profile.DisplayName)
 				.AddParameter("screenName", profile.ScreenName)
 				.AddParameter("description", profile.Description)
+				.AddParameter("refreshToken", profile.RefreshToken)
 				.AddParameter("accessToken", profile.AccessToken)
 				.AddParameter("accessTokenSecret", profile.AccessTokenSecret)
 				.AddParameter("consumerKey", profile.ConsumerKey)

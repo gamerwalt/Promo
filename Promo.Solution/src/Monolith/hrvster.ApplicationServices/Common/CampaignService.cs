@@ -10,6 +10,7 @@ namespace hrvster.ApplicationServices.Common
 	public interface ICampaignService
 	{
 		Task<Campaign> GetCampaignAsync(Guid promotionUid, CancellationToken cancellationToken);
+		Task<Campaign> GetCampaignFromGameUidAsync(Guid gameUid, string gameType);
 	}
 
 	public class CampaignService : ICampaignService
@@ -25,5 +26,13 @@ namespace hrvster.ApplicationServices.Common
 
 		public Task<Campaign> GetCampaignAsync(Guid promotionUid, CancellationToken cancellationToken)
 			=> _repository.GetCampaignByUidAsync(promotionUid);
+
+		public async Task<Campaign> GetCampaignFromGameUidAsync(Guid gameUid, string gameType)
+		{
+			if (gameType == GameTypes.Sweepstake)
+				return await _repository.GetCampaignBySweepsGameAsync(gameUid);
+
+			return await _repository.GetCampaignByMatchGameAsync(gameUid);
+		}
 	}
 }

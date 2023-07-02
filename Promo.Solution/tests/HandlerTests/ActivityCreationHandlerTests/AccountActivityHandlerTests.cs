@@ -23,7 +23,7 @@ namespace ActivityCreationHandlerTests
 		{
 			_feature.GivenACleanSlate();
 
-			var accountCreateRequest = new CreateAccountRequest(TestData.AccountUid, TestData.EmailAddress, TestData.DisplayName, TestData.PhoneNumber, TestData.FirstName, TestData.LastName, TestData.Password, true);
+			var accountCreateRequest = new CreateAccountRequest(TestData.AccountUid, TestData.EmailAddress, TestData.DisplayName, TestData.PhoneNumber, TestData.FirstName, TestData.LastName, TestData.Password, true, TestData.CompanyName, TestData.Subdomain);
 
 			var result = await _feature.Mediator.Send(accountCreateRequest);
 
@@ -35,7 +35,7 @@ namespace ActivityCreationHandlerTests
 		[Fact]
 		public async Task When_A_User_Logs_In_The_Activity_Is_Stored()
 		{
-			var accountCreateRequest = new CreateAccountRequest(TestData.AccountUid, TestData.EmailAddress, TestData.DisplayName, TestData.PhoneNumber, TestData.FirstName, TestData.LastName, TestData.Password, true);
+			var accountCreateRequest = new CreateAccountRequest(TestData.AccountUid, TestData.EmailAddress, TestData.DisplayName, TestData.PhoneNumber, TestData.FirstName, TestData.LastName, TestData.Password, true, TestData.CompanyName, TestData.Subdomain);
 
 			var result = await _feature
 				.GivenACleanSlate()

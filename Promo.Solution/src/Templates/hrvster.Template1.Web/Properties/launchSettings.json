@@ -12,9 +12,9 @@
       "commandName": "Project",
       "dotnetRunMessages": true,
       "launchBrowser": true,
-      "applicationUrl": "https://airtel.localhost.com:7013;http://airtel.localhost.com:5013",
+      "applicationUrl": "https://mtn.hrvster.com:7013;http://mtn.hrvster.com:5001",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "local"
       }
     },
     "IIS Express": {

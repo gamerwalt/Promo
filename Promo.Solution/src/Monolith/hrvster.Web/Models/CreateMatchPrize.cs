@@ -16,5 +16,6 @@ namespace hrvster.Web.Models
 		public List<MatchImage> MatchImages { get; set; }
 		public string ActionName { get; set; }
 		public string ControllerName { get; set; }
+		public List<MatchPrize> Prizes { get; set; }
 	}
 }

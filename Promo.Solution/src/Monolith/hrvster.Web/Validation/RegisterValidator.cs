@@ -1,11 +1,14 @@
 ﻿using FluentValidation;
 using hrvster.Core;
 using hrvster.Infrastructure;
+using hrvster.Infrastructure.Accounts;
 using hrvster.Web.Models;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
+using System.Threading;
 
 namespace hrvster.Web.Validation
 {
@@ -13,10 +16,16 @@ namespace hrvster.Web.Validation
 	{
 		private readonly ILogger<RegisterValidator> _logger;
 		private readonly IAccountsRepository _accountsRepository;
-		public RegisterValidator(ILoggerFactory loggerFactory, IAccountsRepository accountsRepository)
+		private readonly IAccountCompanyRepository _accountCompanyRepository;
+
+		public RegisterValidator(
+			ILoggerFactory loggerFactory, 
+			IAccountsRepository accountsRepository,
+			IAccountCompanyRepository accountCompanyRepository)
 		{
 			_logger = loggerFactory.CreateLogger<RegisterValidator>();
 			_accountsRepository = accountsRepository;
+			_accountCompanyRepository = accountCompanyRepository;
 
 			RuleFor(x => x.EmailAddress)
 				.NotEmpty()
@@ -54,6 +63,24 @@ namespace hrvster.Web.Validation
 			RuleFor(x => x.AcceptedTerms)
 				.Must(c => BeAccepted(c))
 				.WithMessage("You have to accept the terms and conditions.");
+
+			RuleFor(x => x.CompanyName)
+				.Must(CompanyNameDoesNotExist)
+				.WithMessage("The company name already exists. Are you sure you don't want to log in.");
+
+			RuleFor(x => x.SubdomainName)
+				.Must(SubdomainNameDoesNotExist)
+				.WithMessage("The company name already exists. Are you sure you don't want to log in.");
+		}
+
+		private bool CompanyNameDoesNotExist(string companyName)
+		{
+			return !(_accountCompanyRepository.CompanyNameExists(companyName));
+		}
+
+		private bool SubdomainNameDoesNotExist(string subdomainName)
+		{
+			return !(_accountCompanyRepository.SubdomainNameExists(subdomainName));
 		}
 
 		private bool HasSpecialCharacters(string s)

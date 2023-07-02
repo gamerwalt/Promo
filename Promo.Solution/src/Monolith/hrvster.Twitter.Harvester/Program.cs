@@ -69,6 +69,8 @@ namespace hrvster.Twitter.Harvester
 
 					services.AddHttpClient<ITwitterHarvesterService, TwitterHarvesterService>();
 
+					services.AddTwitterHttpService(Configuration);
+
 					AddDatabases(services);
 					AddMediator(services);
 				});

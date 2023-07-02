@@ -8,6 +8,8 @@ namespace hrvster.Core.Requests.Rules.Notifications
 {
 	public class RulePublished : INotification
 	{
+		private Guid _ruleUid;
+		private string _urlLink;
 		private Profile _profile;
 		private string _externalId;
 		private Message _message;
@@ -19,6 +21,8 @@ namespace hrvster.Core.Requests.Rules.Notifications
 		private string _pageId;
 
 		public RulePublished(
+			Guid ruleUid,
+			string urlLink,
 			Profile profile, 
 			string externalId, 
 			Message message, 
@@ -29,6 +33,8 @@ namespace hrvster.Core.Requests.Rules.Notifications
 			ExternalClientType externalClientType,
 			string pageId)
 		{
+			_ruleUid = ruleUid;
+			_urlLink = urlLink;
 			_profile = profile;
 			_externalId = externalId;
 			_message = message;
@@ -40,6 +46,8 @@ namespace hrvster.Core.Requests.Rules.Notifications
 			_pageId = pageId;
 		}
 
+		public Guid RuleUid { get { return _ruleUid; } }
+		public string UrlLink { get { return _urlLink; } }
 		public Profile Profile { get { return _profile; } }
 		public string ExternalId { get { return _externalId; } }
 		public Message Message { get { return _message; } }

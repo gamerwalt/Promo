@@ -50,6 +50,7 @@ namespace hrvster.Core.Requests.Notifications.Handlers
 				DisplayName = model.UserDetails.Name,
 				ScreenName = model.UserDetails.ScreenName,
 				Description = model.UserDetails.Description,
+				RefreshToken = model.UserDetails.RefreshToken,
 				AccessToken = model.UserDetails.AccessToken,
 				AccessTokenSecret = model.UserDetails.AccessTokenSecret,
 				ConsumerKey = model.UserDetails.ConsumerKey,

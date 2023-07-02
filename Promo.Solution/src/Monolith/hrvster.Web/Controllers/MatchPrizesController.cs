@@ -13,6 +13,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Linq;
+using System.Runtime.InteropServices;
 
 namespace hrvster.Web.Controllers
 {
@@ -59,6 +60,7 @@ namespace hrvster.Web.Controllers
 			}
 
 			var matchImages = await _matchImageService.GetForMatchGameAsync(Uid, cancellationToken);
+			var matchPrizes = await _matchPrizeService.GetAllForMatchGameAsync(Uid, cancellationToken);
 
 			var model = new CreateMatchPrize
 			{
@@ -66,7 +68,8 @@ namespace hrvster.Web.Controllers
 				MatchGameUid = matchGame.Uid,
 				MatchImages = _mapper.Map<List<MatchImage>>(matchImages),
 				ControllerName = controllerName ?? "MatchGames",
-				ActionName = actionName ?? "View"
+				ActionName = actionName ?? "View",
+				Prizes = _mapper.Map<List<MatchPrize>>(matchPrizes),
 			};
 
 			return View(model);
@@ -88,9 +91,16 @@ namespace hrvster.Web.Controllers
 
 			if (ModelState.IsValid)
 			{
-				_notificationService.AddSuccessToastMessage("Save now.");
-
 				await _matchPrizeService.CreateAsync(Uid, form.Name, form.Description, form.Value, form.Quantity, form.ImageUid, cancellationToken);
+
+				_notificationService.AddSuccessToastMessage("Prize created successfully.");
+
+				var prizes = await _matchPrizeService.GetAllForMatchGameAsync(Uid, cancellationToken);
+
+				if(prizes.Sum(c => c.Quantity) < matchGame.NumberOfWinnableBoards)
+				{
+					return RedirectToAction("Create", new { Uid = Uid, actionName = actionName, controllerName = controllerName });
+				}
 
 				return RedirectToAction(actionName ?? "View", controllerName ?? "MatchGames", new { Uid = Uid });
 			}

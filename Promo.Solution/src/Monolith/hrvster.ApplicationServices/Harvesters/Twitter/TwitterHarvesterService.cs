@@ -1,26 +1,12 @@
-﻿using hrvster.Core.Requests.Harvester;
-using hrvster.Core.Requests.ServiceRequests;
-using hrvster.Models.Extensions;
-using hrvster.Models.Twitter;
+﻿using hrvster.Core.Clients;
 using MediatR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Text;
+using System.Runtime.CompilerServices;
+using System.Threading;
 using System.Threading.Tasks;
 using Tweetinvi;
-using Tweetinvi.Client.V2;
-using Tweetinvi.Events;
-using Tweetinvi.Models;
-using Tweetinvi.Models.V2;
-using Tweetinvi.Parameters.V2;
 
 namespace hrvster.ApplicationServices.Harvesters.Twitter
 {
@@ -32,203 +18,196 @@ namespace hrvster.ApplicationServices.Harvesters.Twitter
 	public class TwitterHarvesterService : ITwitterHarvesterService
 	{
 		private readonly ILogger<TwitterHarvesterService> _logger;
-		private readonly IMediator _mediator;
-		private readonly ITwitterClient _twitterClient;
 		private readonly HttpClient _httpClient;
-		private readonly IConfiguration _configuration;
+		private readonly ITwitterHttpService _twitterHttpService;
 
 		public TwitterHarvesterService(
 			ILoggerFactory loggerFactory,
-			IMediator mediator,
-			ITwitterClient twitterClient,
 			HttpClient httpClient,
-			IConfiguration configuration)
+			ITwitterHttpService twitterHttpService)
 		{
 			_logger = loggerFactory.CreateLogger<TwitterHarvesterService>();
-			_mediator = mediator;
-			_twitterClient = twitterClient;
 			_httpClient = httpClient;
-			_configuration = configuration;
-
-			_httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _configuration["TwitterAccount:AuthenticationToken"]);
+			_twitterHttpService = twitterHttpService;
 		}
 
 		public async Task StartStreamingAsync()
 		{
-			await GetAndRemoveRulesAsync();
-			
-			var hashtagRules = await _mediator.Send(new GetActiveHashtagRulesRequest());
+			#region NewCode
 
-			var rules = new List<object>();
+			var hashTag = "#thisisatest";
+			var accessTokenObject = await _twitterHttpService.GetAccessTokenFromRefreshTokenAsync("c1MyNzhIUnhmaERtR3RrU2MwVjdtdE9rWW9XbXJheXZlTVExT0pIWF9xY2FBOjE2ODgwNTA4ODAxMjg6MTowOnJ0OjE");
+			var results = await _twitterHttpService.SearchRecentTweets(hashTag, default(CancellationToken));
 
-			_logger.LogInformation("Retrieved {count} hash tag rules to add for tracking purposes.", hashtagRules.Count());
 
-			foreach (var rule in hashtagRules)
-			{
-				if (rule.ActiveInd)
-				{
-					_logger.LogInformation("Adding the Hashtag {hashTag} belonging to Campaign Name {campaignName} and Game Name {gameName} to listen to...",
-						rule.WatchValue,
-						rule.Campaign.CampaignName,
-						rule.Game?.Name ?? rule.Sweep.Name);
+			#endregion
 
-					rules.Add(new { value = rule.WatchValue, tag = rule.WatchValue });
-				}
-			}
 
-			var jsonContent = JsonConvert.SerializeObject(new { add = rules });
+			#region NotWorkingYet
+			//await GetAndRemoveRulesAsync();
 
-			var addRulesContent = 
-				new StringContent(jsonContent, Encoding.UTF8, "application/json");
-			var addRulesResponse = await _httpClient.PostAsync(
-				"https://api.twitter.com/2/tweets/search/stream/rules", addRulesContent);
+			//var hashtagRules = await _mediator.Send(new GetActiveHashtagRulesRequest());
 
-			if (!addRulesResponse.IsSuccessStatusCode)
-			{
-				_logger.LogError("Failed to add rules: " + await addRulesResponse.Content.ReadAsStringAsync());
+			//var rules = new List<object>();
 
-				return;
-			}
+			//_logger.LogInformation("Retrieved {count} hash tag rules to add for tracking purposes.", hashtagRules.Count());
 
-			var streamResponse = await _httpClient.GetAsync(
-				"https://api.twitter.com/2/tweets/search/stream", HttpCompletionOption.ResponseHeadersRead);
+			//foreach (var rule in hashtagRules)
+			//{
+			//	if (rule.ActiveInd)
+			//	{
+			//		_logger.LogInformation("Adding the Hashtag {hashTag} belonging to Campaign Name {campaignName} and Game Name {gameName} to listen to...",
+			//			rule.WatchValue,
+			//			rule.Campaign.CampaignName,
+			//			rule.Game?.Name ?? rule.Sweep.Name);
 
-			if (!streamResponse.IsSuccessStatusCode)
-			{
-				_logger.LogError("Failed to start stream: " + await streamResponse.Content.ReadAsStringAsync());
+			//		rules.Add(new { value = rule.WatchValue, tag = rule.WatchValue });
+			//	}
+			//}
 
-				return;
-			}
+			//var jsonContent = JsonConvert.SerializeObject(new { add = rules });
 
-			_logger.LogInformation("Started streaming from twitter.");
+			//var addRulesContent = 
+			//	new StringContent(jsonContent, Encoding.UTF8, "application/json");
+			//var addRulesResponse = await _httpClient.PostAsync(
+			//	"https://api.twitter.com/2/tweets/search/stream/rules", addRulesContent);
 
-			using (var streamReader = new StreamReader(await streamResponse.Content.ReadAsStreamAsync()))
-			{
-				while (!streamReader.EndOfStream)
-				{
-					var line = await streamReader.ReadLineAsync();
+			//if (!addRulesResponse.IsSuccessStatusCode)
+			//{
+			//	_logger.LogError("Failed to add rules: " + await addRulesResponse.Content.ReadAsStringAsync());
 
-					if (line.StartsWith("{\"data\":"))
-					{
-						_logger.LogInformation("Tweet received.");
+			//	return;
+			//}
 
-						var tweetId = GetTweetId(line);
+			//var streamResponse = await _httpClient.GetAsync(
+			//	"https://api.twitter.com/2/tweets/search/stream", HttpCompletionOption.ResponseHeadersRead);
 
-						var tweet = await GetTweet(tweetId);
+			//if (!streamResponse.IsSuccessStatusCode)
+			//{
+			//	_logger.LogError("Failed to start stream: " + await streamResponse.Content.ReadAsStringAsync());
 
-						if (tweet == null) continue;
+			//	return;
+			//}
 
-						var authorId = tweet.Tweet.AuthorId;
-						var user = tweet.Includes.Users.FirstOrDefault(c => c.Id == authorId);
+			//_logger.LogInformation("Started streaming from twitter.");
 
-						if(tweet.Tweet.Entities.Hashtags != null)
-						{
-							var tweetModel = new Tweet
-							{
-								TweetId = tweet.Tweet.Id,
-								TweetText = tweet.Tweet.Text,
-								CreatedDate = tweet.Tweet.CreatedAt.DateTime,
-								Hashtags = tweet.Tweet.Entities.Hashtags.Select(c => c.Tag.Trim()).ToList(),
-								ScreenName = user.Username,
-								ExternalUserId = user.Id,
-								Location = user.Location,
-								Verified = user.Verified,
-								UserDescription = user.Description,
-								InReplyToTweetId = tweet.Tweet.ReferencedTweets.FirstOrDefault().Id,
-								ProfileImageUrl = user.ProfileImageUrl
-							};
+			//using (var streamReader = new StreamReader(await streamResponse.Content.ReadAsStreamAsync()))
+			//{
+			//	while (!streamReader.EndOfStream)
+			//	{
+			//		var line = await streamReader.ReadLineAsync();
 
-							var incomingTweet = await _mediator.Send(new SaveNewTweetReceivedRequest(line));
+			//		if (line.StartsWith("{\"data\":"))
+			//		{
+			//			_logger.LogInformation("Tweet received.");
 
-							_logger.LogInformation("Sent tweet for processing.");
+			//			var tweetId = GetTweetId(line);
 
-							await _mediator.Send(new ProcessNewTweetRequest(tweetModel, line, incomingTweet));
-						}
-					}
-				}
-			}
+			//			var tweet = await GetTweet(tweetId);
+
+			//			if (tweet == null) continue;
+
+			//			var authorId = tweet.Tweet.AuthorId;
+			//			var user = tweet.Includes.Users.FirstOrDefault(c => c.Id == authorId);
+
+			//			if(tweet.Tweet.Entities.Hashtags != null)
+			//			{
+			//				var tweetModel = new Tweet
+			//				{
+			//					TweetId = tweet.Tweet.Id,
+			//					TweetText = tweet.Tweet.Text,
+			//					CreatedDate = tweet.Tweet.CreatedAt.DateTime,
+			//					Hashtags = tweet.Tweet.Entities.Hashtags.Select(c => c.Tag.Trim()).ToList(),
+			//					ScreenName = user.Username,
+			//					ExternalUserId = user.Id,
+			//					Location = user.Location,
+			//					Verified = user.Verified,
+			//					UserDescription = user.Description,
+			//					InReplyToTweetId = tweet.Tweet.ReferencedTweets.FirstOrDefault().Id,
+			//					ProfileImageUrl = user.ProfileImageUrl
+			//				};
+
+			//				var incomingTweet = await _mediator.Send(new SaveNewTweetReceivedRequest(line));
+
+			//				_logger.LogInformation("Sent tweet for processing.");
+
+			//				await _mediator.Send(new ProcessNewTweetRequest(tweetModel, line, incomingTweet));
+			//			}
+			//		}
+			//	}
+			//}
+			#endregion
 		}
 
-		private static string ConvertTweetToJson(ITweet tweet)
-		{
-			var settings = new JsonSerializerSettings
-			{
-				ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
-			};
+		//private async Task GetAndRemoveRulesAsync()
+		//{
+		//	var getRulesResponse = await _httpClient.GetAsync("https://api.twitter.com/2/tweets/search/stream/rules");
+		//	var getRulesJson = JObject.Parse(await getRulesResponse.Content.ReadAsStringAsync());
 
-			var tweetJson = JsonConvert.SerializeObject(tweet, settings);
-			return tweetJson;
-		}
+		//	if (!getRulesResponse.IsSuccessStatusCode)
+		//	{
+		//		_logger.LogError("Failed to get rules: " + await getRulesResponse.Content.ReadAsStringAsync());
 
-		private async Task GetAndRemoveRulesAsync()
-		{
-			var getRulesResponse = await _httpClient.GetAsync("https://api.twitter.com/2/tweets/search/stream/rules");
-			var getRulesJson = JObject.Parse(await getRulesResponse.Content.ReadAsStringAsync());
+		//		return;
+		//	}
 
-			if (!getRulesResponse.IsSuccessStatusCode)
-			{
-				_logger.LogError("Failed to get rules: " + await getRulesResponse.Content.ReadAsStringAsync());
+		//	var ruleIds = new List<string>();
 
-				return;
-			}
+		//	var metaResult = getRulesJson["meta"].ToString();
+		//	var meta = JsonConvert.DeserializeObject<Meta>(metaResult);
+		//	if (meta != null && meta.ResultCount >= 1)
+		//	{
+		//		foreach (var rule in getRulesJson["data"])
+		//		{
+		//			ruleIds.Add(rule["id"].ToString());
+		//		}
 
-			var ruleIds = new List<string>();
+		//		if (ruleIds.Count > 0)
+		//		{
+		//			await DeleteRulesAsync(ruleIds);
+		//		}
+		//		else
+		//		{
+		//			_logger.LogInformation("No rules to delete.");
+		//		}
+		//	}
 
-			var metaResult = getRulesJson["meta"].ToString();
-			var meta = JsonConvert.DeserializeObject<Meta>(metaResult);
-			if(meta != null && meta.ResultCount >= 1)
-			{
-				foreach (var rule in getRulesJson["data"])
-				{
-					ruleIds.Add(rule["id"].ToString());
-				}
 
-				if (ruleIds.Count > 0)
-				{
-					await DeleteRulesAsync(ruleIds);
-				}
-				else
-				{
-					_logger.LogInformation("No rules to delete.");
-				}
-			}
+		//}
 
-			
-		}
+		//private async Task DeleteRulesAsync(List<string> ruleIds)
+		//{
+		//	var deleteRulesContent = new StringContent(JsonConvert.SerializeObject(new { delete = new { ids = ruleIds } }), Encoding.UTF8, "application/json");
+		//	var deleteRulesResponse = await _httpClient.PostAsync("https://api.twitter.com/2/tweets/search/stream/rules", deleteRulesContent);
 
-		private async Task DeleteRulesAsync(List<string> ruleIds)
-		{
-			var deleteRulesContent = new StringContent(JsonConvert.SerializeObject(new { delete = new { ids = ruleIds } }), Encoding.UTF8, "application/json");
-			var deleteRulesResponse = await _httpClient.PostAsync("https://api.twitter.com/2/tweets/search/stream/rules", deleteRulesContent);
+		//	if (!deleteRulesResponse.IsSuccessStatusCode)
+		//	{
+		//		_logger.LogError("Failed to delete rules: " + await deleteRulesResponse.Content.ReadAsStringAsync());
+		//	}
+		//	else
+		//	{
+		//		_logger.LogInformation("All rules deleted successfully.");
+		//	}
+		//}
 
-			if (!deleteRulesResponse.IsSuccessStatusCode)
-			{
-				_logger.LogError("Failed to delete rules: " + await deleteRulesResponse.Content.ReadAsStringAsync());
-			}
-			else
-			{
-				_logger.LogInformation("All rules deleted successfully.");
-			}
-		}
+		//private async Task<TweetV2Response> GetTweet(JToken tweetId)
+		//	=> await _twitterClient.TweetsV2.GetTweetAsync(long.Parse(tweetId.ToString()));
 
-		private async Task<TweetV2Response> GetTweet(JToken tweetId)
-			=> await _twitterClient.TweetsV2.GetTweetAsync(long.Parse(tweetId.ToString()));
-
-		private static JToken GetTweetId(string line)
-		{
-			var tweetObject = JObject.Parse(line);
-			var tweet = tweetObject["data"]["text"].ToString();
-			var tweetId = tweetObject["data"]["id"];
-			return tweetId;
-		}
+		//private static JToken GetTweetId(string line)
+		//{
+		//	var tweetObject = JObject.Parse(line);
+		//	var tweet = tweetObject["data"]["text"].ToString();
+		//	var tweetId = tweetObject["data"]["id"];
+		//	return tweetId;
+		//}
 	}
 
-	public class Meta
-	{
-		[JsonProperty("sent")]
-		public DateTimeOffset Sent { get; set; }
+	//public class Meta
+	//{
+	//	[JsonProperty("sent")]
+	//	public DateTimeOffset Sent { get; set; }
 
-		[JsonProperty("result_count")]
-		public long ResultCount { get; set; }
-	}
+	//	[JsonProperty("result_count")]
+	//	public long ResultCount { get; set; }
+	//}
 }

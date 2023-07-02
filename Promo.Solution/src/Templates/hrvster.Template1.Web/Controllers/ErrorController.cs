@@ -1,0 +1,73 @@
+﻿using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.AspNetCore.Mvc;
+using NToastNotify;
+
+namespace hrvster.Template1.Web.Controllers
+{
+	public class ErrorController : Controller
+	{
+		private readonly ILogger<ErrorController> _logger;
+
+		public ErrorController(ILoggerFactory loggerFactory)
+		{
+			_logger = loggerFactory.CreateLogger<ErrorController>();
+		}
+
+		[HttpGet("/Error/{statusCode}")]
+		public IActionResult HandleErrorCode(int statusCode)
+		{
+			var errorMessage = string.Empty;
+
+			switch (statusCode)
+			{
+				case 400:
+					errorMessage = "Bad request";
+					break;
+				case 404:
+					errorMessage = "Resource not found";
+					break;
+				case 500:
+					errorMessage = "An error occurred on the server";
+					break;
+				default:
+					errorMessage = "An unknown error occurred";
+					break;
+			}
+
+			_logger.LogError("An error occurred. StatusCode: {statusCode}. Error Message: {errorMessage}",
+				statusCode,
+				errorMessage);
+
+
+			var referer = HttpContext.Request.Headers["Referer"].ToString();
+
+			if (!string.IsNullOrEmpty(referer))
+			{
+				return Redirect(referer);
+			}
+
+			if (statusCode == 0 && string.IsNullOrWhiteSpace(referer))
+				return View("Exception");
+
+			return RedirectToAction("Index", "Home");
+		}
+
+		[Route("Error")]
+		public IActionResult HandleException()
+		{
+			var exceptionFeature = HttpContext.Features.Get<IExceptionHandlerPathFeature>();
+
+			if (exceptionFeature != null)
+			{
+				var exceptionType = exceptionFeature.Error.GetType().Name;
+				var exceptionMessage = exceptionFeature.Error.Message;
+
+				_logger.LogError("An exception occurred. Exception: {nameOfException}. Message: {message}",
+					exceptionType,
+					exceptionMessage);
+			}
+
+			return View("Exception");
+		}
+	}
+}

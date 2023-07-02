@@ -17,5 +17,7 @@ namespace hrvster.Models.Profiles
 		public string ExternalProfileId { get; set; }
 		public string ConsumerKey { get; set; }
 		public string ConsumerSecret { get; set; }
+		public string RefreshToken { get; set; }
+		public DateTime UpdatedDate { get; set; }
 	}
 }

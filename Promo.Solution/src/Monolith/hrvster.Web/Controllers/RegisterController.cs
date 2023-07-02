@@ -1,16 +1,15 @@
 ﻿using hrvster.Core;
 using hrvster.Core.Requests.WebRequests.Accounts;
 using hrvster.Extensions.ModelExtensions;
+using hrvster.Infrastructure;
+using hrvster.Infrastructure.Accounts;
 using hrvster.Web.Models;
+using hrvster.Web.Validation;
 using MediatR;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.Extensions.Logging;
 using NToastNotify;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace hrvster.Web.Controllers
@@ -19,9 +18,20 @@ namespace hrvster.Web.Controllers
 	{
 		private readonly IMediator _mediator;
 		private readonly IToastNotification _notificationService;
+		private readonly ILoggerFactory _loggerFactory;
+		private readonly IAccountsRepository _accountsRepository;
+		private readonly IAccountCompanyRepository _accountCompanyRepository;
 
-		public RegisterController(IMediator mediator, IToastNotification notificationService)
+		public RegisterController(
+			ILoggerFactory loggerFactory,
+			IAccountsRepository accountsRepository,
+			IAccountCompanyRepository accountCompanyRepository,
+			IMediator mediator,
+			IToastNotification notificationService)
 		{
+			_loggerFactory = loggerFactory;
+			_accountCompanyRepository = accountCompanyRepository;
+			_accountsRepository = accountsRepository;
 			_mediator = mediator;
 			_notificationService = notificationService;
 		}
@@ -46,14 +56,14 @@ namespace hrvster.Web.Controllers
 					form.FirstName,
 					form.LastName,
 					form.Password,
-					form.AcceptedTerms));
+					form.AcceptedTerms,
+					form.CompanyName,
+					form.SubdomainName));
 
 				_notificationService.AddSuccessToastMessage(ToastMessages.AccountCreatedSuccessfully);
 
 				return RedirectToActionPermanent("SignIn", "Session");
 			}
-
-			ModelState.BuildMessageFromErrors();
 
 			_notificationService.AddErrorToastMessage(ModelState.BuildMessageFromErrors());
 

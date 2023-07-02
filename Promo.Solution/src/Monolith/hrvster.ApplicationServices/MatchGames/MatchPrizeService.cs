@@ -16,6 +16,7 @@ namespace hrvster.ApplicationServices.MatchGames
 		Task<IEnumerable<MatchPrize>> GetAllForMatchGameAsync(Guid uid, CancellationToken cancellationToken);
 		MatchPrize GetPrize(Guid matchPrizeUid);
 		Task<MatchPrize> GetPrizeAsync(Guid prizeUid, CancellationToken cancellationToken);
+		Task<MatchPrize> GetPrizeFromBoardAsync(Guid gameboardUid, CancellationToken cancellationToken);
 		int GetTotalPrizesForGame(Guid matchGameUid);
 		Task UpdateAsync(Guid prizeUid, Guid uid, string name, string description, int quantity, decimal value, Guid imageUid, CancellationToken cancellationToken);
 	}
@@ -71,6 +72,9 @@ namespace hrvster.ApplicationServices.MatchGames
 
 			return allPrizes.Sum(p => p.Quantity);
 		}
+
+		public async Task<MatchPrize> GetPrizeFromBoardAsync(Guid gameboardUid, CancellationToken cancellationToken)
+			=> await _repository.GetByGameboardUidAsync(gameboardUid, cancellationToken);
 
 		/// <summary>
 		/// Update a match prize

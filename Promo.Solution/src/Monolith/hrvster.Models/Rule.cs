@@ -19,5 +19,6 @@ namespace hrvster.Models
 		public bool ScheduledInd { get; set; }
 		public bool NotifyWinners { get; set; }
 		public ExternalClientType ExternalClientType { get; set; }
+		public string UrlLink { get; set; }
 	}
 }

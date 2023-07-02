@@ -18,6 +18,7 @@ namespace hrvster.ApplicationServices.Accounts
 		Task<Account> GetAccountByUidAsync(Guid accountUid);
 		Task<IEnumerable<Rule>> GetAllRulesAsync(Guid accountUid);
 		Task<Profile> GetProfileAsync(Guid userUid, ProfileType profileType);
+		Task<Profile> GetProfileBySweepUidAsync(Guid campaignUid, ProfileType profileType);
 		Task RaiseProfileValidatedEventAsync(UserProviderDetails userDetails, Guid userUid, ProfileType profileType);
 	}
 
@@ -48,6 +49,11 @@ namespace hrvster.ApplicationServices.Accounts
 
 		public async Task<Profile> GetProfileAsync(Guid userUid, ProfileType profileType)
 			=> await _profilesRepository.GetProfileAsync(userUid, profileType);
+
+		public async Task<Profile> GetProfileBySweepUidAsync(Guid campaignUid, ProfileType profileType)
+		{
+			return await _profilesRepository.GetProfileByCampaignUid(campaignUid, profileType);
+		}
 
 		public async Task RaiseProfileValidatedEventAsync(UserProviderDetails userDetails, Guid userUid, ProfileType profileType)
 			=> await _mediator.Publish(new ProfileValidated(userDetails, userUid, profileType));

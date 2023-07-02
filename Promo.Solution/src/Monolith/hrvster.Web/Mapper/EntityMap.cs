@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using hrvster.Games.Match.Models;
+using hrvster.Models.Company;
 using hrvster.Models.WebModels;
 using hrvster.Models.WebModels.Sweeps;
 using hrvster.Web.Models;
@@ -98,6 +99,11 @@ namespace hrvster.Web.Mapper
 
 			CreateMap<Games.Match.Models.MatchPlay, Models.Plays.MatchPlay>()
 				.ReverseMap();
+
+			CreateMap<ClientImage, hrvster.Web.Models.ClientImages>()
+				.ForMember(dest => dest.LogoLocation, opt => opt.MapFrom(src => src.LogoLocation))
+				.ForMember(dest => dest.HeaderLocation, opt => opt.MapFrom(src => src.HeaderLocation))
+				.ForMember(dest => dest.FooterLocation, opt => opt.MapFrom(src => src.FooterLocation));
 		}
 	}
 }

@@ -13,6 +13,7 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -20,9 +21,11 @@ namespace hrvster.ApplicationServices
 {
 	public interface IGameService
 	{
-		Task CreateRulePostAsync(string externalClientType, HrvsterUser hrvsterUser, string gameType, Guid gameUid, int gameId, int watchTypeId, string watchValue, string post, bool postNow, DateTime scheduledDate, IFormFile media1, IFormFile media2, IFormFile media3, IFormFile media4, string pageId, bool following);
+		Task CreateRulePostAsync(Guid ruleUid, string urlLink, string externalClientType, HrvsterUser hrvsterUser, string gameType, Guid gameUid, int gameId, int watchTypeId, string watchValue, string post, bool postNow, DateTime scheduledDate, IFormFile media1, IFormFile media2, IFormFile media3, IFormFile media4, string pageId, bool following);
+		Task<bool> GameExistsForSubdomainAsync(string subdomain, Guid gameUid);
 		Task<GameDetail> GetGameDetailsAsync(string gameType, Guid uid);
 		Task<IEnumerable<Rule>> GetRulesAsync(GameTypesEnum gameType, CancellationToken cancellationToken);
+		Task<IEnumerable<Rule>> GetRulesAsync(GameTypesEnum gameType, Guid gameUid, CancellationToken cancellationToken);
 		IEnumerable<Rule> GetRulesMatching(GameTypesEnum gameType, string watchValue);
 		Task<IEnumerable<Rule>> GetRulesMatchingAsync(GameTypesEnum gameType, string text, CancellationToken cancellationToken);
 	}
@@ -36,6 +39,7 @@ namespace hrvster.ApplicationServices
 		private readonly IPublishService _publishService;
 		private readonly IAccountsService _accountsService;
 		private readonly IAccountSubscriptionService _accountSubscriptionService;
+		private readonly IAccountCompanyService _accountCompanyService;
 
 		public GameService(
 			ILoggerFactory loggerFactory,
@@ -44,7 +48,8 @@ namespace hrvster.ApplicationServices
 			IMediator mediator,
 			IPublishService publishService,
 			IAccountsService accountsService,
-			IAccountSubscriptionService accountSubscriptionService)
+			IAccountSubscriptionService accountSubscriptionService,
+			IAccountCompanyService accountCompanyService)
 		{
 			_logger = loggerFactory.CreateLogger<GameService>();
 			_sweepService = sweepstakesService;
@@ -53,6 +58,23 @@ namespace hrvster.ApplicationServices
 			_publishService = publishService;
 			_accountsService = accountsService;
 			_accountSubscriptionService = accountSubscriptionService;
+			_accountCompanyService = accountCompanyService;
+		}
+
+		public async Task<IEnumerable<Rule>> GetRulesAsync(
+			GameTypesEnum gameType, 
+			Guid gameUid, 
+			CancellationToken cancellationToken)
+		{
+			switch(gameType)
+			{
+				case GameTypesEnum.Sweeps:
+					return await _sweepService.GetSweepRulesAsync(gameUid);
+				case GameTypesEnum.MatchGames:
+					return await _matchGameService.GetRulesAsync(gameUid, cancellationToken);
+				default:
+					return await _sweepService.GetSweepRulesAsync(gameUid);
+			}
 		}
 
 		public async Task<IEnumerable<Rule>> GetRulesAsync(GameTypesEnum gameType, CancellationToken cancellationToken)
@@ -176,6 +198,8 @@ namespace hrvster.ApplicationServices
 		}
 
 		public async Task CreateRulePostAsync(
+			Guid ruleUid,
+			string urlLink,
 			string externalClientType,
 			HrvsterUser hrvsterUser,
 			string gameType,
@@ -217,6 +241,8 @@ namespace hrvster.ApplicationServices
 			{
 				case GameTypesEnum.Sweeps:
 					await CreateSweepRulePostAsync(
+						ruleUid,
+						urlLink,
 						externalClientType,
 						gameUid,
 						gameId,
@@ -234,6 +260,8 @@ namespace hrvster.ApplicationServices
 					break;
 				case GameTypesEnum.MatchGames:
 					await CreateMatchRulePostAsync(
+						ruleUid,
+						urlLink,
 						externalClientType,
 						gameUid,
 						gameId,
@@ -253,6 +281,8 @@ namespace hrvster.ApplicationServices
 		}
 
 		private async Task<bool> CreateSweepRulePostAsync(
+			Guid ruleUid,
+			string urlLink,
 			string externalClientType, 
 			Guid gameUid, 
 			int gameId, 
@@ -289,7 +319,7 @@ namespace hrvster.ApplicationServices
 
 			var ruleCount = await GetGameRuleCountsForAsync(hrvsterUser.UserUid);
 
-			if (ruleCount >= accountSubscription.Plan.HashtagsPerMonth)
+			if (ruleCount >= accountSubscription.Plan.GetHashtagCount())
 			{
 				_logger.LogWarning("Account with uid {accountUid} has a total of {activeRulesCount} active hashtags and their current max is {maxHashtags}",
 						profile.Account.AccountUid,
@@ -299,10 +329,12 @@ namespace hrvster.ApplicationServices
 				return false;
 			}
 
-			return await PostMessageAsync(externalClientType, gameUid, gameId, gameType, media, mediaLocation, hrvsterUser, watchValue, watchTypeId, post, postNow, scheduledDate, following, profile, pageId);
+			return await PostMessageAsync(ruleUid, urlLink, externalClientType, gameUid, gameId, gameType, media, mediaLocation, hrvsterUser, watchValue, watchTypeId, post, postNow, scheduledDate, following, profile, pageId);
 		}
 
 		private async Task<bool> CreateMatchRulePostAsync(
+			Guid ruleUid,
+			string urlLink,
 			string externalClientType,
 			Guid gameUid,
 			int gameId,
@@ -340,21 +372,40 @@ namespace hrvster.ApplicationServices
 				return false;
 			}
 
-			return await PostMessageAsync(externalClientType, gameUid, gameId, gameType, media, mediaLocation, hrvsterUser, watchValue, watchTypeId, post, postNow, scheduledDate, following, profile, pageId);
+			return await PostMessageAsync(ruleUid, urlLink, externalClientType, gameUid, gameId, gameType, media, mediaLocation, hrvsterUser, watchValue, watchTypeId, post, postNow, scheduledDate, following, profile, pageId);
 		}
 
-		private async Task<bool> PostMessageAsync(string externalClientType, Guid gameUid, int gameId, GameTypesEnum gameType, List<IFormFile> media, IEnumerable<string> mediaLocation, HrvsterUser hrvsterUser, string watchValue, int watchTypeId, string post, bool postNow, DateTime scheduledDate, bool following, Profile profile, string pageId)
+		private async Task<bool> PostMessageAsync(Guid ruleUid, string urlLink, string externalClientType, Guid gameUid, int gameId, GameTypesEnum gameType, List<IFormFile> media, IEnumerable<string> mediaLocation, HrvsterUser hrvsterUser, string watchValue, int watchTypeId, string post, bool postNow, DateTime scheduledDate, bool following, Profile profile, string pageId)
 		{
 			if (postNow)
-				return await _publishService.PublishAsync(profile, gameId, gameUid, gameType, media,
+				return await _publishService.PublishAsync(ruleUid, urlLink, profile, gameId, gameUid, gameType, media,
 					mediaLocation == null ? null : mediaLocation.ToList(),
 					hrvsterUser.Token, hrvsterUser.UserUid, watchValue, watchTypeId, post,
 					Enum.Parse<ExternalClientType>(externalClientType), following, pageId);
 
-			return await _publishService.SaveScheduledPostToPublishAsync(
-				hrvsterUser.UserUid, gameId, gameUid, profile, watchTypeId, watchValue, post, scheduledDate, 
+			return await SaveScheduledPostToPublishAsync(
+				ruleUid, urlLink, hrvsterUser.UserUid, gameId, gameUid, profile, watchTypeId, watchValue, post, scheduledDate, 
 				mediaLocation == null ? null : mediaLocation.ToList(),
 				Enum.Parse<ExternalClientType>(externalClientType), following, pageId);
+		}
+
+		private Task<bool> SaveScheduledPostToPublishAsync(
+			Guid ruleUid, 
+			string urlLink, 
+			Guid userUid, 
+			int gameId, 
+			Guid gameUid, 
+			Profile profile, 
+			int watchTypeId, 
+			string watchValue, 
+			string post, 
+			DateTime scheduledDate, 
+			List<string> list, 
+			ExternalClientType externalClientType, 
+			bool following, 
+			string pageId)
+		{
+			throw new NotImplementedException();
 		}
 
 		private ProfileType GetProfileType(string externalClientType)
@@ -378,6 +429,22 @@ namespace hrvster.ApplicationServices
 			}
 
 			return rules.GetActiveRules().Count();
+		}
+
+		public async Task<bool> GameExistsForSubdomainAsync(string subdomain, Guid gameUid)
+		{
+			var accountCompany = await _accountCompanyService.GetAccountCompanyAsync(subdomain);
+
+			if (accountCompany == null) return false;
+
+			//does the game exist?
+			var sweepGame = await _sweepService.GetSweepstakeAsync(gameUid, default);
+			if (sweepGame != null) return true;
+
+			var matchGame = await _matchGameService.GetMatchGameAsync(gameUid, default);
+			if (matchGame != null) return true;
+
+			return false;
 		}
 	}
 }

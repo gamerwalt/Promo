@@ -1,0 +1,18 @@
+﻿@using hrvster.Core;
+@using hrvster.Models;
+@inject LinkBuilder linkBuilder
+
+@model SweepEntry
+@{
+    var linkUrl = @linkBuilder.BuildTwitterLink(Model.Rule.ExternalId, Guid.Empty, Model.UserIdentifier).Result;
+}
+
+<div class="form-container mx-auto p-4">
+    <div>You have been entered into the sweepstake <strong>@Model.Sweep.Name</strong></div>
+    <div>
+        The sweepstake will run from <strong>@Model.Sweep.StartDateUtc.ToString("MMM d, yyyy hh:MM") GMT</strong>
+        to <strong>@Model.Sweep.EndDateUtc.ToString("MMM d, yyyy hh:MM") GMT</strong> with the draw on 
+        <strong>@Model.Sweep.DrawDateUtc.ToString("MMM d, yyyy hh:MM") GMT</strong>
+    </div>
+    <div>The winners will be posted on the tweet you came from belong to <a target="_blank" href="@linkUrl">@linkUrl</a> </div>
+</div>

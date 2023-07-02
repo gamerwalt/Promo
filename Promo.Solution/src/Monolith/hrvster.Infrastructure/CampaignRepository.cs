@@ -25,6 +25,8 @@ namespace hrvster.Infrastructure
 		//Gets
 		List<Campaign> GetAccountCampaigns(Guid userUid);
 		Campaign GetCampaignByUid(Guid campaignUid, Guid userUid);
+		Task<Campaign> GetCampaignBySweepsGameAsync(Guid gameUid);
+		Task<Campaign> GetCampaignByMatchGameAsync(Guid gameUid);
 	}
 
 	public class CampaignRepository : ICampaignRepository
@@ -87,6 +89,51 @@ namespace hrvster.Infrastructure
 
 			return campaigns;
 		}
+
+		public async Task<Campaign> GetCampaignBySweepsGameAsync(Guid gameUid)
+		{
+			var campaign = default(Campaign);
+
+			using (var conn = new MySqlConnection(_database.GetConnectionString()))
+			{
+				var command = conn.CreateCommand();
+				command.CommandText = "campaign_get_by_sweep_uid";
+				command.CommandType = CommandType.StoredProcedure;
+				command.AddParameter("sweepUid", gameUid);
+
+				await conn.OpenAsync();
+				using var reader = await command.ExecuteReaderAsync();
+				while (await reader.ReadAsync())
+				{
+					campaign = CreateCampaignFrom(reader);
+				}
+			}
+
+			return campaign;
+		}
+
+		public async Task<Campaign> GetCampaignByMatchGameAsync(Guid gameUid)
+		{
+			var campaign = default(Campaign);
+
+			using (var conn = new MySqlConnection(_database.GetConnectionString()))
+			{
+				var command = conn.CreateCommand();
+				command.CommandText = "campaign_get_by_match_game_uid";
+				command.CommandType = CommandType.StoredProcedure;
+				command.AddParameter("matchGameUid", gameUid);
+
+				await conn.OpenAsync();
+				using var reader = await command.ExecuteReaderAsync();
+				while (await reader.ReadAsync())
+				{
+					campaign = CreateCampaignFrom(reader);
+				}
+			}
+
+			return campaign;
+		}
+
 
 		public async Task<List<Campaign>> GetAccountCampaignsAsync(Guid accountUid)
 		{

@@ -46,11 +46,26 @@
 							<input type="text" placeholder="First Name" asp-for="FirstName" autocomplete="off" class="form-control bg-transparent" />
                             <span asp-validation-for="FirstName"></span>
 						</div>
-                        <div class="fv-row mb-8">
+						<div class="fv-row mb-8">
 							<input type="text" placeholder="Last Name" asp-for="LastName" autocomplete="off" class="form-control bg-transparent" />
                             <span asp-validation-for="LastName"></span>
 						</div>
-                        <div class="fv-row mb-8">
+
+						<hr />
+
+						<div class="fv-row mb-8">
+							<input type="text" placeholder="Company Name" asp-for="CompanyName" autocomplete="off" class="form-control bg-transparent" />
+							<span asp-validation-for="CompanyName"></span>
+						</div>
+						<div class="fv-row mb-8">
+							<input type="text" id="SubdomainName" placeholder="Subdomain" asp-for="SubdomainName" autocomplete="off" class="form-control bg-transparent" />
+							<span asp-validation-for="SubdomainName"></span>
+						</div>
+						<div class="fv-row mb-8">
+							<label>Your URL: <span id="url-display">https://<span id="subdomain-display"></span>.hrvster.com</span></label>
+						</div>
+
+                        <div class="fv-row mb-8 url-input">
                             <div class="form-check form-check-solid form-switch fv-row">
 							    <input class="form-check-input w-45px h-30px" type="checkbox" asp-for="AcceptedTerms" />
 							    <label class="form-check-label" for="allowmarketing">
@@ -74,6 +89,12 @@
 		</div>
 	</div>
 </div>
+<style>
+	#url-display {
+		color: blue;
+		font-weight: bold;
+	}
+</style>
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
 }

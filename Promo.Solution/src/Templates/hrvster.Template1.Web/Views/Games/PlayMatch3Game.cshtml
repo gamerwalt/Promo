@@ -1,0 +1,31 @@
+﻿@model PlayMatchGame
+@{
+    ViewData["Title"] = "Play Pick 3 Match Game";
+}
+<link rel="stylesheet" href="~/css/gameboard.css">
+
+<form formnovalidate 
+    asp-action="PlayMatch3Game"
+    asp-route-Uid="@Model.GameUid"
+    asp-route-gameplayUid="@Model.GameplayUid"
+    asp-route-externalClient="@Model.ExternalClient">
+    <input type="text" asp-for="@Model.SelectedTiles" hidden>
+    @Html.HiddenFor(m => m.GameUid)
+    @Html.HiddenFor(m => m.GameplayUid)
+    <div class="gameboard">
+        @foreach (var uid in Model.Tiles)
+        {
+            <div class="tile" data-uid="@uid"></div>
+        }
+        <div class="button-container">
+            <div class="button-wrapper">
+                <button type="submit" class="btn btn-submit btn-primary btn-block" disabled>Submit</button>
+            </div>
+            <div class="button-wrapper">
+                <button type="button" id="reset" class="btn btn-reset" disabled>Reset</button>
+            </div>
+        </div>
+    </div>
+</form>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="~/js/playGameboard.js"></script>

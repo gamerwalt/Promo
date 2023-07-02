@@ -20,27 +20,26 @@ namespace hrvster.Core.Clients.Publishers
 		private readonly TwitterAccount _twitterAccount;
 
 		private Tweetinvi.TwitterClient _twitterClient;
+		private readonly ITwitterHttpService _twitterHttpService;
+		private readonly ITwitterHttpImageUploaderService _twitterUploadingService;
 
-		public TwitterClient(ILoggerFactory loggerFactory, TwitterAccount twitterAccount)
+		public TwitterClient(
+			ILoggerFactory loggerFactory, 
+			TwitterAccount twitterAccount,
+			ITwitterHttpService twitterHttpService,
+			ITwitterHttpImageUploaderService twitterUploadingService)
 		{
 			_logger = loggerFactory.CreateLogger<TwitterClient>();
 			_twitterAccount = twitterAccount;
+			_twitterHttpService = twitterHttpService;
+			_twitterUploadingService = twitterUploadingService;
 		}
 
 		public async Task DeleteAsync(string externalId, string accessToken, string accessTokenSecret)
 		{
 			BuildTwitterClient(accessToken, accessTokenSecret);
 
-			var tweet = await _twitterClient.Tweets.GetTweetAsync(Convert.ToInt64(externalId));
-
-			if (tweet == null)
-			{
-				_logger.LogInformation("Unable to retrieve the tweet of the external id: {externalId}", externalId);
-
-				return;
-			}
-
-			await _twitterClient.Tweets.DestroyTweetAsync(tweet);
+			await _twitterHttpService.DeleteTweetAsync(externalId, accessToken);
 		}
 
 		public virtual async Task<string> PublishAsync(Message message)
@@ -52,16 +51,17 @@ namespace hrvster.Core.Clients.Publishers
 			BuildTwitterClient(message.Profile.AccessToken, message.Profile.AccessTokenSecret);
 
 			var mediaIds = await UploadMedia(message);
-			var tweet = default(ITweet);
+
+			var tweetId = string.Empty;
 
 			if(mediaIds.Count == 0)
 			{
 				try
 				{
-					tweet = await _twitterClient.Tweets.PublishTweetAsync(new PublishTweetParameters
-					{
-						Text = message.Text
-					});
+					tweetId = await _twitterHttpService.PublishTweetAsync(
+						message.Text, 
+						message.Profile.AccessToken, 
+						message.Profile.RefreshToken);
 				}
 				catch (Exception ex)
 				{
@@ -72,7 +72,7 @@ namespace hrvster.Core.Clients.Publishers
 						ex.StackTrace,
 						ex.InnerException?.Message);
 
-					return String.Empty;
+					return string.Empty;
 				}
 				
 			}
@@ -80,11 +80,11 @@ namespace hrvster.Core.Clients.Publishers
 			{
 				try
 				{
-					tweet = await _twitterClient.Tweets.PublishTweetAsync(new PublishTweetParameters
-					{
-						Text = message.Text,
-						MediaIds = mediaIds
-					});
+					tweetId = await _twitterHttpService.PublishTweetAsync(
+						message.Text, 
+						message.Profile.AccessToken, 
+						message.Profile.RefreshToken, 
+						mediaIds);
 				}
 				catch (Exception ex)
 				{
@@ -95,18 +95,18 @@ namespace hrvster.Core.Clients.Publishers
 						ex.StackTrace,
 						ex.InnerException?.Message);
 
-					return String.Empty;
+					return string.Empty;
 				}
 			}
 			
-			if (tweet == null)
+			if (string.IsNullOrWhiteSpace(tweetId))
 			{
 				_logger.LogError("Unable to publish the tweet {message} received.", message.AsJson());
 
 				return string.Empty;
 			}
 
-			return tweet?.IdStr;
+			return tweetId;
 		}
 
 		public virtual async Task<string> PublishResponse(Message message, string responseToId)
@@ -161,59 +161,27 @@ namespace hrvster.Core.Clients.Publishers
 
 					var fileName = Path.GetFileName(path);
 
-					//if(path.Contains(".mp4"))
-					//{
-					//	using (var client = new WebClient())
-					//	{
-					//		var mediaArray = await client.DownloadDataTaskAsync(new Uri(path));
-					//		try
-					//		{
-					//			var uploadedVideo = await _twitterClient.Upload.UploadTweetVideoAsync(mediaArray);
+					using var client = new WebClient();
+					var byteArray = await client.DownloadDataTaskAsync(new Uri(path));
+					try
+					{
+						var uploadedImageObject = await _twitterUploadingService.UploadImageAsync(byteArray, message.Profile.ExternalProfileId);
 
-					//			if(uploadedVideo == null)
-					//			{
-					//				_logger.LogError("Was unable to upload the media {path} for the profile with uid {profileUid}",
-					//					path,
-					//					message.Profile.ProfileUid);
-					//			}
-					//			else
-					//			{
-					//				mediaIds.Add(uploadedVideo.Id.GetValueOrDefault());
-					//			}
-					//		}
-					//		catch (Exception ex)
-					//		{
-					//			_logger.LogError(ex.Message);
-					//		}
-					//	}
-					//}
-					//else
-					//{
-						using (var client = new WebClient())
+						if (uploadedImageObject == null)
 						{
-							var byteArray = await client.DownloadDataTaskAsync(new Uri(path));
-							try
-							{
-								var uploadedImage = await _twitterClient.Upload
-								.UploadTweetImageAsync(byteArray);
-
-								if (uploadedImage == null)
-								{
-									_logger.LogError("Was unable to upload the media {path} for the profile with uid {profileUid}",
-										path,
-										message.Profile.ProfileUid);
-								}
-								else
-								{
-									mediaIds.Add(uploadedImage.Id.GetValueOrDefault());
-								}
-							}
-							catch (Exception ex)
-							{
-								_logger.LogError(ex.Message);
-							}
+							_logger.LogError("Was unable to upload the media {path} for the profile with uid {profileUid}",
+								path,
+								message.Profile.ProfileUid);
 						}
-					//}
+						else
+						{
+							mediaIds.Add(long.Parse(uploadedImageObject.MediaIdString));
+						}
+					}
+					catch (Exception ex)
+					{
+						_logger.LogError(ex.Message);
+					}
 				}
 			}
 

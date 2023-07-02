@@ -22,7 +22,9 @@ namespace hrvster.ApplicationServices.MatchGames
 		MatchGame GetMatchGame(Guid matchGameUid);
 		Task<MatchGame> GetMatchGameAsync(Guid matchGameUid, CancellationToken cancellationToken);
 		Task<IEnumerable<MatchGame>> GetMatchGamesToGenerateBoardAsync(CancellationToken token);
+		Task<MatchPrize> GetPrizeFromGameplayUidAsync(Guid gameplayUid, CancellationToken cancellationToken);
 		Task<IEnumerable<Rule>> GetRulesAsync(CancellationToken cancellationToken);
+		Task<IEnumerable<Rule>> GetRulesAsync(Guid gameUid, CancellationToken cancellationToken);
 		IEnumerable<Rule> GetRulesMatching(string watchValue);
 		Task<IEnumerable<Rule>> GetRulesMatchingAsync(string watchValue, CancellationToken cancellationToken);
 		Task SetAsReadyToBeProcessedAsync(MatchGame matchGame, CancellationToken cancellationToken);
@@ -40,6 +42,8 @@ namespace hrvster.ApplicationServices.MatchGames
 		private readonly IProfilesRepository _profilesRepository;
 		private readonly IFacebookPageRepository _facebookPageRepository;
 		private readonly Func<ExternalClientType, Core.Clients.Publishers.IExternalClient> _publisherResolver;
+		private readonly IMatchPrizeService _matchPrizeService;
+		private readonly IMatchGamePlayRepository _matchGamePlayRepository;
 
 		public MatchGamesService(
 			ILoggerFactory loggerFactory,
@@ -49,7 +53,9 @@ namespace hrvster.ApplicationServices.MatchGames
 			IMatchRulePageRepository matchRulePageRepository,
 			IProfilesRepository profilesRepository,
 			IFacebookPageRepository facebookPageRepository,
-			Func<ExternalClientType, Core.Clients.Publishers.IExternalClient> publisherResolver)
+			Func<ExternalClientType, Core.Clients.Publishers.IExternalClient> publisherResolver,
+			IMatchGamePlayRepository matchGamePlayRepository,
+			IMatchPrizeService matchPrizeService)
 		{
 			_logger = loggerFactory.CreateLogger<MatchGamesService>();
 			_repository = repository;
@@ -59,6 +65,15 @@ namespace hrvster.ApplicationServices.MatchGames
 			_profilesRepository = profilesRepository;
 			_facebookPageRepository = facebookPageRepository;
 			_publisherResolver = publisherResolver;
+			_matchGamePlayRepository = matchGamePlayRepository;
+			_matchPrizeService = matchPrizeService;
+		}
+
+		public async Task<MatchPrize> GetPrizeFromGameplayUidAsync(Guid gameplayUid, CancellationToken cancellationToken)
+		{
+			var gameplay = await _matchGamePlayRepository.GetAsync(gameplayUid, cancellationToken);
+
+			return await _matchPrizeService.GetPrizeFromBoardAsync(gameplay.MatchBoard.Uid, cancellationToken);
 		}
 
 		public async Task CreateMatchGameAsync(
@@ -70,6 +85,10 @@ namespace hrvster.ApplicationServices.MatchGames
 
 			await _repository.CreateAsync(matchGame, timeZone, isDaylight, cancellationToken);
 		}
+
+		public async Task<IEnumerable<Rule>> GetRulesAsync(Guid gameUid, CancellationToken cancellationToken)
+			=> await _matchGameRulesRepository.GetAllRulesAsync(gameUid, cancellationToken);
+
 
 		public async Task DeleteGameRuleAsync(
 			Guid ruleUid, 

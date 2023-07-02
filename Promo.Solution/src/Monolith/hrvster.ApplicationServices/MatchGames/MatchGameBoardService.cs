@@ -75,6 +75,9 @@ namespace hrvster.ApplicationServices.MatchGames
 			var random = new Random();
 			var generatedBoards = new List<MatchBoard>(numberOfBoards);
 
+			//set up loss images for this game
+			await _matchImageService.UpdateLossImageAsync(matchGame.Uid, cancellationToken);
+
 			var prizes = await _matchPrizeService.GetAllForMatchGameAsync(matchGame.Uid, cancellationToken);
 			var prizeList = prizes.ToList();
 			var images = await _matchImageService.GetForMatchGameAsync(matchGame.Uid, cancellationToken);

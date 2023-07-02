@@ -12,10 +12,10 @@ namespace hrvster.Template1.Web.Controllers
 		private readonly ILayoutService _headerFooterService;
 
 		public HomeController(
-			ILogger<HomeController> logger, 
+			ILoggerFactory loggerFactory, 
 			ILayoutService headerFooterService)
 		{
-			_logger = logger;
+			_logger = loggerFactory.CreateLogger<HomeController>();
 			_headerFooterService = headerFooterService;
 		}
 
@@ -25,6 +25,8 @@ namespace hrvster.Template1.Web.Controllers
 			var subdomainName = subdomain.ToString();
 
 			ViewBag.TestData = subdomainName;
+
+			_logger.LogInformation("Loading the HOme Controller index action.");
 
 			return View();
 		}

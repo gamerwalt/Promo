@@ -26,6 +26,12 @@
 		public const string FacebookwebhookLink = "facebookhook/feedhook";
 	}
 
+	public class GameUrlTypes
+	{
+		public const string SweepGame = "Games/Sweeps/[GameUid]";
+		public const string MatchGame = "Games/Pick3MatchGame/[GameUid]";
+	}
+
 	public class NotificationService
 	{
 		public const int DismissInSeconds = 10;
@@ -36,5 +42,11 @@
 		public const string GameBoards = "game_boards_";
 		public const string GameTiles = "game_tiles_";
 		public const string BoardKeys = "board_keys";
+	}
+
+	public class GameUrlTypeReplaceInformation
+	{
+		public const string ReplaceableSubdomain = "[subdomain]";
+		public const string ReplaceableGameUid = "[GameUid]";
 	}
 }

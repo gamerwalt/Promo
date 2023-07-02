@@ -33,6 +33,8 @@ namespace hrvster.ApplicationServices.Tests
             var emptyFile = new FormFile(Stream.Null, 0, 0, null, "");
 
             await _feature.GameService.CreateRulePostAsync(
+                TestData.RuleUid,
+                string.Empty,
                 ExternalClientType.Twitter.ToString(),
                 _feature.hrvsterUser,
                 GameTypesEnum.MatchGames.ToString(),
@@ -63,6 +65,8 @@ namespace hrvster.ApplicationServices.Tests
             var emptyFile = new FormFile(Stream.Null, 0, 0, null, "");
 
             await _feature.GameService.CreateRulePostAsync(
+                TestData.RuleUid,
+                string.Empty,
                 ExternalClientType.Twitter.ToString(),
 				_feature.hrvsterUser,
                 GameTypesEnum.MatchGames.ToString(),
@@ -95,7 +99,9 @@ namespace hrvster.ApplicationServices.Tests
             var emptyFile = new FormFile(Stream.Null, 0, 0, null, "");
 
             await _feature.GameService.CreateRulePostAsync(
-				ExternalClientType.Twitter.ToString(),
+                TestData.RuleUid,
+                string.Empty,
+                ExternalClientType.Twitter.ToString(),
 				_feature.hrvsterUser,
                 GameTypesEnum.MatchGames.ToString(),
                 matchGame.Uid,
@@ -128,7 +134,9 @@ namespace hrvster.ApplicationServices.Tests
             var emptyFile = new FormFile(Stream.Null, 0, 0, null, "");
 
             await _feature.GameService.CreateRulePostAsync(
-				ExternalClientType.Twitter.ToString(),
+                TestData.RuleUid,
+                string.Empty,
+                ExternalClientType.Twitter.ToString(),
 				_feature.hrvsterUser,
                 GameTypesEnum.MatchGames.ToString(),
                 matchGame.Uid,
@@ -146,7 +154,9 @@ namespace hrvster.ApplicationServices.Tests
 				true);
 
             await _feature.GameService.CreateRulePostAsync(
-				ExternalClientType.Twitter.ToString(),
+                TestData.RuleUid2,
+                string.Empty,
+                ExternalClientType.Twitter.ToString(),
 				_feature.hrvsterUser,
                 GameTypesEnum.MatchGames.ToString(),
                 matchGame.Uid,

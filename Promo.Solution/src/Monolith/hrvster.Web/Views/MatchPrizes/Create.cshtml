@@ -64,6 +64,29 @@
 					Create Prize
 				</button>
 			</div>
+			<div class="card-body pt-0">
+				<div class="table-responsive">
+					<table id="kt_profile_overview_table" class="table table-row-bordered table-row-dashed gy-4 align-middle fw-bold">
+						<thead class="fs-7 text-gray-400 text-uppercase">
+							<tr>
+								<th class="min-w-250px">Name</th>
+								<th class="min-w-250px">Value</th>
+								<th class="min-w-150px">Quantity</th>
+							</tr>
+						</thead>
+						<tbody class="fs-7">
+							@foreach (var prize in Model.Prizes)
+							{
+								<tr>
+									<td>@prize.Name</td>
+									<td>@prize.Value</td>
+									<td>@prize.Quantity</td>
+								</tr>
+							}
+						</tbody>
+					</table>
+				</div>
+			</div>
 		</div>
 	</form>
 </div>

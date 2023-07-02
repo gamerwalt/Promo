@@ -1,4 +1,5 @@
-﻿using hrvster.Core.Requests.WebRequests.Publishing;
+﻿using hrvster.Core.Clients;
+using hrvster.Core.Requests.WebRequests.Publishing;
 using hrvster.Infrastructure;
 using hrvster.Infrastructure.Accounts;
 using hrvster.Infrastructure.Facebook;
@@ -19,6 +20,7 @@ namespace hrvster.Core.Handlers.Publishing
 		private readonly IFacebookPageRepository _facebookPageRepository;
 		private readonly Func<ExternalClientType, Clients.Publishers.IExternalClient> _publisherResolver;
 		private readonly ISweepRulesPageRepository _sweepRulesPageRepository;
+		private readonly IRebrandlyService _rebrandlyService;
 
 		public DeleteSweepTweetRule(
 			ILoggerFactory loggerFactory,
@@ -26,7 +28,8 @@ namespace hrvster.Core.Handlers.Publishing
 			IProfilesRepository profilesRepository,
 			IFacebookPageRepository facebookPageRepository,
 			Func<ExternalClientType, Clients.Publishers.IExternalClient> publisherResolver,
-			ISweepRulesPageRepository sweepRulesPageRepository)
+			ISweepRulesPageRepository sweepRulesPageRepository,
+			IRebrandlyService rebrandlyService)
 		{
 			_logger = loggerFactory.CreateLogger<DeleteSweepTweetRule>();
 			_sweepRulesRepository = sweepRulesRepository;
@@ -34,6 +37,7 @@ namespace hrvster.Core.Handlers.Publishing
 			_facebookPageRepository = facebookPageRepository;
 			_publisherResolver = publisherResolver;
 			_sweepRulesPageRepository = sweepRulesPageRepository;
+			_rebrandlyService = rebrandlyService;
 		}
 
 		protected override async Task Handle(DeleteSweepTweetRuleRequest request, CancellationToken cancellationToken)
@@ -80,7 +84,11 @@ namespace hrvster.Core.Handlers.Publishing
 			var externalId = rule.ExternalId;
 			var publisher = _publisherResolver(rule.ExternalClientType);
 
+			//Delete Post/Tweet/Instagram/Tiktok
 			await publisher.DeleteAsync(externalId.ToString(), accessToken, profile.AccessTokenSecret);
+
+			//Delete the ShortUrl if any
+			await _rebrandlyService.DeleteLinkAsync(rule.UrlLink);
 
 			await _sweepRulesRepository.DeleteAsync(request.RuleUid);
 		}

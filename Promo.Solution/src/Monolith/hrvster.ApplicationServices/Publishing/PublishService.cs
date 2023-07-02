@@ -1,5 +1,4 @@
 ﻿using hrvster.ApplicationServices.Harvesters.Facebook;
-using hrvster.ApplicationServices.Subscription;
 using hrvster.Core.Clients.Common;
 using hrvster.Core.Clients.Publishers;
 using hrvster.Core.Requests.Rules.Notifications;
@@ -16,8 +15,8 @@ namespace hrvster.ApplicationServices.Publishing
 {
 	public interface IPublishService
 	{
-		Task<bool> PublishAsync(Profile profile, int gameId, Guid gameUid, GameTypesEnum gameType, IList<IFormFile> media, IList<string> mediaLocation, string token, Guid userUid, string watchValue, int watchTypeId, string tweetText, ExternalClientType externalClientType, bool following, string pageId);
-		Task<bool> SaveScheduledPostToPublishAsync(Guid userUid, int gameId, Guid gameUid, Profile profile, int watchTypeId, string watchValue, string tweetText, DateTime scheduledDate, IList<string> mediaLocation, ExternalClientType externalClientType, bool following, string pageId);
+		Task<bool> PublishAsync(Guid ruleUid, string urlLink, Profile profile, int gameId, Guid gameUid, GameTypesEnum gameType, IList<IFormFile> media, IList<string> mediaLocation, string token, Guid userUid, string watchValue, int watchTypeId, string tweetText, ExternalClientType externalClientType, bool following, string pageId);
+		Task<bool> SaveScheduledPostToPublishAsync(Guid ruleUid, string urlLink, Guid userUid, int gameId, Guid gameUid, Profile profile, int watchTypeId, string watchValue, string tweetText, DateTime scheduledDate, IList<string> mediaLocation, ExternalClientType externalClientType, bool following, string pageId);
 	}
 
 	public class PublishService : IPublishService
@@ -39,7 +38,7 @@ namespace hrvster.ApplicationServices.Publishing
 			_facebookPageService = facebookPageSerivce;
 		}
 
-		public async Task<bool> PublishAsync(Profile profile, int gameId, Guid gameUid, GameTypesEnum gameType, IList<IFormFile> media, IList<string> mediaLocation, string token, Guid userUid, string watchValue, int watchTypeId, string tweetText, ExternalClientType externalClientType, bool following, string pageId = "")
+		public async Task<bool> PublishAsync(Guid ruleUid, string urlLink, Profile profile, int gameId, Guid gameUid, GameTypesEnum gameType, IList<IFormFile> media, IList<string> mediaLocation, string token, Guid userUid, string watchValue, int watchTypeId, string tweetText, ExternalClientType externalClientType, bool following, string pageId = "")
 		{
 			_logger.LogInformation("Publishing the tweet {tweetText} with the hashtag {watchValue} for the user with Uid {userUid} and profile name {screenName} for the External Client {externalClient}",
 				tweetText,
@@ -51,13 +50,13 @@ namespace hrvster.ApplicationServices.Publishing
 			var publisher = _publisherResolver(externalClientType);
 
 			var message = BuildMessage(gameUid, profile, mediaLocation, watchValue, watchTypeId, tweetText);
-			if(!string.IsNullOrWhiteSpace(pageId))
+			if (!string.IsNullOrWhiteSpace(pageId))
 			{
 				var page = await _facebookPageService.GetPageAsync(pageId);
 				message.PageId = pageId;
 				message.PageAccessToken = page.PageAccessToken;
 			}
-			
+
 			var externalId = await publisher.PublishAsync(message);
 
 			if (string.IsNullOrWhiteSpace(externalId))
@@ -72,7 +71,7 @@ namespace hrvster.ApplicationServices.Publishing
 				return false;
 			}
 
-			await _mediator.Publish(new RulePublished(profile, externalId, message, following, gameId, gameUid, gameType, externalClientType, pageId));
+			await _mediator.Publish(new RulePublished(ruleUid, urlLink, profile, externalId, message, following, gameId, gameUid, gameType, externalClientType, pageId));
 
 			return true;
 		}
@@ -93,16 +92,18 @@ namespace hrvster.ApplicationServices.Publishing
 		}
 
 		public async Task<bool> SaveScheduledPostToPublishAsync(
-			Guid userUid, 
-			int gameId, 
-			Guid gameUid, 
-			Profile profile, 
-			int watchTypeId, 
-			string watchValue, 
-			string tweetText, 
-			DateTime scheduledDate, 
-			IList<string> mediaLocation, 
-			ExternalClientType externalClientType, 
+			Guid ruleUid,
+			string urlLink,
+			Guid userUid,
+			int gameId,
+			Guid gameUid,
+			Profile profile,
+			int watchTypeId,
+			string watchValue,
+			string tweetText,
+			DateTime scheduledDate,
+			IList<string> mediaLocation,
+			ExternalClientType externalClientType,
 			bool following, string pageId = "")
 		{
 			_logger.LogInformation("Scheduling the tweet {tweetText} with the hashtag {watchValue} for the user with Uid {userUid} and profile name {screenName} for the External Client {externalClient}",

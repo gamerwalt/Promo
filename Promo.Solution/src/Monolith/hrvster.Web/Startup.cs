@@ -1,6 +1,8 @@
 using Facebook;
 using FluentValidation;
 using FluentValidation.AspNetCore;
+using hrvster.ApplicationServices;
+using hrvster.Core.Clients;
 using hrvster.Extensions.Configuration;
 using hrvster.Extensions.OptionsConfiguration;
 using hrvster.Models.Options;
@@ -39,6 +41,7 @@ namespace hrvster.Web
 					TimeOut = 10000,
 					CloseButton = true,
 				});
+
 			services.AddMvc(o =>
 			{
 				o.Filters.Add(new AutoValidateAntiforgeryTokenAttribute());
@@ -95,6 +98,10 @@ namespace hrvster.Web
 				.AddCacheService()
 				.AddReportingService()
 				.AddProvidersService();
+
+			services.AddHttpClient<IRebrandlyService, RebrandlyService>();
+			services.AddTransient<IHyperlinkService, HyperlinkService>();
+			services.AddTwitterHttpService(Configuration);
 		}
 
 		private void AddValidators(IServiceCollection services)

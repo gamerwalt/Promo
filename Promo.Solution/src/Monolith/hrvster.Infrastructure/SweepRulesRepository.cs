@@ -49,7 +49,8 @@ namespace hrvster.Infrastructure
 				.AddParameter("activeInd", rule.ActiveInd)
 				.AddParameter("mustBeFollowing", rule.MustBeFollowing)
 				.AddParameter("externalClientType", rule.ExternalClientType.ToString())
-				.AddParameter("scheduledInd", rule.ScheduledInd);
+				.AddParameter("scheduledInd", rule.ScheduledInd)
+				.AddParameter("urlLink", rule.UrlLink);
 
 			await conn.OpenAsync();
 			await command.ExecuteNonQueryAsync();
@@ -177,76 +178,6 @@ namespace hrvster.Infrastructure
 			await command.ExecuteNonQueryAsync();
 		}
 
-		private Models.Rule CreateRecordFrom(MySqlDataReader reader)
-		{
-			return new Models.Rule
-			{
-				RuleId = reader.GetInt32("rule_id"),
-				Campaign = new Campaign
-				{
-					CampaignUid = reader.GetGuid("campaign_uid"),
-					CampaignId = reader.GetInt32("campaign_id"),
-					CampaignName = reader.GetStringValue("campaign_name"),
-					Description = reader.GetStringValue("campaign_description"),
-					ActiveInd = reader.GetBoolean("campaign_active_ind"),
-					StartDate = reader.GetDateTime("campaign_start_date"),
-					StartDateUtc = reader.GetDateTime("campaign_start_date_utc"),
-					EndDate = reader.GetDateTime("campaign_end_date"),
-					EndDateUtc = reader.GetDateTime("campaign_end_date_utc"),
-					CampaignType = new CampaignType
-					{
-						CampaignTypeName = reader.GetStringValue("campaign_type_name"),
-						CampaignTypeCode = (CampaignTypeCode)Enum.Parse(typeof(CampaignTypeCode), reader.GetStringValue("campaign_type_code")),
-						CamapaignTypeDescription = reader.GetStringValue("campaign_type_description")
-					},
-					Account = new Account
-					{
-						AccountUid = reader.GetGuid("account_uid")
-					}
-				},
-				Sweep = new Sweep
-				{
-					SweepUid = reader.GetGuid("sweep_uid"),
-					SweepId = reader.GetInt32("sweep_id"),
-					Name = reader.GetStringValue("sweep_name"),
-					RulesUrl = reader.GetStringValue("rules_url"),
-					StartDate = reader.GetDateTime("start_date"),
-					StartDateUtc = reader.GetDateTime("start_date_utc"),
-					EndDate = reader.GetDateTime("end_date"),
-					EndDateUtc = reader.GetDateTime("end_date_utc"),
-					DrawDate = reader.GetDateTime("draw_date"),
-					DrawDateUtc =reader.GetDateTime("draw_date_utc"),
-					DateDrawn = reader.GetNullableDateTimeValue("date_drawn"),
-					DrawAttempted = reader.GetBoolean("draw_attempted"),
-					Account = new Account
-					{
-						AccountUid = reader.GetGuid("account_uid")
-					}
-				},
-				Game = new Game
-				{
-					Id = reader.GetInt32("sweep_id"),
-					Uid = reader.GetGuid("sweep_uid"),
-					Name = reader.GetString("sweep_name"),
-					GameType = GameTypesEnum.Sweeps,
-					StartDate = reader.GetDateTime("start_date"),
-					StartDateUtc = reader.GetDateTime("start_date_utc"),
-					EndDate = reader.GetDateTime("end_date"),
-					EndDateUtc = reader.GetDateTime("end_date_utc")
-				},
-				RuleUid = reader.GetGuid("rule_uid"),
-				WatchValue = reader.GetStringValue("watch_value"),
-				WatchTypeCode = (WatchTypeCode)Enum.Parse(typeof(WatchTypeCode), reader.GetStringValue("watch_type_code")),
-				ExternalId = reader.GetStringValue("external_id"),
-				ActiveInd = reader.GetBoolean("active_ind"),
-				MustBeFollowing = reader.GetBoolean("must_be_following"),
-				NotifyWinners = reader.GetBoolean("notify_winners"),
-				CreatedDate = reader.GetDateTime("created_date"),
-				UpdatedDate = reader.GetNullableDateTimeValue("updated_date"),
-				ExternalClientType = Enum.Parse<ExternalClientType>(reader.GetStringValue("provider_name"))
-			};
-		}
-
 		public async Task UpdateRuleExternalId(Guid ruleUid, string externalId)
 		{
 			using var conn = new MySqlConnection(_database.GetConnectionString());
@@ -316,6 +247,77 @@ namespace hrvster.Infrastructure
 			}
 
 			return rules;
+		}
+
+		private Models.Rule CreateRecordFrom(MySqlDataReader reader)
+		{
+			return new Models.Rule
+			{
+				RuleId = reader.GetInt32("rule_id"),
+				Campaign = new Campaign
+				{
+					CampaignUid = reader.GetGuid("campaign_uid"),
+					CampaignId = reader.GetInt32("campaign_id"),
+					CampaignName = reader.GetStringValue("campaign_name"),
+					Description = reader.GetStringValue("campaign_description"),
+					ActiveInd = reader.GetBoolean("campaign_active_ind"),
+					StartDate = reader.GetDateTime("campaign_start_date"),
+					StartDateUtc = reader.GetDateTime("campaign_start_date_utc"),
+					EndDate = reader.GetDateTime("campaign_end_date"),
+					EndDateUtc = reader.GetDateTime("campaign_end_date_utc"),
+					CampaignType = new CampaignType
+					{
+						CampaignTypeName = reader.GetStringValue("campaign_type_name"),
+						CampaignTypeCode = (CampaignTypeCode)Enum.Parse(typeof(CampaignTypeCode), reader.GetStringValue("campaign_type_code")),
+						CamapaignTypeDescription = reader.GetStringValue("campaign_type_description")
+					},
+					Account = new Account
+					{
+						AccountUid = reader.GetGuid("account_uid")
+					}
+				},
+				Sweep = new Sweep
+				{
+					SweepUid = reader.GetGuid("sweep_uid"),
+					SweepId = reader.GetInt32("sweep_id"),
+					Name = reader.GetStringValue("sweep_name"),
+					RulesUrl = reader.GetStringValue("rules_url"),
+					StartDate = reader.GetDateTime("start_date"),
+					StartDateUtc = reader.GetDateTime("start_date_utc"),
+					EndDate = reader.GetDateTime("end_date"),
+					EndDateUtc = reader.GetDateTime("end_date_utc"),
+					DrawDate = reader.GetDateTime("draw_date"),
+					DrawDateUtc = reader.GetDateTime("draw_date_utc"),
+					DateDrawn = reader.GetNullableDateTimeValue("date_drawn"),
+					DrawAttempted = reader.GetBoolean("draw_attempted"),
+					Account = new Account
+					{
+						AccountUid = reader.GetGuid("account_uid")
+					}
+				},
+				Game = new Game
+				{
+					Id = reader.GetInt32("sweep_id"),
+					Uid = reader.GetGuid("sweep_uid"),
+					Name = reader.GetString("sweep_name"),
+					GameType = GameTypesEnum.Sweeps,
+					StartDate = reader.GetDateTime("start_date"),
+					StartDateUtc = reader.GetDateTime("start_date_utc"),
+					EndDate = reader.GetDateTime("end_date"),
+					EndDateUtc = reader.GetDateTime("end_date_utc")
+				},
+				RuleUid = reader.GetGuid("rule_uid"),
+				WatchValue = reader.GetStringValue("watch_value"),
+				WatchTypeCode = (WatchTypeCode)Enum.Parse(typeof(WatchTypeCode), reader.GetStringValue("watch_type_code")),
+				ExternalId = reader.GetStringValue("external_id"),
+				ActiveInd = reader.GetBoolean("active_ind"),
+				MustBeFollowing = reader.GetBoolean("must_be_following"),
+				NotifyWinners = reader.GetBoolean("notify_winners"),
+				CreatedDate = reader.GetDateTime("created_date"),
+				UpdatedDate = reader.GetNullableDateTimeValue("updated_date"),
+				ExternalClientType = Enum.Parse<ExternalClientType>(reader.GetStringValue("provider_name")),
+				UrlLink = reader.GetStringValue("url_link")
+			};
 		}
 	}
 }

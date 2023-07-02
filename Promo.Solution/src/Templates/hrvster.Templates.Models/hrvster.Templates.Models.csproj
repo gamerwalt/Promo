@@ -6,4 +6,8 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\Monolith\hrvster.Models\hrvster.Models.csproj" />
+  </ItemGroup>
+
 </Project>

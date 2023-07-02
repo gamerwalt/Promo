@@ -46,7 +46,8 @@ namespace hrvster.Infrastructure.MatchGames
 				.AddParameter("activeInd", matchGameRule.ActiveInd)
 				.AddParameter("mustBeFollowing", matchGameRule.MustBeFollowing)
 				.AddParameter("scheduledInd", matchGameRule.ScheduledInd)
-				.AddParameter("externalClientType", matchGameRule.ExternalClientType);
+				.AddParameter("externalClientType", matchGameRule.ExternalClientType)
+				.AddParameter("urlLink", matchGameRule.UrlLink);
 
 			await conn.OpenAsync(cancellationToken);
 			await command.ExecuteNonQueryAsync(cancellationToken);

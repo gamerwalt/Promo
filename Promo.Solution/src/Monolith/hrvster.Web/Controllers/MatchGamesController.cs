@@ -252,6 +252,8 @@ namespace hrvster.Web.Controllers
 		[Route("/MatchGames/{Uid:Guid}/View")]
 		public async Task<IActionResult> View(Guid Uid, MatchGameDetails form, CancellationToken cancellationToken)
 		{
+			_hrvsterUser = _sessionManager.GetUserInformation();
+
 			var matchGame = await _matchGamesService.GetMatchGameAsync(Uid, cancellationToken);
 			if (matchGame == null)
 			{
@@ -263,6 +265,19 @@ namespace hrvster.Web.Controllers
 			if(ModelState.IsValid)
 			{
 				_notificationService.AddSuccessToastMessage("Match game updated successfully.");
+
+				matchGame.Name = form.MatchGame.Name;
+				matchGame.Description = form.MatchGame.Description;
+				matchGame.NumberOfBoards = form.MatchGame.NumberOfBoards;
+				matchGame.NumberOfWinnableBoards = form.MatchGame.WinnableBoards;
+				matchGame.WinProbability = form.MatchGame.WinProbability;
+				matchGame.StartDate = form.MatchGame.StartDate;
+				matchGame.EndDate = form.MatchGame.EndDate;
+
+				await _matchGamesService.UpdateMatchGameAsync(
+					matchGame, 
+					_hrvsterUser.WindowsTimeZone, 
+					_hrvsterUser.IsDaylight, cancellationToken);
 
 				return RedirectToAction("View", new { Uid = Uid });
 			}

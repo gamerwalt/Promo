@@ -4,6 +4,7 @@ using MySqlConnector;
 using System.Data;
 using hrvster.Infrastructure.Extensions;
 using hrvster.Templates.Core.Common.Exceptions;
+using Microsoft.Extensions.Logging;
 
 namespace hrvster.Templates.Core.Common
 {
@@ -14,11 +15,16 @@ namespace hrvster.Templates.Core.Common
 
 	public class ConnectionStringProvider : IConnectionStringProvider
 	{
+		private readonly ILogger<ConnectionStringProvider> _logger;
 		private readonly IHttpContextAccessor _httpContextAccessor;
 		private readonly IConfiguration _configuration;
 
-		public ConnectionStringProvider(IHttpContextAccessor httpContextAccessor, IConfiguration configuration)
+		public ConnectionStringProvider(
+			ILoggerFactory loggerFactory,
+			IHttpContextAccessor httpContextAccessor, 
+			IConfiguration configuration)
 		{
+			_logger = loggerFactory.CreateLogger<ConnectionStringProvider>();
 			_httpContextAccessor = httpContextAccessor;
 			_configuration = configuration;
 		}
@@ -30,7 +36,7 @@ namespace hrvster.Templates.Core.Common
 			var subdomain = _httpContextAccessor.HttpContext.Items[Constants.ContextItemsSubdomain];
 			try
 			{
-				using (var connection = new MySqlConnection(_configuration.GetConnectionString("hrvsterAdmin")))
+				using (var connection = new MySqlConnection(_configuration.GetConnectionString("hrvster")))
 				{
 					var command = connection.CreateCommand();
 					command.CommandText = "connectionStringGetBySubdomain";
@@ -52,6 +58,9 @@ namespace hrvster.Templates.Core.Common
 			}
 			catch (Exception ex)
 			{
+				_logger.LogError("Unable to get the connection string for the subdomain {subdomain}", subdomain);
+				_logger.LogError("Error: {errorMessage}", ex.Message);
+
 				throw;
 			}
 

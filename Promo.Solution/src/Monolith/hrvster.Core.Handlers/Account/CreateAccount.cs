@@ -64,7 +64,9 @@ namespace hrvster.Core.Handlers.Account
 					request.LastName,
 					defaultPin, 
 					request.AcceptedTerms, 
-					verificationLink));
+					verificationLink,
+					request.CompanyName,
+					request.SubdomainName));
 		}
 	}
 }

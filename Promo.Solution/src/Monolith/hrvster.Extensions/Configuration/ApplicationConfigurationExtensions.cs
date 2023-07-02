@@ -2,13 +2,14 @@
 using hrvster.ApplicationServices.Accounts;
 using hrvster.ApplicationServices.Caching;
 using hrvster.ApplicationServices.Common;
-using hrvster.ApplicationServices.Harvesters.Twitter;
 using hrvster.ApplicationServices.Mails;
 using hrvster.ApplicationServices.Processors;
 using hrvster.ApplicationServices.Reporting;
 using hrvster.ApplicationServices.Sweepstakes;
 using hrvster.Core;
 using hrvster.Infrastructure;
+using hrvster.Infrastructure.Accounts;
+using hrvster.Infrastructure.Company;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace hrvster.Extensions.Configuration
@@ -39,6 +40,10 @@ namespace hrvster.Extensions.Configuration
 
 		public static IServiceCollection AddAccountsService(this IServiceCollection services)
 			=> services.AddTransient<IAccountsService, AccountsService>()
+				.AddTransient<IAccountCompanyService, AccountCompanyService>()
+				.AddTransient<ICompanyImagesService, CompanyImagesService>()
+				.AddTransient<ICompanyImagesRepository, CompanyImagesRepository>()
+				.AddTransient<IAccountCompanyRepository, AccountCompanyRepository>()
 				.AddTransient<IAccountsRepository, AccountsRepository>();
 
 		public static IServiceCollection AddSweepstakeUtility(this IServiceCollection services)

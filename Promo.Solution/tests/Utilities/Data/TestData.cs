@@ -5,7 +5,10 @@ namespace TestUtilities.Data
 {
     public static class TestData
     {
-        public const string Fullname = "First Last";
+        public const string CompanyName = "MTN Nigeria";
+        public const string Subdomain = "mtnnigeria";
+
+		public const string Fullname = "First Last";
         public const string UserName = "Username";
         public const string Address1 = "Some address 1";
         public const string Address2 = "Some address 2";

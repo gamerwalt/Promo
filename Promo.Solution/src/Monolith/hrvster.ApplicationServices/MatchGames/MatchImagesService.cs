@@ -20,21 +20,25 @@ namespace hrvster.ApplicationServices.MatchGames
 		Task<IEnumerable<MatchImage>> GetForMatchGameAsync(Guid matchGameUid, CancellationToken cancellationToken);
 		Task<MatchImage> GetImageAsync(Guid imageUid, CancellationToken cancellationToken);
 		Task UpdateImageAsync(Guid matchImageUid, MatchGame matchGame, IFormFile image, CancellationToken cancellationToken);
+		Task UpdateLossImageAsync(Guid uid, CancellationToken cancellationToken);
 	}
 
 	public class MatchImagesService : IMatchImageService
 	{
 		private readonly ILogger<MatchImagesService> _logger;
 		private readonly IMatchImagesRepository _repository;
+		private readonly IMatchPrizeService _matchPrizeService;
 		private readonly IMediator _mediator;
 
 		public MatchImagesService(
 			ILoggerFactory loggerFactory,
 			IMatchImagesRepository repository,
+			IMatchPrizeService matchPrizeService,
 			IMediator mediator)
 		{
 			_logger = loggerFactory.CreateLogger<MatchImagesService>();
 			_repository = repository;
+			_matchPrizeService = matchPrizeService;
 			_mediator = mediator;
 		}
 
@@ -132,6 +136,48 @@ namespace hrvster.ApplicationServices.MatchGames
 			await _mediator.Send(new DeleteMatchImageRequest(matchImage, matchGame));
 
 			await _repository.DeleteAsync(matchImage.Uid, cancellationToken);
+		}
+
+		public async Task UpdateLossImageAsync(Guid gameUid, CancellationToken cancellationToken)
+		{
+			var matchImagesResult = await _repository.GetForMatchGamesAsync(gameUid, cancellationToken);
+			var matchImagesList = matchImagesResult.ToList();
+
+			_logger.LogInformation("Loaded a total of {imageCount} images for the game with uid {gameUid}", 
+				matchImagesList.Count, 
+				gameUid);
+
+			var foundAndUpdated = false;
+
+			if(!matchImagesList.Any(mi => mi.IsLoss))
+			{
+				_logger.LogInformation("We didn't find any images that is a loss image.");
+
+				var matchPrizesResult = await _matchPrizeService.GetAllForMatchGameAsync(gameUid, cancellationToken);
+				var matchPrizesList = matchPrizesResult.ToList();
+
+				_logger.LogInformation("Loaded a total of {prizeCount} prizes for the game with uid {gameUid}",
+					matchPrizesList.Count,
+					gameUid);
+
+				if (matchImagesList != null || matchImagesList.Count > 1)
+				{
+					foreach (var image in matchImagesList)
+					{
+						var prize = matchPrizesList.FirstOrDefault(c => c.Image.Uid == image.Uid);
+						if (prize == null || prize.Value == 0.00m)
+						{
+							foundAndUpdated = true;
+							_logger.LogInformation("Updating the image with uid {imageUid} as a loss image", image.Uid);
+
+							await _repository.UpdateImageAsLossImageAsync(image, cancellationToken);
+						}
+					}
+				}
+			}
+
+			if (foundAndUpdated)
+				_logger.LogInformation("We found a loss image and have updated it for the game with uid {gameUid}", gameUid);
 		}
 	}
 }
