@@ -10,5 +10,6 @@
 		public decimal Value { get; set; }
 		public MatchImage Image { get; set; }
 		public int Quantity { get; set; }
+		public bool IsFiller { get; set; }
 	}
 }

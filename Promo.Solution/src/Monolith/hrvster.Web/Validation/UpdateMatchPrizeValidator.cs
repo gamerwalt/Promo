@@ -42,6 +42,8 @@ namespace hrvster.Web.Validation
 					var matchGame = _matchGameService.GetMatchGame(model.MatchGameUid);
 					int winnableBoards = matchGame.NumberOfWinnableBoards;
 
+					if (model.IsFiller) return true;
+
 					return totalPrizes + quantity <= winnableBoards;
 				})
 				.WithMessage("The total quantity of prizes, including this prize, cannot exceed the number of winnable boards.");

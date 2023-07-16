@@ -43,9 +43,11 @@ namespace hrvster.Extensions.Configuration
 				.AddTransient<ISweepDrawRuleRepository, SweepDrawRuleRepository>()
 				.AddTransient<ISweepWinnersRepository, SweepWinnersRepository>()
 				.AddTransient<ISweepPrizesRepository, SweepPrizesRepository>()
-				.AddTransient<ISweepTweetSchedulerRepository, SweepTweetSchedulerRepository>()
-				.AddTransient<IScheduledSweepRuleTweetsRepository, ScheduledSweepRuleTweetsRepository>()
 				.AddTransient<ISweepNotificationRepository, SweepNotificationRepository>();
+
+		public static IServiceCollection AddPostSchedulers(this IServiceCollection services)
+			=> services.AddTransient<IScheduledPostRepository, ScheduledPostRepository>();
+					
 
 		public static IServiceCollection AddWatchTypeRepositories(this IServiceCollection services)
 			=> services.AddTransient<IWatchTypesRepository, WatchTypesRepository>()

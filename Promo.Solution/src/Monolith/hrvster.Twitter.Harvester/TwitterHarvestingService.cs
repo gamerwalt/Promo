@@ -27,7 +27,7 @@ namespace hrvster.Twitter.Harvester
 		{
 			_logger.LogInformation("Starting {serviceName}", nameof(TwitterHarvestingService));
 
-			await _twitterHrvsterService.StartStreamingAsync();
+			await _twitterHrvsterService.StartStreamingAsync(token);
 		}
 	}
 }

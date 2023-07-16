@@ -8,5 +8,10 @@ namespace hrvster.Core.Clients.Twitter.Models
 		public long ResultCount { get; set; }
 		[JsonProperty("next_token")]
 		public string NextToken { get; set; }
+		[JsonProperty("newest_id")]
+		public string NewestId { get; set; }
+
+		[JsonProperty("oldest_id")]
+		public string OldestId { get; set; }
 	}
 }

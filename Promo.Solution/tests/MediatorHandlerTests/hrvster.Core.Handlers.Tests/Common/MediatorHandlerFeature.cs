@@ -40,7 +40,6 @@ namespace hrvster.Core.Handlers.Tests.Common
 		public ISweepsEntriesRepository SweepEntryRepository { get; private set; }
 		public ISweepRulesRepository SweepRulesRepository { get; private set; }
 		public IPlansRepository PlansRepository { get; private set; }
-		public IScheduledSweepRuleTweetsRepository ScheduledSweepRuleTweetsRepository { get; private set; }
 		public IMatchGamesRepository MatchGameRepository { get; private set; }
 
 		public IDrawService DrawService { get; private set; }
@@ -102,7 +101,6 @@ namespace hrvster.Core.Handlers.Tests.Common
 			AccountSubscriptionService = ServiceProvider.GetService<IAccountSubscriptionService>();
             SubscriptionService = ServiceProvider.GetService<ISubscriptionService>();
             PlansRepository = ServiceProvider.GetService<IPlansRepository>();
-			ScheduledSweepRuleTweetsRepository = ServiceProvider.GetService<IScheduledSweepRuleTweetsRepository>();
 			MatchGameRepository = ServiceProvider.GetService<IMatchGamesRepository>();
 
 

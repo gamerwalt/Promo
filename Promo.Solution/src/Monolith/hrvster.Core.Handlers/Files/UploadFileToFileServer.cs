@@ -23,6 +23,7 @@ namespace hrvster.Core.Handlers.Files
 
 		public async Task<IEnumerable<string>> Handle(UploadFileToFileServerRequest request, CancellationToken cancellationToken)
 		{
+			_logger.LogInformation("Started the upload to the file server");
 			var firebaseStorage = new FirebaseStorage(StorageNames.TweetUploads, new FirebaseStorageOptions
 			{
 				AuthTokenAsyncFactory = () => Task.FromResult(request.SignInToken),
@@ -35,6 +36,8 @@ namespace hrvster.Core.Handlers.Files
 
 			foreach (var media in request.Media)
 			{
+				_logger.LogInformation("Uploading the media {fileName}.", media.FileName);
+
 				var filePath = GetFilePath(request.UserUid, request.ProfileType.ToString());
 
 				Directory.CreateDirectory(filePath);
@@ -51,6 +54,8 @@ namespace hrvster.Core.Handlers.Files
 				}
 
 				listOfPaths.Add(googleStorageFileName);
+
+				_logger.LogInformation("Finished uploading the media {fileName}.", media.FileName);
 			}
 
 			_logger.LogInformation("Media saved succecssfully.");

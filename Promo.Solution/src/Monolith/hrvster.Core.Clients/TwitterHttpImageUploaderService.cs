@@ -23,17 +23,19 @@ namespace hrvster.Core.Clients
 
 		private const string ImageUploadEndpoint = "1.1/media/upload.json";
 
-		public TwitterHttpImageUploaderService(ILoggerFactory loggerFactory, HttpClient httpClient)
+		public TwitterHttpImageUploaderService(
+			ILoggerFactory loggerFactory, 
+			HttpClient httpClient,
+			TwitterAccount twitterAccount)
 		{
 			_logger = loggerFactory.CreateLogger<TwitterHttpImageUploaderService>();
 			_httpClient = httpClient;
+			_twitterAccount = twitterAccount;
 		}
 
 
 		public async Task<ImageResponse> UploadImageAsync(byte[] imageData, string externalProfileId)
 		{
-			_httpClient.BaseAddress = new Uri(ImageUploadEndpoint);
-
 			var oauthNonce = Convert.ToBase64String(new ASCIIEncoding().GetBytes(DateTime.Now.Ticks.ToString()));
 			TimeSpan timeSpan = DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
 			var oauthTimestamp = Convert.ToInt64(timeSpan.TotalSeconds).ToString();
@@ -67,6 +69,7 @@ namespace hrvster.Core.Clients
 
 			try
 			{
+				_httpClient.DefaultRequestHeaders.Clear();
 				_httpClient.DefaultRequestHeaders.Add("Authorization", authorizationHeader);
 
 				var content = new MultipartFormDataContent();
@@ -82,7 +85,6 @@ namespace hrvster.Core.Clients
 			}
 			catch (Exception ex)
 			{
-
 				_logger.LogWarning("An error occurred while trying to upload the image. Error message: {message}", ex.Message);
 
 				return null;

@@ -506,11 +506,11 @@ namespace hrvster.Web.Controllers
 					return RedirectToAction(actionName, controllerName, new { uid = Uid });
 				}
 
-				//var companyGameLink = await GetAccountCompanyLink(_hrvsterUser.UserUid, gameType, Uid);
+				var companyGameLink = await GetAccountCompanyLink(_hrvsterUser.UserUid, gameType, Uid);
 
-				//var link = await _rebrandlyService.GenerateShortLinkAsync($"{companyGameLink}?externalClient={externalClientType}&ruleUid={ruleUid}");
-				//var urlLink = $"https://{link}";
-				var urlLink = "https://games.hrvster.com/rzq";
+				var link = await _rebrandlyService.GenerateShortLinkAsync($"{companyGameLink}?externalClient={externalClientType}&ruleUid={ruleUid}");
+				var urlLink = $"https://{link}";
+				//var urlLink = "https://games.hrvster.com/rzq";
 
 				form.Post = $"{form.Post}{Environment.NewLine}{urlLink}";
 

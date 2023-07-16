@@ -1,18 +1,18 @@
 ﻿using hrvster.Core.Clients;
+using hrvster.Core.Requests.ServiceRequests;
 using MediatR;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using System;
+using System.Linq;
 using System.Net.Http;
-using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
-using Tweetinvi;
 
 namespace hrvster.ApplicationServices.Harvesters.Twitter
 {
 	public interface ITwitterHarvesterService
 	{
-		Task StartStreamingAsync();
+		Task StartStreamingAsync(CancellationToken token);
 	}
 
 	public class TwitterHarvesterService : ITwitterHarvesterService
@@ -20,25 +20,84 @@ namespace hrvster.ApplicationServices.Harvesters.Twitter
 		private readonly ILogger<TwitterHarvesterService> _logger;
 		private readonly HttpClient _httpClient;
 		private readonly ITwitterHttpService _twitterHttpService;
+		private readonly IMediator _mediator;
 
 		public TwitterHarvesterService(
 			ILoggerFactory loggerFactory,
 			HttpClient httpClient,
-			ITwitterHttpService twitterHttpService)
+			ITwitterHttpService twitterHttpService,
+			IMediator mediator)
 		{
 			_logger = loggerFactory.CreateLogger<TwitterHarvesterService>();
 			_httpClient = httpClient;
 			_twitterHttpService = twitterHttpService;
+			_mediator = mediator;
 		}
 
-		public async Task StartStreamingAsync()
+		public async Task StartStreamingAsync(CancellationToken token)
 		{
 			#region NewCode
 
-			var hashTag = "#thisisatest";
-			var accessTokenObject = await _twitterHttpService.GetAccessTokenFromRefreshTokenAsync("c1MyNzhIUnhmaERtR3RrU2MwVjdtdE9rWW9XbXJheXZlTVExT0pIWF9xY2FBOjE2ODgwNTA4ODAxMjg6MTowOnJ0OjE");
-			var results = await _twitterHttpService.SearchRecentTweets(hashTag, default(CancellationToken));
+			_logger.LogInformation("Retrieving rules to search from database.");
 
+			var hashtagRules = await _mediator.Send(new GetActiveHashtagRulesRequest());
+			var ruleList = hashtagRules.ToList();
+
+			_logger.LogInformation("Retrieved a total of {count} hashtag rules. {rules}",
+				ruleList.Count,
+				string.Join(", ", ruleList.Select(c => c.WatchValue)));
+
+			var tasks = ruleList.Select(rule =>
+				Task.Run(async () =>
+				{
+					var processUid = Guid.NewGuid();
+
+					try
+					{
+						token.ThrowIfCancellationRequested();
+
+						var tweets = await _twitterHttpService.SearchRecentTweets(rule.WatchValue, token);
+						var profileBehindHashtag = "";
+						var gameBehindHashtag = "";
+
+						foreach(var tweet in tweets)
+						{
+							var tweetId = tweet.Id;
+							var text = tweet.Text;
+
+							//var actualTweet = _twitterHttpService.GetTweetFromIdAsync(tweetId);
+							//1. Get more details about the tweet
+						}
+					}
+					catch(OperationCanceledException ex)
+					{
+						_logger.LogError("This operation has been cancelled. Message {message},", ex.Message);
+
+						//Update the rule processing table for this rule
+					}
+					catch (Exception ex)
+					{
+						_logger.LogError("An error occurred while processing the rule {rule}. Error Message: {message}.",
+							rule.WatchValue,
+							ex.Message);
+
+						//Update the rule processing table for this rule
+					}
+				})
+			);
+
+			try
+			{
+				await Task.WhenAll(tasks);
+			}
+			catch(OperationCanceledException ex)
+			{
+				_logger.LogError("This operation has been cancelled. Message {message},", ex.Message);
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError("An error occurred in one of the tasks. {message}", ex.Message);
+			}
 
 			#endregion
 

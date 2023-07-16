@@ -1,9 +1,14 @@
 ﻿using hrvster.ApplicationServices.Accounts;
+using hrvster.ApplicationServices.Extensions.LogExtensions;
 using hrvster.ApplicationServices.MatchGames;
 using hrvster.ApplicationServices.Publishing;
 using hrvster.ApplicationServices.Subscription;
 using hrvster.ApplicationServices.Sweepstakes;
 using hrvster.Core.Requests.WebRequests.Files;
+using hrvster.Infrastructure;
+using hrvster.Infrastructure.Core;
+using hrvster.Infrastructure.MatchGames;
+using hrvster.Infrastructure.Scheduling;
 using hrvster.Models;
 using hrvster.Models.Extensions;
 using hrvster.Models.Profiles;
@@ -13,9 +18,9 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
+
 
 namespace hrvster.ApplicationServices
 {
@@ -40,6 +45,10 @@ namespace hrvster.ApplicationServices
 		private readonly IAccountsService _accountsService;
 		private readonly IAccountSubscriptionService _accountSubscriptionService;
 		private readonly IAccountCompanyService _accountCompanyService;
+		private readonly IScheduledPostRepository _scheduledPostRepository;
+		private readonly ISweepRulesRepository _sweepRulesRepository;
+		private readonly IMatchGameRulesRepository _matchGameRulesRepository;
+		private readonly IWatchTypesRepository _watchTypesRepository;
 
 		public GameService(
 			ILoggerFactory loggerFactory,
@@ -49,7 +58,11 @@ namespace hrvster.ApplicationServices
 			IPublishService publishService,
 			IAccountsService accountsService,
 			IAccountSubscriptionService accountSubscriptionService,
-			IAccountCompanyService accountCompanyService)
+			IAccountCompanyService accountCompanyService,
+			IScheduledPostRepository scheduledPostRepository,
+			ISweepRulesRepository sweepRulesRepository,
+			IMatchGameRulesRepository matchGameRulesRepository,
+			IWatchTypesRepository watchTypesRepository)
 		{
 			_logger = loggerFactory.CreateLogger<GameService>();
 			_sweepService = sweepstakesService;
@@ -59,14 +72,18 @@ namespace hrvster.ApplicationServices
 			_accountsService = accountsService;
 			_accountSubscriptionService = accountSubscriptionService;
 			_accountCompanyService = accountCompanyService;
+			_scheduledPostRepository = scheduledPostRepository;
+			_sweepRulesRepository = sweepRulesRepository;
+			_matchGameRulesRepository = matchGameRulesRepository;
+			_watchTypesRepository = watchTypesRepository;
 		}
 
 		public async Task<IEnumerable<Rule>> GetRulesAsync(
-			GameTypesEnum gameType, 
-			Guid gameUid, 
+			GameTypesEnum gameType,
+			Guid gameUid,
 			CancellationToken cancellationToken)
 		{
-			switch(gameType)
+			switch (gameType)
 			{
 				case GameTypesEnum.Sweeps:
 					return await _sweepService.GetSweepRulesAsync(gameUid);
@@ -213,7 +230,7 @@ namespace hrvster.ApplicationServices
 			IFormFile media1,
 			IFormFile media2,
 			IFormFile media3,
-			IFormFile media4, 
+			IFormFile media4,
 			string pageId,
 			bool following)
 		{
@@ -283,24 +300,24 @@ namespace hrvster.ApplicationServices
 		private async Task<bool> CreateSweepRulePostAsync(
 			Guid ruleUid,
 			string urlLink,
-			string externalClientType, 
-			Guid gameUid, 
-			int gameId, 
-			GameTypesEnum gameType, 
-			List<IFormFile> media, 
-			IEnumerable<string> mediaLocation, 
-			HrvsterUser hrvsterUser, 
-			string watchValue, 
-			int watchTypeId, 
-			string post, 
-			bool postNow, 
-			DateTime scheduledDate, 
+			string externalClientType,
+			Guid gameUid,
+			int gameId,
+			GameTypesEnum gameType,
+			List<IFormFile> media,
+			IEnumerable<string> mediaLocation,
+			HrvsterUser hrvsterUser,
+			string watchValue,
+			int watchTypeId,
+			string post,
+			bool postNow,
+			DateTime scheduledDate,
 			bool following,
 			string pageId)
 		{
 			var profile = await _accountsService.GetProfileAsync(hrvsterUser.UserUid, GetProfileType(externalClientType));
 
-			if(profile == null)
+			if (profile == null)
 			{
 				_logger.LogError("Could not locate the profile for this account that matched with {profileType}",
 					GetProfileType(externalClientType));
@@ -375,7 +392,24 @@ namespace hrvster.ApplicationServices
 			return await PostMessageAsync(ruleUid, urlLink, externalClientType, gameUid, gameId, gameType, media, mediaLocation, hrvsterUser, watchValue, watchTypeId, post, postNow, scheduledDate, following, profile, pageId);
 		}
 
-		private async Task<bool> PostMessageAsync(Guid ruleUid, string urlLink, string externalClientType, Guid gameUid, int gameId, GameTypesEnum gameType, List<IFormFile> media, IEnumerable<string> mediaLocation, HrvsterUser hrvsterUser, string watchValue, int watchTypeId, string post, bool postNow, DateTime scheduledDate, bool following, Profile profile, string pageId)
+		private async Task<bool> PostMessageAsync(
+			Guid ruleUid,
+			string urlLink,
+			string externalClientType,
+			Guid gameUid,
+			int gameId,
+			GameTypesEnum gameType,
+			List<IFormFile> media,
+			IEnumerable<string> mediaLocation,
+			HrvsterUser hrvsterUser,
+			string watchValue,
+			int watchTypeId,
+			string post,
+			bool postNow,
+			DateTime scheduledDate,
+			bool following,
+			Profile profile,
+			string pageId)
 		{
 			if (postNow)
 				return await _publishService.PublishAsync(ruleUid, urlLink, profile, gameId, gameUid, gameType, media,
@@ -384,28 +418,176 @@ namespace hrvster.ApplicationServices
 					Enum.Parse<ExternalClientType>(externalClientType), following, pageId);
 
 			return await SaveScheduledPostToPublishAsync(
-				ruleUid, urlLink, hrvsterUser.UserUid, gameId, gameUid, profile, watchTypeId, watchValue, post, scheduledDate, 
+				ruleUid,
+				urlLink,
+				hrvsterUser.UserUid,
+				gameId,
+				gameUid,
+				profile,
+				watchTypeId,
+				watchValue,
+				post,
+				scheduledDate,
 				mediaLocation == null ? null : mediaLocation.ToList(),
-				Enum.Parse<ExternalClientType>(externalClientType), following, pageId);
+				Enum.Parse<ExternalClientType>(externalClientType),
+				following,
+				pageId,
+				gameType,
+				hrvsterUser.WindowsTimeZone,
+				hrvsterUser.IsDaylight);
 		}
 
-		private Task<bool> SaveScheduledPostToPublishAsync(
-			Guid ruleUid, 
-			string urlLink, 
-			Guid userUid, 
-			int gameId, 
-			Guid gameUid, 
-			Profile profile, 
-			int watchTypeId, 
-			string watchValue, 
-			string post, 
-			DateTime scheduledDate, 
-			List<string> list, 
-			ExternalClientType externalClientType, 
-			bool following, 
-			string pageId)
+		private async Task<bool> SaveScheduledPostToPublishAsync(
+			Guid ruleUid,
+			string urlLink,
+			Guid userUid,
+			int gameId,
+			Guid gameUid,
+			Profile profile,
+			int watchTypeId,
+			string watchValue,
+			string post,
+			DateTime scheduledDate,
+			List<string> mediaLocation,
+			ExternalClientType externalClientType,
+			bool following,
+			string pageId,
+			GameTypesEnum gameType,
+			string timezoneId,
+			bool isDaylight)
 		{
-			throw new NotImplementedException();
+			using (_logger.StartSaveScheduledPostToPublishAsyncScope(ruleUid, gameUid, profile, watchValue, gameType))
+			{
+				try
+				{
+					_logger.LogInformation("Beginning transaction to save the rule with a hashtag to schedule.");
+
+					await _scheduledPostRepository.BeginTransactionAsync();
+
+					_logger.LogInformation("Retrieving watch types.");
+					var watchTypes = await _watchTypesRepository.GetWatchTypesAsync();
+					var watchTypeCodeSelected = watchTypes.SingleOrDefault(c => c.WatchTypeId.Equals(watchTypeId)).WatchTypeCode;
+					_logger.LogInformation("The watch type selected is {watchType}", watchTypeCodeSelected);
+
+					_logger.LogInformation("Building new rule.");
+					var rule = new Rule
+					{
+						ActiveInd = true,
+						RuleUid = ruleUid,
+						Sweep = new Sweep { SweepUid = gameUid, Uid = gameUid },
+						WatchTypeCode = Enum.Parse<WatchTypeCode>(watchTypeCodeSelected),
+						WatchValue = watchValue,
+						MustBeFollowing = following,
+						ExternalClientType = externalClientType,
+						ScheduledInd = true,
+						UrlLink = urlLink
+					};
+
+					_logger.LogInformation("Rule built to save {rule}", rule.ToJsonString());
+
+					switch (gameType)
+					{
+						case GameTypesEnum.Sweeps:
+							_logger.LogInformation("Creating a sweepstake rule.");
+							await _sweepRulesRepository.CreateRuleAsync(rule).ContinueWith(_ =>
+							{
+								_logger.LogInformation("Finished the sweep rule creation.");
+							});
+							break;
+						case GameTypesEnum.MatchGames:
+							_logger.LogInformation("Creating a match game rule.");
+							await _matchGameRulesRepository.CreateAsync(rule, default).ContinueWith(_ =>
+							{
+								_logger.LogInformation("Finished the match game rule creation.");
+							});
+							break;
+					}
+
+					_logger.LogInformation("Retrieving the rule we just saved.");
+					rule = await GetRuleAsync(ruleUid, gameUid, gameType);
+					if (rule == null)
+					{
+						_logger.LogError("Unable to retrieve rule.");
+						await _scheduledPostRepository.RollbackTransactionAsync();
+
+						return false;
+					}
+
+					var scheduledPostUid = Guid.NewGuid();
+
+					_logger.LogInformation("Creating the scheduled post for the rule {rule}.", rule.ToJsonString());
+					await _scheduledPostRepository.CreateScheduledPostAsync(
+						scheduledPostUid,
+						profile.ProfileUid,
+						rule.RuleId,
+						gameType.ToString(),
+						post,
+						scheduledDate,
+						urlLink,
+						ScheduledStatus.New,
+						timezoneId,
+						isDaylight).ContinueWith(_ =>
+						{
+							_logger.LogInformation("Scheduled post creation task completed.");
+						});
+
+					foreach (var imageLocation in mediaLocation)
+					{
+						var scheduledPostImageUid = Guid.NewGuid();
+						_logger.LogInformation("Saving the scheduled post image {imageLocation}", imageLocation);
+						await _scheduledPostRepository.CreateScheduledPostImageAsync(
+							scheduledPostUid,
+							scheduledPostImageUid,
+							imageLocation).ContinueWith(_ =>
+							{
+								_logger.LogInformation("Scheduled post image creation task completed.");
+							});
+					}
+
+					await _scheduledPostRepository.CommitTransactionAsync().ContinueWith(_ =>
+					{
+						_logger.LogInformation("Transaction committed!");
+					});
+
+					return true;
+				}
+				catch (Exception ex)
+				{
+					_logger.LogError("An error occurred trying to save the Scheduled Tweet. Rolling back the transaction. Exception Message: {message}",
+						ex.Message);
+
+					await _scheduledPostRepository.RollbackTransactionAsync();
+
+					return false;
+				}
+			}
+		}
+
+		private async Task<Rule> GetRuleAsync(Guid ruleUid, Guid gameUid, GameTypesEnum gameType)
+		{
+			var rules = await GetRulesAsync(gameType, gameUid, default);
+
+			return rules.FirstOrDefault(r => r.RuleUid == ruleUid);
+		}
+
+		private static Core.Clients.Common.Message BuildMessage(
+			Guid gameUid,
+			Profile profile,
+			IList<string> mediaLocation,
+			string watchValue,
+			int watchTypeId,
+			string tweetText)
+		{
+			return new Core.Clients.Common.Message
+			{
+				GameUid = gameUid,
+				Hashtag = watchValue,
+				IsScheduled = false,
+				Profile = profile,
+				Media = mediaLocation,
+				Text = tweetText,
+				WatchTypeId = watchTypeId
+			};
 		}
 
 		private ProfileType GetProfileType(string externalClientType)

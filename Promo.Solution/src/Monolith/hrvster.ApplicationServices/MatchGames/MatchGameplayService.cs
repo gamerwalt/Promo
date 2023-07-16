@@ -15,6 +15,7 @@ namespace hrvster.ApplicationServices.MatchGames
 {
 	public interface IMatchGameplayService
 	{
+		Task FulfillPrizeAsync(MatchPlay gamePlay, Guid prizeUid, CancellationToken cancellationToken);
 		Task<bool> GameBeenPlayedAsync(Guid gameplayUid, CancellationToken cancellationToken);
 		Task<IEnumerable<MatchPlay>> GetAllGamePlays(Guid gameUid, CancellationToken cancellationToken);
 		Task<MatchPlay> GetAsync(Guid gameplayUid, CancellationToken cancellationToken);
@@ -48,6 +49,16 @@ namespace hrvster.ApplicationServices.MatchGames
 			_boardsRepository = boardsRepository;
 			_gameplayRepository = gameplayRepository;
 			_gameboardService = gameboardService;
+		}
+
+		public async Task FulfillPrizeAsync(
+			MatchPlay gamePlay, 
+			Guid prizeUid,
+			CancellationToken cancellationToken)
+		{
+			_logger.LogInformation("Fulfilling the prize {prizeUid} for the game play {gameplayUid}", prizeUid, gamePlay.Uid);
+
+			await _repository.FulfillPrizeAsync(gamePlay.Uid, cancellationToken);
 		}
 
 		public async Task<Guid> ReserveGameboardAsync(

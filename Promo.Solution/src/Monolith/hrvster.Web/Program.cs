@@ -21,7 +21,7 @@ namespace hrvster.Web
 			Log.Logger = new LoggerConfiguration()
 				.ReadFrom.Configuration(configuration)
 				.Enrich.FromLogContext()
-				.WriteTo.Loggly()
+				//.WriteTo.Loggly()
 				.MinimumLevel.Debug()
 				.CreateLogger();
 

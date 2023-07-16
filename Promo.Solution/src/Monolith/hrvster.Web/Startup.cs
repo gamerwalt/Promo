@@ -97,6 +97,7 @@ namespace hrvster.Web
 				.AddSignatureUtility()
 				.AddCacheService()
 				.AddReportingService()
+				.AddPostSchedulers()
 				.AddProvidersService();
 
 			services.AddHttpClient<IRebrandlyService, RebrandlyService>();

@@ -17,5 +17,6 @@ namespace hrvster.Web.Models
 		public string ActionName { get; set; }
 		public string ControllerName { get; set; }
 		public int PreviousQuantity { get; set; }
+		public bool IsFiller { get; set; }
 	}
 }

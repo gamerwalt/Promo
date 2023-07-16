@@ -18,6 +18,7 @@ namespace hrvster.Infrastructure
 		Task ActivateAsync(Guid sweepUid, Guid ruleUid);
 
 		Task<Models.Rule> GetAsync(Guid ruleUid);
+		Task<Models.Rule> GetRuleByIdAsync(int ruleId);
 		Task<IEnumerable<Models.Rule>> GetRules(string watchTypeCode);
 		Task<IEnumerable<Models.Rule>> GetRuleByHashTagAsync(string text);
 		Task<IEnumerable<Models.Rule>> GetSweepRuleAsync(Guid sweepUid);
@@ -66,6 +67,28 @@ namespace hrvster.Infrastructure
 				command.CommandText = "sweep_rule_get";
 				command.CommandType = CommandType.StoredProcedure;
 				command.AddParameter("ruleUid", ruleUid);
+
+				await conn.OpenAsync();
+				using var reader = await command.ExecuteReaderAsync();
+				while (await reader.ReadAsync())
+				{
+					rule = CreateRecordFrom(reader);
+				}
+			}
+
+			return rule;
+		}
+
+		public async Task<Models.Rule> GetRuleByIdAsync(int ruleId)
+		{
+			var rule = default(Models.Rule);
+
+			using (var conn = new MySqlConnection(_database.GetConnectionString()))
+			{
+				var command = conn.CreateCommand();
+				command.CommandText = "sweep_rule_get_by_id";
+				command.CommandType = CommandType.StoredProcedure;
+				command.AddParameter("ruleId", ruleId);
 
 				await conn.OpenAsync();
 				using var reader = await command.ExecuteReaderAsync();

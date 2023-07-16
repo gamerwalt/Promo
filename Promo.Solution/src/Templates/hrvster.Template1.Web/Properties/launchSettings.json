@@ -12,7 +12,7 @@
       "commandName": "Project",
       "dotnetRunMessages": true,
       "launchBrowser": true,
-      "applicationUrl": "https://mtn.hrvster.com:7013;http://mtn.hrvster.com:5001",
+      "applicationUrl": "https://mtn.hrvster.com:7013;http://mtn.hrvster.com:7000",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "local"
       }

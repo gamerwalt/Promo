@@ -68,7 +68,6 @@ namespace hrvster.Core.Authentication
 					User.IsDaylight = bool.Parse(_sessionManager.GetValue(SessionConstants.IsDaylight));
 				}
 
-				_logger.LogWarning("Request passed. Contains token");
 				try
 				{
 					if (!_firebaseAuthManager.VerifyToken(token))

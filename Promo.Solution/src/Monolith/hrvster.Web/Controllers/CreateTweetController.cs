@@ -292,24 +292,25 @@ namespace hrvster.Web.Controllers
 				if (media.Count > 0)
 					mediaLocation = await _mediator.Send(new UploadFileToFileServerRequest(media, _hrvsterUser.UserUid, ProfileType.Twitter, _hrvsterUser.Token));
 
-				var published = await _mediator.Send(
-					new PublishSweepRuleTweetRequest(
-						sweep,
-						profile,
-						form.WatchTypeId,
-						form.WatchValue,
-						form.TweetText,
-						form.PostNow,
-						form.ScheduledDate,
-						true,
-						mediaLocation,
-						_hrvsterUser.WindowsTimeZone,
-						_hrvsterUser.IsDaylight));
-				var word = form.PostNow ? "created" : "scheduled";
+				//Todo: Fix this and use new way to publish or send posts
+				//var published = await _mediator.Send(
+				//	new PublishSweepRuleTweetRequest(
+				//		sweep,
+				//		profile,
+				//		form.WatchTypeId,
+				//		form.WatchValue,
+				//		form.TweetText,
+				//		form.PostNow,
+				//		form.ScheduledDate,
+				//		true,
+				//		mediaLocation,
+				//		_hrvsterUser.WindowsTimeZone,
+				//		_hrvsterUser.IsDaylight));
+				//var word = form.PostNow ? "created" : "scheduled";
 
-				_notificationService.AddSuccessToastMessage($"Tweet {word} successfully.");
+				//_notificationService.AddSuccessToastMessage($"Tweet {word} successfully.");
 
-				return RedirectToAction("View", "Sweeps", new { sweepUid = sweepUid });
+				//return RedirectToAction("View", "Sweeps", new { sweepUid = sweepUid });
 			}
 
 			_notificationService.AddErrorToastMessage(ModelState.BuildMessageFromErrors());

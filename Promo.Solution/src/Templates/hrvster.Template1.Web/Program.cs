@@ -29,6 +29,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using NToastNotify;
 using Serilog;
@@ -54,6 +55,7 @@ namespace hrvster.Template1.Web
 			Log.Logger = new LoggerConfiguration()
 				.ReadFrom.Configuration(builder.Configuration)
 				.Enrich.FromLogContext()
+				.WriteTo.Loggly()
 				.MinimumLevel.Debug()
 				.CreateLogger();
 
@@ -61,6 +63,14 @@ namespace hrvster.Template1.Web
 
 			// Add services to the container.
 			builder.Services.AddSession();
+			builder
+				.Host
+				.UseSerilog((context, configuration)
+							=> configuration.ReadFrom.Configuration(builder.Configuration)
+								.Enrich.FromLogContext()
+								.WriteTo.Loggly()
+								.MinimumLevel.Debug(), preserveStaticLogger: true);
+			Log.Information("Use Serilog applied on hrvster.Template1.Web app.");
 
 			builder.Services.AddCors(options =>
 			{
@@ -148,6 +158,8 @@ namespace hrvster.Template1.Web
 			builder.Services.AddTransient<IMailRepository, MailRepository>();
 			builder.Services.AddTransient<ICampaignRepository, CampaignRepository>();
 			builder.Services.AddMatchGameRepositories();
+			builder.Services.AddPostSchedulers();
+			builder.Services.AddWatchTypeRepositories();
 
 			builder.Services.AddTransient<TwitterClient>()
 				.AddTransient<FacebookPublisher>()

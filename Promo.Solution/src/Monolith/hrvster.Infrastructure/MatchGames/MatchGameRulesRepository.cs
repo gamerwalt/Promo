@@ -18,8 +18,10 @@ namespace hrvster.Infrastructure.MatchGames
 		Task DeleteAsync(Guid ruleUid, CancellationToken cancellationToken);
 		Task<IEnumerable<Models.Rule>> GetAllRulesAsync(Guid gameUid, CancellationToken cancellationToken);
 		Task<Models.Rule> GetAsync(Guid ruleUid);
+		Task<Models.Rule> GetRuleByIdAsync(int ruleId);
 		IEnumerable<Models.Rule> GetRulesMatching(string watchValue);
 		Task<IEnumerable<Models.Rule>> GetRulesMatchingAsync(string watchValue, CancellationToken cancellationToken);
+		Task UpdateRuleExternalIdAsync(Guid ruleUid, string postId);
 	}
 
 	public class MatchGameRulesRepository : IMatchGameRulesRepository
@@ -51,6 +53,20 @@ namespace hrvster.Infrastructure.MatchGames
 
 			await conn.OpenAsync(cancellationToken);
 			await command.ExecuteNonQueryAsync(cancellationToken);
+		}
+
+		public async Task UpdateRuleExternalIdAsync(Guid ruleUid, string postId)
+		{
+			using var conn = new MySqlConnection(_database.GetConnectionString());
+			var command = conn.CreateCommand();
+			command.CommandText = "match_game_rule_update_external_id";
+			command.CommandType = CommandType.StoredProcedure;
+			command
+				.AddParameter("ruleUid", ruleUid)
+				.AddParameter("externalPostId", postId);
+
+			await conn.OpenAsync();
+			await command.ExecuteNonQueryAsync();
 		}
 
 		public async Task DeleteAsync(Guid ruleUid, CancellationToken cancellationToken)
@@ -97,6 +113,28 @@ namespace hrvster.Infrastructure.MatchGames
 				command.CommandText = "match_game_rule_get_by_uid";
 				command.CommandType = CommandType.StoredProcedure;
 				command.AddParameter("ruleUid", ruleUid);
+
+				await conn.OpenAsync();
+				using var reader = await command.ExecuteReaderAsync();
+				while (await reader.ReadAsync())
+				{
+					rule = CreateFrom(reader);
+				}
+			}
+
+			return rule;
+		}
+
+		public async Task<Models.Rule> GetRuleByIdAsync(int ruleId)
+		{
+			var rule = default(Models.Rule);
+
+			using (var conn = new MySqlConnection(_database.GetConnectionString()))
+			{
+				var command = conn.CreateCommand();
+				command.CommandText = "match_game_rule_get_by_id";
+				command.CommandType = CommandType.StoredProcedure;
+				command.AddParameter("ruleId", ruleId);
 
 				await conn.OpenAsync();
 				using var reader = await command.ExecuteReaderAsync();

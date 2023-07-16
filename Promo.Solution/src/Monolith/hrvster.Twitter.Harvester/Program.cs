@@ -1,10 +1,15 @@
+using Facebook;
+using hrvster.ApplicationServices.Harvesters.Facebook;
 using hrvster.ApplicationServices.Harvesters.Twitter;
 using hrvster.Core.Handlers.ServiceHandlers;
 using hrvster.Core.Requests.ServiceRequests;
 using hrvster.Extensions.Configuration;
 using hrvster.Extensions.OptionsConfiguration;
 using hrvster.Infrastructure;
+using hrvster.Infrastructure.Facebook;
+using hrvster.Models.Options;
 using MediatR;
+using Microsoft.AspNetCore.Authentication.Facebook;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -44,6 +49,8 @@ namespace hrvster.Twitter.Harvester
 				{
 					Log.Information("Starting Host for hrvster");
 
+					var facebookOptions = Configuration.GetSection(FacebookConfigOptions.SectionName).Get<FacebookConfigOptions>();
+
 					services.AddHostedService<HostedService>();
 					services.AddSingleton<IService, TwitterHarvestingService>();
 
@@ -65,7 +72,12 @@ namespace hrvster.Twitter.Harvester
 						.AddCacheService()
 						.AddMailSettings(Configuration)
 						.AddEmailRepository()
-						.AddHarvsterConfigurationOption(Configuration);
+						.AddHarvsterConfigurationOption(Configuration)
+						.AddTransient(provider => GetFacebookClient(facebookOptions))
+						.AddTransient<IFacebookPageSerivce, FacebookPageSerivce>()
+						.AddTransient<IFacebookPageRepository, FacebookPageRepository>()
+						.AddPostSchedulers()
+						.AddWatchTypeRepositories();
 
 					services.AddHttpClient<ITwitterHarvesterService, TwitterHarvesterService>();
 
@@ -74,6 +86,15 @@ namespace hrvster.Twitter.Harvester
 					AddDatabases(services);
 					AddMediator(services);
 				});
+
+		private static FacebookClient GetFacebookClient(FacebookConfigOptions facebookOptions)
+		{
+			return new FacebookClient
+			{
+				AppId = facebookOptions.AppId,
+				AppSecret = facebookOptions.AppSecret
+			};
+		}
 
 		private static void AddMediator(IServiceCollection services) 
 			=> services.AddMediatR(typeof(Program))

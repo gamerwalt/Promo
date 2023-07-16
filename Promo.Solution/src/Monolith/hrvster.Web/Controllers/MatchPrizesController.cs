@@ -91,7 +91,15 @@ namespace hrvster.Web.Controllers
 
 			if (ModelState.IsValid)
 			{
-				await _matchPrizeService.CreateAsync(Uid, form.Name, form.Description, form.Value, form.Quantity, form.ImageUid, cancellationToken);
+				await _matchPrizeService.CreateAsync(
+					Uid, 
+					form.Name, 
+					form.Description, 
+					form.Value, 
+					form.Quantity, 
+					form.ImageUid, 
+					form.IsFiller,
+					cancellationToken);
 
 				_notificationService.AddSuccessToastMessage("Prize created successfully.");
 
@@ -195,6 +203,7 @@ namespace hrvster.Web.Controllers
 					form.Quantity, 
 					form.Value, 
 					form.ImageUid, 
+					form.IsFiller,
 					cancellationToken);
 
 				_notificationService.AddSuccessToastMessage("Match prize updated successfully.");
@@ -352,7 +361,8 @@ namespace hrvster.Web.Controllers
 				MatchImages = _mapper.Map<List<MatchImage>>(matchImagesUpdated),
 				ControllerName = controllerName ?? "MatchGames",
 				ActionName = actionName ?? "View",
-				PreviousQuantity = matchPrize.Quantity
+				PreviousQuantity = matchPrize.Quantity,
+				IsFiller = matchPrize.IsFiller,
 			};
 			return model;
 		}

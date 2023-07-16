@@ -55,7 +55,7 @@ namespace hrvster.Services
 					Log.Information("Starting Host for hrvster.Services");
 
 					services.AddHostedService<HostedServices>();
-					services.AddSingleton<IService, ScheduledTweetService>();
+					services.AddSingleton<IService, ScheduledPostService>();
 					services.AddSingleton<IService, SweepstakesDrawService>();
 					services.AddSingleton<IService, EmailNotificationService>();
 					services.AddSingleton<IService, AccountVerificationService>();
@@ -88,10 +88,12 @@ namespace hrvster.Services
 						.AddSweepstakesServices()
 						.AddAccountsService()
 						.AddPaymentServices(Configuration)
-					.AddAutoMapper(typeof(EntityMap))
+						.AddAutoMapper(typeof(EntityMap))
 						.AddMatchGameRepositories()
 						.AddCacheService()
-						.AddMatchGameService();
+						.AddMatchGameService()
+						.AddPostSchedulers()
+						.AddTwitterHttpService(Configuration);
 
 					var facebookOptions = Configuration
 						.GetSection(FacebookConfigOptions.SectionName)

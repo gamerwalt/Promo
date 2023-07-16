@@ -271,7 +271,7 @@
 										<tr>
 											<td>@rule.WatchValue</td>
 											<td>
-												@if (@rule.ExternalId == "0")
+												@if (@rule.ExternalId == "0" || string.IsNullOrWhiteSpace(rule.ExternalId))
 												{
 													<a asp-action="View" asp-controller="ScheduledTweets"
 											   asp-route-ruleUid="@rule.RuleUid"

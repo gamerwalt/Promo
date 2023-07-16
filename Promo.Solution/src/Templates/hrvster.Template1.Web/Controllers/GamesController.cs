@@ -8,7 +8,6 @@ using hrvster.ApplicationServices.Sweepstakes;
 using hrvster.Core.Authentication;
 using hrvster.Core.Clients;
 using hrvster.Infrastructure.Accounts;
-using hrvster.Infrastructure.Core;
 using hrvster.Infrastructure.Harvester;
 using hrvster.Infrastructure.MatchGames;
 using hrvster.Infrastructure.Reporting;
@@ -32,7 +31,6 @@ namespace hrvster.Template1.Web.Controllers
 	{
 		private readonly ILogger _logger;
 		private readonly IGameService _gameService;
-		private readonly IWatchTypeProvider _watchTypeProvider;
 		private readonly ISessionManager _sessionManager;
 		private readonly IMemberProfileRepository _memberProfileRepository;
 		private readonly IMemberRepository _memberRepository;
@@ -46,9 +44,7 @@ namespace hrvster.Template1.Web.Controllers
 		private readonly ICampaignService _campaignService;
 		private readonly IAccountsService _accountsService;
 		private readonly IMatchGameplayService _matchGamePlayService;
-		private readonly SignatureUtility _signatureUtility;
 		private readonly HarvesterSettingsOptions _harvesterSettings;
-		private readonly ISignatureRepository _signatureRepository;
 		private readonly IMatchGamesService _matchGameService;
 		private readonly IMatchGameBoardService _gameBoardService;
 		private readonly IReportingService _reportingService;
@@ -58,7 +54,6 @@ namespace hrvster.Template1.Web.Controllers
 		public GamesController(
 			ILoggerFactory loggerFactory,
 			IGameService gameService,
-			IWatchTypeProvider watchTypeProvider,
 			ISessionManager sessionManager,
 			IMemberProfileRepository memberProfileRepository,
 			IMemberRepository memberRepository,
@@ -72,9 +67,7 @@ namespace hrvster.Template1.Web.Controllers
 			IMatchPlayRulesRepository matchPlayRulesRepository,
 			IAccountsService accountsService,
 			IMatchGameplayService matchGameplayService,
-			SignatureUtility signatureUtility,
 			HarvesterSettingsOptions hrvsterSettings,
-			ISignatureRepository signatureRepository,
 			IMatchGamesService matchGameService,
 			IMatchGameBoardService gameBoardService,
 			IReportingService reportingService,
@@ -83,7 +76,6 @@ namespace hrvster.Template1.Web.Controllers
 		{
 			_logger = loggerFactory.CreateLogger<GamesController>();
 			_gameService = gameService;
-			_watchTypeProvider = watchTypeProvider;
 			_sessionManager = sessionManager;
 			_memberProfileRepository = memberProfileRepository;
 			_memberRepository = memberRepository;
@@ -97,9 +89,7 @@ namespace hrvster.Template1.Web.Controllers
 			_matchPlayRulesRepository = matchPlayRulesRepository;
 			_accountsService = accountsService;
 			_matchGamePlayService = matchGameplayService;
-			_signatureUtility = signatureUtility;
 			_harvesterSettings = hrvsterSettings;
-			_signatureRepository = signatureRepository;
 			_matchGameService = matchGameService;
 			_gameBoardService = gameBoardService;
 			_reportingService = reportingService;
@@ -112,6 +102,13 @@ namespace hrvster.Template1.Web.Controllers
 		{
 			return new OkObjectResult("Ok");
 		}
+
+		[HttpGet("Games/{gameUid}/error")]
+		public async Task<IActionResult> Error(string subdomainName, Guid gameUid, string reason)
+		{
+			return new OkObjectResult(new { subdomainName, gameUid, reason });
+		}
+
 
 		[HttpGet("Games/Pick3MatchGame/{gameUid}")]
 		public async Task<IActionResult> Pick3MatchGame(
@@ -132,7 +129,7 @@ namespace hrvster.Template1.Web.Controllers
 				ruleUid);
 
 			if (!await _gameService.GameExistsForSubdomainAsync(subdomainName, gameUid))
-				return RedirectToAction("GameDoesNotExist");
+				return RedirectToAction("GameDoesNotExist", new { subdomainName, gameUid });
 
 			_sessionManager.SetKeyValue(TemplateSessionConstants.GameUid, gameUid.ToString());
 			_sessionManager.SetKeyValue(TemplateSessionConstants.RuleUid, ruleUid.ToString());
@@ -161,10 +158,17 @@ namespace hrvster.Template1.Web.Controllers
 				externalClient,
 				ruleUid);
 
-			//Does the game exist for this account?
 			if (!await _gameService.GameExistsForSubdomainAsync(subdomainName, gameUid))
-				return RedirectToAction("GameDoesNotExist");
+			{
+				_logger.LogWarning("Game with uid {gameUid} does not exist.", gameUid);
 
+				return RedirectToAction(
+					"Error", new { subdomainName, gameUid, reason = GameErrorReasons.GameDoesNotExist });
+			}
+
+			_logger.LogInformation("The game with uid {gameUid} exists for the company with subdomain {subdomain}", subdomainName);
+
+			_sessionManager.SetKeyValue(TemplateSessionConstants.Subdomain, subdomainName);
 			_sessionManager.SetKeyValue(TemplateSessionConstants.GameUid, gameUid.ToString());
 			_sessionManager.SetKeyValue(TemplateSessionConstants.RuleUid, ruleUid.ToString());
 			_sessionManager.SetKeyValue(TemplateSessionConstants.ExternalClient, externalClient);
@@ -174,31 +178,70 @@ namespace hrvster.Template1.Web.Controllers
 
 			var url = _twitterHttpService.GetAuthorizationUrl(Request.Scheme, Request.Host.Value, $"/Games/Validate{providerCode}Auth");
 
+			_logger.LogInformation("Redirecting to {url} for authorization.", url);
+
 			return new RedirectResult(url);
 		}
 
 		public async Task<IActionResult> ValidateTwitterAuth()
 		{
-			if (Request.Query["denied"].Count > 0)
-			{
-				return RedirectToActionPermanent("FailedAuthentication");
-			}
+			_logger.LogInformation("Validating the Twitter user.");
+			var subdomainName = _sessionManager.GetValue(TemplateSessionConstants.Subdomain);
+			var gameUid = Guid.Parse(_sessionManager.GetValue(TemplateSessionConstants.GameUid));
 
-			if (!Guid.TryParse(_sessionManager.GetValue(TemplateSessionConstants.GameUid), out var gameUid))
-				return View("BadGameUid");
+			if (Request.Query["denied"].Count > 0)
+				return RedirectToAction(
+					"Error",
+					new
+					{
+						subdomainName,
+						gameUid,
+						reason = GameErrorReasons.TwitterAuthenticationFailed
+					});
+
+			if (!Guid.TryParse(_sessionManager.GetValue(TemplateSessionConstants.GameUid), out var gameOutUid))
+				return RedirectToAction(
+					"Error",
+					new
+					{
+						subdomainName,
+						gameUid,
+						reason = GameErrorReasons.GameDoesNotExist
+					});
 
 			if (!Guid.TryParse(_sessionManager.GetValue(TemplateSessionConstants.RuleUid), out var ruleUid))
-				return View("BadRuleUid");
+				return RedirectToAction(
+					"Error",
+					new
+					{
+						subdomainName,
+						gameUid,
+						reason = GameErrorReasons.BadRule
+					});
 
 			var externalClient = _sessionManager.GetValue(TemplateSessionConstants.ExternalClient);
 
 			if (string.IsNullOrWhiteSpace(externalClient))
-				return View("BadExternalClient");
+				return RedirectToAction(
+					"Error",
+					new
+					{
+						subdomainName,
+						gameUid,
+						reason = GameErrorReasons.BadExternalClient
+					});
 
 			var gameType = _sessionManager.GetValue(TemplateSessionConstants.GameType);
 
 			if (string.IsNullOrWhiteSpace(gameType))
-				return View("BadGameType");
+				return RedirectToAction(
+					"Error",
+					new
+					{
+						subdomainName,
+						gameUid,
+						reason = GameErrorReasons.BadGameType
+					});
 
 			var code = Request.Query["code"].ToString();
 
@@ -207,58 +250,51 @@ namespace hrvster.Template1.Web.Controllers
 
 			var userDetails = await _twitterHttpService.GetAuthenticatedUserAsync(accessTokenObject);
 
+			if (userDetails == null)
+				return RedirectToAction("Error", new { subdomainName, gameUid, reason = GameErrorReasons.TwitterAuthenticationFailed });
+
 			var gameDetails = await _gameService.GetGameDetailsAsync(gameType, gameUid);
 
-			if (DateTime.UtcNow > gameDetails.EndDate || DateTime.UtcNow < gameDetails.StartDate)
-				return View("BadGame");
+			if (DateTime.UtcNow > gameDetails.EndDate)
+				return RedirectToAction(
+					"Error",
+					new
+					{
+						subdomainName,
+						gameUid,
+						reason = GameErrorReasons.GameCompleted
+					});
+
+			if (DateTime.UtcNow < gameDetails.StartDate)
+				return RedirectToAction(
+					"Error",
+					new
+					{
+						subdomainName,
+						gameUid,
+						reason = GameErrorReasons.GameNotStarted
+					});
 
 			_logger.LogInformation("Retrieving the member profile for the external profile id {externalProfileId}", userDetails.ExternalProfileId);
 
 			var memberProfile = await _memberProfileRepository.GetByExternalProfileIdAsync(userDetails.ExternalProfileId);
 
-			var claims = new List<Claim>()
-			{
-				new Claim(ClaimTypes.NameIdentifier, userDetails.ExternalProfileId),
-				new Claim(ClaimTypes.Name, userDetails.Name),
-				new Claim(HrvsterClaimTypes.DisplayName, userDetails.ScreenName),
-				new Claim(HrvsterClaimTypes.AccessToken, userDetails.AccessToken),
-				new Claim(HrvsterClaimTypes.RefreshToken, userDetails.RefreshToken),
-				new Claim(HrvsterClaimTypes.Description, userDetails.Description),
-				new Claim(HrvsterClaimTypes.ExternalProfileId, userDetails.ExternalProfileId)
-			};
-
-			var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-			var principal = new ClaimsPrincipal(identity);
-
-			await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
+			await SignInUserAsync(userDetails);
 
 			if (memberProfile == null)
 			{
 				_logger.LogWarning("Member profile does not exist for the external profile id {externalProfileId}", userDetails.ExternalProfileId);
 
-				//serialize the userDetails and add it to the session and go to the createMember action, 
-				//from there, go to play action
 				_sessionManager.SetKeyValue(TemplateSessionConstants.UserDetails, userDetails.ToJsonString());
+
+				_logger.LogInformation("Redirecting to create a member for this authenticated user.");
 
 				return RedirectToAction("CreateMember", new { gameUid, ruleUid, externalClient });
 			}
-			else
-			{
-				memberProfile.AccessToken = userDetails.AccessToken;
-				memberProfile.RefreshToken = userDetails.RefreshToken;
-				memberProfile.Name = userDetails.Name;
-				memberProfile.ScreenName = userDetails.ScreenName;
-				memberProfile.PictureUrl = userDetails.ProfileImage;
 
-				await _memberProfileRepository.UpdateMemberProfileAsync(memberProfile);
-			}
+			await UpdateMemberProfileAsync(userDetails, memberProfile);
 
-			_logger.LogWarning("Member profile found for external profile id {externalProfileId}", userDetails.ExternalProfileId);
-
-			if (gameType == GameTypes.Sweepstake)
-				return RedirectToAction("SweepsPlay", new { gameUid, ruleUid, externalClient });
-
-			return RedirectToAction("Pick3MatchPlay", new { gameUid, ruleUid, externalClient });
+			return RedirectToGamePlayFromGameType(gameUid, ruleUid, externalClient, gameType);
 		}
 
 		public async Task<IActionResult> ValidateFBAuth(string code, string state, string error, string error_description)
@@ -535,8 +571,10 @@ namespace hrvster.Template1.Web.Controllers
 
 			var gameDetails = await _gameService.GetGameDetailsAsync(gameType, gameUid);
 
-			if (DateTime.UtcNow > gameDetails.EndDate || DateTime.UtcNow < gameDetails.StartDate)
-				return View("BadGame");
+			if (DateTime.UtcNow > gameDetails.EndDate)
+				return RedirectToAction("GameCompleted", new { gameUid, ruleUid, externalClient });
+			if (DateTime.UtcNow < gameDetails.StartDate)
+				return RedirectToAction("GameNotStarted", new { gameUid, ruleUid, externalClient });
 
 			var member = await _memberRepository.GetMemberViaExternalProfileIdAsync(GetProfileType(externalClient), externalProfileId);
 
@@ -753,7 +791,7 @@ namespace hrvster.Template1.Web.Controllers
 				await SetGameplayAsWonAsync(gameplayUid, form, cancellationToken);
 				var prize = await _matchGameService.GetPrizeFromGameplayUidAsync(gameplayUid, cancellationToken);
 
-				message = $"{replyTo} I just played the Pick 3 game {game.Name} and won fortunately I just won a prize with a value of ${prize.Value}. {Environment.NewLine} {hashtag}";
+				message = $"{replyTo} I just played the Pick 3 game {game.Name} and won. I just won a prize with a value of ${prize.Value}. {Environment.NewLine} {hashtag}";
 				await _twitterHttpService.PublishTweetInResponseToAsync(message, rule.ExternalId, accessToken, refreshToken);
 
 				return RedirectToAction("MatchGameWin", new { Uid = gameUid, gameplayUid = gameplayUid });
@@ -879,5 +917,54 @@ namespace hrvster.Template1.Web.Controllers
 				ExternalClientType.Instagram => hrvster.Models.Constants.InstagramProvider,
 				_ => hrvster.Models.Constants.TwitterProvider,
 			};
+
+		private async Task SignInUserAsync(UserProviderDetails userDetails)
+		{
+			var principal = BuildPrincipalFromClaims(userDetails);
+
+			await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
+		}
+
+		private async Task UpdateMemberProfileAsync(UserProviderDetails userDetails, MemberProfile memberProfile)
+		{
+			_logger.LogInformation("Authenticated member already exists. We will try to update as much as possible.");
+
+			memberProfile.AccessToken = userDetails.AccessToken;
+			memberProfile.RefreshToken = userDetails.RefreshToken;
+			memberProfile.Name = userDetails.Name;
+			memberProfile.ScreenName = userDetails.ScreenName;
+			memberProfile.PictureUrl = userDetails.ProfileImage;
+
+			await _memberProfileRepository.UpdateMemberProfileAsync(memberProfile);
+
+			_logger.LogWarning("Member profile found for external profile id {externalProfileId}", userDetails.ExternalProfileId);
+		}
+
+		private IActionResult RedirectToGamePlayFromGameType(Guid gameUid, Guid ruleUid, string externalClient, string gameType)
+		{
+			if (gameType == GameTypes.Sweepstake || gameType == GameTypesEnum.Sweeps.ToString())
+				return RedirectToAction("SweepsPlay", new { gameUid, ruleUid, externalClient });
+
+			return RedirectToAction("Pick3MatchPlay", new { gameUid, ruleUid, externalClient });
+		}
+
+		private static ClaimsPrincipal BuildPrincipalFromClaims(UserProviderDetails userDetails)
+		{
+			var claims = new List<Claim>()
+			{
+				new Claim(ClaimTypes.NameIdentifier, userDetails.ExternalProfileId),
+				new Claim(ClaimTypes.Name, userDetails.Name),
+				new Claim(HrvsterClaimTypes.DisplayName, userDetails.ScreenName),
+				new Claim(HrvsterClaimTypes.AccessToken, userDetails.AccessToken),
+				new Claim(HrvsterClaimTypes.RefreshToken, userDetails.RefreshToken),
+				new Claim(HrvsterClaimTypes.Description, userDetails.Description),
+				new Claim(HrvsterClaimTypes.ExternalProfileId, userDetails.ExternalProfileId)
+			};
+
+			var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+			var principal = new ClaimsPrincipal(identity);
+
+			return principal;
+		}
 	}
 }

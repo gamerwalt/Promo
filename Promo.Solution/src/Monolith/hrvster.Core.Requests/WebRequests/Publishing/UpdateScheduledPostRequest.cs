@@ -5,7 +5,7 @@ using System;
 
 namespace hrvster.Core.Requests.WebRequests.Publishing
 {
-	public class UpdateScheduledTweetRequest : IRequest
+	public class UpdateScheduledPostRequest : IRequest
 	{
 		private Guid userUid;
 		private Rule rule;
@@ -24,7 +24,7 @@ namespace hrvster.Core.Requests.WebRequests.Publishing
 		private string _timeZoneId;
 		private bool _isDaylight;
 
-		public UpdateScheduledTweetRequest(
+		public UpdateScheduledPostRequest(
 			Guid userUid,
 			Rule rule, 
 			Sweep sweep, 

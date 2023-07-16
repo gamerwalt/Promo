@@ -74,23 +74,23 @@ namespace hrvster.Web.Controllers
 			if (rule.Sweep.Account.AccountUid != _hrvsterUser.UserUid)
 				return RedirectToAction(actionName ?? "Index", controllerName ?? "Sweeps");
 
-			var scheduledTweet = await _mediator.Send(new GetScheduledTweetRequest(rule));
-			var scheduledImages = scheduledTweet.Images?.Select(item => new string(item.ImageLocation)).ToList();
+			var scheduledPost = await _mediator.Send(new GetScheduledPostRequest(rule));
+			var scheduledImages = scheduledPost.Images?.Select(item => new string(item.ImageLocation)).ToList();
 			var model = new UpdateScheduledSweepRuleTweet
 			{
 				RuleId = rule.RuleId,
-				ScheduledUid = scheduledTweet.ScheduledUid,
-				Text = scheduledTweet.Text,
-				ScheduledTime = scheduledTweet.ScheduledTime,
-				PreviousMediaId1 = scheduledImages.Count >= 1 ? scheduledTweet.Images[0].ScheduledImageId : 0,
-				PreviousMediaId2 = scheduledImages.Count >= 2 ? scheduledTweet.Images[1].ScheduledImageId : 0,
-				PreviousMediaId3 = scheduledImages.Count >= 3 ? scheduledTweet.Images[2].ScheduledImageId : 0,
-				PreviousMediaId4 = scheduledImages.Count >= 4 ? scheduledTweet.Images[3].ScheduledImageId : 0,
+				ScheduledUid = scheduledPost.Uid,
+				Text = scheduledPost.Post,
+				ScheduledTime = scheduledPost.ScheduledTime,
+				PreviousMediaId1 = scheduledImages.Count >= 1 ? scheduledPost.Images[0].Id : 0,
+				PreviousMediaId2 = scheduledImages.Count >= 2 ? scheduledPost.Images[1].Id : 0,
+				PreviousMediaId3 = scheduledImages.Count >= 3 ? scheduledPost.Images[2].Id : 0,
+				PreviousMediaId4 = scheduledImages.Count >= 4 ? scheduledPost.Images[3].Id : 0,
 				Sweepstake = sweep,
 				Rule = rule,
-				ScheduledId = scheduledTweet.ScheduledId,
-				ScheduledTimeUtc = scheduledTweet.ScheduledTimeUtc,
-				Status = scheduledTweet.Status,
+				ScheduledId = scheduledPost.Id,
+				ScheduledTimeUtc = scheduledPost.ScheduledTimeUtc,
+				Status = scheduledPost.Status,
 				Images = scheduledImages,
 				ActionName = actionName ?? "Index",
 				ControllerName = controllerName ?? "Dashboard"
@@ -149,7 +149,7 @@ namespace hrvster.Web.Controllers
 			if (rule.Sweep.Account.AccountUid != _hrvsterUser.UserUid)
 				return RedirectToAction(actionName ?? "Index", controllerName ?? "Sweeps");
 
-			var scheduledTweet = await _mediator.Send(new GetScheduledTweetRequest(rule));
+			var scheduledTweet = await _mediator.Send(new GetScheduledPostRequest(rule));
 			if (scheduledTweet == null)
 			{
 				_logger.LogError("Could not find the scheduled tweet for the rule {rule}", rule.ToJsonString());
@@ -194,7 +194,7 @@ namespace hrvster.Web.Controllers
 			if (ModelState.IsValid)
 			{
 				await _mediator.Send(
-					new UpdateScheduledTweetRequest(
+					new UpdateScheduledPostRequest(
 						_hrvsterUser.UserUid, 
 						rule, 
 						sweep, 
@@ -270,7 +270,7 @@ namespace hrvster.Web.Controllers
 			if (rule.Sweep.Account.AccountUid != _hrvsterUser.UserUid)
 				return RedirectToAction(actionName ?? "Index", controllerName ?? "Sweeps");
 
-			var scheduledTweet = await _mediator.Send(new GetScheduledTweetRequest(rule));
+			var scheduledTweet = await _mediator.Send(new GetScheduledPostRequest(rule));
 			if (scheduledTweet == null)
 			{
 				_logger.LogError("Could not find the scheduled tweet for the rule {rule}", rule.ToJsonString());
@@ -289,16 +289,16 @@ namespace hrvster.Web.Controllers
 			var model = new DeleteScheduledSweepRuleTweet
 			{
 				RuleId = rule.RuleId,
-				ScheduledUid = scheduledTweet.ScheduledUid,
-				Text = scheduledTweet.Text,
+				ScheduledUid = scheduledTweet.Uid,
+				Text = scheduledTweet.Post,
 				ScheduledTime = scheduledTweet.ScheduledTime,
-				PreviousMediaId1 = scheduledImages.Count >= 1 ? scheduledTweet.Images[0].ScheduledImageId : 0,
-				PreviousMediaId2 = scheduledImages.Count >= 2 ? scheduledTweet.Images[1].ScheduledImageId : 0,
-				PreviousMediaId3 = scheduledImages.Count >= 3 ? scheduledTweet.Images[2].ScheduledImageId : 0,
-				PreviousMediaId4 = scheduledImages.Count >= 4 ? scheduledTweet.Images[3].ScheduledImageId : 0,
+				PreviousMediaId1 = scheduledImages.Count >= 1 ? scheduledTweet.Images[0].Id : 0,
+				PreviousMediaId2 = scheduledImages.Count >= 2 ? scheduledTweet.Images[1].Id : 0,
+				PreviousMediaId3 = scheduledImages.Count >= 3 ? scheduledTweet.Images[2].Id : 0,
+				PreviousMediaId4 = scheduledImages.Count >= 4 ? scheduledTweet.Images[3].Id : 0,
 				Sweepstake = sweep,
 				Rule = rule,
-				ScheduledId = scheduledTweet.ScheduledId,
+				ScheduledId = scheduledTweet.Id,
 				ScheduledTimeUtc = scheduledTweet.ScheduledTimeUtc,
 				Status = scheduledTweet.Status,
 				Images = scheduledImages,
@@ -356,7 +356,7 @@ namespace hrvster.Web.Controllers
 			if (rule.Sweep.Account.AccountUid != _hrvsterUser.UserUid)
 				return RedirectToAction(actionName ?? "Index", controllerName ?? "Sweeps");
 
-			var scheduledTweet = await _mediator.Send(new GetScheduledTweetRequest(rule));
+			var scheduledTweet = await _mediator.Send(new GetScheduledPostRequest(rule));
 			if (scheduledTweet == null)
 			{
 				_logger.LogError("Could not find the scheduled tweet for the rule {rule}", rule.ToJsonString());

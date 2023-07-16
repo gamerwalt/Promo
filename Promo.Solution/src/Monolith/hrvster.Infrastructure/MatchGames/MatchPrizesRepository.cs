@@ -19,7 +19,7 @@ namespace hrvster.Infrastructure.MatchGames
 		Task<MatchPrize> GetByGameboardUidAsync(Guid gameboardUid, CancellationToken cancellationToken);
 		IEnumerable<MatchPrize> GetForMatchGame(Guid matchGameUid, object value);
 		Task<IEnumerable<MatchPrize>> GetForMatchGameAsync(Guid matchGameUid, CancellationToken cancellationToken);
-		Task UpdateAsync(Guid prizeUid, string name, string description, int quantity, decimal value, Guid imageUid, CancellationToken cancellationToken);
+		Task UpdateAsync(Guid prizeUid, string name, string description, int quantity, decimal value, Guid imageUid, bool isFiller, CancellationToken cancellationToken);
 	}
 
 	public class MatchPrizesRepository : IMatchPrizesRepository
@@ -42,6 +42,7 @@ namespace hrvster.Infrastructure.MatchGames
 				.AddParameter("matchPrizeDescription", matchPrize.Description)
 				.AddParameter("matchPrizeValue", matchPrize.Value)
 				.AddParameter("quantity", matchPrize.Quantity)
+				.AddParameter("isFiller", matchPrize.IsFiller)
 				.AddParameter("matchImageUid", matchPrize.Image.Uid);
 
 			await conn.OpenAsync(cancellationToken);
@@ -112,7 +113,8 @@ namespace hrvster.Infrastructure.MatchGames
 					Uid = reader.GetGuid("image_uid"),
 					Name = reader.GetStringValue("image_name"),
 					LocationUrl = reader.GetStringValue("location_url")
-				}
+				},
+				IsFiller = reader.GetBoolean("is_filler")
 			};
 
 		public IEnumerable<MatchPrize> GetForMatchGame(Guid matchGameUid, object value)
@@ -188,6 +190,7 @@ namespace hrvster.Infrastructure.MatchGames
 			int quantity, 
 			decimal value, 
 			Guid imageUid, 
+			bool isFiller,
 			CancellationToken cancellationToken)
 		{
 			using var conn = new MySqlConnection(_database.GetConnectionString());
@@ -200,6 +203,7 @@ namespace hrvster.Infrastructure.MatchGames
 				.AddParameter("matchPrizeDescription", description)
 				.AddParameter("matchPrizeValue", value)
 				.AddParameter("quantity", quantity)
+				.AddParameter("isFiller", isFiller)
 				.AddParameter("matchImageUid", imageUid);
 
 			await conn.OpenAsync(cancellationToken);

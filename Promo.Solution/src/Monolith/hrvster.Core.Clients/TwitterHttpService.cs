@@ -14,6 +14,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Web;
 using Tweetinvi;
 using static System.Net.Mime.MediaTypeNames;
 
@@ -31,7 +32,7 @@ namespace hrvster.Core.Clients
 		Task<string> PublishTweetAsync(string text, string accessToken, string refreshToken);
 		Task<string> PublishTweetAsync(string text, string accessToken, string refreshToken, List<long> mediaIds);
 		Task<string> PublishTweetInResponseToAsync(string tweetText, string tweetId, string accessToken, string accessTokenSecret);
-		Task<string> SearchRecentTweets(string hashTag, CancellationToken cancellationToken);
+		Task<List<Tweet>> SearchRecentTweets(string hashTag, CancellationToken cancellationToken, string searchSince = null);
 	}
 
 	public class TwitterHttpService : ITwitterHttpService
@@ -44,11 +45,15 @@ namespace hrvster.Core.Clients
 		private const string GetAccessTokenEndpoint = "oauth2/token";
 		private const string MeEndpoint = "users/me";
 		private const string TweetsEndpoint = "tweets";
-		private const string ImageUploadEndpoint = "https://upload.twitter.com/1.1/media/upload.json";
+		private const string TweetsSearchEndpoint = "tweets/search/recent?query=[tweetSearch]";
+		private const string NextToken = "&next_token=[nextToken]";
+		private const string TweetsSearchSince = "&since_id=[sinceId]";
+
 
 		private const string RandomizedKey = "ABr85mJTMQNZ6Z6x";
 
 		private const string IDReplacer = "[id]";
+		private const string TweetSearchReplacer = "[tweetSearch]";
 
 		public TwitterHttpService(
 			ILoggerFactory loggerFactory,
@@ -68,9 +73,55 @@ namespace hrvster.Core.Clients
 			await _client.DeleteAsync($"{TweetsEndpoint}/{externalId}");
 		}
 
-		public async Task<string> SearchRecentTweets(string hashTag, CancellationToken cancellationToken)
+		public async Task<List<Tweet>> SearchRecentTweets(
+			string hashTag, 
+			CancellationToken cancellationToken, 
+			string searchSince = null)
 		{
-			return string.Empty;
+			//To be used only when 
+			//_client.DefaultRequestHeaders.Clear();
+			//_client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
+			//	"Basic", 
+			//	CreateBase64(_twitterAccount.ClientId, _twitterAccount.ClientSecret));
+
+			var tweets = new List<Tweet>();
+
+			try
+			{
+				var endpoint = BuildTweetSearchEndpoint(hashTag, searchSince);
+
+				var responseResult = await _client.GetAsync(endpoint);
+
+				var response = await responseResult.Content.ReadAsStringAsync();
+
+				var responseObject = JsonConvert.DeserializeObject<TweetSearchResponse>(response);
+
+				tweets = responseObject.Tweets;
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError("An error occurred trying to search for the hashtag {hashTag}. Message: {message}",
+					hashTag,
+					ex.Message);
+
+				return tweets;
+			}
+			
+
+			return tweets;
+		}
+
+		private static string BuildTweetSearchEndpoint(string hashTag, string searchSince)
+		{
+			var encodedHashtag = HttpUtility.UrlEncode(hashTag);
+			var endpoint = TweetsSearchEndpoint.Replace(TweetSearchReplacer, encodedHashtag);
+
+			if (!string.IsNullOrWhiteSpace(searchSince))
+			{
+				endpoint = $"{endpoint}{TweetsSearchSince.Replace(TweetSearchReplacer, searchSince)}";
+			}
+
+			return endpoint;
 		}
 
 		public async Task<string> PublishTweetAsync(string text, string accessToken, string refreshToken, List<long> mediaIds)
@@ -99,6 +150,11 @@ namespace hrvster.Core.Clients
 					var tweetResponse = JsonConvert.DeserializeObject<TweetResponse>(result);
 
 					return tweetResponse.Tweet.Id;
+				}
+				else if(response.StatusCode == System.Net.HttpStatusCode.ServiceUnavailable)
+				{
+					_logger.LogError("Twitter is currently unavailable. Please try again later.");
+					throw new Exception("Twitter is currently unavailable. Please try again later.");
 				}
 			}
 			catch (Exception ex)
@@ -134,6 +190,13 @@ namespace hrvster.Core.Clients
 
 					return tweetResponse.Tweet.Id;
 				}
+
+				var errorResult = await response.Content.ReadAsStringAsync();
+				var error = JsonConvert.DeserializeObject<PublishTweetErrorResponse>(errorResult);
+
+				_logger.LogError("Unable to publish a tweet because ... {response}", error.Detail);
+
+				return string.Empty;
 			}
 			catch (Exception ex)
 			{
@@ -218,6 +281,9 @@ namespace hrvster.Core.Clients
 			do
 			{
 				var page = await GetFollowersPageAsync(externalProfileId, nextToken);
+				
+				if (page == null) return followers;
+
 				followers.AddRange(page.Data);
 
 				nextToken = page.Meta.NextToken;
@@ -317,6 +383,13 @@ namespace hrvster.Core.Clients
 			}
 
 			return null;
+		}
+
+		private string CreateBase64(string clientId, string clientSecret)
+		{
+			var clientCredentials = $"{clientId}:{clientSecret}";
+
+			return Convert.ToBase64String(Encoding.UTF8.GetBytes(clientCredentials));
 		}
 	}
 }

@@ -11,14 +11,14 @@ namespace hrvster.ApplicationServices.MatchGames
 {
 	public interface IMatchPrizeService
 	{
-		Task CreateAsync(Guid uid, string name, string description, decimal value, int quantity, Guid imageUid, CancellationToken cancellationToken);
+		Task CreateAsync(Guid uid, string name, string description, decimal value, int quantity, Guid imageUid, bool isFiller, CancellationToken cancellationToken);
 		Task DeleteAsync(Guid prizeUid, CancellationToken cancellationToken);
 		Task<IEnumerable<MatchPrize>> GetAllForMatchGameAsync(Guid uid, CancellationToken cancellationToken);
 		MatchPrize GetPrize(Guid matchPrizeUid);
 		Task<MatchPrize> GetPrizeAsync(Guid prizeUid, CancellationToken cancellationToken);
 		Task<MatchPrize> GetPrizeFromBoardAsync(Guid gameboardUid, CancellationToken cancellationToken);
 		int GetTotalPrizesForGame(Guid matchGameUid);
-		Task UpdateAsync(Guid prizeUid, Guid uid, string name, string description, int quantity, decimal value, Guid imageUid, CancellationToken cancellationToken);
+		Task UpdateAsync(Guid prizeUid, Guid uid, string name, string description, int quantity, decimal value, Guid imageUid, bool isFiller, CancellationToken cancellationToken);
 	}
 
 	public class MatchPrizeService : IMatchPrizeService
@@ -39,6 +39,7 @@ namespace hrvster.ApplicationServices.MatchGames
 			decimal value, 
 			int quantity, 
 			Guid imageUid, 
+			bool isFiller,
 			CancellationToken cancellationToken)
 				=> await _repository.CreateAsync(new MatchPrize
 				{
@@ -48,6 +49,7 @@ namespace hrvster.ApplicationServices.MatchGames
 					Description = description,
 					Value = value,
 					Quantity = quantity,
+					IsFiller = isFiller,
 					Image = new MatchImage { Uid = imageUid }
 				}, cancellationToken);
 
@@ -97,7 +99,8 @@ namespace hrvster.ApplicationServices.MatchGames
 			int quantity,
 			decimal value,
 			Guid imageUid,
+			bool isFiller,
 			CancellationToken cancellationToken)
-			=> await _repository.UpdateAsync(prizeUid, name, description, quantity, value, imageUid, cancellationToken);
+			=> await _repository.UpdateAsync(prizeUid, name, description, quantity, value, imageUid, isFiller, cancellationToken);
 	}
 }

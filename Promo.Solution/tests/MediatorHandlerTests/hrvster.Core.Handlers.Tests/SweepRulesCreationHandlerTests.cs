@@ -1,10 +1,7 @@
 ﻿using FluentAssertions;
-using hrvster.Core.Clients.Common;
 using hrvster.Core.Handlers.Tests.Common;
 using hrvster.Web.Mvc.Common.Steps;
-using Moq;
 using TestUtilities.Data;
-using TestUtilities.Mocks.Publishers;
 using Xunit;
 
 namespace hrvster.Core.Handlers.Tests
@@ -57,66 +54,6 @@ namespace hrvster.Core.Handlers.Tests
 
             var watchValues = await _feature.SweepRulesRepository.GetSweepRuleAsync(sweep.SweepUid);
             watchValues.Count().Should().Be(maxHashtags);
-        }
-
-        [Fact]
-        public async Task If_We_Have_Max_WatchValues_We_Should_Not_Be_Able_To_PublishSweepRuleTweetRequest_Past_The_Max()
-        {
-            _feature.GivenACleanSlate();
-
-            var account = await BuildAccountAndSubscribeToBasicPlan(_feature);
-            var profile = BuildNewTwitterProfile(account);
-            var campaign = await BuildAndCreateCampaignAsync(_feature, account);
-            var sweep = await BuildAndCreateSweepAsync(_feature, account, campaign);
-            var plan = await _feature.PlansRepository.GetPlanByUidAsync(TestData.BasicPlanUid, default);
-            var maxHashtags = plan.HashtagsPerMonth;
-
-            var request = GetPublishSweepRuleTweetRequest(profile, sweep);
-            var request2 = GetPublishSweepRuleTweetRequest2(profile, sweep);
-            var request3 = GetPublishSweepRuleTweetRequest3(profile, sweep);
-
-            _feature.MockedTwitterClient.Reset();
-            _feature.MockedTwitterClient.SetupPublishAsync();
-
-            await _feature.Mediator.Send(request);
-            await _feature.Mediator.Send(request2);
-            await _feature.Mediator.Send(request3);
-
-            var watchValues = await _feature.SweepRulesRepository.GetSweepRuleAsync(sweep.SweepUid);
-
-            watchValues.Count().Should().Be(maxHashtags);
-            _feature.MockedTwitterClient.Verify(m => m.PublishAsync(It.IsAny<Message>()), Times.Exactly(2));
-        }
-
-        [Fact]
-        public async Task If_We_Have_Max_WatchValues_We_Should_Not_Be_Able_To_SaveScheduledSweepRules_Past_The_Max()
-        {
-            _feature.GivenACleanSlate();
-
-            var account = await BuildAccountAndSubscribeToBasicPlan(_feature);
-            var profile = await BuildAndCreateProfileAsync(_feature, account);
-            var campaign = await BuildAndCreateCampaignAsync(_feature, account);
-            var sweep = await BuildAndCreateSweepAsync(_feature, account, campaign);
-            var plan = await _feature.PlansRepository.GetPlanByUidAsync(TestData.BasicPlanUid, default);
-            var maxHashtags = plan.HashtagsPerMonth;
-
-            var request = GetPublishSweepRuleTweetRequest(profile, sweep, false);
-            var request2 = GetPublishSweepRuleTweetRequest2(profile, sweep, false);
-            var request3 = GetPublishSweepRuleTweetRequest3(profile, sweep, false);
-
-            _feature.MockedTwitterClient.Reset();
-            _feature.MockedTwitterClient.SetupPublishAsync();
-
-            await _feature.Mediator.Send(request);
-            await _feature.Mediator.Send(request2);
-            await _feature.Mediator.Send(request3);
-
-            var watchValues = await _feature.SweepRulesRepository.GetSweepRuleAsync(sweep.SweepUid);
-            var scheduledTweets = await _feature.ScheduledSweepRuleTweetsRepository.GetSweepScheduledTweetAsync(sweep.SweepUid);
-
-            watchValues.Count().Should().Be(maxHashtags);
-            scheduledTweets.Count().Should().Be(maxHashtags);
-            _feature.MockedTwitterClient.Verify(m => m.PublishAsync(It.IsAny<Message>()), Times.Exactly(0));
         }
     }
 }

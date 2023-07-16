@@ -14,5 +14,9 @@ namespace hrvster.Web.Models.Plays
 		public UserIdentifierType UserIdentifierType { get; set; }
 		public string ScreenName { get; set; }
 		public string PrizeName { get; set; }
+		public Guid PrizeUid { get; set; }
+		public int PrizeId { get; set; }
+		public bool Fulfilled { get; set; }
+		public DateTime? DateFulfilled { get; set; }
 	}
 }

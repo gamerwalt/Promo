@@ -2,28 +2,17 @@
 using hrvster.Core.Authentication;
 using hrvster.Core.Clients;
 using hrvster.Core.Requests;
-using hrvster.Core.Requests.Notifications;
-using hrvster.Core.Requests.WebRequests.Core;
-using hrvster.Core.Requests.WebRequests.Files;
 using hrvster.Core.Requests.WebRequests.Publishing;
 using hrvster.Core.Requests.WebRequests.Sweeps;
 using hrvster.Core.Subscriptions;
-using hrvster.Extensions.ModelExtensions;
 using hrvster.Models;
 using hrvster.Models.Options;
 using hrvster.Web.Models;
 using MediatR;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Facebook;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.Logging;
 using NToastNotify;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace hrvster.Web.Controllers
@@ -34,11 +23,9 @@ namespace hrvster.Web.Controllers
 	{
 		private readonly ILogger<SweepRulesController> _logger;
 		private readonly IMediator _mediator;
-		private readonly IWatchTypeProvider _watchTypeProvider;
 		private readonly Func<ExternalClientType, Core.Clients.Publishers.IExternalClient> _publisherResolver;
 		private readonly IMapper _mapper;
 		private readonly IToastNotification _notificationService;
-		private readonly SweepstakeConfiguration _sweepstakeConfiguration;
 		private readonly ISessionManager _sessionManager;
 
 		private HrvsterUser _hrvsterUser;
@@ -46,20 +33,16 @@ namespace hrvster.Web.Controllers
 		public SweepRulesController(
 			ILoggerFactory loggerFactory,
 			IMediator mediator,
-			IWatchTypeProvider watchTypeProvider,
 			Func<ExternalClientType, Core.Clients.Publishers.IExternalClient> publisherResolver,
 			IMapper mapper,
 			IToastNotification notificationService,
-			SweepstakeConfiguration sweepstakeConfiguration,
 			ISessionManager sessionManager)
 		{
 			_logger = loggerFactory.CreateLogger<SweepRulesController>();
 			_mediator = mediator;
-			_watchTypeProvider = watchTypeProvider;
 			_publisherResolver = publisherResolver;
 			_mapper = mapper;
 			_notificationService = notificationService;
-			_sweepstakeConfiguration = sweepstakeConfiguration;
 			_sessionManager = sessionManager;
 		}
 
@@ -416,280 +399,6 @@ namespace hrvster.Web.Controllers
 					sweepUid = sweepUid
 				});
 			}
-
-			return View(form);
-		}
-
-		[HttpGet]
-		public async Task<IActionResult> SelectProvider(Guid sweepUid, string actionName, string controllerName)
-		{
-			_hrvsterUser = _sessionManager.GetUserInformation();
-
-			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
-			if (sweep == null)
-			{
-				_logger.LogError("Could not find sweepstake with uid: {sweepUid}", sweepUid);
-
-				_notificationService.AddWarningToastMessage($"Could not find sweepstake with uid: {sweepUid}.");
-
-				return RedirectToAction(actionName, controllerName);
-			}
-
-			if (sweep.Account.AccountUid != _hrvsterUser.UserUid)
-				return RedirectToAction(actionName ?? "Index", controllerName ?? "Sweeps");
-
-			var watchTypeProviders = await _mediator.Send(new GetWatchTypeProvidersRequest());
-
-			var model = new SelectWatchTypeProvider()
-			{
-				Providers = watchTypeProviders
-					.Where(a => a.ActiveInd)
-					.Select(a => new SelectListItem()
-					{
-						Text = a.WatchTypeProviderName,
-						Value = a.WatchTypeProviderCode
-					}),
-				Sweep = sweep,
-				Campaign = sweep.Campaign,
-				ReturnAction = actionName,
-				ReturnController = controllerName
-			};
-
-			return View(model);
-		}
-
-		[HttpPost]
-		public async Task<IActionResult> SelectProvider(
-			Guid sweepUid,
-			string actionName,
-			string controllerName,
-			SelectWatchTypeProvider form)
-		{
-			_hrvsterUser = _sessionManager.GetUserInformation();
-
-			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
-			if (sweep == null)
-			{
-				_logger.LogError("Could not find sweepstake with uid: {sweepUid}", sweepUid);
-
-				_notificationService.AddWarningToastMessage($"Could not find sweepstake with uid: {sweepUid}.");
-
-				return RedirectToAction(actionName, controllerName);
-			}
-
-			if (sweep.Account.AccountUid != _hrvsterUser.UserUid)
-				return RedirectToAction(actionName ?? "Index", controllerName ?? "Sweeps");
-
-			var watchTypeProviders = await _mediator.Send(new GetWatchTypeProvidersRequest());
-
-			if (ModelState.IsValid)
-			{
-				HttpContext.Session.SetString(SessionConstants.SweepUid, sweepUid.ToString());
-				HttpContext.Session.SetString(SessionConstants.ReturnController, form.ReturnController ?? "SweepRules");
-				HttpContext.Session.SetString(SessionConstants.ReturnAction, form.ReturnAction ?? "CreateTweet");
-
-				var authorizationUrl = await _watchTypeProvider.GetAuthorizationUrl(form.ProviderCode, Request.Scheme, Request.Host.Value, $"/SweepRules/Validate{form.ProviderCode}Auth");
-
-				var authProperties = new AuthenticationProperties
-				{
-					RedirectUri = authorizationUrl
-				};
-
-				return Challenge(authProperties, FacebookDefaults.AuthenticationScheme);
-			}
-
-			form.Providers = watchTypeProviders
-				.Where(a => a.ActiveInd)
-				.Select(a => new SelectListItem()
-				{
-					Text = a.WatchTypeProviderName,
-					Value = a.WatchTypeProviderCode
-				});
-			form.Sweep = sweep;
-			form.Campaign = sweep.Campaign;
-			form.ReturnAction = actionName;
-			form.ReturnController = controllerName;
-
-			_notificationService.AddErrorToastMessage(ModelState.BuildMessageFromErrors());
-
-			return View(form);
-		}
-
-		public IActionResult FailedAuthValidation()
-		{
-			return RedirectToActionPermanent("Index", "Sweeps");
-		}
-
-		public async Task<IActionResult> ValidateTwitterAuth()
-		{
-			_hrvsterUser = _sessionManager.GetUserInformation();
-
-			if (Request.Query["denied"].Count > 0)
-			{
-				return RedirectToAction("FailedAuthValidation");
-			}
-
-			var userDetails = await _watchTypeProvider.IsValidAuthorization(Constants.TwitterProvider, Request.QueryString.Value);
-
-			_logger.LogInformation("Profile validated for user with uid: {userUid} via {providerType}",
-				_hrvsterUser.UserUid,
-				ProfileType.Twitter.ToString());
-
-			//update the profile
-			await _mediator.Publish(new ProfileValidated(userDetails, _hrvsterUser.UserUid, ProfileType.Twitter));
-
-			var sweepUid = HttpContext.Session.GetString(SessionConstants.SweepUid);
-			var returnController = HttpContext.Session.GetString(SessionConstants.ReturnController);
-			var returnAction = HttpContext.Session.GetString(SessionConstants.ReturnAction);
-
-			HttpContext.Session.Remove(SessionConstants.SweepUid);
-			HttpContext.Session.Remove(SessionConstants.ReturnController);
-			HttpContext.Session.Remove(SessionConstants.ReturnAction);
-
-			return RedirectToAction("CreateTweet",
-				new
-				{
-					sweepUid = sweepUid,
-					actionName = returnAction ?? "CreateTweet",
-					controllerName = returnController ?? "SweepRules"
-				});
-		}
-
-		public async Task<IActionResult> ValidateFBAuth()
-		{
-			_hrvsterUser = _sessionManager.GetUserInformation();
-
-			var sweepUid = HttpContext.Session.GetString(SessionConstants.SweepUid);
-			var returnController = HttpContext.Session.GetString(SessionConstants.ReturnController);
-			var returnAction = HttpContext.Session.GetString(SessionConstants.ReturnAction);
-
-			HttpContext.Session.Remove(SessionConstants.SweepUid);
-			HttpContext.Session.Remove(SessionConstants.ReturnController);
-			HttpContext.Session.Remove(SessionConstants.ReturnAction);
-
-			return RedirectToAction("CreateTweet",
-				new
-				{
-					sweepUid = sweepUid,
-					actionName = returnAction ?? "CreateTweet",
-					controllerName = returnController ?? "SweepRules"
-				});
-		}
-
-		[HttpGet]
-		public async Task<IActionResult> CreateTweet(Guid sweepUid, string actionName, string controllerName)
-		{
-			_hrvsterUser = _sessionManager.GetUserInformation();
-
-			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
-			if (sweep == null)
-			{
-				_logger.LogError("Could not find sweepstake with uid: {sweepUid}", sweepUid);
-
-				_notificationService.AddWarningToastMessage($"Could not find sweepstake with uid: {sweepUid}.");
-
-				return RedirectToAction(actionName, controllerName);
-			}
-
-			if (sweep.Account.AccountUid != _hrvsterUser.UserUid)
-				return RedirectToAction(actionName ?? "Index", controllerName ?? "Sweeps");
-
-			var watchTypes = await _mediator.Send(new GetWatchTypeRequest());
-
-			var model = new CreateSweepRuleTweet
-			{
-				WatchTypes = watchTypes.Select(a => new SelectListItem() { Text = a.WatchTypeName, Value = a.WatchTypeId.ToString() }).ToList(),
-				SweepstakeId = sweep.SweepId,
-				SweepstakeUid = sweep.SweepUid,
-				SweepstakeName = sweep.Name,
-				SweepstakeStartDate = sweep.StartDate,
-				SweepstakeEndDate = sweep.EndDate,
-				SweepstakeDrawDate = sweep.DrawDate,
-				ActionName = actionName,
-				ControllerName = controllerName,
-				ScheduledDate = sweep.StartDate.AddMinutes(-_sweepstakeConfiguration.TweetScheduleDefaultMinutes)
-			};
-
-			return View(model);
-		}
-
-		[HttpPost]
-		public async Task<IActionResult> CreateTweet(Guid sweepUid, string actionName, string controllerName, CreateSweepRuleTweet form)
-		{
-			_hrvsterUser = _sessionManager.GetUserInformation();
-
-			var sweep = await _mediator.Send(new GetSweepByUid(sweepUid));
-			if (sweep == null)
-			{
-				_logger.LogError("Could not find sweepstake with uid: {sweepUid}", sweepUid);
-
-				_notificationService.AddWarningToastMessage($"Could not find sweepstake with uid: {sweepUid}.");
-
-				return RedirectToAction(actionName, controllerName);
-			}
-
-			if (sweep.Account.AccountUid != _hrvsterUser.UserUid)
-				return RedirectToAction(actionName ?? "Index", controllerName ?? "Sweeps");
-
-			if (ModelState.IsValid)
-			{
-				//upload files
-				var media = new List<IFormFile>();
-				var mediaLocation = default(IEnumerable<string>);
-
-				if (form.Media1 != null || form.Media1?.Length > 0)
-					media.Add(form.Media1);
-				if (form.Media2 != null || form.Media2?.Length > 0)
-					media.Add(form.Media2);
-				if (form.Media3 != null || form.Media3?.Length > 0)
-					media.Add(form.Media3);
-				if (form.Media4 != null || form.Media4?.Length > 0)
-					media.Add(form.Media4);
-
-				if (media.Count > 0)
-					mediaLocation = await _mediator.Send(new UploadFileToFileServerRequest(media, _hrvsterUser.UserUid, ProfileType.Twitter, _hrvsterUser.Token));
-
-				var profile = await _mediator.Send(new GetUserProfile(_hrvsterUser.UserUid, ProfileType.Twitter));
-
-				var published = await _mediator.Send(
-					new PublishSweepRuleTweetRequest(
-						sweep,
-						profile,
-						form.WatchTypeId,
-						form.WatchValue,
-						form.TweetText,
-						form.PostNow,
-						form.ScheduledDate,
-						true, //default to true now
-						mediaLocation,
-						_hrvsterUser.WindowsTimeZone,
-						_hrvsterUser.IsDaylight));
-
-				if(!published)
-				{
-					_notificationService.AddErrorToastMessage("Unable to publish the tweet. An error occurred. Rest assured we are looking into it.");
-
-					return RedirectToAction(actionName ?? "View", controllerName ?? "SweepRules", new { sweepUid = sweepUid });
-				}
-
-				var word = form.PostNow ? "created" : "scheduled";
-				_notificationService.AddSuccessToastMessage($"Tweet {word} successfully.");
-
-				return RedirectToAction(actionName ?? "View", controllerName ?? "SweepRules", new { sweepUid = sweepUid });
-			}
-
-			_notificationService.AddErrorToastMessage(ModelState.BuildMessageFromErrors());
-
-			var watchTypes = await _mediator.Send(new GetWatchTypeRequest());
-
-			form.WatchTypes = watchTypes.Select(a => new SelectListItem() { Text = a.WatchTypeName, Value = a.WatchTypeId.ToString() }).ToList();
-
-			form.SweepstakeId = sweep.SweepId;
-			form.SweepstakeUid = sweep.SweepUid;
-			form.SweepstakeName = sweep.Name;
-			form.SweepstakeStartDate = sweep.StartDate;
-			form.SweepstakeEndDate = sweep.EndDate;
-			form.SweepstakeDrawDate = sweep.DrawDate;
 
 			return View(form);
 		}

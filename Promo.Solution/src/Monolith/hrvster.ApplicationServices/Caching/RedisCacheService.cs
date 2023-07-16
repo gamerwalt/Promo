@@ -31,9 +31,16 @@ namespace hrvster.ApplicationServices.Caching
 			var connectionStringForRedis = _hrvsterSettings.RedisCache;
 			_logger.LogInformation($"Connecting to {connectionStringForRedis}");
 
-			_redis = ConnectionMultiplexer.Connect(_hrvsterSettings.RedisCache, c => CreateConfigurationOptions());
+			try
+			{
+				_redis = ConnectionMultiplexer.Connect(_hrvsterSettings.RedisCache, c => CreateConfigurationOptions());
 
-			_cache = _redis.GetDatabase();
+				_cache = _redis.GetDatabase();
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError("Unable to connect to the redis server. Error message: {message}", ex.Message);
+			}
 		}
 
 		private static ConfigurationOptions CreateConfigurationOptions()

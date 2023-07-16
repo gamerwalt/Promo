@@ -18,6 +18,8 @@ namespace hrvster.Infrastructure.Accounts
 		Task<Profile> GetProfileBelongingToSweepRuleAsync(Guid ruleUid, ProfileType profileType	);
 		Task RemoveProfileAsync(Guid accountUid, ProfileType profileType);
 		Task CreateProfileAsync(Profile profile);
+		Task<Profile> GetProfileByProfileUidAsync(Guid profileUid);
+		Task UpdateTokensAsync(Guid profileUid, string accessToken, string refreshToken);
 	}
 
 	public class ProfilesRepository : IProfilesRepository
@@ -29,9 +31,46 @@ namespace hrvster.Infrastructure.Accounts
 			_database = database;
 		}
 
+		public async Task UpdateTokensAsync(Guid profileUid, string accessToken, string refreshToken)
+		{
+			using var conn = new MySqlConnection(_database.GetConnectionString());
+			var command = conn.CreateCommand();
+			command.CommandText = "profile_update_tokens";
+			command.CommandType = CommandType.StoredProcedure;
+			command
+				.AddParameter("profileUid", profileUid)
+				.AddParameter("refreshToken", refreshToken)
+				.AddParameter("accessToken", accessToken);
+
+			await conn.OpenAsync();
+			await command.ExecuteNonQueryAsync();
+		}
+
+		public async Task<Profile> GetProfileByProfileUidAsync(Guid profileUid)
+		{
+			var profile = default(Profile);
+
+			using (var conn = new MySqlConnection(_database.GetConnectionString()))
+			{
+				var command = conn.CreateCommand();
+				command.CommandText = "profile_get_by_profile_uid";
+				command.CommandType = CommandType.StoredProcedure;
+				command.AddParameter("profileUid", profileUid);
+
+				await conn.OpenAsync();
+				using var reader = await command.ExecuteReaderAsync();
+				while (await reader.ReadAsync())
+				{
+					profile = CreateRecordFrom(reader);
+				}
+			}
+
+			return profile;
+		}
+
 		public async Task<Profile> GetProfileAsync(Guid userUid, ProfileType profileType)
 		{
-			var account = default(Profile);
+			var profile = default(Profile);
 
 			using (var conn = new MySqlConnection(_database.GetConnectionString()))
 			{
@@ -45,11 +84,11 @@ namespace hrvster.Infrastructure.Accounts
 				using var reader = await command.ExecuteReaderAsync();
 				while (await reader.ReadAsync())
 				{
-					account = CreateRecordFrom(reader);
+					profile = CreateRecordFrom(reader);
 				}
 			}
 
-			return account;
+			return profile;
 		}
 
 		private Profile CreateRecordFrom(MySqlDataReader reader)

@@ -234,47 +234,6 @@ namespace hrvster.Core.Handlers.Tests
                 IsScheduled = false
             }, true);
 
-        public static PublishSweepRuleTweetRequest GetPublishSweepRuleTweetRequest(Profile profile, Sweep sweep, bool postNow = true)
-            => new PublishSweepRuleTweetRequest(
-                sweep,
-                profile,
-                TestData.WatchTypeHashtagId,
-                TestData.WatchValue,
-                TestData.TweetText,
-                postNow,
-                DateTime.Now.AddHours(1),
-                true,
-                null,
-                TestData.WindowsTimezone,
-                false);
-
-        public static PublishSweepRuleTweetRequest GetPublishSweepRuleTweetRequest2(Profile profile, Sweep sweep, bool postNow = true)
-            => new PublishSweepRuleTweetRequest(
-                sweep,
-                profile,
-                TestData.WatchTypeHashtagId,
-                TestData.WatchValue2,
-                TestData.TweetText2,
-                postNow,
-                DateTime.Now.AddHours(2),
-                true,
-                null,
-                TestData.WindowsTimezone,
-                false);
-        public static PublishSweepRuleTweetRequest GetPublishSweepRuleTweetRequest3(Profile profile, Sweep sweep, bool postNow = true)
-            => new PublishSweepRuleTweetRequest(
-                sweep,
-                profile,
-                TestData.WatchTypeHashtagId,
-                TestData.WatchValue3,
-                TestData.TweetText3,
-                postNow,
-                DateTime.Now.AddHours(2),
-                true,
-                null,
-                TestData.WindowsTimezone,
-                false);
-
         public async Task<Profile> BuildAndCreateProfileAsync(MediatorHandlerFeature feature, Models.Account account)
         {
             var profileBuilt = BuildNewTwitterProfile(account);

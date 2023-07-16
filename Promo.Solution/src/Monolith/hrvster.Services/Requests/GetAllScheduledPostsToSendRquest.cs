@@ -5,11 +5,11 @@ using System.Collections.Generic;
 
 namespace hrvster.Services.Requests
 {
-	public class GetAllScheduledSweepsRuleTweetsToSendRquest : IRequest<IEnumerable<ScheduledSweepRuleTweet>>
+	public class GetAllScheduledPostsToSendRquest : IRequest<IEnumerable<ScheduledPost>>
 	{
 		private DateTime _currentDate;
 
-		public GetAllScheduledSweepsRuleTweetsToSendRquest(DateTime currentDate)
+		public GetAllScheduledPostsToSendRquest(DateTime currentDate)
 		{
 			_currentDate = currentDate;
 		}

@@ -8,6 +8,14 @@
 	ViewData["Title"] = $"View Match Game";
 	var totalQuantityOfPrizes = 0;
 }
+<style>
+	.btn-extra-sm {
+		padding: 0.25rem 0.5rem;
+		font-size: 0.785rem;
+		line-height: 1.4;
+		border-radius: 0.2rem;
+	}
+</style>
 <div class="card card-flush">
 	<div class="card-body pt-9 pb-0">
 		<div class="d-flex flex-wrap flex-sm-nowrap mb-6">
@@ -192,6 +200,13 @@
 											</label>
 											<input asp-for="MatchGame.EndDate" class="form-control" />
 											<span asp-validation-for="MatchGame.EndDate"></span>
+										</div>
+										<div class="fv-row mb-8 w-lg-300px">
+											<label class="required d-flex align-items-center fs-6 fw-semibold form-label mb-2">
+												Board Generation Date
+											</label>
+											<input asp-for="MatchGame.GenerateBoardDate" class="form-control" />
+											<span asp-validation-for="MatchGame.GenerateBoardDate"></span>
 										</div>
 									</div>
 								</div>
@@ -545,8 +560,6 @@
 						</tbody>
 					</table>
 					<div class="separator"></div>
-					@if (Model.MatchPrizes.Sum(p => p.Quantity) < Model.MatchGame.WinnableBoards)
-					{
 						<a 
 							asp-action="Create"
 							asp-controller="MatchPrizes"
@@ -556,7 +569,6 @@
 							class="btn btn-lg btn-primary">
 							Create Prize
 						</a>
-					}
 				</div>
 			</div>
 			<div class="tab-pane fade" id="plays" role="tabpanel">
@@ -568,6 +580,7 @@
 								<th>Played/Reserved</th>
 								<th>Win</th>
 								<th>Prize</th>
+								<th>Action</th>
 							</tr>
 						</thead>
 						<tbody>
@@ -603,6 +616,21 @@
 										}
 									</td>
 									<td>@win.PrizeName</td>
+									<td>
+										@if(win.WinIndicator)
+										{
+											@if (!win.Fulfilled)
+											{
+												<form id="@win.Uid" asp-action="Fulfill" asp-route-gamePlayUid="@win.Uid" asp-route-Uid="@Model.MatchGame.MatchGameUid" asp-route-prizeUid="@win.PrizeUid">
+													<button type="submit" class="btn btn-primary btn-extra-sm">Fulfill Prize</button>
+												</form>
+											}
+											else
+											{
+												<span class="badge badge-success">Fulfilled on @win.DateFulfilled.GetValueOrDefault().ToString("MMM, dd, yyyy")</span>
+											}
+										}
+									</td>
 								</tr>
 							}
 						</tbody>

@@ -13,6 +13,7 @@
 		public const string RuleUid = "Session_Rule_Uid";
 		public const string GameType = "Session_Game_Type";
 		public const string UserDetails = "Session_User_Details";
+		public const string Subdomain = "Session_Subdomain";
 	}
 
 	public class HrvsterClaimTypes
@@ -31,5 +32,16 @@
 	public class MessageConstants
 	{
 		public const string SweepstakeTweetReply = "I just got an entry into the [GameName] sweepstake.";
+	}
+
+	public class GameErrorReasons
+	{
+		public const string GameDoesNotExist = "The game does not exist.";
+		public const string TwitterAuthenticationFailed = "Twitter authentication failed.";
+		public const string BadRule = "Bad rule.";
+		public const string BadExternalClient = "Bad external client.";
+		public const string BadGameType = "Bad game type encountered";
+		public const string GameCompleted = "The game has completed.";
+		public const string GameNotStarted = "The game has not started.";
 	}
 }

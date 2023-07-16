@@ -249,18 +249,19 @@ namespace hrvster.ApplicationServices.Sweepstakes
 			var followers = await _twitterHttpService.GetFollowersAsync(profile.ExternalProfileId);
 			var followersList = followers.ToList();
 
-			if (followersList.Count == 0) return false;
-
-			var rule = rules.FirstOrDefault(r => r.RuleUid == ruleUid);
-
-			if (rule != null)
-			{
-				//if (rule.MustBeFollowing)
-				//	return followersList.Any(c => c.Id.Equals(externalUserId));
-				return true;
-			}
-
 			return true;
+			//if (followersList.Count == 0) return false;
+
+			//var rule = rules.FirstOrDefault(r => r.RuleUid == ruleUid);
+
+			//if (rule != null)
+			//{
+			//	//if (rule.MustBeFollowing)
+			//	//	return followersList.Any(c => c.Id.Equals(externalUserId));
+			//	return true;
+			//}
+
+			//return true;
 		}
 
 		private void BuildTwitterClient(string accessToken, string accessTokenSecret)

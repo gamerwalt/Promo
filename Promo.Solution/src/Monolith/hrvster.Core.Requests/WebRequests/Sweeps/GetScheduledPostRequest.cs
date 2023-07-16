@@ -4,11 +4,11 @@ using MediatR;
 
 namespace hrvster.Core.Requests.WebRequests.Sweeps
 {
-	public class GetScheduledTweetRequest : IRequest<ScheduledSweepRuleTweet>
+	public class GetScheduledPostRequest : IRequest<ScheduledPost>
 	{
 		private Rule _rule;
 
-		public GetScheduledTweetRequest(Rule rule)
+		public GetScheduledPostRequest(Rule rule)
 		{
 			_rule = rule;
 		}

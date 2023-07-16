@@ -2,6 +2,7 @@
 using hrvster.Core.Requests.WebRequests.Publishing;
 using hrvster.Infrastructure.Scheduling;
 using hrvster.Models.Extensions;
+using hrvster.Models.Scheduling;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using System;
@@ -15,8 +16,8 @@ namespace hrvster.Core.Handlers.Publishing
 	public class DeleteScheduledSweepRuleTweet : AsyncRequestHandler<DeleteScheduledSweepRuleTweetRequest>
 	{
 		private readonly ILogger<DeleteScheduledSweepRuleTweet> _logger;
-		private readonly ISweepTweetSchedulerRepository _repository;
-		public DeleteScheduledSweepRuleTweet(ILoggerFactory loggerFactory, ISweepTweetSchedulerRepository repository)
+		private readonly IScheduledPostRepository _repository;
+		public DeleteScheduledSweepRuleTweet(ILoggerFactory loggerFactory, IScheduledPostRepository repository)
 		{
 			_logger = loggerFactory.CreateLogger<DeleteScheduledSweepRuleTweet>();
 			_repository = repository;
@@ -26,13 +27,21 @@ namespace hrvster.Core.Handlers.Publishing
 		{
 			try
 			{
-				await _repository.BeginTransaction();
+				var scheduledPost = await _repository.GetAsync(request.ScheduledUid);
 
-				await _repository.DeleteScheduledSweepRuleTweetAsync(request.ScheduledUid);
+				if(scheduledPost == null)
+				{
+					_logger.LogWarning("Unable to locate the scheduled post with uid {scheduledPostUid}", request.ScheduledUid);
+					return;
+				}
 
-				await _repository.DeleteRuleAsync(request.RuleUid);
+				await _repository.BeginTransactionAsync();
 
-				await _repository.CommitTransaction();
+				await _repository.DeleteScheduledPostAsync(request.ScheduledUid);
+
+				await DeleteRuleBasedOnGameTypeAsync(scheduledPost);
+
+				await _repository.CommitTransactionAsync();
 			}
 			catch (Exception ex)
 			{
@@ -42,7 +51,20 @@ namespace hrvster.Core.Handlers.Publishing
 					ex.Message);
 				_logger.LogError("Stack: {stack}", ex.StackTrace);
 
-				await _repository.RollbackTransaction();
+				await _repository.RollbackTransactionAsync();
+			}
+		}
+
+		private Task DeleteRuleBasedOnGameTypeAsync(ScheduledPost scheduledPost)
+		{
+			switch(scheduledPost.GameType)
+			{
+				case Models.GameTypesEnum.Sweeps:
+					return _repository.DeleteSweepRuleByIdAsync(scheduledPost.Rule.RuleId);
+				case Models.GameTypesEnum.MatchGames:
+					return _repository.DeleteMatchGameRuleByIdAsync(scheduledPost.Rule.RuleId);
+				default:
+					return _repository.DeleteSweepRuleByIdAsync(scheduledPost.Rule.RuleId);
 			}
 		}
 	}

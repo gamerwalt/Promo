@@ -5,6 +5,8 @@ using MySqlConnector;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Formats.Asn1;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -13,6 +15,7 @@ namespace hrvster.Infrastructure.MatchGames
 	public interface IMatchGamePlayRepository
 	{
 		Task CreateAsync(Guid gameplayUid, int id, string screenName, Models.UserIdentifierType handle, CancellationToken cancellationToken);
+		Task FulfillPrizeAsync(Guid gameplayUid, CancellationToken cancellationToken);
 		Task<MatchPlay> GetAsync(Guid gameplayUid, CancellationToken cancellationToken);
 		Task<IEnumerable<MatchPlay>> GetForGamePlayAsync(Guid gameUid, CancellationToken cancellationToken);
 		Task MarkAsPlayedAndLossAsync(Guid gameplayUid, string selectedTiles, CancellationToken cancellationToken);
@@ -26,6 +29,18 @@ namespace hrvster.Infrastructure.MatchGames
 		public MatchGamePlayRepository(IDatabase database)
 		{
 			_database = database;
+		}
+
+		public async Task FulfillPrizeAsync(Guid gameplayUid, CancellationToken cancellationToken)
+		{
+			using var conn = new MySqlConnection(_database.GetConnectionString());
+			var command = conn.CreateCommand();
+			command.CommandText = "match_play_fulfill_prize";
+			command.CommandType = CommandType.StoredProcedure;
+			command.AddParameter("gameplayUid", gameplayUid);
+
+			await conn.OpenAsync(cancellationToken);
+			await command.ExecuteNonQueryAsync(cancellationToken);
 		}
 
 		public async Task CreateAsync(Guid gameplayUid, int id, string screenName, Models.UserIdentifierType handleType, CancellationToken cancellationToken)
@@ -118,7 +133,7 @@ namespace hrvster.Infrastructure.MatchGames
 
 		private MatchPlay CreateFrom(MySqlDataReader reader)
 		{
-			return new MatchPlay
+			var gameplay = new MatchPlay
 			{
 				Id = reader.GetInt32("game_play_id"),
 				Uid = reader.GetGuid("game_play_uid"),
@@ -134,9 +149,19 @@ namespace hrvster.Infrastructure.MatchGames
 					IsReserved = reader.GetBoolean("is_reserved")
 				},
 				PrizeName = reader.GetStringValue("prize_name"),
+				Fulfilled = reader.GetBoolean("fulfilled_ind"),
+				DateFulfilled = reader.GetNullableDateTimeValue("date_fulfilled"),
 				ScreenName = reader.GetString("screen_name"),
 				UserIdentifierType = Enum.Parse<UserIdentifierType>(reader.GetString("user_identifier_type"))
 			};
+
+			if(gameplay.WinIndicator)
+			{
+				gameplay.PrizeUid = reader.GetGuid("prize_uid");
+				gameplay.PrizeId = reader.GetInt32("prize_id");
+			}
+
+			return gameplay;
 		}
 	}
 }
