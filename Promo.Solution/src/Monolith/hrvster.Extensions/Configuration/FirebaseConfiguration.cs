@@ -1,5 +1,4 @@
-﻿using Facebook;
-using Firebase.Auth;
+﻿using Firebase.Auth;
 using FirebaseAdmin;
 using Google.Apis.Auth.OAuth2;
 using hrvster.ApplicationServices.Harvesters.Facebook;
@@ -138,7 +137,6 @@ namespace hrvster.Extensions.Configuration
 					};
 				});
 
-			services.AddTransient(provider => GetFacebookClient(facebookOptions));
 			services.AddTransient<IFacebookPageSerivce, FacebookPageSerivce>();
 			services.AddTransient<IFacebookPageRepository, FacebookPageRepository>();
 
@@ -151,15 +149,6 @@ namespace hrvster.Extensions.Configuration
 			});
 
 			return services;
-		}
-
-		private static FacebookClient GetFacebookClient(FacebookConfigOptions facebookOptions)
-		{
-			return new FacebookClient
-			{
-				AppId = facebookOptions.AppId,
-				AppSecret = facebookOptions.AppSecret
-			};
 		}
 	}
 }

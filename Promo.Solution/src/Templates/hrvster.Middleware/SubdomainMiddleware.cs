@@ -32,15 +32,17 @@ namespace hrvster.Middleware
 			else
 			{
 				var host = context.Request.Host.Host;
+				_logger.LogInformation("Host information is {host}", host);
 				var index = host.IndexOf(".");
 				subdomain = (index < 0) ? null : host.Substring(0, index);
+				_logger.LogInformation("Subdomain retrieved is {subdomain}", subdomain);
 			}
 
 			//is the subdomain valid?
 			var companyInformation = await _accountCompanyRepository.GetAccountCompanyAsync(subdomain);
 
 			if (companyInformation == null)
-				throw new Exception("Company does not exist on our systems.");
+				throw new Exception($"Company subdomain {subdomain} does not exist on our systems.");
 
 			context.Items[Constants.ContextItemsSubdomain] = subdomain;
 

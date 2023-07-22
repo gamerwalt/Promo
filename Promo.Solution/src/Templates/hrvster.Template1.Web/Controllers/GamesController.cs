@@ -106,7 +106,10 @@ namespace hrvster.Template1.Web.Controllers
 		[HttpGet("Games/{gameUid}/error")]
 		public async Task<IActionResult> Error(string subdomainName, Guid gameUid, string reason)
 		{
-			return new OkObjectResult(new { subdomainName, gameUid, reason });
+			_logger.LogError("An error occurred for the subdomain {subdomain} and game uid {gameUid}. Error Message: {message}",
+				subdomainName, gameUid, reason);
+
+			return RedirectToAction(nameof(ErrorController.HandleErrorCode), nameof(ErrorController), new { statusCode = 500 });
 		}
 
 
@@ -117,6 +120,7 @@ namespace hrvster.Template1.Web.Controllers
 			[FromQuery] Guid ruleUid)
 		{
 			HttpContext.Items.TryGetValue(Constants.ContextItemsSubdomain, out var subdomain);
+
 			var subdomainName = subdomain.ToString();
 
 			_logger.LogInformation("Received a request to play the pick 3 match game with uid {gameUid} and from the social {externalClient}",

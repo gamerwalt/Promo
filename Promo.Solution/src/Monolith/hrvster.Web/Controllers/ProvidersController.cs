@@ -1,5 +1,4 @@
-﻿using Facebook;
-using hrvster.ApplicationServices;
+﻿using hrvster.ApplicationServices;
 using hrvster.ApplicationServices.Accounts;
 using hrvster.ApplicationServices.Harvesters.Facebook;
 using hrvster.Core.Authentication;
@@ -7,7 +6,6 @@ using hrvster.Core.Clients;
 using hrvster.Core.Subscriptions;
 using hrvster.Extensions.ModelExtensions;
 using hrvster.Models;
-using hrvster.Models.Facebook;
 using hrvster.Models.Options;
 using hrvster.Web.Models;
 using Microsoft.AspNetCore.Authentication;
@@ -37,7 +35,6 @@ namespace hrvster.Web.Controllers
 		private readonly IAccountsService _accountsService;
 		private readonly IGameService _gameService;
 		private readonly IFacebookPageSerivce _facebookPageService;
-		private readonly FacebookClient _facebookClient;
 		private readonly FacebookConfigOptions _facebookOptions;
 		private readonly HarvesterSettingsOptions _hrvsterOptions;
 		private readonly IRebrandlyService _rebrandlyService;
@@ -55,7 +52,6 @@ namespace hrvster.Web.Controllers
 			IAccountsService accountsService,
 			IGameService gameService,
 			IFacebookPageSerivce facebookPageSerivce,
-			FacebookClient facebookClient,
 			FacebookConfigOptions facebookOptions,
 			HarvesterSettingsOptions hrvsterOptions,
 			IRebrandlyService rebrandlyService,
@@ -70,7 +66,6 @@ namespace hrvster.Web.Controllers
 			_accountsService = accountsService;
 			_gameService = gameService;
 			_facebookPageService = facebookPageSerivce;
-			_facebookClient = facebookClient;
 			_facebookOptions = facebookOptions;
 			_hrvsterOptions = hrvsterOptions;
 			_rebrandlyService = rebrandlyService;
@@ -120,7 +115,7 @@ namespace hrvster.Web.Controllers
 				HttpContext.Session.SetString(SessionConstants.GameType, gameType);
 
 				var profile = await _accountsService.GetProfileAsync(_hrvsterUser.UserUid, ProfileType.Twitter);
-				if(profile == null || DateTime.Now >= profile.UpdatedDate.AddHours(2))
+				if (profile == null || DateTime.Now >= profile.UpdatedDate.AddHours(2))
 				{
 					var url = _twitterHttpService.GetAuthorizationUrl(Request.Scheme, Request.Host.Value, $"/Providers/Validate{form.ProviderCode}Auth");
 
@@ -225,144 +220,146 @@ namespace hrvster.Web.Controllers
 
 		public async Task<IActionResult> ValidateFBAuth(string code, string state, string error, string error_description)
 		{
-			_hrvsterUser = _sessionManager.GetUserInformation();
+			//_hrvsterUser = _sessionManager.GetUserInformation();
 
-			var Uid = HttpContext.Session.GetString(SessionConstants.Uid);
-			var returnController = HttpContext.Session.GetString(SessionConstants.ReturnController);
-			var returnAction = HttpContext.Session.GetString(SessionConstants.ReturnAction);
-			var gameType = HttpContext.Session.GetString(SessionConstants.GameType);
+			//var Uid = HttpContext.Session.GetString(SessionConstants.Uid);
+			//var returnController = HttpContext.Session.GetString(SessionConstants.ReturnController);
+			//var returnAction = HttpContext.Session.GetString(SessionConstants.ReturnAction);
+			//var gameType = HttpContext.Session.GetString(SessionConstants.GameType);
 
-			if (!string.IsNullOrWhiteSpace(error))
-			{
-				_logger.LogError("Facebook authentication failed for user with uid {userUid} with description {errorDescription}",
-					_hrvsterUser.UserUid,
-					error_description);
+			//if (!string.IsNullOrWhiteSpace(error))
+			//{
+			//	_logger.LogError("Facebook authentication failed for user with uid {userUid} with description {errorDescription}",
+			//		_hrvsterUser.UserUid,
+			//		error_description);
 
-				return RedirectToActionPermanent(returnAction, returnController, GetReturnObject(gameType, Uid));
-			}
+			//	return RedirectToActionPermanent(returnAction, returnController, GetReturnObject(gameType, Uid));
+			//}
 
-			var redirectUri = await _watchTypeProvider.GetCallbackUrl(Request.Scheme, Request.Host.Value, $"/Providers/Validate{Constants.FaceBookProvider}Auth");
+			//var redirectUri = await _watchTypeProvider.GetCallbackUrl(Request.Scheme, Request.Host.Value, $"/Providers/Validate{Constants.FaceBookProvider}Auth");
 
-			_facebookClient.AppId = _facebookOptions.AppId;
-			_facebookClient.AppSecret = _facebookOptions.AppSecret;
-			dynamic tokenResult = await _facebookClient.GetTaskAsync("/oauth/access_token",
-				new
-				{
-					client_id = _facebookOptions.AppId,
-					client_secret = _facebookOptions.AppSecret,
-					code,
-					redirect_uri = redirectUri
-				});
+			//_facebookClient.AppId = _facebookOptions.AppId;
+			//_facebookClient.AppSecret = _facebookOptions.AppSecret;
+			//dynamic tokenResult = await _facebookClient.GetTaskAsync("/oauth/access_token",
+			//	new
+			//	{
+			//		client_id = _facebookOptions.AppId,
+			//		client_secret = _facebookOptions.AppSecret,
+			//		code,
+			//		redirect_uri = redirectUri
+			//	});
 
-			var accessToken = tokenResult.access_token;
+			//var accessToken = tokenResult.access_token;
 
-			_facebookClient.AccessToken = accessToken;
+			//_facebookClient.AccessToken = accessToken;
 
-			var appSecretProof = GenerateAppSecretProof(_facebookClient.AppSecret, accessToken);
+			//var appSecretProof = GenerateAppSecretProof(_facebookClient.AppSecret, accessToken);
 
-			dynamic user = await _facebookClient.GetTaskAsync("me", new { fields = "id,name,email,location,link,picture.type(large)", appsecret_proof = appSecretProof });
+			//dynamic user = await _facebookClient.GetTaskAsync("me", new { fields = "id,name,email,location,link,picture.type(large)", appsecret_proof = appSecretProof });
 
-			var userDict = (IDictionary<string, object>)user;
+			//var userDict = (IDictionary<string, object>)user;
 
-			var userDetails = new UserProviderDetails()
-			{
-				AccessToken = accessToken.ToString(),
-				Location = user.location != null ? user.location.name : null,
-				Name = user.name,
-				ProfileImage = user.picture.data.url,
-				ScreenName = user.name,
-				ExternalProfileId = userDict["id"].ToString(),
-				Description = user.name,
-				AccessTokenSecret = string.Empty,
-				BearerToken = string.Empty,
-				ConsumerKey = string.Empty,
-				ConsumerSecret = string.Empty
-			};
+			//var userDetails = new UserProviderDetails()
+			//{
+			//	AccessToken = accessToken.ToString(),
+			//	Location = user.location != null ? user.location.name : null,
+			//	Name = user.name,
+			//	ProfileImage = user.picture.data.url,
+			//	ScreenName = user.name,
+			//	ExternalProfileId = userDict["id"].ToString(),
+			//	Description = user.name,
+			//	AccessTokenSecret = string.Empty,
+			//	BearerToken = string.Empty,
+			//	ConsumerKey = string.Empty,
+			//	ConsumerSecret = string.Empty
+			//};
 
-			_logger.LogInformation("Profile validated for user with uid: {userUid} via {providerType}",
-				_hrvsterUser.UserUid,
-				ProfileType.Twitter.ToString());
+			//_logger.LogInformation("Profile validated for user with uid: {userUid} via {providerType}",
+			//	_hrvsterUser.UserUid,
+			//	ProfileType.Twitter.ToString());
 
-			//update the profile
-			await _accountsService.RaiseProfileValidatedEventAsync(userDetails, _hrvsterUser.UserUid, ProfileType.Facebook);
+			////update the profile
+			//await _accountsService.RaiseProfileValidatedEventAsync(userDetails, _hrvsterUser.UserUid, ProfileType.Facebook);
 
-			HttpContext.Session.Remove(SessionConstants.Uid);
-			HttpContext.Session.Remove(SessionConstants.ReturnController);
-			HttpContext.Session.Remove(SessionConstants.ReturnAction);
-			HttpContext.Session.Remove(SessionConstants.GameType);
+			//HttpContext.Session.Remove(SessionConstants.Uid);
+			//HttpContext.Session.Remove(SessionConstants.ReturnController);
+			//HttpContext.Session.Remove(SessionConstants.ReturnAction);
+			//HttpContext.Session.Remove(SessionConstants.GameType);
 
-			_sessionManager.SetKeyValue(SessionConstants.ExternalClientType, ExternalClientType.Facebook.ToString());
+			//_sessionManager.SetKeyValue(SessionConstants.ExternalClientType, ExternalClientType.Facebook.ToString());
 
-			if (string.IsNullOrWhiteSpace(returnController) ||
-				string.IsNullOrWhiteSpace(gameType) ||
-				string.IsNullOrWhiteSpace(returnAction) ||
-				string.IsNullOrWhiteSpace(Uid))
-			{
-				return RedirectToAction("Index", "Dashboard");
-			}
+			//if (string.IsNullOrWhiteSpace(returnController) ||
+			//	string.IsNullOrWhiteSpace(gameType) ||
+			//	string.IsNullOrWhiteSpace(returnAction) ||
+			//	string.IsNullOrWhiteSpace(Uid))
+			//{
+			//	return RedirectToAction("Index", "Dashboard");
+			//}
 
-			dynamic pages = await _facebookClient.GetTaskAsync("/me/accounts");
-			var facebookPages = new List<FacebookPage>();
+			//dynamic pages = await _facebookClient.GetTaskAsync("/me/accounts");
+			//var facebookPages = new List<FacebookPage>();
 
-			foreach (var page in pages.data)
-			{
-				facebookPages.Add(new FacebookPage
-				{
-					Id = page.id,
-					Name = page.name,
-					PageAccessToken = page.access_token,
-				});
-			}
+			//foreach (var page in pages.data)
+			//{
+			//	facebookPages.Add(new FacebookPage
+			//	{
+			//		Id = page.id,
+			//		Name = page.name,
+			//		PageAccessToken = page.access_token,
+			//	});
+			//}
 
-			if(facebookPages.Count <= 0)
-			{
-				_notificationService.AddErrorToastMessage("You have to select a page for us to post to.");
+			//if(facebookPages.Count <= 0)
+			//{
+			//	_notificationService.AddErrorToastMessage("You have to select a page for us to post to.");
 
-				return RedirectToAction("SelectProvider", new
-				{
-					uid = Uid,
-					actionName = returnAction,
-					controllerName = returnController,
-					gameType = gameType
-				});
-			}
+			//	return RedirectToAction("SelectProvider", new
+			//	{
+			//		uid = Uid,
+			//		actionName = returnAction,
+			//		controllerName = returnController,
+			//		gameType = gameType
+			//	});
+			//}
 
-			if (facebookPages.Count > 0)
-			{
-				//we need to save this
-				await _facebookPageService.CreateAsync(_hrvsterUser.UserUid, facebookPages);
-			}
+			//if (facebookPages.Count > 0)
+			//{
+			//	//we need to save this
+			//	await _facebookPageService.CreateAsync(_hrvsterUser.UserUid, facebookPages);
+			//}
 
-			//if the facebookPages.Count > 1, then we need the user to select which page first
-			//else, we just go ahead and createPost. Save the details in the session first
-			if(facebookPages.Count > 1)
-				return RedirectToAction("SelectPage",
-					new
-					{
-						Uid = Uid,
-						actionName = returnAction,
-						controllerName = returnController,
-						gameType = gameType
-					});
+			////if the facebookPages.Count > 1, then we need the user to select which page first
+			////else, we just go ahead and createPost. Save the details in the session first
+			//if(facebookPages.Count > 1)
+			//	return RedirectToAction("SelectPage",
+			//		new
+			//		{
+			//			Uid = Uid,
+			//			actionName = returnAction,
+			//			controllerName = returnController,
+			//			gameType = gameType
+			//		});
 
-			_sessionManager.SetKeyValue(SessionConstants.PageId, facebookPages.FirstOrDefault()?.Id);
+			//_sessionManager.SetKeyValue(SessionConstants.PageId, facebookPages.FirstOrDefault()?.Id);
 
-			return RedirectToAction("CreatePost",
-				new
-				{
-					Uid = Uid,
-					actionName = returnAction,
-					controllerName = returnController,
-					gameType = gameType
-				});
+			//return RedirectToAction("CreatePost",
+			//	new
+			//	{
+			//		Uid = Uid,
+			//		actionName = returnAction,
+			//		controllerName = returnController,
+			//		gameType = gameType
+			//	});
+
+			return new OkObjectResult(new { message = "Authenticate via Facebook." });
 		}
 
 		[HttpGet]
 		[Route("/providers/pages/select")]
 		public async Task<IActionResult> SelectPage(
-			Guid Uid, 
-			string actionName, 
-			string controllerName, 
+			Guid Uid,
+			string actionName,
+			string controllerName,
 			string gameType)
 		{
 			_hrvsterUser = _sessionManager.GetUserInformation();
@@ -390,17 +387,17 @@ namespace hrvster.Web.Controllers
 		[HttpPost]
 		[Route("/providers/pages/select")]
 		public async Task<IActionResult> SelectPage(
-			Guid Uid, 
-			string actionName, 
-			string controllerName, 
-			string gameType, 
+			Guid Uid,
+			string actionName,
+			string controllerName,
+			string gameType,
 			SelectPageToPost form)
 		{
 			_hrvsterUser = _sessionManager.GetUserInformation();
 
 			var gameDetail = await _gameService.GetGameDetailsAsync(gameType, Uid);
 
-			if(ModelState.IsValid)
+			if (ModelState.IsValid)
 			{
 				_sessionManager.SetKeyValue(SessionConstants.PageId, form.PageId);
 
@@ -471,7 +468,7 @@ namespace hrvster.Web.Controllers
 		public async Task<IActionResult> CreatePost(Guid Uid, string actionName, string controllerName, string gameType, CreateRulePost form)
 		{
 
-			if(string.IsNullOrWhiteSpace(gameType) ||
+			if (string.IsNullOrWhiteSpace(gameType) ||
 				string.IsNullOrWhiteSpace(actionName) ||
 				string.IsNullOrWhiteSpace(controllerName))
 			{

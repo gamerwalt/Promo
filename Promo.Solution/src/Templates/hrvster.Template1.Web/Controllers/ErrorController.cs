@@ -14,7 +14,7 @@ namespace hrvster.Template1.Web.Controllers
 		}
 
 		[HttpGet("/Error/{statusCode}")]
-		public IActionResult HandleErrorCode(int statusCode)
+		public IActionResult HandleErrorCode(int statusCode, string error)
 		{
 			var errorMessage = string.Empty;
 

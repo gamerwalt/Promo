@@ -1,4 +1,3 @@
-using Facebook;
 using hrvster.ApplicationServices.Harvesters.Facebook;
 using hrvster.ApplicationServices.Harvesters.Twitter;
 using hrvster.Core.Handlers.ServiceHandlers;
@@ -73,7 +72,6 @@ namespace hrvster.Twitter.Harvester
 						.AddMailSettings(Configuration)
 						.AddEmailRepository()
 						.AddHarvsterConfigurationOption(Configuration)
-						.AddTransient(provider => GetFacebookClient(facebookOptions))
 						.AddTransient<IFacebookPageSerivce, FacebookPageSerivce>()
 						.AddTransient<IFacebookPageRepository, FacebookPageRepository>()
 						.AddPostSchedulers()
@@ -86,15 +84,6 @@ namespace hrvster.Twitter.Harvester
 					AddDatabases(services);
 					AddMediator(services);
 				});
-
-		private static FacebookClient GetFacebookClient(FacebookConfigOptions facebookOptions)
-		{
-			return new FacebookClient
-			{
-				AppId = facebookOptions.AppId,
-				AppSecret = facebookOptions.AppSecret
-			};
-		}
 
 		private static void AddMediator(IServiceCollection services) 
 			=> services.AddMediatR(typeof(Program))

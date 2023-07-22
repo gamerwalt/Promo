@@ -16,7 +16,6 @@ using hrvster.Infrastructure.Accounts;
 using hrvster.Infrastructure.Facebook;
 using hrvster.Infrastructure.Harvester;
 using hrvster.Infrastructure.MatchGames;
-using hrvster.Infrastructure.Reporting;
 using hrvster.Infrastructure.Subscriptions;
 using hrvster.Middleware;
 using hrvster.Models;
@@ -26,12 +25,11 @@ using hrvster.Templates.Core.Common;
 using hrvster.Templates.Infrastructure.Customizations;
 using hrvster.Templates.Services;
 using MediatR;
+using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
-using NToastNotify;
 using Serilog;
 using Tweetinvi;
 using Tweetinvi.Auth;
@@ -52,11 +50,17 @@ namespace hrvster.Template1.Web
 				.AddJsonFile($"appsettings.{env}.json")
 				.Build();
 
+			var telemetryConfiguration = TelemetryConfiguration.CreateDefault();
+			telemetryConfiguration.InstrumentationKey = builder.Configuration
+				.GetSection("ApplicationInsights:InstrumentationKey")
+				.Value;
+
 			Log.Logger = new LoggerConfiguration()
 				.ReadFrom.Configuration(builder.Configuration)
 				.Enrich.FromLogContext()
 				.WriteTo.Loggly()
-				.MinimumLevel.Debug()
+				.WriteTo.ApplicationInsights(telemetryConfiguration, TelemetryConverter.Traces)
+				.MinimumLevel.Verbose()
 				.CreateLogger();
 
 			Log.Information("Running the hrvster.Template1.Web app.");
@@ -69,7 +73,8 @@ namespace hrvster.Template1.Web
 							=> configuration.ReadFrom.Configuration(builder.Configuration)
 								.Enrich.FromLogContext()
 								.WriteTo.Loggly()
-								.MinimumLevel.Debug(), preserveStaticLogger: true);
+								.WriteTo.ApplicationInsights(telemetryConfiguration, TelemetryConverter.Traces)
+								.MinimumLevel.Verbose(), preserveStaticLogger: true);
 			Log.Information("Use Serilog applied on hrvster.Template1.Web app.");
 
 			builder.Services.AddCors(options =>
@@ -88,11 +93,15 @@ namespace hrvster.Template1.Web
 				});
 			});
 
+			Log.Information("Added DynamicCorsPolicy.");
+
 			builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
 				.AddCookie(options =>
 				{
 					options.LoginPath = "/Home/Login";
 				});
+
+			Log.Information("Added Cookies auth scheme.");
 
 			builder.Services.AddControllersWithViews();
 
@@ -162,7 +171,6 @@ namespace hrvster.Template1.Web
 			builder.Services.AddWatchTypeRepositories();
 
 			builder.Services.AddTransient<TwitterClient>()
-				.AddTransient<FacebookPublisher>()
 				.AddTransient<InstagramClient>()
 				.AddTransient<Func<ExternalClientType, IExternalClient>>(sp => serviceTypeName =>
 				{
@@ -171,7 +179,7 @@ namespace hrvster.Template1.Web
 						case ExternalClientType.Twitter:
 							return sp.GetService<TwitterClient>();
 						case ExternalClientType.Facebook:
-							return sp.GetService<FacebookPublisher>();
+							return sp.GetService<FacebookClient>();
 						case ExternalClientType.Instagram:
 							return sp.GetService<InstagramClient>();
 						default:
@@ -209,6 +217,8 @@ namespace hrvster.Template1.Web
 			builder.Services.AddTransient<IPlaySweepstakeService, PlaySweepstakeService>();
 
 			builder.Services.AddTwitterHttpService(builder.Configuration);
+
+			Log.Information("Done with adding services.");
 
 			var app = builder.Build();
 

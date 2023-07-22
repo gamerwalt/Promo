@@ -1,4 +1,3 @@
-using Facebook;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using hrvster.ApplicationServices;
