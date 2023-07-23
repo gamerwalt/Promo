@@ -1,44 +1,3 @@
-Rephrase: The target market for this service will be brands and celebrities (in Nigeria for now) that want to promote their brand and at the same time engage their social media followers. hrvster is starting with Twitter. The service is replying a tweet or post with a hashtag to get a chance to win a sweepstakes or get a link to a pick 3 game for a chance to win a prize And/or clicking on a short url link on a tweet or post to enter a chance to play a game and win. Brands will eventually engage their users to win prizes and also go viral when promoting a product or service.
-
-
-Unlock the Power of Brand Engagement with hrvster!
-
-
-Unleash the fun with hrvster - a revolutionary platform transforming brand interaction on social media. Craft engaging games like Sweepstakes or Pick 3, tailor the rules, set enticing prizes, and propel your brand's gaming event directly to Twitter. Your followers play by clicking a link or replying to a tweet. They win, you shine by fulfilling their prized moments. But hrvster is more than just play - it's a viral sensation creator. Each interaction engages your followers and attracts new ones, boosting brand visibility, and crafting unforgettable experiences. With hrvster, you're not just playing games; you're building a vibrant community around your brand. Play, win, and grow with hrvster!
-
-
-At its core, harvester is a dynamic, interactive platform designed to transform how brands and influencers interact with their audiences on social media. Imagine an arcade of engagement where your followers can dive into fun and rewarding games such as Sweepstakes or Pick 3, all crafted by you and centered around your brand.
-
-With harvester, you set the stage - determine the game rules, set enticing prizes, and launch your gaming event directly to Twitter. It's a breeze for your followers to play along; all they need to do is click a link or reply to your tweet. As they play and win, your brand becomes the hero who fulfills these prized moments.
-
-What makes harvester truly exceptional is its viral potential. Each game interaction serves not only to engage your existing followers but to attract new ones, creating a ripple effect across Twitter. By using harvester, you're not just playing games; you're building a community, boosting brand visibility, and creating memorable experiences for your audience. Unleash the power of play with harvester!
-
-
-hrvster unleashes the fun in gaming. From simple Pick 3 to fun-filled Sweepstakes, share the experience and drive your brand's reach with a whole new level of interaction!
-
-Hrvster brings the fun of social media to sweepstakes, contests and games.
-
-It's all about having fun! In just minutes, you can set up and launch social media sweepstakes, contests and lucky draws, to reward your followers' loyalty and attraction of new ones.
-
-To build the leading interactive gaming platform for brands to leverage game mechanics on social media.
-
-To engage and captivate consumers with our revolutionary social media gaming platform.
-
-Introducing a new way for brands to connect with their audience – on social media.
-
-To unleash the fun of playing games on Twitter!
-
-Because great marketing is so much more than a great slogan or a witty tweet. It's about passion and purpose, vision and attitude-and above all, fun.
-
-Building a vibrant community around brands is our focus.
-
-We make your followers want to play and tell their friends about you.
-
-Hrvster wants to make life entertaining and rewarding again.
-
-Let's play together.
-
-
 Introducing a new way for brands to connect with their audience – on social media, at its core, harvester is a dynamic, interactive platform designed to transform how brands and influencers interact with their audiences on social media. Imagine an arcade of engagement where your followers can dive into fun and rewarding games such as Sweepstakes or Pick 3, all crafted by you and centered around your brand.
 
 With harvester, you set the stage - determine the game rules, set enticing prizes, and launch your gaming event directly to Twitter. It's a breeze for your followers to play along; all they need to do is click a link or reply to your tweet. As they play and win, your brand becomes the hero who fulfills these prized moments.
@@ -54,3 +13,26 @@ Brands or influencers will be notified when a follower wins a prize.
 It's all about having fun! In just minutes, you can set up and launch social media sweepstakes, contests and lucky draws, to reward your followers' loyalty and attraction of new ones.
 
 Unlock the Power of Brand Engagement with harvester!
+
+
+1. Show creating a Sweepstakes
+	Show adding rules and prizes
+	Show creating the Rule/Watch
+	
+2. Show creating a Pick3Game
+	Show adding rules images and prizes
+	Show creating the Rule/Watch
+	Show board creation logs
+
+3. Use mobile to click on the link and play the sweepstake
+4. Use mobile to click on the link and play the pick 3
+
+5 Show list of plays on hrvster
+6 Generate a list of entries for Sweepstakes on hrvster
+7 Show draw performance for the Sweepstakes.
+8 Show fulfillment action
+
+
+Games/Sweeps/fb090809-382a-45ad-9130-c60447d35d8e?externalClient=Twitter&ruleUid=1ace2cf4-6ec8-4b05-8657-fb63d248900b
+
+/Games/Pick3MatchGame/6d613efe-ba00-4eec-bfeb-395a7bb9a5a8?externalClient=Twitter&ruleUid=7941975f-4ced-4958-9db6-e19efb69780a

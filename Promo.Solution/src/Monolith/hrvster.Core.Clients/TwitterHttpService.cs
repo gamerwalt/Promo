@@ -375,8 +375,8 @@ namespace hrvster.Core.Clients
 					RefreshToken = accessTokenObject.RefreshToken,
 					Description = twitterUserResponse.Profile.Description,
 					ExternalProfileId = twitterUserResponse.Profile.Id,
-					Name = twitterUserResponse.Profile.Username,
-					ScreenName = twitterUserResponse.Profile.Name,
+					Name = twitterUserResponse.Profile.Name,
+					ScreenName = twitterUserResponse.Profile.Username,
 					ProfileImage = twitterUserResponse.Profile.ProfileImageUrl,
 					Location = twitterUserResponse.Profile.Location
 				};

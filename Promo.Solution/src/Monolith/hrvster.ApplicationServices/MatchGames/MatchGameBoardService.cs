@@ -273,9 +273,13 @@ namespace hrvster.ApplicationServices.MatchGames
 			var randomIndex = RandomNumberGenerator.GetInt32(boardKeys.Count);
 			var randomBoardUid = boardKeys[randomIndex];
 
+			_logger.LogInformation("Retrieving the board with uid {boardUid} from the cache.", randomBoardUid);
+
 			var board = await _cahceDataService.GetAsync<MatchBoard>($"{CacheKeys.GameBoards}{randomBoardUid}");
 			if (board == null)
 			{
+				_logger.LogInformation("Board is empty so retrieving the board from the databse.");
+
 				board = await _matchBoardsRepository.GetGameBoardAsync(randomBoardUid);
 			}
 

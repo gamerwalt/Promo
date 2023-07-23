@@ -58,8 +58,6 @@ namespace hrvster.Template1.Web
 			Log.Logger = new LoggerConfiguration()
 				.ReadFrom.Configuration(builder.Configuration)
 				.Enrich.FromLogContext()
-				.WriteTo.Loggly()
-				.WriteTo.ApplicationInsights(telemetryConfiguration, TelemetryConverter.Traces)
 				.MinimumLevel.Verbose()
 				.CreateLogger();
 

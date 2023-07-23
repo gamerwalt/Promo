@@ -32,11 +32,17 @@ namespace hrvster.Templates.Core.Common
 		public async Task GetConnectionString()
 		{
 			string connectionString = string.Empty;
+			var hrvsterConnectionString = string.Empty;
 
 			var subdomain = _httpContextAccessor.HttpContext.Items[Constants.ContextItemsSubdomain];
+
+			_logger.LogInformation("Getting connection string for subdomain {subdomain}", subdomain);
+
 			try
 			{
-				using (var connection = new MySqlConnection(_configuration.GetConnectionString("hrvster")))
+				hrvsterConnectionString = _configuration.GetConnectionString("hrvster");
+				
+				using (var connection = new MySqlConnection(hrvsterConnectionString))
 				{
 					var command = connection.CreateCommand();
 					command.CommandText = "connectionStringGetBySubdomain";

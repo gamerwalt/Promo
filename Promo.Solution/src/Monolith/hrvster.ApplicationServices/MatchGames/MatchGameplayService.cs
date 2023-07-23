@@ -67,6 +67,7 @@ namespace hrvster.ApplicationServices.MatchGames
 			UserIdentifierType userIdentifierType, 
 			CancellationToken cancellationToken)
 		{
+			_logger.LogInformation("Reserving gameboard.");
 			var gameBoard = default(MatchBoard);
 
 			gameBoard = await _gameboardService.GetRandomBoardAsync(gameUid, cancellationToken);
@@ -95,10 +96,14 @@ namespace hrvster.ApplicationServices.MatchGames
 				gameBoard = await _gameboardService.GetGameBoardAsync(gameboardUid, cancellationToken);
 			}
 
-			//create a gameplay
+			_logger.LogInformation("Retrieved the gameboard {gameboardUid} from the cache.", gameBoard.Uid);
+
+			_logger.LogInformation("Creating a game play for the gameboard {gameboardUid}", gameBoard.Uid);
 			var gameplayUid = await CreateGamePlayAsync(gameBoard, screenName, userIdentifierType, cancellationToken);
 
+			_logger.LogInformation("Reserving the gameboard {gameboardUid}", gameBoard.Uid);
 			await _gameboardService.ReserveBoardAsync(gameBoard, cancellationToken);
+
 
 			return gameplayUid;
 		}

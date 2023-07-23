@@ -3,6 +3,7 @@ using hrvster.Models;
 using hrvster.Templates.Core.Common;
 using hrvster.Templates.Models.Members;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 using MySqlConnector;
 using System.Data;
 using Constants = hrvster.Templates.Core.Common.Constants;
@@ -65,6 +66,8 @@ namespace hrvster.Templates.Infrastructure.Customizations
 			object? connectionString, subDomain;
 
 			SetDetailsNeeded(out connectionString, out subDomain);
+
+			
 
 			using (var conn = new MySqlConnection(connectionString.ToString()))
 			{

@@ -21,6 +21,7 @@ namespace hrvster.Template1.Web.Controllers
 			//_logger.LogInformation("Loading the HOme Controller index action.");
 
 			//return View();
+
 			return new OkObjectResult(new { message = "Home" });
 		}
 	}

@@ -29,7 +29,7 @@ namespace hrvster.ApplicationServices.Common
 
 		public async Task<Campaign> GetCampaignFromGameUidAsync(Guid gameUid, string gameType)
 		{
-			if (gameType == GameTypes.Sweepstake)
+			if (gameType == GameTypesEnum.Sweeps.ToString())
 				return await _repository.GetCampaignBySweepsGameAsync(gameUid);
 
 			return await _repository.GetCampaignByMatchGameAsync(gameUid);

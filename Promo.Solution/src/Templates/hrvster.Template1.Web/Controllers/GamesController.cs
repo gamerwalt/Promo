@@ -24,6 +24,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using Constants = hrvster.Templates.Core.Common.Constants;
+using hrvster.ApplicationServices.Extensions.LogExtensions;
+using System.Threading;
 
 namespace hrvster.Template1.Web.Controllers
 {
@@ -109,7 +111,7 @@ namespace hrvster.Template1.Web.Controllers
 			_logger.LogError("An error occurred for the subdomain {subdomain} and game uid {gameUid}. Error Message: {message}",
 				subdomainName, gameUid, reason);
 
-			return RedirectToAction(nameof(ErrorController.HandleErrorCode), nameof(ErrorController), new { statusCode = 500 });
+			return RedirectToAction("HandleErrorCode", "ErrorController", new { statusCode = 500 });
 		}
 
 
@@ -298,7 +300,53 @@ namespace hrvster.Template1.Web.Controllers
 
 			await UpdateMemberProfileAsync(userDetails, memberProfile);
 
-			return RedirectToGamePlayFromGameType(gameUid, ruleUid, externalClient, gameType);
+			if(gameType == GameTypesEnum.Sweeps.ToString())
+				return RedirectToActionPermanent("SweepsPlay", new { gameUid, ruleUid, externalClient });
+
+			_logger.LogInformation("MatchPlayPick3 Entered.");
+			var game = await _gameService.GetGameDetailsAsync(gameType, gameUid);
+			var blacklisted = await _blackListedUserRepository.GetBlacklistedUsersAsync(gameUid);
+			var campaign = await _campaignService.GetCampaignFromGameUidAsync(gameUid, gameType);
+
+			_logger.LogInformation("Retrieved a total of {count} blacklisted users for the game {gameUid}",
+				blacklisted.Count(),
+				gameUid);
+
+			var userClaims = User.Identities.FirstOrDefault()?.Claims;
+			var externalProfileId = userClaims?.FirstOrDefault(x => x.Type == HrvsterClaimTypes.ExternalProfileId)?.Value;
+			var screenName = userClaims?.FirstOrDefault(x => x.Type == HrvsterClaimTypes.DisplayName)?.Value;
+			screenName = $"@{screenName}";
+			var canPlayGame = await CanPlayMatchGame(gameUid, campaign.CampaignUid, externalProfileId, screenName, default);
+
+			if (!canPlayGame)
+				return RedirectToAction("CannotPlayMatchGame", new { gameUid, ruleUid, externalClient });
+
+			if (blacklisted.Any(c => c.UserId.Equals(externalProfileId)))
+				return RedirectToAction("CannotPlayMatchGame", new { gameUid, ruleUid, externalClient });
+
+			var rules = await _gameService.GetRulesAsync(GameTypesEnum.MatchGames, gameUid, default);
+			var rule = rules.FirstOrDefault(r => r.RuleUid == ruleUid);
+
+			if (rule.MustBeFollowing)
+			{
+				/*
+				var followers = await _twitterHttpService.GetFollowersAsync(externalProfileId);
+
+				if (!followers.Any(c => c.Id == profile.ExternalProfileId))*/
+
+				//return RedirectToAction("CannotPlayMatchGame", new { gameUid, ruleUid, externalClient });
+			}
+
+			_logger.LogInformation("User {screenName} is playing the game {gameUid} with the rule {ruleUid}",
+				screenName,
+				gameUid,
+				ruleUid);
+
+			_logger.LogInformation("Reserving the gameboard for game {gameUid}", gameUid);
+			var gamePlayUid = await _matchGamePlayService.ReserveGameboardAsync(
+				gameUid, screenName, UserIdentifierType.TwitterHandle, default);
+
+			return RedirectToActionPermanent("PlayMatch3Game", new { gameUid, ruleUid, externalClient, gamePlayUid });
 		}
 
 		public async Task<IActionResult> ValidateFBAuth(string code, string state, string error, string error_description)
@@ -379,60 +427,21 @@ namespace hrvster.Template1.Web.Controllers
 					RefreshToken = refreshToken
 				});
 
-				if (gameType == GameTypes.Sweepstake)
+				if (gameType == GameTypesEnum.Sweeps.ToString())
 					return RedirectToActionPermanent("SweepsPlay", new { gameUid, ruleUid, externalClient });
 
-				return RedirectToActionPermanent("Pick3MatchPlay", new { gameUid, ruleUid, externalClient });
+				return RedirectToActionPermanent("MatchPlayPick3", new { gameUid, ruleUid, externalClient });
 			}
 
 			return View(form);
 		}
 
-		[Authorize]
-		[HttpGet("Games/Pick3MatchPlay/{gameUid}/rule/{ruleUid}/Play")]
-		public async Task<IActionResult> Pick3MatchPlay(Guid gameUid, Guid ruleUid, [FromQuery] string externalClient, CancellationToken cancellationToken)
-		{
-			var gameType = _sessionManager.GetValue(TemplateSessionConstants.GameType);
-			var game = await _gameService.GetGameDetailsAsync(gameType, gameUid);
-			var blacklisted = await _blackListedUserRepository.GetBlacklistedUsersAsync(gameUid);
-			var campaign = await _campaignService.GetCampaignFromGameUidAsync(gameUid, gameType);
-			var account = await _accountsService.GetAccountByUidAsync(campaign.Account.AccountUid);
-			var profile = await _accountsService.GetProfileAsync(account.AccountUid, GetActualProfileType(externalClient));
-
-			_logger.LogInformation("Retrieved a total of {count} blacklisted users for the game {gameUid}",
-				blacklisted.Count(),
-				gameUid);
-
-			var userClaims = User.Identities.FirstOrDefault()?.Claims;
-			var externalProfileId = userClaims?.FirstOrDefault(x => x.Type == HrvsterClaimTypes.ExternalProfileId)?.Value;
-			var screenName = userClaims?.FirstOrDefault(x => x.Type == ClaimTypes.Name)?.Value;
-
-			var canPlayGame = await CanPlayMatchGame(gameUid, campaign.CampaignUid, externalProfileId, screenName, cancellationToken);
-
-			if (!canPlayGame)
-				return RedirectToAction("CannotPlayMatchGame", new { gameUid, ruleUid, externalClient });
-
-			if (blacklisted.Any(c => c.UserId.Equals(externalProfileId)))
-				return RedirectToAction("CannotPlayMatchGame", new { gameUid, ruleUid, externalClient });
-
-			var rules = await _gameService.GetRulesAsync(GameTypesEnum.MatchGames, gameUid, cancellationToken);
-			var rule = rules.FirstOrDefault(r => r.RuleUid == ruleUid);
-
-			if (rule.MustBeFollowing)
-			{
-				/*
-				var followers = await _twitterHttpService.GetFollowersAsync(externalProfileId);
-
-				if (!followers.Any(c => c.Id == profile.ExternalProfileId))*/
-
-				//return RedirectToAction("CannotPlayMatchGame", new { gameUid, ruleUid, externalClient });
-			}
-
-			var gamePlayUid = await _matchGamePlayService.ReserveGameboardAsync(
-				gameUid, screenName, UserIdentifierType.TwitterHandle, cancellationToken);
-
-			return RedirectToActionPermanent("PlayMatch3Game", new { gameUid, ruleUid, externalClient, gamePlayUid });
-		}
+		//[Authorize]
+		//[HttpGet("Games/MatchPlayPick3/{gameUid}/rule/{ruleUid}/Play")]
+		//public async Task<IActionResult> MatchPlayPick3(Guid gameUid, Guid ruleUid, [FromQuery] string externalClient, CancellationToken cancellationToken)
+		//{
+			
+		//}
 
 		[Authorize]
 		[HttpGet("Games/PlayMatch3Game/Game/{gameUid}/Rule/{ruleUid}/Play/{gamePlayUid}")]
@@ -530,7 +539,7 @@ namespace hrvster.Template1.Web.Controllers
 				{
 					var userClaims = User.Identities.FirstOrDefault()?.Claims;
 					var externalProfileId = userClaims?.FirstOrDefault(x => x.Type == HrvsterClaimTypes.ExternalProfileId)?.Value;
-					var screenName = userClaims?.FirstOrDefault(x => x.Type == ClaimTypes.Name)?.Value;
+					var screenName = userClaims?.FirstOrDefault(x => x.Type == HrvsterClaimTypes.DisplayName)?.Value;
 
 					await _reportingService.SaveMatchGameAsync(
 						gameUid,
@@ -560,7 +569,7 @@ namespace hrvster.Template1.Web.Controllers
 			var userName = User.Identities
 				.FirstOrDefault()?
 				.Claims?
-				.FirstOrDefault(x => x.Type == ClaimTypes.Name)?
+				.FirstOrDefault(x => x.Type == HrvsterClaimTypes.DisplayName)?
 				.Value;
 			var externalProfileId = User.Identities
 				.FirstOrDefault()?
@@ -612,7 +621,7 @@ namespace hrvster.Template1.Web.Controllers
 			var userName = User.Identities
 				.FirstOrDefault()?
 				.Claims?
-				.FirstOrDefault(x => x.Type == ClaimTypes.Name)?
+				.FirstOrDefault(x => x.Type == HrvsterClaimTypes.DisplayName)?
 				.Value;
 			var externalProfileId = User.Identities
 				.FirstOrDefault()?
@@ -638,7 +647,7 @@ namespace hrvster.Template1.Web.Controllers
 				sweepGame,
 				ruleUid,
 				externalProfileId,
-				member.Profiles.FirstOrDefault()?.Name,
+				userName,
 				GetUserIdentifierType(externalClient),
 				MessageConstants.SweepstakeTweetReply,
 				externalClient,
@@ -775,7 +784,7 @@ namespace hrvster.Template1.Web.Controllers
 		{
 			var userClaims = User.Identities.FirstOrDefault()?.Claims;
 			var externalProfileId = userClaims?.FirstOrDefault(x => x.Type == HrvsterClaimTypes.ExternalProfileId)?.Value;
-			var screenName = userClaims?.FirstOrDefault(x => x.Type == ClaimTypes.Name)?.Value;
+			var screenName = userClaims?.FirstOrDefault(x => x.Type == HrvsterClaimTypes.DisplayName)?.Value;
 
 			var member = await _memberRepository.GetMemberViaExternalProfileIdAsync(GetProfileType(externalClient), externalProfileId);
 			var rule = await _matchGameRulesRepository.GetAsync(ruleUid);
@@ -942,14 +951,6 @@ namespace hrvster.Template1.Web.Controllers
 			await _memberProfileRepository.UpdateMemberProfileAsync(memberProfile);
 
 			_logger.LogWarning("Member profile found for external profile id {externalProfileId}", userDetails.ExternalProfileId);
-		}
-
-		private IActionResult RedirectToGamePlayFromGameType(Guid gameUid, Guid ruleUid, string externalClient, string gameType)
-		{
-			if (gameType == GameTypes.Sweepstake || gameType == GameTypesEnum.Sweeps.ToString())
-				return RedirectToAction("SweepsPlay", new { gameUid, ruleUid, externalClient });
-
-			return RedirectToAction("Pick3MatchPlay", new { gameUid, ruleUid, externalClient });
 		}
 
 		private static ClaimsPrincipal BuildPrincipalFromClaims(UserProviderDetails userDetails)

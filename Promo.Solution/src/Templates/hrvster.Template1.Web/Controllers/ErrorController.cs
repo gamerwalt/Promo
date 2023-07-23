@@ -13,8 +13,8 @@ namespace hrvster.Template1.Web.Controllers
 			_logger = loggerFactory.CreateLogger<ErrorController>();
 		}
 
-		[HttpGet("/Error/{statusCode}")]
-		public IActionResult HandleErrorCode(int statusCode, string error)
+		[HttpGet("/HandleErrorCode/{statusCode}")]
+		public IActionResult HandleErrorCode(int statusCode)
 		{
 			var errorMessage = string.Empty;
 
@@ -38,18 +38,17 @@ namespace hrvster.Template1.Web.Controllers
 				statusCode,
 				errorMessage);
 
-
 			var referer = HttpContext.Request.Headers["Referer"].ToString();
 
 			if (!string.IsNullOrEmpty(referer))
 			{
-				return Redirect(referer);
+				return View(statusCode);
 			}
 
 			if (statusCode == 0 && string.IsNullOrWhiteSpace(referer))
 				return View("Exception");
 
-			return RedirectToAction("Index", "Home");
+			return View(statusCode.ToString());
 		}
 
 		[Route("Error")]
