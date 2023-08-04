@@ -48,7 +48,9 @@
 		SweepsGoingLiveSoonMissingProperty,
 		SweepLive,
 		DrawCompleted,
-		SweepstakeMaxEntries
+		SweepstakeMaxEntries,
+		NotifyAccountOfUserWinningPick3WinEmail,
+		NotifyMemberOfPick3WinEmail
 	}
 
 	public enum CampaignTypeCode

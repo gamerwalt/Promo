@@ -65,8 +65,7 @@ namespace hrvster.Template1.Web
 
 			// Add services to the container.
 			builder.Services.AddSession();
-			builder
-				.Host
+			builder.Host
 				.UseSerilog((context, configuration)
 							=> configuration.ReadFrom.Configuration(builder.Configuration)
 								.Enrich.FromLogContext()
@@ -96,7 +95,7 @@ namespace hrvster.Template1.Web
 			builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
 				.AddCookie(options =>
 				{
-					options.LoginPath = "/Home/Login";
+					options.LoginPath = "/Authentication/Login";
 				});
 
 			Log.Information("Added Cookies auth scheme.");

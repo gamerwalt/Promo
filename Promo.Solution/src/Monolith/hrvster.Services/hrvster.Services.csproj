@@ -39,6 +39,12 @@
     <None Update="Settings.job">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Templates\NotifyAccountOfUserWinningPick3WinEmail.html">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Templates\NotifyMemberOfPick3WinEmail.html">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="Templates\EmailAddressUpdateRequest.html">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

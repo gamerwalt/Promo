@@ -2,6 +2,7 @@
 using hrvster.ApplicationServices.Accounts;
 using hrvster.ApplicationServices.Caching;
 using hrvster.ApplicationServices.Common;
+using hrvster.ApplicationServices.Communications;
 using hrvster.ApplicationServices.Mails;
 using hrvster.ApplicationServices.Processors;
 using hrvster.ApplicationServices.Reporting;
@@ -21,6 +22,7 @@ namespace hrvster.Extensions.Configuration
 				.AddTransient<ITweetProcessor, TweetProcessor>()
 				.AddTransient<IDrawService, DrawService>()
 				.AddTransient<IMailService, MailService>()
+				.AddTransient<ICommunicationService, CommunicationService>()
 				.AddTransient<IAccountVerificationService, AccountVerificationService>()
 				.AddGameService()
 				.AddReportingService()

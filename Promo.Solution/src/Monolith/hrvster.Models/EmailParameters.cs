@@ -23,5 +23,11 @@
 		public static string EntryPerUser = "EntryPerUser";
 		public static string SweepstakeName = "SweepstakeName";
 		public static string DrawDate = "DrawDate";
+		public static string GameGuid = "GameUid";
+		public static string GameName = "GameName";
+		public static string ScreenName = "ScreenName";
+		public static string GameplayUid = "GameplayUid";
+		public static string PrizeName = "PrizeName";
+		public static string PrizeValue = "PrizeValue";
 	}
 }

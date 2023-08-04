@@ -4,11 +4,7 @@ using hrvster.Infrastructure;
 using hrvster.Infrastructure.Accounts;
 using hrvster.Web.Models;
 using Microsoft.Extensions.Logging;
-using System;
 using System.Linq;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using System.Threading;
 
 namespace hrvster.Web.Validation
 {
@@ -19,7 +15,7 @@ namespace hrvster.Web.Validation
 		private readonly IAccountCompanyRepository _accountCompanyRepository;
 
 		public RegisterValidator(
-			ILoggerFactory loggerFactory, 
+			ILoggerFactory loggerFactory,
 			IAccountsRepository accountsRepository,
 			IAccountCompanyRepository accountCompanyRepository)
 		{
@@ -70,7 +66,7 @@ namespace hrvster.Web.Validation
 
 			RuleFor(x => x.SubdomainName)
 				.Must(SubdomainNameDoesNotExist)
-				.WithMessage("The company name already exists. Are you sure you don't want to log in.");
+				.WithMessage("The subdomain already exists. Are you sure you don't want to log in.");
 		}
 
 		private bool CompanyNameDoesNotExist(string companyName)
@@ -86,7 +82,7 @@ namespace hrvster.Web.Validation
 		private bool HasSpecialCharacters(string s)
 		{
 			var specialCharacters = @"\|!#$%&/()=?»«@£§€{}.-;'\<>_,+";
-			foreach(var c in specialCharacters)
+			foreach (var c in specialCharacters)
 			{
 				if (s.Contains(c)) return true;
 			}

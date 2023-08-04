@@ -2,13 +2,10 @@
 using hrvster.Models;
 using hrvster.Models.Options;
 using hrvster.Models.TemplateMailRequest;
-using MediatR;
 using Microsoft.Extensions.Logging;
-using Org.BouncyCastle.Asn1.Ocsp;
 using SendGrid;
 using SendGrid.Helpers.Mail;
 using System;
-using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -50,6 +47,12 @@ namespace hrvster.ApplicationServices.Mails
 				{
 					switch (email.Template)
 					{
+						case EmailTemplate.NotifyMemberOfPick3WinEmail:
+							await SendNotifyMemberOfPick3Win(email);
+							break;
+						case EmailTemplate.NotifyAccountOfUserWinningPick3WinEmail:
+							await SendNotifyAccountOfUserWinningPick3WinEmail(email);
+							break;
 						case EmailTemplate.DrawCompleted:
 							await SendDrawCompletedEmailAsync(email);
 							break;
@@ -64,7 +67,7 @@ namespace hrvster.ApplicationServices.Mails
 								EmailTemplate = EmailTemplate.SweepLive,
 								EmailAddress = email.Parameters[EmailParameters.EmailAddress],
 								SweepstakeName = email.Parameters[EmailParameters.SweepstakeName],
-								DisplayName = email.Parameters[EmailParameters.DisplayName],								
+								DisplayName = email.Parameters[EmailParameters.DisplayName],
 								DashboardLink = email.Parameters[EmailParameters.DashboardLink],
 								StartDate = email.Parameters[EmailParameters.StartDate],
 								EndDate = email.Parameters[EmailParameters.EndDate],
@@ -77,7 +80,7 @@ namespace hrvster.ApplicationServices.Mails
 								EntryPerUser = email.Parameters[EmailParameters.EntryPerUser]
 							}))
 								await _mailRepository.UpdateAsSentAsync(email);
-						break;
+							break;
 						case EmailTemplate.SweepsGoingLiveSoonMissingProperty:
 							if (await SendSweepsMissingPropertyAsync(
 								new SweepMissingPropertyRequest
@@ -215,6 +218,70 @@ namespace hrvster.ApplicationServices.Mails
 			}
 
 			_logger.LogInformation($"{nameof(ProcessAnyUnsentEmails)} processing completed.");
+		}
+
+		private async Task SendNotifyMemberOfPick3Win(Email email)
+		{
+			var request = new NotifyMemberOfWin
+			{
+				EmailTemplate = EmailTemplate.NotifyMemberOfPick3WinEmail,
+				EmailAddress = email.EmailAddress,
+				GameName = email.Parameters[EmailParameters.GameName],
+				GamePlayUid = email.Parameters[EmailParameters.GameplayUid],
+				PrizeName = email.Parameters[EmailParameters.PrizeName],
+				PrizeValue = email.Parameters[EmailParameters.PrizeValue]
+			};
+
+			var mailText = GetMailText(request.EmailTemplate);
+			var type = request.GetType();
+
+			foreach (var f in type.GetProperties(BindingFlags.Instance | BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public))
+			{
+				mailText = mailText.Replace($"[{f.Name}]", f.GetValue(request).ToString());
+			}
+
+			await SendEmailAsync(
+				new MailRequest
+				{
+					ToEmailAddress = request.EmailAddress,
+					Body = mailText,
+					Subject = $"You just won {request.PrizeName} playing the {request.GameName}"
+				}
+			);
+
+			await _mailRepository.UpdateAsSentAsync(email);
+		}
+
+		private async Task SendNotifyAccountOfUserWinningPick3WinEmail(Email email)
+		{
+			var request = new NotifyAccountOfuserWinningPick3WinRequest
+			{
+				EmailTemplate = EmailTemplate.NotifyAccountOfUserWinningPick3WinEmail,
+				EmailAddress = email.EmailAddress,
+				GameName = email.Parameters[EmailParameters.GameName],
+				GameGuid = email.Parameters[EmailParameters.GameGuid],
+				ScreenName = email.Parameters[EmailParameters.ScreenName],
+				PrizeName = email.Parameters[EmailParameters.PrizeName]
+			};
+
+			var mailText = GetMailText(request.EmailTemplate);
+			var type = request.GetType();
+
+			foreach (var f in type.GetProperties(BindingFlags.Instance | BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public))
+			{
+				mailText = mailText.Replace($"[{f.Name}]", f.GetValue(request).ToString());
+			}
+
+			await SendEmailAsync(
+				new MailRequest
+				{
+					ToEmailAddress = request.EmailAddress,
+					Body = mailText,
+					Subject = $"{request.GameName} has a winner and has won a {request.PrizeName}"
+				}
+			);
+
+			await _mailRepository.UpdateAsSentAsync(email);
 		}
 
 		private async Task SendSweepstakeMaxEntriesAsync(Email email)

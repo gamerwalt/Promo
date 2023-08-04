@@ -2,6 +2,7 @@
 using hrvster.ApplicationServices;
 using hrvster.ApplicationServices.Accounts;
 using hrvster.ApplicationServices.Common;
+using hrvster.ApplicationServices.Communications;
 using hrvster.ApplicationServices.MatchGames;
 using hrvster.ApplicationServices.Reporting;
 using hrvster.ApplicationServices.Sweepstakes;
@@ -24,8 +25,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using Constants = hrvster.Templates.Core.Common.Constants;
-using hrvster.ApplicationServices.Extensions.LogExtensions;
-using System.Threading;
 
 namespace hrvster.Template1.Web.Controllers
 {
@@ -52,6 +51,7 @@ namespace hrvster.Template1.Web.Controllers
 		private readonly IReportingService _reportingService;
 		private readonly IMatchGameRulesRepository _matchGameRulesRepository;
 		private readonly IProfilesRepository _profilesRepository;
+		private readonly ICommunicationService _communicationService;
 
 		public GamesController(
 			ILoggerFactory loggerFactory,
@@ -74,7 +74,8 @@ namespace hrvster.Template1.Web.Controllers
 			IMatchGameBoardService gameBoardService,
 			IReportingService reportingService,
 			IMatchGameRulesRepository matchGameRulesRepository,
-			IProfilesRepository profilesRepository)
+			IProfilesRepository profilesRepository,
+			ICommunicationService communicationService)
 		{
 			_logger = loggerFactory.CreateLogger<GamesController>();
 			_gameService = gameService;
@@ -97,6 +98,7 @@ namespace hrvster.Template1.Web.Controllers
 			_reportingService = reportingService;
 			_matchGameRulesRepository = matchGameRulesRepository;
 			_profilesRepository = profilesRepository;
+			_communicationService = communicationService;
 		}
 
 		[HttpGet("Games")]
@@ -300,7 +302,7 @@ namespace hrvster.Template1.Web.Controllers
 
 			await UpdateMemberProfileAsync(userDetails, memberProfile);
 
-			if(gameType == GameTypesEnum.Sweeps.ToString())
+			if (gameType == GameTypesEnum.Sweeps.ToString())
 				return RedirectToActionPermanent("SweepsPlay", new { gameUid, ruleUid, externalClient });
 
 			_logger.LogInformation("MatchPlayPick3 Entered.");
@@ -440,7 +442,7 @@ namespace hrvster.Template1.Web.Controllers
 		//[HttpGet("Games/MatchPlayPick3/{gameUid}/rule/{ruleUid}/Play")]
 		//public async Task<IActionResult> MatchPlayPick3(Guid gameUid, Guid ruleUid, [FromQuery] string externalClient, CancellationToken cancellationToken)
 		//{
-			
+
 		//}
 
 		[Authorize]
@@ -807,6 +809,11 @@ namespace hrvster.Template1.Web.Controllers
 				message = $"{replyTo} I just played the Pick 3 game {game.Name} and won. I just won a prize with a value of ${prize.Value}. {Environment.NewLine} {hashtag}";
 				await _twitterHttpService.PublishTweetInResponseToAsync(message, rule.ExternalId, accessToken, refreshToken);
 
+				//Send email to owner
+				await _communicationService.NotifyAccountOfWin(account.EmailAddress, game.Uid, game.Name, screenName, prize.Name);
+
+				await _communicationService.NotifyMemberOfWin(member.EmailAddress, game.Name, gameplayUid, prize.Name, prize.Value);
+
 				return RedirectToAction("MatchGameWin", new { Uid = gameUid, gameplayUid = gameplayUid });
 			}
 
@@ -898,15 +905,12 @@ namespace hrvster.Template1.Web.Controllers
 
 		private string GetProfileType(string externalClient)
 		{
-			switch (Enum.Parse<ExternalClientType>(externalClient))
+			return Enum.Parse<ExternalClientType>(externalClient) switch
 			{
-				case ExternalClientType.Twitter:
-					return ProfileType.Twitter.ToString();
-				case ExternalClientType.Facebook:
-					return ProfileType.Facebook.ToString();
-			}
-
-			return ProfileType.Twitter.ToString();
+				ExternalClientType.Twitter => ProfileType.Twitter.ToString(),
+				ExternalClientType.Facebook => ProfileType.Facebook.ToString(),
+				_ => ProfileType.Twitter.ToString(),
+			};
 		}
 
 		private ProfileType GetActualProfileType(string externalClient)
