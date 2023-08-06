@@ -1,3 +1,4 @@
+using AspNetCoreRateLimit;
 using hrvster.ApplicationServices;
 using hrvster.ApplicationServices.Accounts;
 using hrvster.ApplicationServices.Common;
@@ -29,6 +30,7 @@ using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using Serilog;
 using Tweetinvi;
@@ -214,6 +216,12 @@ namespace hrvster.Template1.Web
 			builder.Services.AddTransient<IPlaySweepstakeService, PlaySweepstakeService>();
 
 			builder.Services.AddTwitterHttpService(builder.Configuration);
+			builder.Services.AddOptions();
+			builder.Services.AddMemoryCache();
+			builder.Services.Configure<IpRateLimitOptions>(builder.Configuration.GetSection("IpRateLimiting"));
+			builder.Services.Configure<IpRateLimitPolicies>(builder.Configuration.GetSection("IpRateLimitPolicies"));
+			builder.Services.AddInMemoryRateLimiting();
+			builder.Services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>();
 
 			Log.Information("Done with adding services.");
 
@@ -228,6 +236,8 @@ namespace hrvster.Template1.Web
 				// The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
 				app.UseHsts();
 			}
+
+			app.UseIpRateLimiting();
 
 			app.UseHttpsRedirection();
 			app.UseStaticFiles();
