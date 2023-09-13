@@ -25,6 +25,88 @@ namespace hrvster.ApplicationServices.Extensions.LogExtensions
 			});
 		}
 
+		public static IDisposable SweepsGameLoggingEntry(
+			this ILogger logger,
+			Guid ruleUid,
+			Guid gameUid,
+			Guid campaignUid,
+			Guid accountUid)
+		{
+			return logger.BeginScope(new Dictionary<string, object>()
+			{
+				{"RuleUid", ruleUid },
+				{"GameUid", gameUid },
+				{"CampaignUid", campaignUid },
+				{"AccountUid", accountUid },
+			});
+		}
+
+		public static IDisposable Pick3MatchGameLoggingEntry(
+			this ILogger logger,
+			Guid ruleUid,
+			Guid gameUid,
+			Guid campaignUid,
+			Guid accountUid)
+		{
+			return logger.BeginScope(new Dictionary<string, object>()
+			{
+				{"RuleUid", ruleUid },
+				{"GameUid", gameUid },
+				{"CampaignUid", campaignUid },
+				{"AccountUid", accountUid },
+			});
+		}
+
+		public static IDisposable CreateMemberPageLogScope(
+			this ILogger logger,
+			Guid ruleUid,
+			Guid gameUid,
+			string externalClient,
+			Guid accountUid)
+			=> logger.BeginScope(new Dictionary<string, object>()
+			{
+				{"RuleUid", ruleUid },
+				{"GameUid", gameUid },
+				{"ExternalClient", externalClient },
+				{"AccountUid", accountUid },
+			});
+		
+		public static IDisposable CreateMemberPagePostLogScope(
+			this ILogger logger,
+			Guid ruleUid,
+			Guid gameUid,
+			string externalClient,
+			Guid accountUid)
+			=> logger.CreateMemberPageLogScope(ruleUid, gameUid, externalClient, accountUid);
+
+		public static IDisposable ValidatingTwitterAuthBeginScope(
+			this ILogger logger,
+			Guid ruleUid,
+			Guid gameUid,
+			string externalClient,
+			string gameType)
+		{
+			return logger.BeginScope(new Dictionary<string, object>()
+			{
+				{"RuleUid", ruleUid },
+				{"GameUid", gameUid },
+				{"ExternalClient", externalClient },
+				{"GameType", gameType },
+			});
+		}
+
+		public static IDisposable GameServiceGameExistsForAccount(
+			this ILogger logger,
+			Guid gameUid,
+			Guid accountUid)
+		{
+			return logger.BeginScope(new Dictionary<string, object>()
+			{
+				{"GameUid", gameUid },
+				{"AccountUid", accountUid },
+			});
+		}
+
 		public static IDisposable StartScheduledPostPublishing(
 			this ILogger logger,
 			Guid scheduledPostUid,

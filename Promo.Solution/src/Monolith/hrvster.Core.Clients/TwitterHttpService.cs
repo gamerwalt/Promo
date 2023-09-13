@@ -27,6 +27,7 @@ namespace hrvster.Core.Clients
 		Task<AccessTokenResponse> GetAccessTokenAsyncForOfflineAccess(string code, string scheme, string value, string redirectUrl);
 		Task<AccessTokenResponse> GetAccessTokenFromRefreshTokenAsync(string ownerRefreshToken);
 		Task<UserProviderDetails> GetAuthenticatedUserAsync(AccessTokenResponse accessTokenObject);
+		Task<UserProviderDetails> GetAuthenticatedUserAsync(string authKey);
 		string GetAuthorizationUrl(string scheme, string value, string redirectUrl);
 		Task<IEnumerable<Follower>> GetFollowersAsync(string externalProfileId);
 		Task<string> PublishTweetAsync(string text, string accessToken, string refreshToken);
@@ -354,6 +355,34 @@ namespace hrvster.Core.Clients
 			var client = new HttpClient();
 
 			var response = await client.PostAsync(url, null);
+		}
+
+		public async Task<UserProviderDetails> GetAuthenticatedUserAsync(string authKey)
+		{
+			_client.DefaultRequestHeaders.Clear();
+			_client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authKey);
+
+			var response = await _client.GetAsync($"{MeEndpoint}?user.fields=created_at,description,entities,id,location,name,pinned_tweet_id,profile_image_url,protected,public_metrics,url,username,verified,withheld");
+
+			if (response.IsSuccessStatusCode)
+			{
+				var result = await response.Content.ReadAsStringAsync();
+
+				var twitterUserResponse = JsonConvert.DeserializeObject<TwitterUserResponse>(result);
+
+				return new UserProviderDetails
+				{
+					AccessToken = authKey,
+					Description = twitterUserResponse.Profile.Description,
+					ExternalProfileId = twitterUserResponse.Profile.Id,
+					Name = twitterUserResponse.Profile.Name,
+					ScreenName = twitterUserResponse.Profile.Username,
+					ProfileImage = twitterUserResponse.Profile.ProfileImageUrl,
+					Location = twitterUserResponse.Profile.Location
+				};
+			}
+
+			return null;
 		}
 
 		public async Task<UserProviderDetails> GetAuthenticatedUserAsync(AccessTokenResponse accessTokenObject)

@@ -30,14 +30,7 @@
 </style>
 <footer class="footer">
     <div class="footer-background">
-        @if (Model.FooterType == "svg" || Model.FooterType == "png")
-        {
-            <img src="@Model.FooterLocation" alt="Footer Image" />
-        }
-        else
-        {
-            <p>@Model.FooterLocation</p>
-        }
+        <img src="@Model.FooterLocation" alt="Footer Image" />
     </div>
     <div class="footer-content-container">
         <div class="container-fluid text-center">

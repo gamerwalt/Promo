@@ -13,5 +13,6 @@ namespace hrvster.Models
 		public bool AcceptedTerms { get; set; }
 		public DateTime CreatedDate { get; set; }
 		public DateTime? UpdatedDate { get; set; }
+		public string ScreenName { get; set; }
 	}
 }

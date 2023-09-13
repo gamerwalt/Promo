@@ -1,6 +1,7 @@
 ﻿using hrvster.ApplicationServices.Subscription;
 using hrvster.Core.Requests.ServiceRequests;
 using hrvster.Core.Requests.Sweepstakes;
+using hrvster.Core.Requests.WebRequests.Sweeps;
 using hrvster.Infrastructure;
 using hrvster.Infrastructure.Harvester;
 using hrvster.Models;
@@ -19,6 +20,7 @@ namespace hrvster.ApplicationServices.Sweepstakes
 {
 	public interface ISweepstakesService
 	{
+		Task<IEnumerable<SweepDetail>> GetAccountGamesAsync(Guid accountUid, CancellationToken cancellationToken);
 		Task<IEnumerable<BlacklistedSweepUser>> GetBlacklistedUsersOfSweepstakes(Guid sweepUid);
 		Task<SweepEntryRule> GetEntryRulesAsync(Guid sweepUid);
 		Task<IEnumerable<Sweep>> GetLiveSweepsAsync(CancellationToken cancellationToken);
@@ -105,6 +107,17 @@ namespace hrvster.ApplicationServices.Sweepstakes
 				sweepsLive.Count());
 
 			return sweepsLive;
+		}
+
+		public async Task<IEnumerable<SweepDetail>> GetAccountGamesAsync(Guid accountUid, CancellationToken cancellationToken)
+		{
+			_logger.LogInformation("Retrieving sweepstakes for account with uid {accountUid}", accountUid);
+
+			var sweeps = await _mediator.Send(new GetSweepForAccountUidRequest(accountUid));
+
+			_logger.LogInformation("Retrieved a total of {count} sweepstakes for account with uid {accountUid}", sweeps.SweepDetails.Count, accountUid);
+
+			return sweeps.SweepDetails;
 		}
 
 		public IEnumerable<Rule> GetRulesMatching(string watchValue)

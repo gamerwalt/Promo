@@ -1,0 +1,15 @@
+﻿@using hrvster.Core;
+@using hrvster.Models;
+
+@model SweepstakeGameDetails
+@inject LinkBuilder linkBuilder
+
+<div class="form-container mx-auto p-4">
+    <div>We're sorry we were unable to enter you into the sweepstake <strong>@Model.Name</strong></div>
+    <div>Please try again!</div>
+    <div>
+        This sweepstakes is supposed to run from <strong>@Model.StartDate.ToString("MMM d, yyyy hh:MM") GMT</strong>
+        to <strong>@Model.EndDate.ToString("MMM d, yyyy hh:MM") GMT</strong> with a draw on 
+        <strong>@Model.DrawDate.ToString("MMM d, yyyy hh:MM") GMT</strong>
+    </div>
+</div>

@@ -2,6 +2,7 @@ using AspNetCoreRateLimit;
 using hrvster.ApplicationServices;
 using hrvster.ApplicationServices.Accounts;
 using hrvster.ApplicationServices.Common;
+using hrvster.ApplicationServices.Communications;
 using hrvster.ApplicationServices.Harvesters.Facebook;
 using hrvster.ApplicationServices.MatchGames;
 using hrvster.ApplicationServices.Publishing;
@@ -66,7 +67,10 @@ namespace hrvster.Template1.Web
 			Log.Information("Running the hrvster.Template1.Web app.");
 
 			// Add services to the container.
-			builder.Services.AddSession();
+			builder.Services.AddSession(o =>
+			{
+				o.IdleTimeout = TimeSpan.FromMinutes(30);
+			});
 			builder.Host
 				.UseSerilog((context, configuration)
 							=> configuration.ReadFrom.Configuration(builder.Configuration)
@@ -113,7 +117,6 @@ namespace hrvster.Template1.Web
 			builder.Services.AddAutoMapper(typeof(EntityMapper));
 
 			builder.Services.AddHttpContextAccessor();
-			builder.Services.AddScoped<IConnectionStringProvider, ConnectionStringProvider>();
 			//builder.Services.AddSingleton<IDatabase>(c =>
 			//{
 			//	return new MySqlDatabase("hrvster", builder.Configuration);
@@ -223,6 +226,8 @@ namespace hrvster.Template1.Web
 			builder.Services.AddInMemoryRateLimiting();
 			builder.Services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>();
 
+			builder.Services.AddTransient<ICommunicationService, CommunicationService>();
+
 			Log.Information("Done with adding services.");
 
 			var app = builder.Build();
@@ -248,7 +253,7 @@ namespace hrvster.Template1.Web
 
 			app.UseCors("DynamicCorsPolicy");
 
-			app.UseMiddleware<SubdomainMiddleware>();
+			app.UseMiddleware<GameDetectingMiddleware>();
 
 			app.UseAuthentication();
 			app.UseAuthorization();
@@ -260,11 +265,10 @@ namespace hrvster.Template1.Web
 
 			app.UseEndpoints(endpoints =>
 			{
+				endpoints.MapControllers(); // This is necessary for attribute routing to work.
 				endpoints.MapControllerRoute(
 					name: "default",
 					pattern: "{controller=Home}/{action=Index}/{id?}");
-
-				endpoints.MapControllers(); // This is necessary for attribute routing to work.
 			});
 
 			app.Run();

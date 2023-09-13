@@ -5,7 +5,7 @@ namespace hrvster.Templates.Services
 {
 	public interface ILayoutService
 	{
-		Task<LayoutProperty> GetLayoutPropertyAsync(CancellationToken cancellationToken);
+		Task<LayoutProperty> GetLayoutPropertyAsync(Guid accountUid, CancellationToken cancellationToken);
 	}
 
 	public class LayoutService : ILayoutService
@@ -17,7 +17,7 @@ namespace hrvster.Templates.Services
 			_layoutRepository = layoutRepository;
 		}
 
-		public async Task<LayoutProperty> GetLayoutPropertyAsync(CancellationToken cancellationToken)
-			=> await _layoutRepository.GetLayoutProperties(cancellationToken);
+		public async Task<LayoutProperty> GetLayoutPropertyAsync(Guid accountUid, CancellationToken cancellationToken)
+			=> await _layoutRepository.GetLayoutProperties(accountUid, cancellationToken);
 	}
 }

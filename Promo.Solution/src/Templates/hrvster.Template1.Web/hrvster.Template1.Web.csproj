@@ -26,9 +26,11 @@
   <ItemGroup>
     <ProjectReference Include="..\..\Monolith\hrvster.ApplicationServices\hrvster.ApplicationServices.csproj" />
     <ProjectReference Include="..\..\Monolith\hrvster.Core\hrvster.Core.csproj" />
+    <ProjectReference Include="..\..\Monolith\hrvster.Exceptions\hrvster.Exceptions.csproj" />
     <ProjectReference Include="..\..\Monolith\hrvster.Extensions\hrvster.Extensions.csproj" />
     <ProjectReference Include="..\hrvster.Middleware\hrvster.Templates.Middleware.csproj" />
     <ProjectReference Include="..\hrvster.Services\hrvster.Templates.Services.csproj" />
+    <ProjectReference Include="..\hrvster.Templates.Models\hrvster.Templates.Models.csproj" />
   </ItemGroup>
 
   <ItemGroup>

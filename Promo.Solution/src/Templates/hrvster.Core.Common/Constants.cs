@@ -6,6 +6,18 @@
 		public const string ContextItemsConnectionString = "connectionString";
 	}
 
+	public class ContextConstants
+	{
+		public const string GameUid = "GameUid";
+		public const string GameUidV1 = "gameUid";
+		public const string GameUidV2 = "Uid";
+		public const string GameUidV3 = "uid";
+		public const string RuleUid = "ruleUid";
+		public const string ExternalClient = "externalClient";
+		public const string CampaignUid = "campaignUid";
+		public const string AccountUid = "accountUid";
+	}
+
 	public class TemplateSessionConstants
 	{
 		public const string GameUid = "Session_Game_Uid";
@@ -14,6 +26,8 @@
 		public const string GameType = "Session_Game_Type";
 		public const string UserDetails = "Session_User_Details";
 		public const string Subdomain = "Session_Subdomain";
+		public const string AuthenticationKey = "Session_AuthKey";
+		public const string RefreshKey = "Session_Auth_Refresh_Key";
 	}
 
 	public class HrvsterClaimTypes

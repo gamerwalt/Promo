@@ -1,7 +1,11 @@
-﻿namespace hrvster.Web.Models
+﻿using Microsoft.AspNetCore.Http;
+using System;
+
+namespace hrvster.Web.Models
 {
 	public class ViewClientPages
 	{
+		public Guid Uid { get; set; }
 		public ClientImages Images { get; set; }
 	}
 

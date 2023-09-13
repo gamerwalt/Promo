@@ -1,6 +1,7 @@
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using hrvster.ApplicationServices;
+using hrvster.ApplicationServices.Files;
 using hrvster.Core.Clients;
 using hrvster.Extensions.Configuration;
 using hrvster.Extensions.OptionsConfiguration;
@@ -102,6 +103,8 @@ namespace hrvster.Web
 			services.AddHttpClient<IRebrandlyService, RebrandlyService>();
 			services.AddTransient<IHyperlinkService, HyperlinkService>();
 			services.AddTwitterHttpService(Configuration);
+
+			services.AddTransient<IFileUploaderService, FileUploaderService>();
 		}
 
 		private void AddValidators(IServiceCollection services)

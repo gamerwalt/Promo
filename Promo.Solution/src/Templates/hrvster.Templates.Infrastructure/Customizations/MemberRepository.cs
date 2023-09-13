@@ -1,80 +1,58 @@
-﻿using hrvster.Infrastructure;
-using hrvster.Infrastructure.Extensions;
-using hrvster.Templates.Core.Common;
+﻿using hrvster.Infrastructure.Extensions;
 using hrvster.Templates.Models.Members;
-using Microsoft.AspNetCore.Http;
 using MySqlConnector;
-using System;
-using System.Collections.Generic;
 using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace hrvster.Templates.Infrastructure.Customizations
 {
 	public interface IMemberRepository
 	{
-		Task CreateMemberAsync(Member newMember);
-		Task<Member> GetMemberViaExternalProfileIdAsync(string profileType, string externalProfileId);
+		Task CreateMemberAsync(Guid accountUid, Member newMember);
+		Task<Member> GetMemberViaExternalProfileIdAsync(Guid accountUid, string profileType, string externalProfileId);
 	}
 
 	public class MemberRepository : IMemberRepository
 	{
-		private readonly IConnectionStringProvider _connectionStringProvider;
-		private readonly IHttpContextAccessor _httpContextAccessor;
+		private readonly hrvster.Infrastructure.IDatabase _database;
 
-		public MemberRepository(
-			IConnectionStringProvider connectionStringProvider,
-			IHttpContextAccessor httpContextAccessor)
+		public MemberRepository(hrvster.Infrastructure.IDatabase database)
 		{
-			_connectionStringProvider = connectionStringProvider;
-			_httpContextAccessor = httpContextAccessor;
+			_database = database;
 		}
 
-		public async Task CreateMemberAsync(Member member)
+		public async Task CreateMemberAsync(Guid accountUid, Member member)
 		{
-			await _connectionStringProvider.GetConnectionString();
-
-			object? connectionString, subDomain;
-
-			SetDetailsNeeded(out connectionString, out subDomain);
-
-			using var conn = new MySqlConnection(connectionString.ToString());
+			using var conn = new MySqlConnection(_database.GetConnectionString());
 			var command = conn.CreateCommand();
 			command.CommandText = "member_create";
 			command.CommandType = CommandType.StoredProcedure;
 			command
+				.AddParameter("accountUid", accountUid)
 				.AddParameter("memberUid", member.Uid)
 				.AddParameter("emailAddress", member.EmailAddress)
 				.AddParameter("firstName", member.FirstName)
 				.AddParameter("lastName", member.LastName)
-				.AddParameter("address1", member.Address1)
-				.AddParameter("address2", member.Address2)
-				.AddParameter("phoneNumber", member.PhoneNumber)
-				.AddParameter("state", member.State)
-				.AddParameter("city", member.City);
+				.AddParameter("phoneNumber", member.PhoneNumber);
 
 			await conn.OpenAsync();
 			await command.ExecuteNonQueryAsync();
 		}
 
-		public async Task<Member> GetMemberViaExternalProfileIdAsync(string profileType, string externalProfileId)
+		public async Task<Member> GetMemberViaExternalProfileIdAsync(
+			Guid accountUid,
+			string profileType,
+			string externalProfileId)
 		{
 			var member = default(Member);
 
-			await _connectionStringProvider.GetConnectionString();
-
-			object? connectionString, subDomain;
-
-			SetDetailsNeeded(out connectionString, out subDomain);
-
-			using (var conn = new MySqlConnection(connectionString.ToString()))
+			using (var conn = new MySqlConnection(_database.GetConnectionString()))
 			{
 				var command = conn.CreateCommand();
 				command.CommandText = "member_get_by_external_profile_id";
 				command.CommandType = CommandType.StoredProcedure;
-				command.AddParameter("externalProfileId", externalProfileId)
+				command
+					.AddParameter("accountUid", accountUid)
+					.AddParameter("externalProfileId", externalProfileId)
 					.AddParameter("profileType", profileType);
 
 				await conn.OpenAsync();
@@ -97,12 +75,7 @@ namespace hrvster.Templates.Infrastructure.Customizations
 				FirstName = reader.GetStringValue("first_name"),
 				LastName = reader.GetStringValue("last_name"),
 				EmailAddress = reader.GetStringValue("email_address"),
-				Address1 = reader.GetStringValue("address1"),
-				Address2 = reader.GetStringValue("address2"),
 				PhoneNumber = reader.GetStringValue("phone_number"),
-				State = reader.GetStringValue("state"),
-				City = reader.GetStringValue("city"),
-				Country = reader.GetStringValue("country"),
 				Profiles = new List<MemberProfile>
 				{
 					new MemberProfile
@@ -117,12 +90,6 @@ namespace hrvster.Templates.Infrastructure.Customizations
 					}
 				}
 			};
-		}
-
-		private void SetDetailsNeeded(out object? connectionString, out object? subDomain)
-		{
-			_httpContextAccessor.HttpContext.Items.TryGetValue(Constants.ContextItemsConnectionString, out connectionString);
-			_httpContextAccessor.HttpContext.Items.TryGetValue(Constants.ContextItemsSubdomain, out subDomain);
 		}
 	}
 }

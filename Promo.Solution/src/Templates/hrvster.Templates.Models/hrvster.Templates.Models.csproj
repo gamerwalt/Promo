@@ -7,7 +7,9 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\Monolith\hrvster.Core.Clients\hrvster.Core.Clients.csproj" />
     <ProjectReference Include="..\..\Monolith\hrvster.Models\hrvster.Models.csproj" />
+    <ProjectReference Include="..\hrvster.Core.Common\hrvster.Templates.Core.Common.csproj" />
   </ItemGroup>
 
 </Project>

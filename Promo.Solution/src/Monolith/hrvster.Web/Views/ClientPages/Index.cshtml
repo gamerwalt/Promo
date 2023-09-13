@@ -15,27 +15,28 @@
 					<tr>
 						<th class="min-w-100px">Type</th>
 						<th class="min-w-250px">Image</th>
-						<th class="min-w-250px">Actions</th>
 					</tr>
 				</thead>
 				<tbody class="fs-7">
 					<tr>
 						<td>Logo</td>
 						<td><img width="64" height="64" src="@Model.Images.LogoLocation" /></td>
-						<td>Actions</td>
 					</tr>
 					<tr>
 						<td>Header</td>
 						<td><img src="@Model.Images.HeaderLocation" /></td>
-						<td>Actions</td>
 					</tr>
 					<tr>
 						<td>Footer</td>
 						<td><img src="@Model.Images.FooterLocation" /></td>
-						<td>Actions</td>
 					</tr>
 				</tbody>
 			</table>
+		</div>
+	</div>
+	<div class="card-footer">
+		<div class="card-toolbar">
+			<a class="btn btn-large btn-md btn-light btn-primary" asp-action="Update" asp-route-uid="@Model.Uid">Update Images</a>
 		</div>
 	</div>
 </div>

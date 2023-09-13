@@ -364,7 +364,7 @@ namespace hrvster.Web.Controllers
 		{
 			_hrvsterUser = _sessionManager.GetUserInformation();
 
-			var gameDetail = await _gameService.GetGameDetailsAsync(gameType, Uid);
+			var gameDetail = await _gameService.GetGameDetailsAsync(Enum.Parse<GameTypesEnum>(gameType), Uid);
 			var pages = await _facebookPageService.GetPagesAsync(_hrvsterUser.UserUid);
 
 			var model = new SelectPageToPost
@@ -395,7 +395,7 @@ namespace hrvster.Web.Controllers
 		{
 			_hrvsterUser = _sessionManager.GetUserInformation();
 
-			var gameDetail = await _gameService.GetGameDetailsAsync(gameType, Uid);
+			var gameDetail = await _gameService.GetGameDetailsAsync(Enum.Parse<GameTypesEnum>(gameType), Uid);
 
 			if (ModelState.IsValid)
 			{
@@ -436,7 +436,7 @@ namespace hrvster.Web.Controllers
 
 			var watchTypes = await _providersService.GetWatchTypesAsync();
 
-			var gameDetail = await _gameService.GetGameDetailsAsync(gameType, Uid);
+			var gameDetail = await _gameService.GetGameDetailsAsync(Enum.Parse<GameTypesEnum>(gameType), Uid);
 
 			if (gameDetail == null)
 			{
@@ -479,7 +479,7 @@ namespace hrvster.Web.Controllers
 
 			var watchTypes = await _providersService.GetWatchTypesAsync();
 
-			var gameDetail = await _gameService.GetGameDetailsAsync(gameType, Uid);
+			var gameDetail = await _gameService.GetGameDetailsAsync(Enum.Parse<GameTypesEnum>(gameType), Uid);
 
 			if (gameDetail == null)
 			{

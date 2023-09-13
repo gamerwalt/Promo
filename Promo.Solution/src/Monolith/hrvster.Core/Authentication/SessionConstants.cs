@@ -30,5 +30,10 @@
 
 		public const string ExternalClientType = "_ExternalClientType";
 		public const string PageId = "_PageId";
+
+		public const string CampaignUid = "_CampaignUid";
+		public const string AccountUid = "_AccountUid";
+		public const string ExternalClient = "_ExternalClient";
+		public const string RuleUid = "_RuleUid";
 	}
 }

@@ -34,23 +34,9 @@
 </style>
 <header class="header">
     <div class="header-background">
-        @if (Model.HeaderType == "svg" || Model.HeaderType == "png")
-        {
-            <img src="@Model.HeaderLocation" alt="Header Image" />
-        }
-        else
-        {
-            <p>@Model.HeaderLocation</p>
-        }
+        <img src="@Model.HeaderLocation" alt="Header Image" />
     </div>
     <div class="logo-container">
-        @if (Model.LogoType == "svg" || Model.LogoType == "png")
-        {
-            <img src="@Model.LogoLocation" alt="Logo Image" />
-        }
-        else
-        {
-            <p>@Model.LogoLocation</p>
-        }
+        <img src="@Model.LogoLocation" alt="Logo Image" />
     </div>
 </header>

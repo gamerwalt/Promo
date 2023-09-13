@@ -5,6 +5,7 @@ using hrvster.ApplicationServices.Publishing;
 using hrvster.ApplicationServices.Subscription;
 using hrvster.ApplicationServices.Sweepstakes;
 using hrvster.Core.Requests.WebRequests.Files;
+using hrvster.Games.Match.Models;
 using hrvster.Infrastructure;
 using hrvster.Infrastructure.Core;
 using hrvster.Infrastructure.MatchGames;
@@ -27,8 +28,10 @@ namespace hrvster.ApplicationServices
 	public interface IGameService
 	{
 		Task CreateRulePostAsync(Guid ruleUid, string urlLink, string externalClientType, HrvsterUser hrvsterUser, string gameType, Guid gameUid, int gameId, int watchTypeId, string watchValue, string post, bool postNow, DateTime scheduledDate, IFormFile media1, IFormFile media2, IFormFile media3, IFormFile media4, string pageId, bool following);
+		Task<bool> GameExistsForAccountAsync(Guid accountUid, Guid gameUid);
 		Task<bool> GameExistsForSubdomainAsync(string subdomain, Guid gameUid);
-		Task<GameDetail> GetGameDetailsAsync(string gameType, Guid uid);
+		Task<GameDetail> GetGameDetailsAsync(GameTypesEnum gameType, Guid uid);
+		Task<GameDetail> GetGameDetailsAsync(string gameUid);
 		Task<IEnumerable<Rule>> GetRulesAsync(GameTypesEnum gameType, CancellationToken cancellationToken);
 		Task<IEnumerable<Rule>> GetRulesAsync(GameTypesEnum gameType, Guid gameUid, CancellationToken cancellationToken);
 		IEnumerable<Rule> GetRulesMatching(GameTypesEnum gameType, string watchValue);
@@ -111,9 +114,9 @@ namespace hrvster.ApplicationServices
 		private async Task<IEnumerable<Rule>> GetMatchGameRulesAsync(CancellationToken cancellationToken)
 			=> await _matchGameService.GetRulesAsync(cancellationToken);
 
-		public async Task<GameDetail> GetGameDetailsAsync(string gameType, Guid uid)
+		public async Task<GameDetail> GetGameDetailsAsync(GameTypesEnum gameType, Guid uid)
 		{
-			switch (Enum.Parse<GameTypesEnum>(gameType))
+			switch (gameType)
 			{
 				case GameTypesEnum.Sweeps:
 					return await GetSweepGameDetailsAsync(uid);
@@ -122,6 +125,19 @@ namespace hrvster.ApplicationServices
 				default:
 					return await GetSweepGameDetailsAsync(uid);
 			}
+		}
+
+		public async Task<GameDetail> GetGameDetailsAsync(string gameUid)
+		{
+			var gameDetails = await GetSweepGameDetailsAsync(Guid.Parse(gameUid));
+
+			if (gameDetails != null) return gameDetails;
+
+			gameDetails = await GetMatchGameDetailsAsync(Guid.Parse(gameUid));
+
+			if (gameDetails != null) return gameDetails;
+
+			return null;
 		}
 
 		public async Task<IEnumerable<Rule>> GetRulesMatchingAsync(
@@ -180,7 +196,8 @@ namespace hrvster.ApplicationServices
 					StartDate = matchGame.StartDate,
 					EndDate = matchGame.EndDate,
 					Id = matchGame.Id,
-					Uid = uid
+					Uid = uid,
+					CampaignUid = matchGame.CampaignUid
 				};
 			}
 
@@ -205,7 +222,8 @@ namespace hrvster.ApplicationServices
 					StartDate = sweepstake.StartDate,
 					EndDate = sweepstake.EndDate,
 					Id = sweepstake.SweepId,
-					Uid = uid
+					Uid = uid,
+					CampaignUid = sweepstake.Campaign.CampaignUid
 				};
 			}
 
@@ -627,6 +645,63 @@ namespace hrvster.ApplicationServices
 			if (matchGame != null) return true;
 
 			return false;
+		}
+
+		public async Task<bool> GameExistsForAccountAsync(Guid accountUid, Guid gameUid)
+		{
+			using (_logger.GameServiceGameExistsForAccount(gameUid, accountUid))
+			{
+				var sweepGame = await _sweepService.GetSweepstakeAsync(gameUid, default);
+				var matchGame = await _matchGameService.GetMatchGameAsync(gameUid, default);
+
+				if (!IsAnyGameFound(sweepGame, matchGame))
+				{
+					_logger.LogInformation("Game not found.");
+					return false;
+				}
+
+				var account = await _accountsService.GetAccountByUidAsync(accountUid);
+				if (account == null)
+				{
+					_logger.LogInformation("Account not found.");
+					return false;
+				}
+
+				if (IsSweepGameAccessibleByAccount(sweepGame, accountUid))
+				{
+					return true;
+				}
+
+				if (await IsMatchGameAccessibleByAccount(matchGame, accountUid))
+				{
+					return true;
+				}
+
+				_logger.LogInformation("Account does not have access to the game.");
+
+				return false;
+			}
+		}
+
+		private bool IsAnyGameFound(Sweep sweepGame, MatchGame matchGame)
+		{
+			return !(sweepGame == null && matchGame == null);
+		}
+
+		private bool IsSweepGameAccessibleByAccount(Sweep sweepGame, Guid accountUid)
+		{
+			return sweepGame != null && sweepGame.Account.AccountUid == accountUid;
+		}
+
+		private async Task<bool> IsMatchGameAccessibleByAccount(MatchGame matchGame, Guid accountUid)
+		{
+			if (matchGame == null)
+			{
+				return false;
+			}
+
+			var accountMatchGames = await _matchGameService.GetAccountMatchGamesAsync(accountUid, default);
+			return accountMatchGames.Any(c => c.Uid == matchGame.Uid);
 		}
 	}
 }

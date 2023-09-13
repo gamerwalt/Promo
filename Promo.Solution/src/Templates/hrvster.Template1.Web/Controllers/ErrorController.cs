@@ -13,7 +13,7 @@ namespace hrvster.Template1.Web.Controllers
 			_logger = loggerFactory.CreateLogger<ErrorController>();
 		}
 
-		[HttpGet("/HandleErrorCode/{statusCode}")]
+		[HttpGet("HandleErrorCode/{statusCode}")]
 		public IActionResult HandleErrorCode(int statusCode)
 		{
 			var errorMessage = string.Empty;

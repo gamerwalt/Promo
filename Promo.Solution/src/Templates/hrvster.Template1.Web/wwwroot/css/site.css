@@ -18,19 +18,27 @@ body {
     margin-bottom: 120px; /* to prevent the footer from overlapping content */
 }
 
-/* new styles for the error page */
+    /* Error page specific styles */
+
+    body.error-page {
+        margin-top: 0;
+        margin-bottom: 0;
+    }
 
 .exception-container {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    height: 100%;
+    height: 100vh; /* take up the full viewport height */
+    display: flex; /* use flexbox for layout */
+    flex-direction: column; /* stack children vertically */
+    justify-content: center; /* center children vertically */
+    align-items: center; /* center children horizontally */
 }
 
 .exception-image {
     max-width: 100%;
+    max-height: 70vh; /* 70% of the viewport height */
     height: auto;
+    display: block; /* remove any default margins or padding */
+    margin: 0 auto; /* center the image horizontally */
 }
 
 .exception-home-button-container {
@@ -48,6 +56,6 @@ body {
     transition: background-color 0.3s ease;
 }
 
-.exception-home-button:hover {
-    background-color: #aaa;
-}
+    .exception-home-button:hover {
+        background-color: #aaa;
+    }
