@@ -41,11 +41,8 @@ namespace hrvster.ApplicationServices
 			}
 
 			var companyList = companyInformation.ToList();
-			var subdomain = companyList.FirstOrDefault().Subdomain;
 
-			var companyLink = _harvesterSettingsOptions.HrvsterUrlForSubdomains;
-
-			return companyLink.Replace(GameUrlTypeReplaceInformation.ReplaceableSubdomain, subdomain);
+			return _harvesterSettingsOptions.HrvsterUrlForSubdomains;
 		}
 	}
 }

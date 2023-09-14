@@ -76,7 +76,7 @@ namespace hrvster.Web.Controllers
 
 		[HttpGet]
 		[Route("/MatchGames/Create")]
-		public async Task<IActionResult> Create(CancellationToken cancellationToken)
+		public async Task<IActionResult> Create(Guid campaignUid, CancellationToken cancellationToken)
 		{
 			_hrvsterUser = _sessionManager.GetUserInformation();
 
@@ -100,7 +100,8 @@ namespace hrvster.Web.Controllers
 				return RedirectToAction("Index");
 			}
 
-			var createNewMatchGame = BuildCreateGameModel(campaigns);
+			var createNewMatchGame = BuildCreateGameModel(campaigns, campaignUid);
+			ModelState.Remove("PromotionUid");
 
 			return View(createNewMatchGame);
 		}
@@ -364,7 +365,7 @@ namespace hrvster.Web.Controllers
 					MatchPlays = _mapper.Map<IEnumerable<MatchPlay>>(gamePlays)
 				};
 
-		private static CreateMatchGame BuildCreateGameModel(List<Campaign> campaigns)
+		private static CreateMatchGame BuildCreateGameModel(List<Campaign> campaigns, Guid campaignUid)
 			=> new CreateMatchGame()
 			{
 				Promotions = campaigns
@@ -372,7 +373,8 @@ namespace hrvster.Web.Controllers
 					.Select(a => new SelectListItem()
 					{
 						Text = $"{a.CampaignName} - {a.StartDate.ToString("d")} to {a.EndDate.ToString("d")}",
-						Value = a.CampaignUid.ToString()
+						Value = a.CampaignUid.ToString(),
+						Selected = a.CampaignUid == campaignUid
 					}),
 				StartDate = DateTime.Now.AddDays(1),
 				EndDate = DateTime.Now.AddDays(30),

@@ -54,9 +54,12 @@
 						</label>
 						<input hidden asp-for=ImageUid class="form-control w-lg-150px" />
 						<div id="image-container" class="d-flex flex-wrap">
-							@foreach(var image in Model.MatchImages)
+							@if(Model.MatchImages.Count > 0)
 							{
-								<div class="prize-image-box" data-uid="@image.Uid" style="background-image: url('@image.LocationUrl');"></div>
+								@foreach (var image in Model.MatchImages)
+								{
+									<div class="prize-image-box" data-uid="@image.Uid" style="background-image: url('@image.LocationUrl');"></div>
+								}
 							}
 						</div>
 						<span asp-validation-for="Value"></span>
@@ -81,13 +84,16 @@
 							</tr>
 						</thead>
 						<tbody class="fs-7">
-							@foreach (var prize in Model.Prizes)
+							@if(Model.Prizes?.Count > 0)
 							{
-								<tr>
-									<td>@prize.Name</td>
-									<td>@prize.Value</td>
-									<td>@prize.Quantity</td>
-								</tr>
+								@foreach (var prize in Model.Prizes)
+								{
+									<tr>
+										<td>@prize.Name</td>
+										<td>@prize.Value</td>
+										<td>@prize.Quantity</td>
+									</tr>
+								}
 							}
 						</tbody>
 					</table>

@@ -14,7 +14,10 @@
 									Promotion
 								</label>
 								<select asp-for="PromotionUid" asp-items=@Model.Promotions class="form-select form-control-lg">
-									<option value="@Guid.Empty">Please select promotion</option>
+									@if (!Model.Promotions.Any(s => s.Selected))
+									{
+										<option value="@Guid.Empty">Please select promotion</option>
+									}
 								</select>
 								<span asp-validation-for="PromotionUid"></span>
 							</div>
