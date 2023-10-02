@@ -47,6 +47,9 @@ namespace hrvster.ApplicationServices.Mails
 				{
 					switch (email.Template)
 					{
+						case EmailTemplate.AccountSubscriptionUpdateEmail:
+							await SendAccountSubscriptionUpdateEmailAsync(email);
+							break;
 						case EmailTemplate.NotifyMemberOfPick3WinEmail:
 							await SendNotifyMemberOfPick3Win(email);
 							break;
@@ -218,6 +221,36 @@ namespace hrvster.ApplicationServices.Mails
 			}
 
 			_logger.LogInformation($"{nameof(ProcessAnyUnsentEmails)} processing completed.");
+		}
+
+		private async Task SendAccountSubscriptionUpdateEmailAsync(Email email)
+		{
+			var request = new AccountSubscriptionUpdateEmailRequest
+			{
+				EmailTemplate = EmailTemplate.AccountSubscriptionUpdateEmail,
+				EmailAddress = email.EmailAddress,
+				CurrentAccountSubscriptionStatus = email.Parameters[EmailParameters.CurrentAccountSubscriptionStatus],
+				NewAccountSubscriptionStatus = email.Parameters[EmailParameters.NewAccountSubscriptionStatus]
+			};
+
+			var mailText = GetMailText(request.EmailTemplate);
+			var type = request.GetType();
+
+			foreach (var f in type.GetProperties(BindingFlags.Instance | BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public))
+			{
+				mailText = mailText.Replace($"[{f.Name}]", f.GetValue(request).ToString());
+			}
+
+			await SendEmailAsync(
+				new MailRequest
+				{
+					ToEmailAddress = request.EmailAddress,
+					Body = mailText,
+					Subject = $"Your subscription status changed!"
+				}
+			);
+
+			await _mailRepository.UpdateAsSentAsync(email);
 		}
 
 		private async Task SendNotifyMemberOfPick3Win(Email email)

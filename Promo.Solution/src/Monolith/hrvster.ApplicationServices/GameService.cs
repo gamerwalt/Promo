@@ -194,7 +194,9 @@ namespace hrvster.ApplicationServices
 				{
 					Name = matchGame.Name,
 					StartDate = matchGame.StartDate,
+					StartDateUtc = matchGame.StartDateUtc,
 					EndDate = matchGame.EndDate,
+					EndDateUtc = matchGame.EndDateUtc,
 					Id = matchGame.Id,
 					Uid = uid,
 					CampaignUid = matchGame.CampaignUid
@@ -220,7 +222,9 @@ namespace hrvster.ApplicationServices
 				{
 					Name = sweepstake.Name,
 					StartDate = sweepstake.StartDate,
+					StartDateUtc = sweepstake.StartDateUtc,
 					EndDate = sweepstake.EndDate,
+					EndDateUtc = sweepstake.EndDateUtc,
 					Id = sweepstake.SweepId,
 					Uid = uid,
 					CampaignUid = sweepstake.Campaign.CampaignUid

@@ -1,30 +1,10 @@
-﻿using AutoMapper;
-using hrvster.ApplicationServices;
-using hrvster.ApplicationServices.Accounts;
-using hrvster.ApplicationServices.Common;
-using hrvster.ApplicationServices.Communications;
+﻿using hrvster.ApplicationServices;
 using hrvster.ApplicationServices.Extensions.LogExtensions;
-using hrvster.ApplicationServices.MatchGames;
-using hrvster.ApplicationServices.Reporting;
-using hrvster.ApplicationServices.Sweepstakes;
 using hrvster.Core.Authentication;
 using hrvster.Core.Clients;
-using hrvster.Exceptions;
-using hrvster.Infrastructure.Accounts;
-using hrvster.Infrastructure.Harvester;
-using hrvster.Infrastructure.MatchGames;
-using hrvster.Infrastructure.Reporting;
 using hrvster.Models;
-using hrvster.Models.Options;
-using hrvster.Template1.Web.Models;
 using hrvster.Templates.Core.Common;
-using hrvster.Templates.Infrastructure.Customizations;
-using hrvster.Templates.Models.Members;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 
 namespace hrvster.Template1.Web.Controllers
 {
@@ -33,72 +13,18 @@ namespace hrvster.Template1.Web.Controllers
 		private readonly ILogger _logger;
 		private readonly IGameService _gameService;
 		private readonly ISessionManager _sessionManager;
-		private readonly IMemberProfileRepository _memberProfileRepository;
-		private readonly IMemberRepository _memberRepository;
-		private readonly IMapper _mapper;
-		private readonly ISweepstakesService _sweepStakeService;
-		private readonly IPlaySweepstakeService _playSweepstakeService;
 		private readonly ITwitterHttpService _twitterHttpService;
-		private readonly IBlacklistedUserRepository _blackListedUserRepository;
-		private readonly IMatchGamePlayReportingRepository _matchGamePlayReportingRepository;
-		private readonly IMatchPlayRulesRepository _matchPlayRulesRepository;
-		private readonly ICampaignService _campaignService;
-		private readonly IAccountsService _accountsService;
-		private readonly IMatchGameplayService _matchGamePlayService;
-		private readonly HarvesterSettingsOptions _harvesterSettings;
-		private readonly IMatchGamesService _matchGameService;
-		private readonly IMatchGameBoardService _gameBoardService;
-		private readonly IReportingService _reportingService;
-		private readonly IMatchGameRulesRepository _matchGameRulesRepository;
-		private readonly IProfilesRepository _profilesRepository;
-		private readonly ICommunicationService _communicationService;
 
 		public GamesController(
 			ILoggerFactory loggerFactory,
 			IGameService gameService,
 			ISessionManager sessionManager,
-			IMemberProfileRepository memberProfileRepository,
-			IMemberRepository memberRepository,
-			IMapper mapper,
-			ISweepstakesService sweepstakesService,
-			IPlaySweepstakeService playSweepstakeService,
-			ITwitterHttpService twitterHttpService,
-			IBlacklistedUserRepository blacklistedUserRepository,
-			IMatchGamePlayReportingRepository matchGamePlayReportingRepository,
-			ICampaignService campaignService,
-			IMatchPlayRulesRepository matchPlayRulesRepository,
-			IAccountsService accountsService,
-			IMatchGameplayService matchGameplayService,
-			HarvesterSettingsOptions hrvsterSettings,
-			IMatchGamesService matchGameService,
-			IMatchGameBoardService gameBoardService,
-			IReportingService reportingService,
-			IMatchGameRulesRepository matchGameRulesRepository,
-			IProfilesRepository profilesRepository,
-			ICommunicationService communicationService)
+			ITwitterHttpService twitterHttpService)
 		{
 			_logger = loggerFactory.CreateLogger<GamesController>();
 			_gameService = gameService;
 			_sessionManager = sessionManager;
-			_memberProfileRepository = memberProfileRepository;
-			_memberRepository = memberRepository;
-			_mapper = mapper;
-			_sweepStakeService = sweepstakesService;
-			_playSweepstakeService = playSweepstakeService;
 			_twitterHttpService = twitterHttpService;
-			_blackListedUserRepository = blacklistedUserRepository;
-			_matchGamePlayReportingRepository = matchGamePlayReportingRepository;
-			_campaignService = campaignService;
-			_matchPlayRulesRepository = matchPlayRulesRepository;
-			_accountsService = accountsService;
-			_matchGamePlayService = matchGameplayService;
-			_harvesterSettings = hrvsterSettings;
-			_matchGameService = matchGameService;
-			_gameBoardService = gameBoardService;
-			_reportingService = reportingService;
-			_matchGameRulesRepository = matchGameRulesRepository;
-			_profilesRepository = profilesRepository;
-			_communicationService = communicationService;
 		}
 
 		[HttpGet("Games")]

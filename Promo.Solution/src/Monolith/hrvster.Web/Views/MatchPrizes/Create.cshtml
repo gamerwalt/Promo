@@ -3,7 +3,7 @@
 	ViewData["Title"] = $"Create Prize for {Model.MatchGameName}";
 }
 <div class="card card-bordered">
-	<form 
+	<form
 		asp-controller="MatchPrizes" 
 		asp-action="Create"
 		asp-route-Uid="@Model.MatchGameUid"
@@ -62,7 +62,7 @@
 								}
 							}
 						</div>
-						<span asp-validation-for="Value"></span>
+						<span asp-validation-for="ImageUid"></span>
 					</div>
 				</div>
 			</div>

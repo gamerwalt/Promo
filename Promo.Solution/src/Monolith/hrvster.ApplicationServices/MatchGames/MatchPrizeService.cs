@@ -72,7 +72,7 @@ namespace hrvster.ApplicationServices.MatchGames
 
 			if (allPrizes.Count == 0) return 0;
 
-			return allPrizes.Sum(p => p.Quantity);
+			return allPrizes.Where(p => !p.IsFiller).Sum(p => p.Quantity);
 		}
 
 		public async Task<MatchPrize> GetPrizeFromBoardAsync(Guid gameboardUid, CancellationToken cancellationToken)

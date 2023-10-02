@@ -50,7 +50,8 @@
 		DrawCompleted,
 		SweepstakeMaxEntries,
 		NotifyAccountOfUserWinningPick3WinEmail,
-		NotifyMemberOfPick3WinEmail
+		NotifyMemberOfPick3WinEmail,
+		AccountSubscriptionUpdateEmail
 	}
 
 	public enum CampaignTypeCode

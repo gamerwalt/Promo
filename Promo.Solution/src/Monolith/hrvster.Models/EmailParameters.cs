@@ -29,5 +29,8 @@
 		public static string GameplayUid = "GameplayUid";
 		public static string PrizeName = "PrizeName";
 		public static string PrizeValue = "PrizeValue";
+		public static string CurrentAccountSubscriptionStatus = "CurrentAccountSubscriptionStatus";
+		public static string NewAccountSubscriptionStatus = "NewAccountSubscriptionStatus";
+		public static string PendingHours = "PendingHours";
 	}
 }

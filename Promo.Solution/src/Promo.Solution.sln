@@ -174,7 +174,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ConsoleHelper", "ConsoleHel
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Helper", "ConsoleHelper\Helper\Helper.csproj", "{EB639AEA-2612-47C8-85FD-69A08C2EA7B8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "hrvster.Exceptions", "Monolith\hrvster.Exceptions\hrvster.Exceptions.csproj", "{C2BA2F67-AD57-45D4-883C-473E4E99DEC4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "hrvster.Exceptions", "Monolith\hrvster.Exceptions\hrvster.Exceptions.csproj", "{C2BA2F67-AD57-45D4-883C-473E4E99DEC4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "hrvster.PaymentPendingChecker.Service", "Monolith\hrvster.PaymentPendingChecker.Service\hrvster.PaymentPendingChecker.Service.csproj", "{989AF818-7067-453E-B92E-02331EFE314B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -314,6 +316,10 @@ Global
 		{C2BA2F67-AD57-45D4-883C-473E4E99DEC4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C2BA2F67-AD57-45D4-883C-473E4E99DEC4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C2BA2F67-AD57-45D4-883C-473E4E99DEC4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{989AF818-7067-453E-B92E-02331EFE314B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{989AF818-7067-453E-B92E-02331EFE314B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{989AF818-7067-453E-B92E-02331EFE314B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{989AF818-7067-453E-B92E-02331EFE314B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -376,6 +382,7 @@ Global
 		{A18E8A15-AB58-4244-92E9-F57DA316AA1F} = {B71190C8-5608-4FFE-8C71-DA20A334CFC6}
 		{EB639AEA-2612-47C8-85FD-69A08C2EA7B8} = {A18E8A15-AB58-4244-92E9-F57DA316AA1F}
 		{C2BA2F67-AD57-45D4-883C-473E4E99DEC4} = {71429F9B-A81B-4A12-98DD-505C0F9FDB34}
+		{989AF818-7067-453E-B92E-02331EFE314B} = {71429F9B-A81B-4A12-98DD-505C0F9FDB34}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {94B46B7F-1545-465E-863A-AAD0C58A8C0F}

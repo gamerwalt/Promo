@@ -3,6 +3,7 @@ using hrvster.Models;
 using hrvster.Models.Subscriptions;
 using MySqlConnector;
 using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Threading.Tasks;
 
@@ -16,8 +17,9 @@ namespace hrvster.Infrastructure.Subscriptions
 		AccountSubscription GetAccountSubscription(Guid accountUid);
 		Task<AccountSubscription> GetAccountSubscriptionAsync(Guid accountUid);
 		Task<AccountSubscription> GetAccountSubscriptionByEmailAsync(string email);
+		Task<IEnumerable<AccountSubscription>> GetAccountSubscriptionsByStatusAsync(SubscriptionStatus status, int pendingHours);
 		Task<AccountSubscription> GetAsync(Guid subscriptionUid);
-		Task UpdateAccountSubscriptionStatusAsync(Guid subscriptionUid, SubscriptionStatus subscribed);
+		Task UpdateAccountSubscriptionStatusAsync(Guid subscriptionUid, SubscriptionStatus status);
 		Task UpdateNewDatesAsync(Guid subscriptionUid, DateTime startDate, DateTime startDateUtc, DateTime endDate, DateTime endDateUtc);
 	}
 
@@ -128,6 +130,59 @@ namespace hrvster.Infrastructure.Subscriptions
 			}
 
 			return account;
+		}
+
+		public async Task<IEnumerable<AccountSubscription>> GetAccountSubscriptionsByStatusAsync(
+			SubscriptionStatus status, 
+			int pendingHours)
+		{
+			var accountSubscriptions = new List<AccountSubscription>();
+
+			using(var conn = new MySqlConnection(_database.GetConnectionString()))
+			{
+				var command = conn.CreateCommand();
+				command.CommandText = "account_subscriptions_get_by_status";
+				command.CommandType = CommandType.StoredProcedure;
+				command
+					.AddParameter("subscriptionStatus", status.ToString())
+					.AddParameter("pendingHours", pendingHours);
+
+				await conn.OpenAsync();
+				using var reader = await command.ExecuteReaderAsync();
+				while (await reader.ReadAsync())
+				{
+					accountSubscriptions.Add(CreateAccountSubscriptionWithAccountFrom(reader));
+				}
+			}
+
+			return accountSubscriptions;
+		}
+
+		private AccountSubscription CreateAccountSubscriptionWithAccountFrom(MySqlDataReader reader)
+		{
+			return new AccountSubscription
+			{
+				SubscriptionId = reader.GetInt32("subscription_id"),
+				SubscriptionUid = reader.GetGuid("subscription_uid"),
+				Account = new Models.Account
+				{
+					AccountId = reader.GetInt32("account_id"),
+					AccountUid = reader.GetGuid("account_uid"),
+					EmailAddress = reader.GetStringValue("email_address"),
+					FirstName = reader.GetStringValue("first_name"),
+					LastName = reader.GetStringValue("last_name"),
+					PhoneNumber = reader.GetStringValue("phone_number")
+				},
+				Plan = new Plan
+				{
+					PlanId = reader.GetInt32("plan_id"),
+				},
+				StartDate = reader.GetDateTime("start_date"),
+				StartDateUtc = reader.GetDateTime("start_date_utc"),
+				EndDate = reader.GetDateTime("end_date"),
+				EndDateUtc = reader.GetDateTime("end_date_utc"),
+				SubscriptionStatus = Enum.Parse<SubscriptionStatus>(reader.GetString("subscription_status"))
+			};
 		}
 
 		public async Task<AccountSubscription> GetAccountSubscriptionByEmailAsync(string email)

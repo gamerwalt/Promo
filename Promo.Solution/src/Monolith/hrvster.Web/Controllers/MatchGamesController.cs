@@ -354,7 +354,9 @@ namespace hrvster.Web.Controllers
 						WinnableBoards = matchGame.NumberOfWinnableBoards,
 						WinProbability = matchGame.WinProbability,
 						StartDate = matchGame.StartDate,
+						StartDateUtc = matchGame.StartDateUtc,
 						EndDate = matchGame.EndDate,
+						EndDateUtc = matchGame.EndDateUtc,
 						IsGenerated = matchGame.HasBeenGenerated,
 						GenerateBoardDate = matchGame.GenerateBoardDate
 					},

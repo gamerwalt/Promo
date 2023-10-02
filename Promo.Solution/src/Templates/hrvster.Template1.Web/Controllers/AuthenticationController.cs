@@ -141,12 +141,12 @@ public class AuthenticationController : Controller
 	{
 		var gameDetails = await _gameService.GetGameDetailsAsync(Enum.Parse<GameTypesEnum>(gameType), gameUid);
 
-		if (DateTime.UtcNow > gameDetails.EndDate)
+		if (DateTime.UtcNow > gameDetails.EndDateUtc)
 		{
 			return ErrorRedirect("Game has ended.", StatusCodes.Status400BadRequest);
 		}
 
-		if (DateTime.UtcNow < gameDetails.StartDate)
+		if (DateTime.UtcNow < gameDetails.StartDateUtc)
 		{
 			return ErrorRedirect("Game has not started.", StatusCodes.Status400BadRequest);
 		}

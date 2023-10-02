@@ -10,5 +10,7 @@ namespace hrvster.Models
 		public DateTime StartDate { get; set; }
 		public DateTime EndDate { get; set; }
 		public Guid CampaignUid { get; set; }
+		public DateTime StartDateUtc { get; set; }
+		public DateTime EndDateUtc { get; set; }
 	}
 }

@@ -79,14 +79,14 @@ public class SweepstakesController : Controller
 				return ErrorRedirect("Unable to locate sweepstakes game.", StatusCodes.Status404NotFound);
 			}
 
-			if (DateTime.UtcNow > sweepGame.EndDate)
+			if (DateTime.UtcNow > sweepGame.EndDateUtc)
 			{
 				_logger.LogWarning("Game has ended.");
 
 				return ErrorRedirect("Game has ended.", StatusCodes.Status400BadRequest);
 			}
 
-			if (DateTime.UtcNow < sweepGame.StartDate)
+			if (DateTime.UtcNow < sweepGame.StartDateUtc)
 			{
 				_logger.LogWarning("Game has not started.");
 
@@ -137,14 +137,14 @@ public class SweepstakesController : Controller
 				return ErrorRedirect("Unable to locate sweepstakes game.", StatusCodes.Status404NotFound);
 			}
 
-			if (DateTime.UtcNow > gameDetails.EndDate)
+			if (DateTime.UtcNow > gameDetails.EndDateUtc)
 			{
 				_logger.LogWarning("Game has ended.");
 
 				return ErrorRedirect("Game has ended.", StatusCodes.Status400BadRequest);
 			}
 
-			if (DateTime.UtcNow < gameDetails.StartDate)
+			if (DateTime.UtcNow < gameDetails.StartDateUtc)
 			{
 				_logger.LogWarning("Game has not started.");
 
@@ -229,14 +229,14 @@ public class SweepstakesController : Controller
 				return ErrorRedirect("Unable to locate sweepstakes game.", StatusCodes.Status404NotFound);
 			}
 
-			if (DateTime.UtcNow > gameDetails.EndDate)
+			if (DateTime.UtcNow > gameDetails.EndDateUtc)
 			{
 				_logger.LogWarning("Game has ended.");
 
 				return ErrorRedirect("Game has ended.", StatusCodes.Status400BadRequest);
 			}
 
-			if (DateTime.UtcNow < gameDetails.StartDate)
+			if (DateTime.UtcNow < gameDetails.StartDateUtc)
 			{
 				_logger.LogWarning("Game has not started.");
 
@@ -365,14 +365,14 @@ public class SweepstakesController : Controller
 			return ErrorRedirect("Unable to locate sweepstakes game.", StatusCodes.Status404NotFound);
 		}
 
-		if (DateTime.UtcNow > gameDetails.EndDate)
+		if (DateTime.UtcNow > gameDetails.EndDateUtc)
 		{
 			_logger.LogWarning("Game has ended.");
 
 			return ErrorRedirect("Game has ended.", StatusCodes.Status400BadRequest);
 		}
 
-		if (DateTime.UtcNow < gameDetails.StartDate)
+		if (DateTime.UtcNow < gameDetails.StartDateUtc)
 		{
 			_logger.LogWarning("Game has not started.");
 

@@ -139,3 +139,12 @@ https://twitter.com/i/oauth2/authorize?response_type=code&client_id=OHp1RmFrTjla
 
 
 https://play.hrvster.local:7013/Games/Pick3MatchGame/1359c0d3-08f2-4c44-936a-71222e27b378?externalClient=Twitter&ruleUid=078781a9-370f-47f5-9269-e64410a48e1c
+
+
+No more stale, one-way social media updates. 
+With our platform, you can transform your tweets into interactive experiences. 
+Whether it's a post about your latest product or a post showcasing your services, 
+convert these into exciting games like Sweepstakes or Pick 3. 
+Your audience can interact directly through the tweet, all while enjoying a gamified experience.
+
+

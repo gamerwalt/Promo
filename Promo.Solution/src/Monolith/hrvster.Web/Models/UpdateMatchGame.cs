@@ -14,18 +14,20 @@ namespace hrvster.Web.Models
 		public int WinnableBoards { get; set; }
 		public int WinProbability { get; set; }
 		public DateTime StartDate { get; set; }
+		public DateTime StartDateUtc { get; set; }
 		public DateTime EndDate { get; set; }
+		public DateTime EndDateUtc { get; set; }
 		public DateTime GenerateBoardDate { get; set; }
 		public IEnumerable<SelectListItem> Promotions { get; set; }
 
 		public bool IsActive()
 		{
-			return DateTime.Now >= StartDate && DateTime.Now <= EndDate;
+			return DateTime.UtcNow >= StartDateUtc && DateTime.UtcNow <= EndDateUtc;
 		}
 
 		public bool WillBeInProgress()
 		{
-			return DateTime.Now <= StartDate;
+			return DateTime.UtcNow <= StartDateUtc;
 		}
 
 		public bool IsGenerated { get; set; }

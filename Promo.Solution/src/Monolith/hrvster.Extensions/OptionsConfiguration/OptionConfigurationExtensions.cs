@@ -48,5 +48,13 @@ namespace hrvster.Extensions.OptionsConfiguration
 					.Configure<HarvesterSettingsOptions>(configuration)
 					.Configure<HarvesterSettingsOptions>(configuration.GetSection(HarvesterSettingsOptions.SectionName))
 					.AddTransient(s => s.GetService<IOptions<HarvesterSettingsOptions>>().Value);
+
+		public static IServiceCollection AddPaymentPendingConfigurationOption(
+			this IServiceCollection services,
+			IConfiguration configuration)
+				=> services
+					.Configure<PaymentPendingOptions>(configuration)
+					.Configure<PaymentPendingOptions>(configuration.GetSection(PaymentPendingOptions.SectionName))
+					.AddTransient(s => s.GetService<IOptions<PaymentPendingOptions>>().Value);
 	}
 }
