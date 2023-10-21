@@ -230,7 +230,8 @@ namespace hrvster.ApplicationServices.Mails
 				EmailTemplate = EmailTemplate.AccountSubscriptionUpdateEmail,
 				EmailAddress = email.EmailAddress,
 				CurrentAccountSubscriptionStatus = email.Parameters[EmailParameters.CurrentAccountSubscriptionStatus],
-				NewAccountSubscriptionStatus = email.Parameters[EmailParameters.NewAccountSubscriptionStatus]
+				NewAccountSubscriptionStatus = email.Parameters[EmailParameters.NewAccountSubscriptionStatus],
+				PendingHours = email.Parameters[EmailParameters.PendingHours],
 			};
 
 			var mailText = GetMailText(request.EmailTemplate);

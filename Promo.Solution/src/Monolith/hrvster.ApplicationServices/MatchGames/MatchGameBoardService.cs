@@ -116,16 +116,21 @@ namespace hrvster.ApplicationServices.MatchGames
 
 				_logger.LogInformation("Generating winnable boards.");
 				for (var i = 0; i < numberOfWinnableBoards; i++)
+				{
 					generatedBoards.Add(GenerateBoard(matchGame, matchGame.WinProbability, availablePrizes, true));
+				}
 
 				_logger.LogInformation("Generating loss boards.");
 				for (var i = numberOfWinnableBoards; i < numberOfBoards; i++)
+				{
 					generatedBoards.Add(GenerateBoard(matchGame, 0, availablePrizes, false));
+				}
 
 				_logger.LogInformation("Shuffling boards.");
 				generatedBoards = generatedBoards.OrderBy(x => Guid.NewGuid()).ToList();
 
 				_logger.LogInformation("Saving boards.");
+
 				await SaveBoardsAsync(matchGame, generatedBoards, cancellationToken);
 
 				_logger.LogInformation("Generating boards finished.");

@@ -5,9 +5,7 @@ using hrvster.Extensions.Configuration;
 using hrvster.Extensions.OptionsConfiguration;
 using hrvster.Infrastructure;
 using hrvster.Infrastructure.Facebook;
-using hrvster.Models.Options;
 using MediatR;
-using Microsoft.AspNetCore.Authentication.Facebook;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -26,10 +24,15 @@ namespace hrvster.Services
 			//ASPNETCORE_ENVIRONMENT=Development
 			var env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
 
+			if (string.IsNullOrEmpty(env))
+			{
+				env = Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT");
+			}
+
 			Configuration = new ConfigurationBuilder()
 				.SetBasePath(Directory.GetCurrentDirectory())
 				.AddJsonFile("appsettings.json")
-				.AddJsonFile($"appsettings.{env}.json", optional: true, reloadOnChange: true)
+				.AddJsonFile($"appsettings.{env ?? "Development"}.json", optional: true, reloadOnChange: true)
 				.Build();
 
 			Log.Logger = new LoggerConfiguration()

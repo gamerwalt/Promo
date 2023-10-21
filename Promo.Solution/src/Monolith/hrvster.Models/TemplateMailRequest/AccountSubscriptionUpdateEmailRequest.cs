@@ -6,5 +6,6 @@
 		public string EmailAddress { get; set; }
 		public string CurrentAccountSubscriptionStatus { get; set; }
 		public string NewAccountSubscriptionStatus { get; set; }
+		public string PendingHours { get; set; }
 	}
 }

@@ -3,7 +3,12 @@
     ViewData["Title"] = "Play Pick 3 Match Game";
 }
 <link rel="stylesheet" href="~/css/gameboard.css">
-
+<div style="text-align: center;">
+    <p class="fw-bold"><strong>How to Play</strong></p>
+    <div class="text-info fw-bold">Select 3 Boxes</div>
+    <div class="text-info fw-bold">Change your mind? Click the box again to unselect</div>
+    <div class="text-info fw-bold">Happy with your 3? Click the submit button to check</div>
+</div>
 <form formnovalidate 
     asp-action="Play"
     asp-route-Uid="@Model.GameUid"

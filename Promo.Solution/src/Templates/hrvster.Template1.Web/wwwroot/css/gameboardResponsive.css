@@ -1,0 +1,191 @@
+﻿* {
+    box-sizing: border-box;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    font-family: sans-serif;
+    background-image: url('/images/Pick3Background.jpg');
+    background-size: cover;
+    background-position: center;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+}
+
+.gameboard {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-gap: 5px;
+    width: 90%;
+    max-width: 400px; /* Setting a maximum width for larger screens */
+    background-color: black;
+    border: 1px solid white;
+    padding: 1em;
+    position: relative;
+    z-index: 1;
+}
+
+.tile {
+    background-color: lightblue;
+    cursor: pointer;
+    width: calc(33.33% - 5px); /* Width for each tile minus the grid-gap */
+    position: relative;
+    border: 1px solid #000;
+    display: block;
+    overflow: hidden; /* hides anything that goes outside the tile dimensions */
+}
+
+    .tile::before { /* Creating a pseudo-element to maintain the square aspect ratio */
+        content: "";
+        display: block;
+        padding-bottom: 100%;
+    }
+
+.tile-content { /* Optional: if you have content inside the tile, wrap it with a div having this class */
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.tile::after {
+    content: "";
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    opacity: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.tile.selected::after {
+    opacity: 1;
+}
+
+
+.gameboard .button-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 20px;
+    gap: 1em;
+    width: 100%;
+    justify-content: center;
+}
+
+.btn-submit, .btn-reset {
+    padding: 10px 20px;
+    border: none;
+    background-color: #007BFF;
+    color: #FFF;
+    cursor: pointer;
+    width: 100%; /* Full width for smaller screens */
+}
+
+/* Start of Media Queries */
+@media (min-width: 576px) {
+    .btn-submit, .btn-reset {
+        width: auto; /* Default width for larger screens */
+    }
+}
+
+/* Continuing the media query adjustments in the next part... */
+
+.btn-reset {
+    background-color: #dc3545;
+}
+
+    .btn-submit:hover, .btn-reset:hover {
+        opacity: 0.8;
+    }
+
+.info-panel {
+    width: 90%;
+    margin-top: 1em;
+    padding: 1em;
+    background-color: rgba(255, 255, 255, 0.8);
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+}
+
+    .info-panel h2 {
+        margin-top: 0;
+    }
+
+.game-result {
+    font-size: 1.5em;
+    font-weight: bold;
+    color: #007BFF;
+}
+
+.overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 2;
+}
+
+    .overlay.active {
+        display: flex;
+    }
+
+.overlay-content {
+    color: white;
+    font-size: 2em;
+    text-align: center;
+    padding: 2em;
+    border-radius: 5px;
+    background-color: rgba(0, 0, 0, 0.7);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+}
+
+/* Additional Media Queries */
+@media (min-width: 768px) { /* Adjustments for tablets and above */
+    .gameboard {
+        max-width: 600px;
+    }
+
+    .info-panel, .overlay-content {
+        font-size: 1.2em;
+    }
+}
+
+@media (min-width: 992px) { /* Adjustments for desktops and above */
+    .gameboard {
+        max-width: 800px;
+    }
+
+    .info-panel, .overlay-content {
+        font-size: 1.5em;
+    }
+}
+
+@media (min-width: 1200px) { /* Adjustments for large desktops */
+    .gameboard {
+        max-width: 1000px;
+    }
+
+    .info-panel, .overlay-content {
+        font-size: 1.8em;
+    }
+}
