@@ -9,10 +9,12 @@
     <PackageReference Include="Microsoft.AspNetCore.Authentication.Facebook" Version="6.0.20" />
     <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.2.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.3" />
+    <PackageReference Include="Stripe.net" Version="43.8.0" />
     <PackageReference Include="TweetinviAPI" Version="5.0.4" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\hrvster.Core.Notifications\hrvster.Core.Notifications.csproj" />
     <ProjectReference Include="..\hrvster.Infrastructure\hrvster.Infrastructure.csproj" />
     <ProjectReference Include="..\hrvster.Models\hrvster.Models.csproj" />
   </ItemGroup>

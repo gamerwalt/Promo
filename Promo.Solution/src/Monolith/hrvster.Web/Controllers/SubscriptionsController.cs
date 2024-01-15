@@ -4,12 +4,14 @@ using hrvster.Core.Authentication;
 using hrvster.Core.Requests.WebRequests.Subscriptions;
 using hrvster.Models;
 using hrvster.Models.Extensions;
+using hrvster.Models.Options;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using NToastNotify;
 using System;
 using System.Threading.Tasks;
+using Tweetinvi.Core.Events;
 
 namespace hrvster.Web.Controllers
 {
@@ -22,6 +24,7 @@ namespace hrvster.Web.Controllers
 		private readonly IToastNotification _notificationService;
 		private readonly ISessionManager _sessionManager;
 		private readonly IAccountsService _accountsService;
+		private readonly PaymentProviderOptions _paymentProviderOption;
 
 		private HrvsterUser _hrvsterUser;
 
@@ -31,7 +34,8 @@ namespace hrvster.Web.Controllers
 			ISubscriptionService subscriptionService,
 			IToastNotification notificationService,
 			ISessionManager sessionManager,
-			IAccountsService accountsService)
+			IAccountsService accountsService,
+			PaymentProviderOptions paymentProviderOptions)
 		{
 			_logger = loggerFactory.CreateLogger<SubscriptionsController>();
 			_mediator = mediator;
@@ -39,6 +43,7 @@ namespace hrvster.Web.Controllers
 			_notificationService = notificationService;
 			_sessionManager = sessionManager;
 			_accountsService = accountsService;
+			_paymentProviderOption = paymentProviderOptions;
 		}
 
 		public async Task<IActionResult> Index(string subscriptionStatus)
@@ -51,7 +56,18 @@ namespace hrvster.Web.Controllers
 		{
 			var plans = await _mediator.Send(new GetPlansRequest());
 
-			return View(plans);
+			var paymentClient = Enum.Parse<PaymentClient>(_paymentProviderOption.PaymentProvider);
+
+			if (paymentClient == PaymentClient.Flutterwave)
+			{
+				return View(plans);
+			}
+			else if (paymentClient == PaymentClient.Stripe)
+			{
+				return View();
+			}
+
+			return View();
 		}
 
 		[Route("/Subscriptions/EndOfSubscription")]

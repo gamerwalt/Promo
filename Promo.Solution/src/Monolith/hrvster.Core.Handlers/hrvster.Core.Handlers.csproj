@@ -12,6 +12,7 @@
     <PackageReference Include="FirebaseStorage.net" Version="1.0.3" />
     <PackageReference Include="MediatR" Version="11.1.0" />
     <PackageReference Include="NToastNotify" Version="8.0.0" />
+    <PackageReference Include="Stripe.net" Version="43.8.0" />
     <PackageReference Include="WindowsAzure.Storage" Version="9.3.3" />
   </ItemGroup>
 
@@ -19,6 +20,7 @@
     <ProjectReference Include="..\hrvster.ApplicationServices\hrvster.ApplicationServices.csproj" />
     <ProjectReference Include="..\hrvster.Core.Requests\hrvster.Core.Requests.csproj" />
     <ProjectReference Include="..\hrvster.Core\hrvster.Core.csproj" />
+    <ProjectReference Include="..\hrvster.Exceptions\hrvster.Exceptions.csproj" />
     <ProjectReference Include="..\hrvster.Games.Match.Models\hrvster.Games.Match.Models.csproj" />
   </ItemGroup>
 

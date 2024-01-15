@@ -1363,6 +1363,7 @@
     <PackageReference Include="Serilog.Settings.Configuration" Version="3.4.0" />
     <PackageReference Include="Serilog.Sinks.Console" Version="4.1.0" />
     <PackageReference Include="Serilog.Sinks.Loggly" Version="5.3.0" />
+    <PackageReference Include="Stripe.net" Version="43.8.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -1371,6 +1372,7 @@
     <ProjectReference Include="..\hrvster.Core.Handlers\hrvster.Core.Handlers.csproj" />
     <ProjectReference Include="..\hrvster.Core.Requests\hrvster.Core.Requests.csproj" />
     <ProjectReference Include="..\hrvster.Core\hrvster.Core.csproj" />
+    <ProjectReference Include="..\hrvster.Exceptions\hrvster.Exceptions.csproj" />
     <ProjectReference Include="..\hrvster.Extensions\hrvster.Extensions.csproj" />
     <ProjectReference Include="..\hrvster.Infrastructure\hrvster.Infrastructure.csproj" />
   </ItemGroup>

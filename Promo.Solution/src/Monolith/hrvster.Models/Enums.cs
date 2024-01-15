@@ -24,6 +24,7 @@
 	public enum PaymentClient
 	{
 		Flutterwave,
+		Stripe,
 		Paystack,
 		Okra
 	}
@@ -163,5 +164,12 @@
 	{
 		Sweeps,
 		MatchGames
+	}
+
+	public enum StripeEventStatus
+	{
+		New,
+		Processing,
+		Processed
 	}
 }

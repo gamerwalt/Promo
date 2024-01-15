@@ -19,6 +19,7 @@ using Microsoft.Extensions.Hosting;
 using Serilog;
 using System;
 using System.Net;
+using Stripe;
 
 namespace hrvster.Web
 {
@@ -91,13 +92,13 @@ namespace hrvster.Web
 				.AddMatchGameService()
 				.AddMatchEngineServices()
 				.AddCampaignService()
-				.AddPaymentServices(Configuration)
 				.AddHttpClient()
 				.AddFlutterwaveHttpClient()
 				.AddSignatureUtility()
 				.AddCacheService()
 				.AddReportingService()
 				.AddPostSchedulers()
+				.AddPaymentPlanProvider(Configuration)
 				.AddProvidersService();
 
 			services.AddHttpClient<IRebrandlyService, RebrandlyService>();
@@ -105,6 +106,11 @@ namespace hrvster.Web
 			services.AddTwitterHttpService(Configuration);
 
 			services.AddTransient<IFileUploaderService, FileUploaderService>();
+
+			var stripeOptions = new StripeOptions();
+			Configuration.Bind(StripeOptions.SectionName, stripeOptions);
+
+			StripeConfiguration.ApiKey = stripeOptions.SecretKey;
 		}
 
 		private void AddValidators(IServiceCollection services)

@@ -56,5 +56,13 @@ namespace hrvster.Extensions.OptionsConfiguration
 					.Configure<PaymentPendingOptions>(configuration)
 					.Configure<PaymentPendingOptions>(configuration.GetSection(PaymentPendingOptions.SectionName))
 					.AddTransient(s => s.GetService<IOptions<PaymentPendingOptions>>().Value);
+
+		public static IServiceCollection AddPaymentPlanProvider(
+			this IServiceCollection services,
+			IConfiguration configuration)
+				=> services
+					.Configure<PaymentProviderOptions>(configuration)
+					.Configure<PaymentProviderOptions>(configuration.GetSection(PaymentProviderOptions.SectionName))
+					.AddTransient(s => s.GetService<IOptions<PaymentProviderOptions>>().Value);
 	}
 }

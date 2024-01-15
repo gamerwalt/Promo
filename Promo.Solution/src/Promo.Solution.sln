@@ -176,7 +176,20 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Helper", "ConsoleHelper\Hel
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "hrvster.Exceptions", "Monolith\hrvster.Exceptions\hrvster.Exceptions.csproj", "{C2BA2F67-AD57-45D4-883C-473E4E99DEC4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "hrvster.PaymentPendingChecker.Service", "Monolith\hrvster.PaymentPendingChecker.Service\hrvster.PaymentPendingChecker.Service.csproj", "{989AF818-7067-453E-B92E-02331EFE314B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "hrvster.PaymentPendingChecker.Service", "Monolith\hrvster.PaymentPendingChecker.Service\hrvster.PaymentPendingChecker.Service.csproj", "{989AF818-7067-453E-B92E-02331EFE314B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DockerTests", "DockerTests", "{A6C98869-6DB5-4DC6-8C78-45F00E0A9695}"
+	ProjectSection(SolutionItems) = preProject
+		..\tests\Utilities\appsettings.test.json = ..\tests\Utilities\appsettings.test.json
+	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "hrvster.Web.Integration.Tests", "..\tests\DockerTests\hrvster.Web.Integration.Tests\hrvster.Web.Integration.Tests.csproj", "{A2E878F4-12CA-444B-85BA-CB00D3518AC1}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "hrvster.Web.TestUtilities", "..\tests\DockerTests\hrvster.Web.Integration.New.Tests\hrvster.Web.TestUtilities.csproj", "{67B32542-6133-419A-99F3-1309B932E18F}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "hrvster.Stripe.EventProcessor.Service", "Monolith\hrvster.Stripe.EventProcessor.Service\hrvster.Stripe.EventProcessor.Service.csproj", "{394246EF-EB8B-449F-8420-FA34EE37508B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "hrvster.Core.Notifications", "Monolith\hrvster.Core.Notifications\hrvster.Core.Notifications.csproj", "{213B163C-7DBD-4538-AF4B-FE4BB387CD5B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -320,6 +333,22 @@ Global
 		{989AF818-7067-453E-B92E-02331EFE314B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{989AF818-7067-453E-B92E-02331EFE314B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{989AF818-7067-453E-B92E-02331EFE314B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A2E878F4-12CA-444B-85BA-CB00D3518AC1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A2E878F4-12CA-444B-85BA-CB00D3518AC1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A2E878F4-12CA-444B-85BA-CB00D3518AC1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A2E878F4-12CA-444B-85BA-CB00D3518AC1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{67B32542-6133-419A-99F3-1309B932E18F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{67B32542-6133-419A-99F3-1309B932E18F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{67B32542-6133-419A-99F3-1309B932E18F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{67B32542-6133-419A-99F3-1309B932E18F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{394246EF-EB8B-449F-8420-FA34EE37508B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{394246EF-EB8B-449F-8420-FA34EE37508B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{394246EF-EB8B-449F-8420-FA34EE37508B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{394246EF-EB8B-449F-8420-FA34EE37508B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{213B163C-7DBD-4538-AF4B-FE4BB387CD5B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{213B163C-7DBD-4538-AF4B-FE4BB387CD5B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{213B163C-7DBD-4538-AF4B-FE4BB387CD5B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{213B163C-7DBD-4538-AF4B-FE4BB387CD5B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -383,6 +412,11 @@ Global
 		{EB639AEA-2612-47C8-85FD-69A08C2EA7B8} = {A18E8A15-AB58-4244-92E9-F57DA316AA1F}
 		{C2BA2F67-AD57-45D4-883C-473E4E99DEC4} = {71429F9B-A81B-4A12-98DD-505C0F9FDB34}
 		{989AF818-7067-453E-B92E-02331EFE314B} = {71429F9B-A81B-4A12-98DD-505C0F9FDB34}
+		{A6C98869-6DB5-4DC6-8C78-45F00E0A9695} = {8F3D8585-5B5D-4512-A73E-E109D4178F38}
+		{A2E878F4-12CA-444B-85BA-CB00D3518AC1} = {A6C98869-6DB5-4DC6-8C78-45F00E0A9695}
+		{67B32542-6133-419A-99F3-1309B932E18F} = {A6C98869-6DB5-4DC6-8C78-45F00E0A9695}
+		{394246EF-EB8B-449F-8420-FA34EE37508B} = {71429F9B-A81B-4A12-98DD-505C0F9FDB34}
+		{213B163C-7DBD-4538-AF4B-FE4BB387CD5B} = {71429F9B-A81B-4A12-98DD-505C0F9FDB34}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {94B46B7F-1545-465E-863A-AAD0C58A8C0F}

@@ -1,14 +1,12 @@
-using hrvster.Core.Requests.ServiceRequests;
+using hrvster.ApplicationServices.Files;
+using hrvster.ApplicationServices.Harvesters.Facebook;
+using hrvster.ApplicationServices.Subscription;
+using hrvster.Extensions.Configuration;
+using hrvster.Extensions.OptionsConfiguration;
+using hrvster.Infrastructure.Facebook;
 using hrvster.Infrastructure.Subscriptions;
 using MediatR;
 using Serilog;
-using hrvster.Extensions.Configuration;
-using hrvster.ApplicationServices.Subscription;
-using hrvster.Extensions.OptionsConfiguration;
-using hrvster.ApplicationServices.Harvesters.Facebook;
-using hrvster.Infrastructure.Facebook;
-using hrvster.ApplicationServices.Files;
-using hrvster.Core.Handlers.ServiceHandlers;
 
 namespace hrvster.PaymentPendingChecker.Service
 {
@@ -100,7 +98,9 @@ namespace hrvster.PaymentPendingChecker.Service
 						.AddLinkBuilder()
 						.AddHttpContextAccessor()
 						.AddAutoMapper(typeof(EntityMap))
-						.AddGameService();
+						.AddGameService()
+						.AddStripeConfiguration(Configuration)
+						.AddPaymentPlanProvider(Configuration);
 
 					AddMediator(services);
 

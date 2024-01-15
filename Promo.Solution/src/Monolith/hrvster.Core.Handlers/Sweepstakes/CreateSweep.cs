@@ -1,6 +1,7 @@
 ﻿using hrvster.ApplicationServices.Subscription;
 using hrvster.Core.Requests.Notifications;
 using hrvster.Core.Requests.WebRequests.Sweeps;
+using hrvster.Exceptions;
 using hrvster.Infrastructure;
 using hrvster.Models.Extensions;
 using MediatR;
@@ -47,7 +48,7 @@ namespace hrvster.Core.Handlers.Sweepstakes
 			{
 				_logger.LogWarning("Account with uid {accountUid} is not subscribed.", request.AccountUid);
 
-				return;
+				throw new AccountIsNotSubscribedException($"Account with uid {request.AccountUid} is not subscribed.");
 			}
 
 			var sweeps = await _repository.GetAllForAccountAsync(request.AccountUid);

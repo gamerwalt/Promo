@@ -1,5 +1,6 @@
-﻿using hrvster.Core.Handlers.Profiles;
+﻿using hrvster.Core.Handlers;
 using hrvster.Core.Handlers.ServiceHandlers;
+using hrvster.Core.Notifications.Stripe;
 using hrvster.Core.Requests;
 using hrvster.Core.Requests.Notifications;
 using hrvster.Core.Requests.Notifications.Handlers;
@@ -20,10 +21,11 @@ namespace hrvster.Extensions.Configuration
 			var notificationHandlerAssembly = typeof(StoreAccountInDatabase).GetTypeInfo().Assembly;
 			var harvsterHandlerAssembly = typeof(NewHashTagTweetReceived).GetTypeInfo().Assembly;
 			var webRequestAssembly = typeof(SigninForm).GetTypeInfo().Assembly;
-			var getUserProfileHandler = typeof(GetUserProfileHandler).GetTypeInfo().Assembly;
+			var handlers = typeof(SubscribeUserToPlan).GetTypeInfo().Assembly;
 			var serviceHandlers = typeof(ProcessNewTweet).GetTypeInfo().Assembly;
+			var notificationAssemblyV2 = typeof(UserSubscribedThroughStripe).GetTypeInfo().Assembly;
 
-			services.AddMediatR(new[] { handlerAssembly, notificationAssembly, notificationHandlerAssembly, harvsterHandlerAssembly, webRequestAssembly, getUserProfileHandler, serviceHandlers });
+			services.AddMediatR(new[] { handlerAssembly, notificationAssembly, notificationHandlerAssembly, harvsterHandlerAssembly, webRequestAssembly, handlers, serviceHandlers, notificationAssemblyV2 });
 
 			return services;
 		}

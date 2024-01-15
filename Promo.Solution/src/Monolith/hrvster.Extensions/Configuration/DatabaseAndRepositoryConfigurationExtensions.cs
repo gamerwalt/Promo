@@ -5,6 +5,7 @@ using hrvster.Infrastructure.Harvester;
 using hrvster.Infrastructure.MatchGames;
 using hrvster.Infrastructure.Reporting;
 using hrvster.Infrastructure.Scheduling;
+using hrvster.Infrastructure.Stripe;
 using hrvster.Infrastructure.Subscriptions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -75,6 +76,9 @@ namespace hrvster.Extensions.Configuration
 		public static IServiceCollection AddFlutterwaveEventRepository(this IServiceCollection services)
 			=> services.AddTransient<IFlutterwaveEventRepository, FlutterwaveEventRepository>()
 				.AddTransient<IFlutterwaveAccountSubscriptionRepository, FlutterwaveAccountSubscriptionRepository>();
+
+		public static IServiceCollection AddStripeEventRepository(this IServiceCollection services)
+			=> services.AddTransient<IStripeEventRepository, StripeEventRepository>();
 
 		public static IServiceCollection AddHarvesterServiceCommandRepository(this IServiceCollection services)
 			=> services.AddTransient<IHarvesterServiceCommandRepository, HarvesterServiceCommandRepository>();
