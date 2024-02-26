@@ -15,5 +15,6 @@ namespace hrvster.Models.Subscriptions
 		public DateTime EndDateUtc { get; set; }
 		public bool IsDiscounted { get; set; }
 		public int DiscountedBy { get; set; }
+		public PaymentClient PaymentClient { get; set; } = PaymentClient.Flutterwave;
 	}
 }

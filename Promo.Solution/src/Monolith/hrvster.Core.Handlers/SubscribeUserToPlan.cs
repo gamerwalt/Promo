@@ -76,7 +76,8 @@ namespace hrvster.Core.Handlers
 				EndDateUtc = endDateUtc,
 				IsDiscounted = false,
 				SubscriptionStatus = Models.SubscriptionStatus.PendingPayment,
-				SubscriptionUid = subscriptionUid
+				SubscriptionUid = subscriptionUid,
+				PaymentClient = Models.PaymentClient.Flutterwave
 			});
 						
 

@@ -47,7 +47,8 @@ namespace hrvster.Infrastructure.Subscriptions
 				.AddParameter("endDate", model.EndDate)
 				.AddParameter("endDateUtc", model.EndDateUtc)
 				.AddParameter("isDiscounted", model.IsDiscounted)
-				.AddParameter("discountedBy", model.DiscountedBy);
+				.AddParameter("discountedBy", model.DiscountedBy)
+				.AddParameter("paymentClient", model.PaymentClient);
 
 			await conn.OpenAsync();
 			await command.ExecuteNonQueryAsync();
@@ -69,7 +70,8 @@ namespace hrvster.Infrastructure.Subscriptions
 				.AddParameter("endDate", model.EndDate)
 				.AddParameter("endDateUtc", model.EndDateUtc)
 				.AddParameter("isDiscounted", model.IsDiscounted)
-				.AddParameter("discountedBy", model.DiscountedBy);
+				.AddParameter("discountedBy", model.DiscountedBy)
+				.AddParameter("paymentClient", model.PaymentClient);
 
 			await conn.OpenAsync();
 			await command.ExecuteNonQueryAsync();
@@ -164,6 +166,7 @@ namespace hrvster.Infrastructure.Subscriptions
 			{
 				SubscriptionId = reader.GetInt32("subscription_id"),
 				SubscriptionUid = reader.GetGuid("subscription_uid"),
+				PaymentClient = Enum.Parse<PaymentClient>(reader.GetString("payment_client")),
 				Account = new Models.Account
 				{
 					AccountId = reader.GetInt32("account_id"),
@@ -267,6 +270,7 @@ namespace hrvster.Infrastructure.Subscriptions
 			{
 				SubscriptionId = reader.GetInt32("subscription_id"),
 				SubscriptionUid = reader.GetGuid("subscription_uid"),
+				PaymentClient = Enum.Parse<PaymentClient>(reader.GetString("payment_client")),
 				Account = new Models.Account
 				{
 					AccountId = reader.GetInt32("account_id"),

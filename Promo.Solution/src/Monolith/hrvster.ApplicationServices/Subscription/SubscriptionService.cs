@@ -116,7 +116,7 @@ namespace hrvster.ApplicationServices.Subscription
 		{
 			var result = await _mediator.Send(new SubscribeUserToPlanRequest(accountUid, plan));
 
-			_mediator.Publish(new UserSubscribed(accountUid, plan));
+			await _mediator.Publish(new UserSubscribed(accountUid, plan));
 
 			return result;
 		}

@@ -74,7 +74,8 @@ namespace hrvster.Core.Notifications.Stripe.Handlers
 				EndDateUtc = notification.EndDate.ToUniversalTime(),
 				IsDiscounted = false,
 				SubscriptionStatus = SubscriptionStatus.Subscribed,
-				SubscriptionUid = subscriptionUid
+				SubscriptionUid = subscriptionUid,
+				PaymentClient = PaymentClient.Stripe
 			};
 
 			await _accountSubscriptionRepository.CreateAsync(accountSubscription);
