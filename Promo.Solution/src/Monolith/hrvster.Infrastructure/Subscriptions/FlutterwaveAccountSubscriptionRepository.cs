@@ -30,7 +30,7 @@ namespace hrvster.Infrastructure.Subscriptions
 			command.CommandType = CommandType.StoredProcedure;
 			command
 				.AddParameter("Uid", model.Uid)
-				.AddParameter("subscriptionUid", model.SubscriptionUid)
+				.AddParameter("subscriptionId", model.SubscriptionId)
 				.AddParameter("externalAccountId", model.ExternalAccountId)
 				.AddParameter("externalSubscriptionId", model.ExternalSubscriptionId);
 

@@ -7,6 +7,7 @@ namespace hrvster.Models.Subscriptions
 		public int Id { get; set; }
 		public Guid Uid { get; set; }
 		public Guid SubscriptionUid { get; set; }
+		public int SubscriptionId { get; set; }
 		public string ExternalAccountId { get; set; }
 		public string ExternalSubscriptionId { get; set; }
 	}

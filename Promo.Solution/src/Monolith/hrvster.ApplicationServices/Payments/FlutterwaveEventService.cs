@@ -8,8 +8,6 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -58,7 +56,7 @@ namespace hrvster.ApplicationServices.Payments
 		{
 			var exceptions = new List<Exception>();
 
-			foreach(var flutterwaveEvent in newEvents)
+			foreach (var flutterwaveEvent in newEvents)
 			{
 				var eventUid = flutterwaveEvent.FlutterwaveEventUid;
 
@@ -72,7 +70,7 @@ namespace hrvster.ApplicationServices.Payments
 						eventUid, FlutterwaveEventStatus.Processing, cancellationToken);
 
 					var flutterwaveCardTransaction = default(FlutterwaveCardTransaction);
-				
+
 					flutterwaveCardTransaction = JsonConvert.DeserializeObject<FlutterwaveCardTransaction>(flutterwaveEvent.Payload);
 
 					if (flutterwaveCardTransaction == null)
@@ -88,16 +86,21 @@ namespace hrvster.ApplicationServices.Payments
 						await _flutterwaveAccountSubscriptionRepository.CreateAsync(clientSubscription, cancellationToken);
 
 						var cardTransactionProcessed = await _cardService.ProcessAsync(
-							eventUid, 
-							flutterwaveCardTransaction, 
+							eventUid,
+							flutterwaveCardTransaction,
 							cancellationToken);
 
 						if (cardTransactionProcessed)
+						{
 							await _flutterwaveEventRepository.UpdateEventStatusAsync(
 								eventUid, FlutterwaveEventStatus.Success, cancellationToken);
+							await _accountSubscriptionsRepository.UpdateAccountSubscriptionStatusAsync(clientSubscription.SubscriptionUid, SubscriptionStatus.Subscribed);
+						}
 						else
+						{
 							await _flutterwaveEventRepository.UpdateEventStatusAsync(
 								eventUid, FlutterwaveEventStatus.Failed, cancellationToken);
+						}
 					}
 				}
 				catch (Exception ex)
@@ -109,10 +112,10 @@ namespace hrvster.ApplicationServices.Payments
 				}
 			}
 
-			if(exceptions.Count > 0)
+			if (exceptions.Count > 0)
 			{
 				_logger.LogWarning("There was a total of {count} exceptions that occurred.", exceptions.Count);
-				foreach(var exception in exceptions)
+				foreach (var exception in exceptions)
 				{
 					_logger.LogWarning(exception.Message);
 				}
@@ -129,6 +132,7 @@ namespace hrvster.ApplicationServices.Payments
 				Uid = Guid.NewGuid(),
 				ExternalAccountId = flutterwaveCardTransaction.Customer?.Id.ToString(),
 				ExternalSubscriptionId = flutterwaveCardTransaction.Id.ToString(),
+				SubscriptionId = accountSubscription.SubscriptionId,
 				SubscriptionUid = accountSubscription.SubscriptionUid
 			};
 		}

@@ -70,21 +70,26 @@ namespace hrvster.Core.Subscriptions
 				return;
 			}
 
+			_logger.LogInformation("User is currently {subscriptionStatus}.", subscriptionStatus);
+
 			switch (subscriptionStatus)
 			{
 				case SubscriptionStatus.UnSubscribed:
-					if(IsSubscriptionEndDate(accountSubscription))
-					{
-						context.Result = new RedirectToActionResult(
-							"Index",
-							"Subscriptions",
-							new { subscriptionStatus = SubscriptionStatus.UnSubscribed.ToString() });
-					}
-					
+				case SubscriptionStatus.PendingPayment:
+				case SubscriptionStatus.EndOfSubscription:
+					_logger.LogWarning("Redirecting user to unsubscribed page.");
+						
+					context.Result = new RedirectToActionResult(
+						"Index",
+						"Subscriptions",
+						new { subscriptionStatus = SubscriptionStatus.UnSubscribed.ToString() });
+				
 					break;
 				case SubscriptionStatus.Subscribed:
 					if(IsSubscriptionEndDate(accountSubscription))
 					{
+						_logger.LogWarning("Redirecting user to unsubscribed page.");
+
 						context.Result = new RedirectToActionResult(
 							"Index",
 							"Subscriptions",
