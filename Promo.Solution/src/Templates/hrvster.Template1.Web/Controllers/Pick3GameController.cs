@@ -21,7 +21,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace hrvster.Template1.Web.Controllers
 {
-	[Authorize]
 	public class Pick3GameController : Controller
 	{
 		private readonly ILogger<Pick3GameController> _logger;
@@ -92,6 +91,11 @@ namespace hrvster.Template1.Web.Controllers
 			string externalClient,
 			CancellationToken cancellationToken)
 		{
+			_sessionManager.SetKeyValue(TemplateSessionConstants.GameUid, gameUid.ToString());
+			_sessionManager.SetKeyValue(TemplateSessionConstants.RuleUid, ruleUid.ToString());
+			_sessionManager.SetKeyValue(TemplateSessionConstants.ExternalClient, externalClient);
+			_sessionManager.SetKeyValue(TemplateSessionConstants.GameType, GameTypesEnum.MatchGames.ToString());
+
 			using (_logger.BeginPrePlayForPick3GameScope(gameUid, ruleUid, externalClient))
 			{
 				_logger.LogInformation("PrePlay for Pick3 game");
@@ -128,11 +132,32 @@ namespace hrvster.Template1.Web.Controllers
 					return ErrorRedirect("Campaign not found!", StatusCodes.Status400BadRequest);
 				}
 
+				_sessionManager.SetKeyValue(SessionConstants.AccountUid, campaign.Account.AccountUid.ToString());
+
 				if (!await _matchGamesService.GamePlayableAsync(gameUid, cancellationToken))
 				{
 					_logger.LogWarning("Game is not playable!");
 
 					return ErrorRedirect("Game is not playable!", StatusCodes.Status400BadRequest);
+				}
+
+				_sessionManager.SetKeyValue(TemplateSessionConstants.GameUid, gameUid.ToString());
+				_sessionManager.SetKeyValue(TemplateSessionConstants.RuleUid, ruleUid.ToString());
+				_sessionManager.SetKeyValue(TemplateSessionConstants.ExternalClient, externalClient);
+				_sessionManager.SetKeyValue(TemplateSessionConstants.GameType, GameTypesEnum.MatchGames.ToString());
+
+				if (!User.Identity.IsAuthenticated)
+				{
+					var code = GetProviderCode(externalClient);
+					_logger.LogInformation("Redirecting with provider code {code}", code);
+
+					return RedirectToAction(
+						"ExternalLogin",
+						"Authentication",
+						new
+						{
+							providerCode = code
+						});
 				}
 
 				var userClaims = User.Identities.FirstOrDefault()?.Claims;
@@ -239,6 +264,11 @@ namespace hrvster.Template1.Web.Controllers
 		[Route("Pick3/{gameUid}/rule/{ruleUid}/externalClient/{externalClient}/gameplay/{gameplayUid}/play")]
 		public async Task<IActionResult> Play(Guid gameUid, Guid ruleUid, string externalClient, Guid gameplayUid, CancellationToken cancellationToken)
 		{
+			_sessionManager.SetKeyValue(TemplateSessionConstants.GameUid, gameUid.ToString());
+			_sessionManager.SetKeyValue(TemplateSessionConstants.RuleUid, ruleUid.ToString());
+			_sessionManager.SetKeyValue(TemplateSessionConstants.ExternalClient, externalClient);
+			_sessionManager.SetKeyValue(TemplateSessionConstants.GameType, GameTypesEnum.MatchGames.ToString());
+
 			if (User.Identity.IsAuthenticated)
 			{
 				using (_logger.BeginGetPlayForPick3GameScope(gameUid, ruleUid, externalClient, gameplayUid))
@@ -250,6 +280,10 @@ namespace hrvster.Template1.Web.Controllers
 
 						return ErrorRedirect("Game not found!", StatusCodes.Status400BadRequest);
 					}
+
+					var campaign = await _campaignService.GetCampaignFromGameUidAsync(gameUid, GameTypesEnum.MatchGames.ToString());
+
+					_sessionManager.SetKeyValue(SessionConstants.AccountUid, campaign.Account.AccountUid.ToString());
 
 					if (gameplayUid == Guid.Empty)
 					{
@@ -303,13 +337,32 @@ namespace hrvster.Template1.Web.Controllers
 				}
 			}
 
-			return ErrorRedirect("User needs to be authenticated!", StatusCodes.Status401Unauthorized);
+			_sessionManager.SetKeyValue(TemplateSessionConstants.GameUid, gameUid.ToString());
+			_sessionManager.SetKeyValue(TemplateSessionConstants.RuleUid, ruleUid.ToString());
+			_sessionManager.SetKeyValue(TemplateSessionConstants.ExternalClient, externalClient);
+			_sessionManager.SetKeyValue(TemplateSessionConstants.GameType, GameTypesEnum.MatchGames.ToString());
+
+			var code = GetProviderCode(externalClient);
+			_logger.LogInformation("Redirecting with provider code {code}", code);
+
+			return RedirectToAction(
+				"ExternalLogin",
+				"Authentication",
+				new
+				{
+					providerCode = code
+				});
 		}
 
 		[HttpPost]
 		[Route("Pick3/{gameUid}/rule/{ruleUid}/externalClient/{externalClient}/gameplay/{gameplayUid}/play")]
 		public async Task<IActionResult> Play(Guid gameUid, Guid ruleUid, string externalClient, Guid gameplayUid, PlayMatchGame form, CancellationToken cancellationToken)
 		{
+			_sessionManager.SetKeyValue(TemplateSessionConstants.GameUid, gameUid.ToString());
+			_sessionManager.SetKeyValue(TemplateSessionConstants.RuleUid, ruleUid.ToString());
+			_sessionManager.SetKeyValue(TemplateSessionConstants.ExternalClient, externalClient);
+			_sessionManager.SetKeyValue(TemplateSessionConstants.GameType, GameTypesEnum.MatchGames.ToString());
+
 			if (User.Identity.IsAuthenticated)
 			{
 				using (_logger.BeginPostPlayForPick3GameScope(gameUid, ruleUid, externalClient, gameplayUid))
@@ -321,6 +374,10 @@ namespace hrvster.Template1.Web.Controllers
 
 						return ErrorRedirect("Game not found!", StatusCodes.Status400BadRequest);
 					}
+
+					var campaign = await _campaignService.GetCampaignFromGameUidAsync(gameUid, GameTypesEnum.MatchGames.ToString());
+
+					_sessionManager.SetKeyValue(SessionConstants.AccountUid, campaign.Account.AccountUid.ToString());
 
 					if (gameplayUid == Guid.Empty)
 					{
@@ -356,7 +413,21 @@ namespace hrvster.Template1.Web.Controllers
 				}
 			}
 
-			return ErrorRedirect("User needs to be authenticated!", StatusCodes.Status401Unauthorized);
+			_sessionManager.SetKeyValue(TemplateSessionConstants.GameUid, gameUid.ToString());
+			_sessionManager.SetKeyValue(TemplateSessionConstants.RuleUid, ruleUid.ToString());
+			_sessionManager.SetKeyValue(TemplateSessionConstants.ExternalClient, externalClient);
+			_sessionManager.SetKeyValue(TemplateSessionConstants.GameType, GameTypesEnum.MatchGames.ToString());
+
+			var code = GetProviderCode(externalClient);
+			_logger.LogInformation("Redirecting with provider code {code}", code);
+
+			return RedirectToAction(
+				"ExternalLogin",
+				"Authentication",
+				new
+				{
+					providerCode = code
+				});
 		}
 
 		[Authorize]
@@ -463,6 +534,11 @@ namespace hrvster.Template1.Web.Controllers
 			string externalClient,
 			CancellationToken cancellationToken)
 		{
+			_sessionManager.SetKeyValue(TemplateSessionConstants.GameUid, gameUid.ToString());
+			_sessionManager.SetKeyValue(TemplateSessionConstants.RuleUid, ruleUid.ToString());
+			_sessionManager.SetKeyValue(TemplateSessionConstants.ExternalClient, externalClient);
+			_sessionManager.SetKeyValue(TemplateSessionConstants.GameType, GameTypesEnum.MatchGames.ToString());
+
 			var userClaims = User.Identities.FirstOrDefault()?.Claims;
 			var externalProfileId = userClaims?.FirstOrDefault(x => x.Type == HrvsterClaimTypes.ExternalProfileId)?.Value;
 			var screenName = userClaims?.FirstOrDefault(x => x.Type == HrvsterClaimTypes.DisplayName)?.Value;
@@ -667,9 +743,18 @@ namespace hrvster.Template1.Web.Controllers
 		private IActionResult ErrorRedirect(string reason, int statusCode)
 		{
 			return RedirectToActionPermanent(
-				nameof(ErrorController.HandleErrorCode),
-				nameof(ErrorController),
+				"HandleErrorCode",
+				"Error",
 				new { reason, statusCode });
 		}
+
+		private string GetProviderCode(string externalClient)
+			=> Enum.Parse<ExternalClientType>(externalClient) switch
+			{
+				ExternalClientType.Twitter => hrvster.Models.Constants.TwitterProvider,
+				ExternalClientType.Facebook => hrvster.Models.Constants.FaceBookProvider,
+				ExternalClientType.Instagram => hrvster.Models.Constants.InstagramProvider,
+				_ => hrvster.Models.Constants.TwitterProvider,
+			};
 	}
 }

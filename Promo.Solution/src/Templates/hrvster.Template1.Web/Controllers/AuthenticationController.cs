@@ -49,6 +49,7 @@ public class AuthenticationController : Controller
 
 	public async Task<IActionResult> ValidateTwitterAuth()
 	{
+		
 		if (IsRequestDenied())
 		{
 			return ErrorRedirect("TwitterAuthenticationFailed", StatusCodes.Status401Unauthorized);
@@ -207,8 +208,8 @@ public class AuthenticationController : Controller
 	private IActionResult ErrorRedirect(string reason, int statusCode)
 	{
 		return RedirectToActionPermanent(
-			nameof(ErrorController.HandleErrorCode),
-			nameof(ErrorController),
+			"HandleErrorCode",
+			"Error",
 			new { reason, statusCode });
 	}
 

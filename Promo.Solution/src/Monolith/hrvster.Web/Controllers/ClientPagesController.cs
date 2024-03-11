@@ -53,7 +53,7 @@ namespace hrvster.Web.Controllers
 			return View(model);
 		}
 
-		[HttpGet("update/{uid:Guid}")]
+		[HttpGet("clientpages/update/{uid:Guid}")]
 		public async Task<IActionResult> Update(Guid uid)
 		{
 			_hrvsterUser = _sessionManager.GetUserInformation();
@@ -71,7 +71,7 @@ namespace hrvster.Web.Controllers
 			return View(model);
 		}
 
-		[HttpPost("update/{uid:Guid}")]
+		[HttpPost("clientpages/update/{uid:Guid}")]
 		public async Task<IActionResult> Update(Guid uid, UpdateClientPages form, CancellationToken cancellationToken)
 		{
 			_hrvsterUser = _sessionManager.GetUserInformation();
@@ -88,7 +88,7 @@ namespace hrvster.Web.Controllers
 			return RedirectToAction(nameof(Update), new { uid });
 		}
 
-		[HttpGet("create")]
+		[HttpGet("clientpages/create")]
 		public async Task<IActionResult> Create()
 		{
 			_hrvsterUser = _sessionManager.GetUserInformation();
@@ -98,7 +98,7 @@ namespace hrvster.Web.Controllers
 			return View(model);
 		}
 
-		[HttpPost("create")]
+		[HttpPost("clientpages/create")]
 		public async Task<IActionResult> Create(CreateClientPages form, CancellationToken cancellationToken)
 		{
 			_hrvsterUser = _sessionManager.GetUserInformation();

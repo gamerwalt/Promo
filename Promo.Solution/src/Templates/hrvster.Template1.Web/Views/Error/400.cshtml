@@ -1,13 +1,12 @@
-﻿@{
+﻿@model ErrorReason
+@{
     ViewData["Title"] = "Error";
     Layout = "~/Views/Shared/_Error_Layout.cshtml";
 }
 
 <body class="error-page">
     <div class="exception-container">
+        <h3>@Model.Message</h3>
         <img src="~/images/Error_Coffee.png" alt="Error Image" class="exception-image" />
-        <div class="exception-home-button-container">
-            <a href="@Url.Action("Index", "Home")" class="exception-home-button">Go Home</a>
-        </div>
     </div>
 </body>

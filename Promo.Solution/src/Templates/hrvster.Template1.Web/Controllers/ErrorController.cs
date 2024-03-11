@@ -1,6 +1,6 @@
-﻿using Microsoft.AspNetCore.Diagnostics;
+﻿using hrvster.Template1.Web.Models;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using NToastNotify;
 
 namespace hrvster.Template1.Web.Controllers
 {
@@ -13,8 +13,8 @@ namespace hrvster.Template1.Web.Controllers
 			_logger = loggerFactory.CreateLogger<ErrorController>();
 		}
 
-		[HttpGet("HandleErrorCode/{statusCode}")]
-		public IActionResult HandleErrorCode(int statusCode)
+		[HttpGet("HandleErrorCode")]
+		public async Task<IActionResult> HandleErrorCode(string reason, int statusCode)
 		{
 			var errorMessage = string.Empty;
 
@@ -34,9 +34,10 @@ namespace hrvster.Template1.Web.Controllers
 					break;
 			}
 
-			_logger.LogError("An error occurred. StatusCode: {statusCode}. Error Message: {errorMessage}",
+			_logger.LogError("An error occurred. StatusCode: {statusCode}. Error Message: {errorMessage}, Reason: {reason}",
 				statusCode,
-				errorMessage);
+				errorMessage,
+				reason);
 
 			var referer = HttpContext.Request.Headers["Referer"].ToString();
 
@@ -48,7 +49,12 @@ namespace hrvster.Template1.Web.Controllers
 			if (statusCode == 0 && string.IsNullOrWhiteSpace(referer))
 				return View("Exception");
 
-			return View(statusCode.ToString());
+			var model = new ErrorReason
+			{
+				Message = reason
+			};
+
+			return View(statusCode.ToString(), model);
 		}
 
 		[Route("Error")]

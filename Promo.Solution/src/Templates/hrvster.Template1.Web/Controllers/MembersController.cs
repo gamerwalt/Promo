@@ -5,11 +5,14 @@ using hrvster.Core.Authentication;
 using hrvster.Models;
 using hrvster.Template1.Web.Models;
 using hrvster.Template1.Web.Models.Query;
+using hrvster.Templates.Core.Common;
 using hrvster.Templates.Infrastructure.Customizations;
 using hrvster.Templates.Models.Extensions;
 using hrvster.Templates.Models.Members;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 
 namespace hrvster.Template1.Web.Controllers;
 
@@ -71,6 +74,23 @@ public class MembersController : Controller
 				_logger.LogWarning("Either game has not started or it has ended.");
 
 				return ErrorRedirect("Either game has not started or it has ended.", StatusCodes.Status400BadRequest);
+			}
+
+			//does this user exist?
+			//if this user exists, then we need to redirect to the game
+			var principal = User.Identity;
+			var externalIdClaim = User.Claims.Where(c => c.Type == HrvsterClaimTypes.ExternalProfileId).FirstOrDefault();
+			var externalId = externalIdClaim?.Value;
+
+			if(externalId != null)
+			{
+				var memberProfile = await _memberProfileRepository.GetByExternalProfileIdAsync(accountUid, externalId);
+				if (memberProfile != null)
+				{
+					_logger.LogInformation("Member already exists. Returning to play the game.");
+
+					return RedirectToGame(query.GameType, query.GameUid, query.RuleUid, query.ExternalClient);
+				}
 			}
 
 			return View(new CreateMember
@@ -172,8 +192,8 @@ public class MembersController : Controller
 	private IActionResult ErrorRedirect(string reason, int statusCode)
 	{
 		return RedirectToActionPermanent(
-			nameof(ErrorController.HandleErrorCode),
-			nameof(ErrorController),
+			"HandleErrorCode",
+			"Error",
 			new { reason, statusCode });
 	}
 }

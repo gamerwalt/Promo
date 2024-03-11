@@ -101,7 +101,7 @@ namespace hrvster.Template1.Web
 			builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
 				.AddCookie(options =>
 				{
-					options.LoginPath = "/Authentication/Login";
+					options.LoginPath = "/Authentication/Login/external/TWITTER";
 				});
 
 			Log.Information("Added Cookies auth scheme.");
