@@ -199,7 +199,8 @@ namespace hrvster.ApplicationServices
 					EndDateUtc = matchGame.EndDateUtc,
 					Id = matchGame.Id,
 					Uid = uid,
-					CampaignUid = matchGame.CampaignUid
+					CampaignUid = matchGame.CampaignUid,
+					IsGenerated = matchGame.HasBeenGenerated
 				};
 			}
 

@@ -171,7 +171,7 @@ namespace hrvster.ApplicationServices.MatchGames
 
 			if (DateTime.UtcNow > game.EndDateUtc || DateTime.UtcNow < game.StartDateUtc)
 			{
-				_logger.LogWarning("Game is not playable. Current date not within game start and end dates.");
+				_logger.LogWarning("Current date not within game start and end dates.");
 				return false;
 			}
 
@@ -180,6 +180,8 @@ namespace hrvster.ApplicationServices.MatchGames
 				_logger.LogWarning("Gameboards for the game has not been generated.");
 				return false;
 			}
+
+			_logger.LogInformation("Game is playable.");
 
 			return true;
 		}

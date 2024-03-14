@@ -25,6 +25,7 @@ using hrvster.Models.Options;
 using hrvster.Template1.Web.MapperProfiles;
 using hrvster.Templates.Core.Common;
 using hrvster.Templates.Infrastructure.Customizations;
+using hrvster.Templates.Middleware;
 using hrvster.Templates.Services;
 using MediatR;
 using Microsoft.ApplicationInsights.Extensibility;
@@ -62,7 +63,10 @@ namespace hrvster.Template1.Web
 				.ReadFrom.Configuration(builder.Configuration)
 				.Enrich.FromLogContext()
 				.MinimumLevel.Verbose()
+				.WriteTo.Loggly()
 				.CreateLogger();
+
+			Serilog.Debugging.SelfLog.Enable(Console.Error);
 
 			Log.Information("Running the hrvster.Template1.Web app.");
 
@@ -227,6 +231,7 @@ namespace hrvster.Template1.Web
 			builder.Services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>();
 
 			builder.Services.AddTransient<ICommunicationService, CommunicationService>();
+			builder.Services.AddScoped<ICorrelationContextAccessor, CorrelationContextAccessor>();
 
 			Log.Information("Done with adding services.");
 
@@ -245,6 +250,9 @@ namespace hrvster.Template1.Web
 			app.UseIpRateLimiting();
 
 			app.UseHttpsRedirection();
+
+			app.UseMiddleware<CorrelationIdMiddleware>();
+
 			app.UseStaticFiles();
 
 			app.UseSession();

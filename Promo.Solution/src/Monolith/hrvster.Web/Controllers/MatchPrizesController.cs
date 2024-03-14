@@ -70,6 +70,7 @@ namespace hrvster.Web.Controllers
 				ControllerName = controllerName ?? "MatchGames",
 				ActionName = actionName ?? "View",
 				Prizes = _mapper.Map<List<MatchPrize>>(matchPrizes),
+				TotalWinnable = matchGame.NumberOfWinnableBoards,
 			};
 
 			return View(model);
@@ -123,7 +124,8 @@ namespace hrvster.Web.Controllers
 				MatchGameUid = matchGame.Uid,
 				MatchImages = _mapper.Map<List<MatchImage>>(matchImages),
 				ControllerName = controllerName ?? "MatchGames",
-				ActionName = actionName ?? "View"
+				ActionName = actionName ?? "View",
+				TotalWinnable = matchGame.NumberOfWinnableBoards,
 			};
 
 			return View(model);

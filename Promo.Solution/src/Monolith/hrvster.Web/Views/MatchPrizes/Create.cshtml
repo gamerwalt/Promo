@@ -1,6 +1,14 @@
 ﻿@model CreateMatchPrize
 @{
 	ViewData["Title"] = $"Create Prize for {Model.MatchGameName}";
+	var totalPrizesCreated = 0;
+	var totalWinnable = 0;
+	totalWinnable = Model.TotalWinnable;
+	foreach(var prize in Model.Prizes)
+	{
+		totalPrizesCreated += prize.Quantity;
+	}
+	var totalCreateablePrizes = totalWinnable - totalPrizesCreated + 1;
 }
 <div class="card card-bordered">
 	<form
@@ -72,6 +80,7 @@
 				<button type="submit" class="btn btn-md btn-light btn-primary">
 					Create Prize
 				</button>
+				<label>You can now create a total of @totalCreateablePrizes</label>
 			</div>
 			<div class="card-body pt-0">
 				<div class="table-responsive">

@@ -59,6 +59,8 @@ namespace hrvster.Template1.Web.Controllers
 			[FromQuery] string externalClient,
 			[FromQuery] Guid ruleUid)
 		{
+			_logger.LogInformation("Got a request to play the game for a pick 3 game with uid {gameUid}", gameUid);
+
 			_sessionManager.SetKeyValue(TemplateSessionConstants.GameUid, gameUid.ToString());
 			_sessionManager.SetKeyValue(TemplateSessionConstants.RuleUid, ruleUid.ToString());
 			_sessionManager.SetKeyValue(TemplateSessionConstants.ExternalClient, externalClient);
@@ -69,7 +71,7 @@ namespace hrvster.Template1.Web.Controllers
 
 			if (string.IsNullOrEmpty(campaignUidString) || string.IsNullOrEmpty(accountUidString))
 			{
-				_logger.LogWarning("CampaignUid or AccountUid is null or empty for the game uid {gameUid} with externalClient {externalClient} for rule {ruleUid}",
+				_logger.LogError("CampaignUid or AccountUid is null or empty for the game uid {gameUid} with externalClient {externalClient} for rule {ruleUid}",
 					gameUid,
 					externalClient,
 					ruleUid);
@@ -82,13 +84,16 @@ namespace hrvster.Template1.Web.Controllers
 
 			if (campaignUid == Guid.Empty || accountUid == Guid.Empty)
 			{
-				_logger.LogWarning("CampaignUid or AccountUid is empty for the game uid {gameUid} with externalClient {externalClient} for rule {ruleUid}",
+				_logger.LogError("CampaignUid or AccountUid is empty for the game uid {gameUid} with externalClient {externalClient} for rule {ruleUid}",
 					gameUid,
 					externalClient,
 					ruleUid);
 
 				return RedirectToAction("HandleErrorCode", "Error", new { statusCode = 400 });
 			}
+
+			_sessionManager.SetKeyValue(SessionConstants.CampaignUid, campaignUidString);
+			_sessionManager.SetKeyValue(SessionConstants.AccountUid, accountUidString);
 
 			using (_logger.Pick3MatchGameLoggingEntry(ruleUid, gameUid, campaignUid, accountUid))
 			{
@@ -97,6 +102,8 @@ namespace hrvster.Template1.Web.Controllers
 
 				if (!await _gameService.GameExistsForAccountAsync(accountUid, gameUid))
 				{
+					_logger.LogError("Game does not exist for the account.");
+
 					return RedirectToAction(nameof(GameDoesNotExist), new { gameUid, externalClient, ruleUid });
 				}
 
@@ -114,6 +121,8 @@ namespace hrvster.Template1.Web.Controllers
 
 				if (userDetails != null)
 				{
+					_logger.LogInformation("Redirecting to game controller.");
+
 					return RedirectToGame(GameTypesEnum.MatchGames.ToString(), gameUid, ruleUid, externalClient);
 				}
 			}
@@ -177,6 +186,9 @@ namespace hrvster.Template1.Web.Controllers
 
 				return RedirectToAction("HandleErrorCode", "Error", new { statusCode = 400 });
 			}
+
+			_sessionManager.SetKeyValue(SessionConstants.CampaignUid, campaignUidString);
+			_sessionManager.SetKeyValue(SessionConstants.AccountUid, accountUidString);
 
 			using (_logger.SweepsGameLoggingEntry(ruleUid, gameUid, campaignUid, accountUid))
 			{

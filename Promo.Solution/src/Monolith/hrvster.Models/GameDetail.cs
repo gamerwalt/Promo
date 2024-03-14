@@ -12,5 +12,11 @@ namespace hrvster.Models
 		public Guid CampaignUid { get; set; }
 		public DateTime StartDateUtc { get; set; }
 		public DateTime EndDateUtc { get; set; }
+		public bool IsGenerated { get; set; } = false;
+
+		public bool GameBoardsHasBeenGenerated()
+		{
+			return this.IsGenerated;
+		}
 	}
 }

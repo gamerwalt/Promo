@@ -557,6 +557,8 @@ public class SweepstakesController : Controller
 
 	private IActionResult ErrorRedirect(string reason, int statusCode)
 	{
+		_logger.LogError("Redirecting to the error handler with reason {reason}", reason);
+
 		return RedirectToActionPermanent(
 			"HandleErrorCode",
 			"Error",

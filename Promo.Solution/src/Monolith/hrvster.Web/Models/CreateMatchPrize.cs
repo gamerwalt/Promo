@@ -18,5 +18,6 @@ namespace hrvster.Web.Models
 		public string ControllerName { get; set; }
 		public List<MatchPrize> Prizes { get; set; }
 		public bool IsFiller { get; set; }
+		public int TotalWinnable { get; set; }
 	}
 }

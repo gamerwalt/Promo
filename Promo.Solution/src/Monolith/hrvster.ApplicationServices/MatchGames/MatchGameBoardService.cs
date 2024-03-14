@@ -307,6 +307,7 @@ namespace hrvster.ApplicationServices.MatchGames
 			if (boardKeys == null || boardKeys.Count == 0)
 			{
 				var boardUids = await _matchBoardsRepository.GetGameBoardUidsAsync(gameUid, cancellationToken);
+
 				boardKeys = boardUids.ToList();
 			}
 
@@ -316,7 +317,12 @@ namespace hrvster.ApplicationServices.MatchGames
 		private async Task<List<Guid>> GetBoardKeysAsync(Guid gameUid)
 		{
 			var boardKeysString = await _cahceDataService.GetAsync<string>(GenerateMatchBoardKeysForTheUids(gameUid));
-			
+
+			if (string.IsNullOrWhiteSpace(boardKeysString))
+			{
+				return null;
+			}
+
 			return JsonConvert.DeserializeObject<List<Guid>>(boardKeysString);
 		}
 
