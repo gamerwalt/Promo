@@ -13,5 +13,6 @@ namespace hrvster.Web.Models
 		public string WatchValue { get; set; }
 		public string ExternalId { get; set; }
 		public ExternalClientType ExternalClientType { get; set; }
+		public string UrlLink { get; set; }
 	}
 }

@@ -3,36 +3,34 @@
     ViewData["Title"] = "Create Client Images";
 }
 <div class="card card-flush">
-	<form asp-controller="ClientPages" asp-action="Create" class="form-horizontal form-material mx-2">
+	<form asp-action="Create" enctype="multipart/form-data" class="form-horizontal form-material mx-2">
 		<div class="card-header mt-5">
 			<div class="card-title flex-column">
-				<div class="fs-6 text-gray-400">Company Page Images</div>
+				<div class="fs-1 text-white-400">Company Page Images</div>
 			</div>
 		</div>
 		<div class="card-body pt-0">
-			<form asp-action="Create">
-				<div class="fv-row mb-8">
-					<label class="required d-flex align-items-center fs-6 fw-semibold form-label mb-2">
-						Logo Image
-					</label>
-					<input class="form-control" id="LogoLocation" asp-for="LogoLocation" type="file" />
-					<span asp-validation-for="LogoLocation"></span>
-				</div>
-				<div class="fv-row mb-8">
-					<label class="required d-flex align-items-center fs-6 fw-semibold form-label mb-2">
-						Header Image
-					</label>
-					<input class="form-control" id="HeaderLocation" asp-for="HeaderLocation" type="file" />
-					<span asp-validation-for="HeaderLocation"></span>
-				</div>
-				<div class="fv-row mb-8">
-					<label class="required d-flex align-items-center fs-6 fw-semibold form-label mb-2">
-						Footer Image
-					</label>
-					<input class="form-control" id="FooterLocation" asp-for="FooterLocation" type="file" />
-					<span asp-validation-for="FooterLocation"></span>
-				</div>
-			</form>
+			<div class="fv-row mb-8">
+				<label class="required d-flex align-items-center fs-6 fw-semibold form-label mb-2">
+					Logo Image (Not more than 512px X 512px)
+				</label>
+				<input class="form-control" id="LogoLocation" asp-for="LogoLocation" type="file" />
+				<span asp-validation-for="LogoLocation"></span>
+			</div>
+			<div class="fv-row mb-8">
+				<label class="required d-flex align-items-center fs-6 fw-semibold form-label mb-2">
+					Header Image (490px X 60px)
+				</label>
+				<input class="form-control" id="HeaderLocation" asp-for="HeaderLocation" type="file" />
+				<span asp-validation-for="HeaderLocation"></span>
+			</div>
+			<div class="fv-row mb-8">
+				<label class="required d-flex align-items-center fs-6 fw-semibold form-label mb-2">
+					Footer Image (490px X 60px)
+				</label>
+				<input class="form-control" id="FooterLocation" asp-for="FooterLocation" type="file" />
+				<span asp-validation-for="FooterLocation"></span>
+			</div>
 		</div>
 		<div class="card-footer">
 			<div class="card-toolbar">

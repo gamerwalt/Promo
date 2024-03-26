@@ -22,6 +22,7 @@ using hrvster.Infrastructure.Subscriptions;
 using hrvster.Middleware;
 using hrvster.Models;
 using hrvster.Models.Options;
+using hrvster.Template1.Web.Components;
 using hrvster.Template1.Web.MapperProfiles;
 using hrvster.Templates.Core.Common;
 using hrvster.Templates.Infrastructure.Customizations;
@@ -116,6 +117,7 @@ namespace hrvster.Template1.Web
 			{
 				o.Filters.Add(new AutoValidateAntiforgeryTokenAttribute());
 			})
+			.AddApplicationPart(typeof(LayoutViewComponent).Assembly)
 			.AddSessionStateTempDataProvider();
 
 			builder.Services.AddAutoMapper(typeof(EntityMapper));

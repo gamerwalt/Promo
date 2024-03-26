@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace hrvster.Template1.Web.Components
 {
+	[ViewComponent(Name = "LayoutView")]
 	public class LayoutViewComponent : ViewComponent
 	{
 		private readonly ILogger<LayoutViewComponent> _logger;

@@ -102,6 +102,12 @@ namespace hrvster.ApplicationServices.MatchGames
 				var availablePrizes = new List<MatchPrize>();
 
 				_logger.LogInformation("Generating available prizes.");
+				var lossPrize = prizeList.FirstOrDefault(c => c.IsFiller);
+				if(lossPrize != null)
+				{
+					prizeList.Remove(lossPrize);
+				}
+
 				foreach (var prize in prizeList)
 				{
 					for (var i = 0; i < prize.Quantity; i++)

@@ -19,5 +19,6 @@
 		public string RebrandlyApiKey { get; set; }
 		public string GameLinkReplaceText { get; set; }
 		public string HrvsterUrlForSubdomains { get; set; }
+		public string HrvsterAzureStorageConnectionString { get; set; }
 	}
 }

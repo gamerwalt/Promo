@@ -282,7 +282,7 @@
 						<thead>
 							<tr class="fw-semibold fs-6 text-gray-800 border-bottom-2 border-gray-200">
 								<th>Watch Value</th>
-								<th>Tweet</th>
+								<th>Tweet/Link</th>
 								<th>Active</th>
 								<th>Must Be Following?</th>
 								<th>Notify Winners?</th>
@@ -297,13 +297,7 @@
 									<td>
 										@if (@rule.ExternalId == "0")
 										{
-											<a 
-												asp-action="View" 
-												asp-controller="ScheduledTweets"
-												asp-route-ruleUid="@rule.RuleUid"
-												asp-route-gameUid="@Model.MatchGame.MatchGameUid" target="_blank">
-												Scheduled
-											</a>
+											@rule.UrlLink
 										}
 										else
 										{

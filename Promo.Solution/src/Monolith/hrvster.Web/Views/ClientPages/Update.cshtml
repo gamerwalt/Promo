@@ -2,6 +2,7 @@
 @{
     ViewData["Title"] = "Update Client Pages and Images";
 }
+<form asp-route-uid="@Model.Uid" asp-action="Update" enctype="multipart/form-data">
 <div class="card card-flush">
 	<div class="card-header mt-5">
 		<div class="card-title flex-column">
@@ -9,38 +10,61 @@
 		</div>
 	</div>
 	<div class="card-body pt-0">
-		<form asp-route-uid="@Model.Uid">
+			<input hidden asp-for="PreviousFooterLocation" value="@Model.PreviousFooterLocation" />
+			<input hidden asp-for="PreviousLogoLocation" value="@Model.PreviousLogoLocation" />
+			<input hidden asp-for="PreviousHeaderLocation" value="@Model.PreviousHeaderLocation" />
 			<div class="table-responsive">
-				<table id="kt_profile_overview_table" class="table table-row-bordered table-row-dashed gy-4 align-middle fw-bold">
-					<thead class="fs-7 text-gray-400 text-uppercase">
-						<tr>
-							<th class="min-w-100px">Type</th>
-							<th class="min-w-250px">Image</th>
-						</tr>
-					</thead>
-					<tbody class="fs-7">
-						<tr>
-							<td>Logo</td>
-							<td>
-								<img width="64" height="64" src="@Model.LogoLocation" />
-							</td>
-						</tr>
-						<tr>
-							<td>Header</td>
-							<td><img src="@Model.HeaderLocation" /></td>
-						</tr>
-						<tr>
-							<td>Footer</td>
-							<td><img src="@Model.FooterLocation" /></td>
-						</tr>
-					</tbody>
-				</table>
+				<div class="table-responsive">
+					<table id="kt_profile_overview_table" class="table table-row-bordered table-row-dashed gy-4 align-middle fw-bold">
+						<thead class="fs-7 text-gray-400 text-uppercase">
+							<tr>
+								<th class="min-w-100px">Type</th>
+								<th class="min-w-250px">Image</th>
+							</tr>
+						</thead>
+						<tbody class="fs-7">
+							<tr>
+								<td>Logo</td>
+								<td>
+									<img width="64" height="64" src="@Model.PreviousLogoLocation" alt="@Model.PreviousLogoLocation"></img>
+									<label class="d-flex align-items-center fs-6 fw-semibold form-label mb-2">
+										Replace Logo Image (Not more than 512px X 512px)
+									</label>
+									<input class="form-control" id="LogoLocation" asp-for="LogoLocation" type="file" />
+									<span asp-validation-for="LogoLocation"></span>
+								</td>
+							</tr>
+							<tr>
+								<td>Header</td>
+								<td>
+									<img src="@Model.PreviousHeaderLocation" ></img>
+									<label class="d-flex align-items-center fs-6 fw-semibold form-label mb-2">
+										Replace Header Image (490px X 60px)
+									</label>
+									<input class="form-control" id="HeaderLocation" asp-for="HeaderLocation" type="file" />
+									<span asp-validation-for="HeaderLocation"></span>
+								</td>
+							</tr>
+							<tr>
+								<td>Footer</td>
+								<td>
+									<img src="@Model.PreviousFooterLocation" />
+									<label class="d-flex align-items-center fs-6 fw-semibold form-label mb-2">
+										Replace Footer Image (490px X 60px)
+									</label>
+									<input class="form-control" id="FooterLocation" asp-for="FooterLocation" type="file" />
+									<span asp-validation-for="FooterLocation"></span>
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
 			</div>
-		</form>
 	</div>
 	<div class="card-footer">
 		<div class="card-toolbar">
-			<a class="btn btn-large btn-md btn-light btn-primary" asp-action="Update">Update Images</a>
+			<button class="btn btn-large btn-md btn-light btn-primary">Update</button>
 		</div>
 	</div>
 </div>
+</form>

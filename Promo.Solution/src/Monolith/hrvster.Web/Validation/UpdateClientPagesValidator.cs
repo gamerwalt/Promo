@@ -15,24 +15,18 @@ namespace hrvster.Web.Validation
 		public UpdateClientPagesValidator()
 		{
 			RuleFor(x => x.LogoLocation)
-				.NotEmpty()
-				.WithMessage("You need to select an image for the logo.")
 				.Must(c => BeOfTheAllowedExtension(c))
 				.WithMessage($"Your logo image has to be of the allowed extensions. {AllowedExtensionString}")
 				.Must(c => BeOfTheAllowedSize(c))
 				.WithMessage("Your logo image is too large. It must not be larger than 5MB in size.");
 
 			RuleFor(x => x.FooterLocation)
-				.NotEmpty()
-				.WithMessage("You need to select an image for the footer.")
 				.Must(c => BeOfTheAllowedExtension(c))
 				.WithMessage($"Your footer image has to be of the allowed extensions. {AllowedExtensionString}")
 				.Must(c => BeOfTheAllowedSize(c))
 				.WithMessage("Your footer image is too large. It must not be larger than 5MB in size.");
 
 			RuleFor(x => x.HeaderLocation)
-				.NotEmpty()
-				.WithMessage("You need to select an image for the header.")
 				.Must(c => BeOfTheAllowedExtension(c))
 				.WithMessage($"Your header image has to be of the allowed extensions. {AllowedExtensionString}")
 				.Must(c => BeOfTheAllowedSize(c))
@@ -57,7 +51,7 @@ namespace hrvster.Web.Validation
 					return false;
 			}
 
-			return false;
+			return true;
 		}
 	}
 }

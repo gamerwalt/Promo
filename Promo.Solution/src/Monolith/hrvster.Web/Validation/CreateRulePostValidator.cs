@@ -57,9 +57,9 @@ namespace hrvster.Web.Validation
 				.Must(c => WatchValueShouldBeWithinTweetText(c))
 				.WithMessage("The tweet text should contain the watch value.");
 
-			RuleFor(c => c)
-				.Must(c => ScheduledTimeShouldBeInTheFuture(c))
-				.WithMessage("The scheduled date for this tweet should be in the future.");
+			//RuleFor(c => c)
+			//	.Must(c => ScheduledTimeShouldBeInTheFuture(c))
+			//	.WithMessage("The scheduled date for this tweet should be in the future.");
 
 			RuleFor(c => c.Media1)
 				.Must(c => BeOfTheAllowedExtension(c))

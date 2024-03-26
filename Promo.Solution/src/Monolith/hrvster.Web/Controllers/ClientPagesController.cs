@@ -3,6 +3,7 @@ using hrvster.ApplicationServices.Accounts;
 using hrvster.Core.Authentication;
 using hrvster.Extensions.ModelExtensions;
 using hrvster.Models;
+using hrvster.Models.Company;
 using hrvster.Web.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -38,15 +39,24 @@ namespace hrvster.Web.Controllers
 			_notificationService = notificationService;
 		}
 
+		[Route("clientpages/myimages")]
+		[HttpGet]
 		public async Task<IActionResult> Index()
 		{
 			_hrvsterUser = _sessionManager.GetUserInformation();
 
 			var clientImages = await _services.GetClientImagesAsync(_hrvsterUser.UserUid);
 
+			if(clientImages == null)
+			{
+				_notificationService.AddInfoToastMessage("You need to create your client images.");
+
+				return RedirectToAction("create");
+			}
+
 			var model = new ViewClientPages
 			{
-				Uid = clientImages.Uid,
+				Uid = clientImages == null ? Guid.Empty : clientImages.Uid,
 				Images = _mapper.Map<ClientImages>(clientImages),
 			};
 
@@ -59,6 +69,17 @@ namespace hrvster.Web.Controllers
 			_hrvsterUser = _sessionManager.GetUserInformation();
 
 			var clientImages = await _services.GetClientImagesAsync(_hrvsterUser.UserUid);
+
+			if (!await _services.BelongsToUserAsync(_hrvsterUser.UserUid, clientImages))
+			{
+				_logger.LogWarning("The company image uid {uid} does not belong to the user {userUid}", uid, _hrvsterUser.UserUid);
+
+				_notificationService.AddWarningToastMessage("There has been an issue.");
+
+				return RedirectToAction("Index");
+			}
+
+			_logger.LogInformation("Client images pulled and includes Logo: {logoLocation}", clientImages.LogoLocation);
 
 			var model = new UpdateClientPages
 			{
@@ -75,23 +96,49 @@ namespace hrvster.Web.Controllers
 		public async Task<IActionResult> Update(Guid uid, UpdateClientPages form, CancellationToken cancellationToken)
 		{
 			_hrvsterUser = _sessionManager.GetUserInformation();
+			var clientImages = await _services.GetClientImagesAsync(_hrvsterUser.UserUid);
+
+			if (!await _services.BelongsToUserAsync(_hrvsterUser.UserUid, clientImages))
+			{
+				_logger.LogWarning("The company image uid {uid} does not belong to the user {userUid}", uid, _hrvsterUser.UserUid);
+
+				_notificationService.AddWarningToastMessage("There has been an issue.");
+
+				return RedirectToAction("Index");
+			}
+
+			if(form.HeaderLocation == null && form.LogoLocation == null && form.FooterLocation == null)
+			{
+				_notificationService.AddInfoToastMessage("No images were updated.");
+
+				return RedirectToAction("update", new { uid });
+			}
 
 			if (ModelState.IsValid)
 			{
 				await _services.UpdateClientImagesAsync(uid, _hrvsterUser, form.LogoLocation, form.HeaderLocation, form.FooterLocation, form.PreviousLogoLocation, form.PreviousHeaderLocation, form.PreviousFooterLocation, cancellationToken);
 
 				_notificationService.AddSuccessToastMessage("Images updated successfully.");
+
+				return RedirectToAction("update", new { uid = uid });
 			}
 
 			_notificationService.AddErrorToastMessage(ModelState.BuildMessageFromErrors());
 
-			return RedirectToAction(nameof(Update), new { uid });
+			return RedirectToAction("update", new { uid });
 		}
 
 		[HttpGet("clientpages/create")]
 		public async Task<IActionResult> Create()
 		{
 			_hrvsterUser = _sessionManager.GetUserInformation();
+
+			var clientImages = await _services.GetClientImagesAsync(_hrvsterUser.UserUid);
+
+			if (clientImages != null)
+			{
+				return RedirectToAction("Update", new { uid = clientImages.Uid });
+			}
 
 			var model = new CreateClientPages();
 
@@ -103,7 +150,7 @@ namespace hrvster.Web.Controllers
 		{
 			_hrvsterUser = _sessionManager.GetUserInformation();
 
-			if(ModelState.IsValid)
+			if (ModelState.IsValid)
 			{
 				await _services.AddClientImagesAsync(
 					_hrvsterUser, 
@@ -113,6 +160,8 @@ namespace hrvster.Web.Controllers
 					cancellationToken);
 
 				_notificationService.AddSuccessToastMessage("Images created successfully.");
+
+				return RedirectToAction("Index");
 			}
 
 			_notificationService.AddErrorToastMessage(ModelState.BuildMessageFromErrors());

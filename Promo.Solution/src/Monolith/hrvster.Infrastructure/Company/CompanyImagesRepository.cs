@@ -12,7 +12,7 @@ namespace hrvster.Infrastructure.Company
 	{
 		Task<ClientImage> GetCompanyImages(Guid accountUid);
 		Task UpdateCompanyImagesAsync(Guid rowUid, ClientImage companyImages, CancellationToken cancellationToken);
-		Task AddCompanyImagesAsync(Guid accountUid, ClientImage companyImages, CancellationToken cancellationToken);
+		Task AddCompanyImagesAsync(int companyId, ClientImage companyImages, CancellationToken cancellationToken);
 	}
 
 	public class CompanyImagesRepository : ICompanyImagesRepository
@@ -24,14 +24,15 @@ namespace hrvster.Infrastructure.Company
 			_database = database;
 		}
 
-		public async Task AddCompanyImagesAsync(Guid accountUid, ClientImage companyImages, CancellationToken cancellationToken)
+		public async Task AddCompanyImagesAsync(int companyId, ClientImage companyImages, CancellationToken cancellationToken)
 		{
 			using var conn = new MySqlConnection(_database.GetConnectionString());
 			var command = conn.CreateCommand();
-			command.CommandText = "client_images_update";
+			command.CommandText = "client_images_create";
 			command.CommandType = CommandType.StoredProcedure;
 			command
-				.AddParameter("accountUid", accountUid)
+				.AddParameter("companyId", companyId)
+				.AddParameter("companyImageUid", Guid.NewGuid())
 				.AddParameter("logoLocation", companyImages.LogoLocation)
 				.AddParameter("headerLocation", companyImages.HeaderLocation)
 				.AddParameter("footerLocation", companyImages.FooterLocation);

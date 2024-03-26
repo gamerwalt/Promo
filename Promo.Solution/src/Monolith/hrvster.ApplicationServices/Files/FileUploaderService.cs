@@ -1,5 +1,6 @@
-﻿using Firebase.Storage;
+﻿using Azure.Storage.Blobs;
 using hrvster.ApplicationServices.Storage;
+using hrvster.Models.Options;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using System;
@@ -10,47 +11,52 @@ namespace hrvster.ApplicationServices.Files
 {
 	public interface IFileUploaderService
 	{
-		Task<string> UploadToServiceAsync(IFormFile file, string token, string appendToName);
+		Task<string> UploadToServiceAsync(IFormFile file, string token, string companyName);
 	}
 
 	public class FileUploaderService : IFileUploaderService
 	{
 		private readonly ILogger<FileUploaderService> _logger;
+		private readonly HarvesterSettingsOptions _harvesterSettings;
 
-		public FileUploaderService(ILoggerFactory loggerFactory)
+		public FileUploaderService(ILoggerFactory loggerFactory, HarvesterSettingsOptions harvesterSettings)
 		{
 			_logger = loggerFactory.CreateLogger<FileUploaderService>();
+			_harvesterSettings = harvesterSettings;
 		}
 
-		public async Task<string> UploadToServiceAsync(IFormFile file, string token, string appendToName)
+		public async Task<string> UploadToServiceAsync(IFormFile file, string token, string companyName)
 		{
-			_logger.LogInformation("Started the upload to the file server");
+			var blobServiceClient = new BlobServiceClient(_harvesterSettings.HrvsterAzureStorageConnectionString);
+			var containerClient = blobServiceClient.GetBlobContainerClient(StorageNames.ContainerName);
 
-			var firebaseStorage = new FirebaseStorage(GetStoragePath(appendToName), new FirebaseStorageOptions
+			try
 			{
-				AuthTokenAsyncFactory = () => Task.FromResult(token),
-				ThrowOnCancel = true
-			});
+				var filePath = GetFileName(file, Guid.NewGuid());
 
-			var googleStorageFileName = string.Empty;
+				var folderPath = $"{companyName}/";
+				var blobName = $"{folderPath}{Guid.NewGuid()}_{ file.FileName}";
 
-			_logger.LogInformation("Uploading the media {fileName}.", file.FileName);
-			
-			var filePath = GetFileName(file, Guid.NewGuid());
+				using (var stream = File.Create(filePath))
+				{
+					await file.CopyToAsync(stream);
+				}
 
-			using (var stream = File.Create(filePath))
-			{
-				await file.CopyToAsync(stream);
+				var blobClient = containerClient.GetBlobClient(blobName);
+				await using (var uploadStream = File.OpenRead(filePath))
+				{
+					await blobClient.UploadAsync(uploadStream, true);
+					uploadStream.Close();
+				}
+
+				return blobClient.Uri.AbsoluteUri;
 			}
-
-			using (var ms = new FileStream(filePath, FileMode.Open))
+			catch (Exception ex)
 			{
-				googleStorageFileName = await firebaseStorage.Child(file.FileName).PutAsync(ms);
+				_logger.LogWarning("An error occurred while trying to upload an image to Google.");
+				_logger.LogError("Error Received: {errorMessage}", ex.Message);
+				throw;
 			}
-
-			_logger.LogInformation("Finished uploading the media {fileName}.", file.FileName);
-
-			return googleStorageFileName;
 		}
 
 		private string GetFileName(IFormFile file, Guid newUid)
@@ -60,16 +66,6 @@ namespace hrvster.ApplicationServices.Files
 			Directory.CreateDirectory(filePath);
 
 			return Path.Combine(filePath, file.FileName);
-		}
-
-		private static string GetStoragePath(string appendToName)
-		{
-			if (string.IsNullOrWhiteSpace(appendToName))
-			{
-				return $"{StorageNames.CompanyName}";
-			}
-
-			return $"{StorageNames.CompanyName}-{appendToName}";
 		}
 
 		private string GetFilePath(Guid userUid, string addToPath)

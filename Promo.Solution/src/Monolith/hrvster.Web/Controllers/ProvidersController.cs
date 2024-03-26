@@ -507,7 +507,6 @@ namespace hrvster.Web.Controllers
 
 				var link = await _rebrandlyService.GenerateShortLinkAsync($"{companyGameLink}?externalClient={externalClientType}&ruleUid={ruleUid}");
 				var urlLink = $"https://{link}";
-				//var urlLink = "https://games.hrvster.com/rzq";
 
 				form.Post = $"{form.Post}{Environment.NewLine}{urlLink}";
 

@@ -3,28 +3,14 @@
 
 // Write your JavaScript code.
 $(document).ready(function () {
-    $('input[type="radio"]').click(function () {
-        if ($(this).attr('id') == 'PostNow' && $(this).attr('value') == 'False') {
-            $('#scheduleDiv').show();
-        }
-        else if ($(this).attr('id') == 'PostNow' && $(this).attr('value') == 'True') {
-            $('#scheduleDiv').hide();
-        }
-    });
-
     $('#immediateRadioDiv').click(function () {
-        $('#scheduleDiv').hide();
-
         $('[name="PostNow"]').removeAttr('checked');
-
         var value = "true";
         $("input[name=PostNow][value=" + value + "]").attr('checked', 'checked');
     });
 
-    $('#scheduleRadioDiv').click(function () {
-        $('#scheduleDiv').show();
+    $('#showOnScreenRadioDiv').click(function () {
         $('[name="PostNow"]').removeAttr('checked');
-
         var value = "false";
         $("input[name=PostNow][value=" + value + "]").attr('checked', 'checked');
     })

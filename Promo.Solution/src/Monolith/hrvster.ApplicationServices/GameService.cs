@@ -4,6 +4,7 @@ using hrvster.ApplicationServices.MatchGames;
 using hrvster.ApplicationServices.Publishing;
 using hrvster.ApplicationServices.Subscription;
 using hrvster.ApplicationServices.Sweepstakes;
+using hrvster.Core.Requests.Rules.Notifications;
 using hrvster.Core.Requests.WebRequests.Files;
 using hrvster.Games.Match.Models;
 using hrvster.Infrastructure;
@@ -274,8 +275,10 @@ namespace hrvster.ApplicationServices
 				media.Add(media4);
 
 			if (media.Count > 0)
+			{
 				mediaLocation = await _mediator.Send(
 					new UploadFileToFileServerRequest(media, hrvsterUser.UserUid, ProfileType.Twitter, hrvsterUser.Token));
+			}
 
 			switch (Enum.Parse<GameTypesEnum>(gameType))
 			{
@@ -440,24 +443,45 @@ namespace hrvster.ApplicationServices
 					hrvsterUser.Token, hrvsterUser.UserUid, watchValue, watchTypeId, post,
 					Enum.Parse<ExternalClientType>(externalClientType), following, pageId);
 
-			return await SaveScheduledPostToPublishAsync(
-				ruleUid,
-				urlLink,
-				hrvsterUser.UserUid,
-				gameId,
-				gameUid,
-				profile,
-				watchTypeId,
-				watchValue,
-				post,
-				scheduledDate,
-				mediaLocation == null ? null : mediaLocation.ToList(),
-				Enum.Parse<ExternalClientType>(externalClientType),
-				following,
-				pageId,
-				gameType,
-				hrvsterUser.WindowsTimeZone,
-				hrvsterUser.IsDaylight);
+			await _mediator.Publish(
+				new RulePublished(
+					ruleUid, 
+					urlLink, 
+					profile, "0", 
+					new Core.Clients.Common.Message 
+					{ 
+						Hashtag = watchValue,
+						GameUid = gameUid,
+						IsScheduled = true,
+						SweepUid = gameUid,
+						WatchTypeId = watchTypeId
+					}, 
+					following, 
+					gameId, 
+					gameUid, 
+					gameType, 
+					Enum.Parse<ExternalClientType>(externalClientType), 
+					pageId));
+
+			return true;
+			//return await SaveScheduledPostToPublishAsync(
+			//	ruleUid,
+			//	urlLink,
+			//	hrvsterUser.UserUid,
+			//	gameId,
+			//	gameUid,
+			//	profile,
+			//	watchTypeId,
+			//	watchValue,
+			//	post,
+			//	scheduledDate,
+			//	mediaLocation == null ? null : mediaLocation.ToList(),
+			//	Enum.Parse<ExternalClientType>(externalClientType),
+			//	following,
+			//	pageId,
+			//	gameType,
+			//	hrvsterUser.WindowsTimeZone,
+			//	hrvsterUser.IsDaylight);
 		}
 
 		private async Task<bool> SaveScheduledPostToPublishAsync(

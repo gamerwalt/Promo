@@ -244,7 +244,8 @@ namespace hrvster.Infrastructure.MatchGames
 						AccountId = reader.GetInt32("account_id")
 					}
 				},
-				ExternalClientType = Enum.Parse<ExternalClientType>(reader.GetString("provider_name"))
+				ExternalClientType = Enum.Parse<ExternalClientType>(reader.GetString("provider_name")),
+				UrlLink = reader.GetString("url_link")
 			};
 		}
 	}
