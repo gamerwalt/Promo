@@ -113,30 +113,38 @@ namespace hrvster.Template1.Web.Controllers
 				_sessionManager.SetKeyValue(TemplateSessionConstants.GameType, GameTypesEnum.MatchGames.ToString());
 			}
 
-			var authKey = _sessionManager.GetValue(TemplateSessionConstants.AuthenticationKey);
-
-			if (!string.IsNullOrWhiteSpace(authKey))
+			if(externalClient == ExternalClientType.Twitter.ToString())
 			{
-				var userDetails = _twitterHttpService.GetAuthenticatedUserAsync(authKey);
+				var authKey = _sessionManager.GetValue(TemplateSessionConstants.AuthenticationKey);
 
-				if (userDetails != null)
+				if (!string.IsNullOrWhiteSpace(authKey))
 				{
-					_logger.LogInformation("Redirecting to game controller.");
+					var userDetails = _twitterHttpService.GetAuthenticatedUserAsync(authKey);
 
-					return RedirectToGame(GameTypesEnum.MatchGames.ToString(), gameUid, ruleUid, externalClient);
+					if (userDetails != null)
+					{
+						_logger.LogInformation("Redirecting to game controller.");
+
+						return RedirectToGame(GameTypesEnum.MatchGames.ToString(), gameUid, ruleUid, externalClient);
+					}
 				}
+
+				var code = GetProviderCode(externalClient);
+				_logger.LogInformation("Redirecting with provider code {code}", code);
+
+				return RedirectToAction(
+					"ExternalLogin",
+					"Authentication",
+					new
+					{
+						providerCode = code
+					});
 			}
+			
+			//External Client 
+			_logger.LogInformation("Using External Client {externalClient}", externalClient);
 
-			var code = GetProviderCode(externalClient);
-			_logger.LogInformation("Redirecting with provider code {code}", code);
-
-			return RedirectToAction(
-				"ExternalLogin",
-				"Authentication",
-				new
-				{
-					providerCode = code
-				});
+			return new OkObjectResult(new { message = $"We will need the User's MSNId or UserId or UserName from the client to authenticate on our app and also tell them who played the game (win or loss)" });
 		}
 
 		private IActionResult RedirectToGame(string gameType, Guid gameUid, Guid ruleUid, string externalClient)
@@ -205,28 +213,36 @@ namespace hrvster.Template1.Web.Controllers
 				_sessionManager.SetKeyValue(TemplateSessionConstants.ExternalClient, externalClient);
 				_sessionManager.SetKeyValue(TemplateSessionConstants.GameType, GameTypesEnum.Sweeps.ToString());
 
-				var authKey = _sessionManager.GetValue(TemplateSessionConstants.AuthenticationKey);
-
-				if (!string.IsNullOrWhiteSpace(authKey))
+				if (externalClient == ExternalClientType.Twitter.ToString())
 				{
-					var userDetails = _twitterHttpService.GetAuthenticatedUserAsync(authKey);
+					var authKey = _sessionManager.GetValue(TemplateSessionConstants.AuthenticationKey);
 
-					if (userDetails != null)
+					if (!string.IsNullOrWhiteSpace(authKey))
 					{
-						return RedirectToGame(GameTypesEnum.Sweeps.ToString(), gameUid, ruleUid, externalClient);
+						var userDetails = _twitterHttpService.GetAuthenticatedUserAsync(authKey);
+
+						if (userDetails != null)
+						{
+							return RedirectToGame(GameTypesEnum.Sweeps.ToString(), gameUid, ruleUid, externalClient);
+						}
 					}
+
+					var code = GetProviderCode(externalClient);
+					_logger.LogInformation("Redirecting with provider code {code}", code);
+
+					return RedirectToAction(
+						"ExternalLogin",
+						"Authentication",
+						new
+						{
+							providerCode = code
+						});
 				}
 
-				var code = GetProviderCode(externalClient);
-				_logger.LogInformation("Redirecting with provider code {code}", code);
+				//External Client 
+				_logger.LogInformation("Using External Client {externalClient}", externalClient);
 
-				return RedirectToAction(
-					"ExternalLogin",
-					"Authentication",
-					new
-					{
-						providerCode = code
-					});
+				return new OkObjectResult(new { message = $"We will need the User's MSNId or UserId or UserName from the client to authenticate on our app and also tell them who played the game (win or loss)" });
 			}
 		}
 

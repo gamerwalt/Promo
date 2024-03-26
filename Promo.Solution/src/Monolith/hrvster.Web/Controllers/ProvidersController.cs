@@ -6,6 +6,7 @@ using hrvster.Core.Clients;
 using hrvster.Core.Subscriptions;
 using hrvster.Extensions.ModelExtensions;
 using hrvster.Models;
+using hrvster.Models.Company;
 using hrvster.Models.Options;
 using hrvster.Web.Models;
 using Microsoft.AspNetCore.Authentication;
@@ -40,6 +41,7 @@ namespace hrvster.Web.Controllers
 		private readonly IRebrandlyService _rebrandlyService;
 		private readonly IHyperlinkService _hyperLinkService;
 		private readonly ITwitterHttpService _twitterHttpService;
+		private readonly IAccountCompanyService _accountCompanyService;
 
 		private HrvsterUser _hrvsterUser;
 
@@ -56,7 +58,8 @@ namespace hrvster.Web.Controllers
 			HarvesterSettingsOptions hrvsterOptions,
 			IRebrandlyService rebrandlyService,
 			IHyperlinkService hyperLinkService,
-			ITwitterHttpService twitterHttpService)
+			ITwitterHttpService twitterHttpService,
+			IAccountCompanyService accountCompanyService)
 		{
 			_logger = loggerFactory.CreateLogger<ProvidersController>();
 			_sessionManager = sessionManager;
@@ -71,6 +74,7 @@ namespace hrvster.Web.Controllers
 			_rebrandlyService = rebrandlyService;
 			_hyperLinkService = hyperLinkService;
 			_twitterHttpService = twitterHttpService;
+			_accountCompanyService = accountCompanyService;
 		}
 
 		[HttpGet]
@@ -477,6 +481,16 @@ namespace hrvster.Web.Controllers
 
 			_hrvsterUser = _sessionManager.GetUserInformation();
 
+			var accountCompanies = await _accountCompanyService.GetAccountCompaniesAsync(_hrvsterUser.UserUid);
+			var accountCompany = accountCompanies.FirstOrDefault();
+
+			if(accountCompany == null)
+			{
+				_logger.LogWarning("Unable to get the company of the account with user uid {userUid}", _hrvsterUser.UserUid);
+
+				return RedirectToAction(actionName, controllerName, new { uid = Uid });
+			}
+
 			var watchTypes = await _providersService.GetWatchTypesAsync();
 
 			var gameDetail = await _gameService.GetGameDetailsAsync(Enum.Parse<GameTypesEnum>(gameType), Uid);
@@ -505,7 +519,8 @@ namespace hrvster.Web.Controllers
 
 				var companyGameLink = await GetAccountCompanyLink(_hrvsterUser.UserUid, gameType, Uid);
 
-				var link = await _rebrandlyService.GenerateShortLinkAsync($"{companyGameLink}?externalClient={externalClientType}&ruleUid={ruleUid}");
+				var link = await _rebrandlyService.GenerateShortLinkAsync(
+					$"{companyGameLink}?externalClient={GetExternalClient(externalClientType, form.PostNow, accountCompany)}&ruleUid={ruleUid}");
 				var urlLink = $"https://{link}";
 
 				form.Post = $"{form.Post}{Environment.NewLine}{urlLink}";
@@ -540,6 +555,11 @@ namespace hrvster.Web.Controllers
 			var model = GetCreateRulePost(Uid, actionName, controllerName, gameType, watchTypes, gameDetail);
 
 			return View(model);
+		}
+
+		private string GetExternalClient(string externalClientType, bool postNow, AccountCompany accountCompany)
+		{
+			return postNow ? externalClientType : accountCompany.Subdomain;
 		}
 
 		private async Task<string> GetAccountCompanyLink(Guid userUid, string gameType, Guid gameUid)

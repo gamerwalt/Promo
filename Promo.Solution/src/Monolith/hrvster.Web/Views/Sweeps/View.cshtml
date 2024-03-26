@@ -322,36 +322,6 @@
 																Rule Actions
 															</div>
 														</div>
-														@if (rule.ExternalId == "0")
-														{
-															<div class="menu-item px-3">
-																<a asp-action="View"
-																   asp-controller="ScheduledTweets"
-																   asp-route-sweepUid="@Model.Sweepstake.SweepUid"
-																   asp-route-ruleUid="@rule.RuleUid"
-																   asp-route-actionName=@ViewContext.RouteData.Values["action"]
-																   asp-route-controllerName=@ViewContext.RouteData.Values["controller"]
-																   target="_blank"
-																   class="menu-link flex-stack px-3">
-																	View
-																</a>
-															</div>
-														}
-														else
-														{
-															<div class="menu-item px-3">
-																<a asp-action="View"
-																   asp-controller="SweepRuleEntries"
-																   asp-route-sweepUid="@Model.Sweepstake.SweepUid"
-																   asp-route-ruleUid="@rule.RuleUid"
-																   asp-route-actionName=@ViewContext.RouteData.Values["action"]
-																   asp-route-controllerName=@ViewContext.RouteData.Values["controller"]
-																   target="_blank"
-																   class="menu-link flex-stack px-3">
-																	View Entries
-																</a>
-															</div>
-														}
 														@if (rule.ExternalId != "0")
 														{
 															@if (!Model.SweepNotification.DrawHappened || Model.SweepEntries.Count() <= 0)
@@ -365,23 +335,6 @@
 																	   asp-route-controllerName=@ViewContext.RouteData.Values["controller"]
 																	   class="menu-link flex-stack px-3">
 																		Delete
-																	</a>
-																</div>
-															}
-														}
-														else
-														{
-															@if (!Model.SweepNotification.DrawHappened || Model.SweepEntries.Count() <= 0)
-															{
-																<div class="menu-item px-3">
-																	<a asp-action="DeleteScheduledRule"
-																   asp-controller="ScheduledTweets"
-																   asp-route-sweepUid="@Model.Sweepstake.SweepUid"
-																   asp-route-ruleUid="@rule.RuleUid"
-																   asp-route-actionName=@ViewContext.RouteData.Values["action"]
-																   asp-route-controllerName=@ViewContext.RouteData.Values["controller"]
-																   class="menu-link flex-stack px-3">
-																		Delete Scheduled
 																	</a>
 																</div>
 															}
