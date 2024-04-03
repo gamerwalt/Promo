@@ -16,15 +16,29 @@ namespace hrvster.Templates.Models.Extensions
 			var accessToken = claims.FirstOrDefault(x => x.Type == HrvsterClaimTypes.AccessToken)?.Value;
 			var refreshToken = claims.FirstOrDefault(x => x.Type == HrvsterClaimTypes.RefreshToken)?.Value;
 			var description = claims.FirstOrDefault(x => x.Type == HrvsterClaimTypes.Description)?.Value;
+			var externalClient = claims.FirstOrDefault(x => x.Type == HrvsterClaimTypes.ExternalClient)?.Value;
+			externalProfileId = externalProfileId ?? claims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier)?.Value;
 
 			// Check for missing claims and handle accordingly
-			if (string.IsNullOrWhiteSpace(externalProfileId) ||
-				string.IsNullOrWhiteSpace(screenName) ||
-				string.IsNullOrWhiteSpace(displayName) ||
-				string.IsNullOrWhiteSpace(accessToken) ||
-				string.IsNullOrWhiteSpace(refreshToken))
+			if (string.IsNullOrWhiteSpace(externalProfileId))
 			{
-				throw new InvalidOperationException("One or more required claims are missing.");
+				throw new InvalidOperationException("The External Profile Claim Is missing");
+			}
+			if(string.IsNullOrWhiteSpace(screenName))
+			{
+				throw new InvalidOperationException("The Screen Name Claim Is missing");
+			}
+			if(string.IsNullOrWhiteSpace(displayName))
+			{
+				throw new InvalidOperationException("The Display Name Claim Is missing");
+			}
+			if(string.IsNullOrWhiteSpace(accessToken))
+			{
+				throw new InvalidOperationException("The Access Token Claim Is missing");
+			}
+			if(string.IsNullOrWhiteSpace(refreshToken))
+			{
+				throw new InvalidOperationException("The Refresh Token Claim Is missing");
 			}
 
 			return new MemberProfile
@@ -35,7 +49,7 @@ namespace hrvster.Templates.Models.Extensions
 				AccessToken = accessToken,
 				RefreshToken = refreshToken,
 				Description = description ?? string.Empty,  // Description can be optional, so we provide a default value
-				ProfileType = ProfileType.Twitter
+				ProfileType = ProfileType.Client
 			};
 		}
 	}

@@ -26,7 +26,7 @@ form {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     grid-gap: 5px;
-    max-width: 50%;
+    max-width: 70%;
     width: 100%;
     background-color: black;
     border: 1px solid white;
@@ -38,9 +38,16 @@ form {
 .tile {
     background-color: lightblue;
     cursor: pointer;
-    padding-bottom: 100%;
+    padding-bottom: 100%; /* Maintain aspect ratio */
     position: relative;
     border: 1px solid #000;
+    background-image: url('/images/PrizeBox.png');
+    background-position: center; /* Center the background image */
+    background-repeat: no-repeat; /* Prevent the image from repeating */
+    background-size: contain; /* Adjust the size of the image to fit the tile */
+    display: flex; /* Ensures content is centered */
+    align-items: center; /* Center content vertically */
+    justify-content: center; /* Center content horizontally */
 }
 
     .tile::after {
@@ -49,15 +56,16 @@ form {
         position: absolute;
         top: 0;
         left: 0;
-        width: 100%;
-        height: 100%;
+        right: 0;
+        bottom: 0;
         box-sizing: border-box;
         opacity: 0;
         background-color: rgba(0, 0, 0, 0.5);
+        z-index: 1; /* Ensure it's above the background image but below any other content */
     }
 
     .tile.selected::after {
-        opacity: 1;
+        opacity: 0.85;
     }
 
 @media screen and (max-width: 768px) {

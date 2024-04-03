@@ -1,0 +1,75 @@
+﻿@model CreateLinkRequest
+@{
+    ViewData["Title"] = "Create/Publish Rule Post";
+}
+<div class="card card-bordered">
+    <form 
+        asp-controller="Providers" 
+        asp-action="CreateLink"
+        asp-route-Uid="@Model.GameUid"
+        asp-route-returnAction=@Model.ActionName
+        asp-route-returnController=@Model.ControllerName
+        class="form-horizontal form-material mx-2">
+        @Html.HiddenFor(m => m.GameUid)
+        @Html.HiddenFor(m => m.ActionName)
+        @Html.HiddenFor(m => m.ControllerName)
+        @Html.HiddenFor(m => m.GameType)
+        @Html.HiddenFor(m => m.UrlLink)
+        @Html.HiddenFor(m => m.RuleUid)
+                <div class="card-header">
+            <h3 class="card-title">Create A Link for @Model.GameName</h3>
+        </div>
+        <div class="card-body">
+            <div class="d-flex flex-column flex-lg-row">
+                <div class="flex-lg-row-fluid me-lg-15 order-2 order-lg-1 mb-10 mb-lg-0">
+                    <div class="fv-row mb-8">
+                        <label class="d-flex align-items-center fs-6 fw-semibold form-label mb-2">
+                            Link
+                        </label>
+                        <label>@Model.UrlLink</label>
+                        <span asp-validation-for="UrlLink"></span>
+                    </div>
+                    <div class="fv-row-mb-8 text-active-primary">
+                        <label class="fs-3 fw-bolder" style="color: green">
+                            You don't really have to do anything. The link has been created. Just click the save button to save it.
+                        </label>
+                    </div>
+                </div>
+                <div class="flex-column flex-lg-row-auto w-100 w-lg-250px w-xl-300px mb-10 order-1 order-lg-2">
+                    <div class="card card-flush pt-3 mb-0" data-kt-sticky="true" data-kt-sticky-offset="{default: false, lg: '200px'}" data-kt-sticky-width="{lg: '250px', xl: '300px'}" data-kt-sticky-left="auto" data-kt-sticky-top="150px" data-kt-sticky-animation="false" data-kt-sticky-zindex="95">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <h2>Game Dates</h2>
+                            </div>
+                        </div>
+                        <div class="card-body pt-0 fs-6">
+                            <div class="mb-7">
+                                <span>@Model.GameName</span>
+                            </div>
+                            <div class="separator separator-dashed mb-7"></div>
+                            <div class="mb-7">
+                                <h5 class="mb-3">Dates</h5>
+                                <div class="mb-0">
+                                    <span class="badge badge-light-info me-2">Start Date: @Model.StartDate.ToString("MMM dd, yyyy, hh:mm:ss tt")</span>
+                                    <span class="badge badge-light-info me-2">End Date: @Model.EndDate.ToString("MMM dd, yyyy, hh:mm:ss tt")</span>
+                                </div>
+                            </div>
+                            <div class="separator separator-dashed mb-7"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card-footer">
+            <div class="card-toolbar">
+                <button type="submit" class="btn btn-md btn-light btn-primary mx-2">
+                    Save
+                </button>
+                <a class="btn btn-light btn-default" href="javascript:history.go(-1)">Back</a>
+            </div>
+        </div>
+    </form>
+</div>
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

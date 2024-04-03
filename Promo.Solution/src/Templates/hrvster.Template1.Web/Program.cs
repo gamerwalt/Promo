@@ -65,6 +65,7 @@ namespace hrvster.Template1.Web
 				.Enrich.FromLogContext()
 				.MinimumLevel.Verbose()
 				.WriteTo.Loggly()
+				.WriteTo.Console()
 				.CreateLogger();
 
 			Serilog.Debugging.SelfLog.Enable(Console.Error);
@@ -81,6 +82,7 @@ namespace hrvster.Template1.Web
 							=> configuration.ReadFrom.Configuration(builder.Configuration)
 								.Enrich.FromLogContext()
 								.WriteTo.Loggly()
+								.WriteTo.Console()
 								.WriteTo.ApplicationInsights(telemetryConfiguration, TelemetryConverter.Traces)
 								.MinimumLevel.Verbose(), preserveStaticLogger: true);
 			Log.Information("Use Serilog applied on hrvster.Template1.Web app.");
@@ -177,6 +179,7 @@ namespace hrvster.Template1.Web
 			builder.Services.AddMatchGameRepositories();
 			builder.Services.AddPostSchedulers();
 			builder.Services.AddWatchTypeRepositories();
+			builder.Services.AddTransient<CryptoHelper>();
 
 			builder.Services.AddTransient<TwitterClient>()
 				.AddTransient<InstagramClient>()

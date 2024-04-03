@@ -74,7 +74,9 @@ namespace hrvster.ApplicationServices.Sweepstakes
 			string displayName,
 			UserIdentifierType userIdentifierType,
 			string tweetMessage,
-			string externalClient, string accessToken, string refreshToken)
+			string externalClient,
+			string accessToken, 
+			string accessTokenSecret)
 		{
 			_logger.LogInformation("Getting sweepstake {sweepName} entry rules.", sweepGame.Name);
 
@@ -150,9 +152,16 @@ namespace hrvster.ApplicationServices.Sweepstakes
 
 			var rule = rules.ToList().FirstOrDefault(r => r.RuleUid == ruleUid);
 
+			if(externalClient != ExternalClientType.Twitter.ToString() ||
+				externalClient != ExternalClientType.Facebook.ToString() ||
+				externalClient != ExternalClientType.Instagram.ToString())
+			{
+				externalClient = ExternalClientType.Client.ToString();
+			}
+
 			_publisher = _publisherResolver(Enum.Parse<ExternalClientType>(externalClient));
 
-			return await EnterSweepstakeAsync(_publisher, campaign, sweepGame, rule, profile, displayName, externalProfileId, userIdentifierType, tweetMessage, accessToken, refreshToken);
+			return await EnterSweepstakeAsync(_publisher, campaign, sweepGame, rule, profile, displayName, externalProfileId, userIdentifierType, tweetMessage, accessToken, accessTokenSecret, externalClient);
 		}
 
 		private async Task<Guid> EnterSweepstakeAsync(
@@ -166,7 +175,8 @@ namespace hrvster.ApplicationServices.Sweepstakes
 			UserIdentifierType userIdentifierType,
 			string tweetMessage,
 			string accessToken, 
-			string refreshToken)
+			string refreshToken,
+			string externalClient)
 		{
 			if (!campaign.ActiveInd ||
 				!CampaignIsRunning(campaign) ||
@@ -189,16 +199,21 @@ namespace hrvster.ApplicationServices.Sweepstakes
 					SweepEntryUid = sweepEntryUid
 				});
 
-				//Todo: let's tweet out here
-				var hashtag = rule.WatchValue;
-				var replyTo = $"@{profile.ScreenName}";
-				var tweetText = $"{replyTo} {tweetMessage.Replace("[GameName]", sweepGame.Name)} {Environment.NewLine} {hashtag}";
+				var tweetId = "N/A";
 
-				var tweetId = await _twitterHttpService.PublishTweetInResponseToAsync(
-					tweetText, 
-					rule.ExternalId, 
-					accessToken,
-					refreshToken);
+				if(externalClient == ExternalClientType.Twitter.ToString())
+				{
+					//Todo: let's tweet out here
+					var hashtag = rule.WatchValue;
+					var replyTo = $"@{profile.ScreenName}";
+					var tweetText = $"{replyTo} {tweetMessage.Replace("[GameName]", sweepGame.Name)} {Environment.NewLine} {hashtag}";
+
+					tweetId = await _twitterHttpService.PublishTweetInResponseToAsync(
+						tweetText,
+						rule.ExternalId,
+						accessToken,
+						refreshToken);
+				}
 
 				//enter reporting
 				await _reportingRepository.UpsertSweepEntryReportAsync(new SweepEntryReport

@@ -13,5 +13,7 @@
 		public Guid? AccountUid { get; set; }
 		public string? ExternalClient { get; internal set; }
 		public Guid? RuleUid { get; internal set; }
+		public string? HandshakeKey { get; internal set; }
+		public Guid CampaignUid { get; internal set; }
 	}
 }

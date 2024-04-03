@@ -273,7 +273,7 @@
 											<td>
 												@if (@rule.ExternalId == "0" || string.IsNullOrWhiteSpace(rule.ExternalId))
 												{
-													@rule.UrlLink
+													<a href="@rule.UrlLink">Right Click and Copy</a>
 												}
 												else
 												{
@@ -393,6 +393,15 @@
 								asp-route-gameType="@GameTypesEnum.Sweeps.ToString()"
 								class="btn btn-lg btn-primary">
 								Create Hashtag
+							</a>
+							<a asp-action="CreateLink"
+							   asp-controller="Providers"
+							   asp-route-uid="@Model.Sweepstake.SweepUid"
+							   asp-route-actionName=@ViewContext.RouteData.Values["action"]
+							   asp-route-controllerName=@ViewContext.RouteData.Values["controller"]
+							   asp-route-gameType="@GameTypesEnum.Sweeps.ToString()"
+							   class="btn btn-lg btn-primary">
+								Create Link
 							</a>
 							<div class="separator"></div>
 						}
@@ -590,7 +599,9 @@
 								<thead>
 									<tr>
 										<th class="min-w-100px">Identifier</th>
+										<th>User Id</th>
 										<th>Identifier Type</th>
+										<th></th>
 										<th>Entry Date</th>
 									</tr>
 								<thead>

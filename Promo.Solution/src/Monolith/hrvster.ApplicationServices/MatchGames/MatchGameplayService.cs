@@ -73,27 +73,9 @@ namespace hrvster.ApplicationServices.MatchGames
 			gameBoard = await _gameboardService.GetRandomBoardAsync(gameUid, cancellationToken);
 			if (gameBoard == null)
 			{
-				_logger.LogInformation("Could not get a random gameboard from the cache.");
+				_logger.LogInformation("Could not get a random gameboard.");
 
-				_logger.LogInformation("Attempting to get a random gameboard uid.");
-
-				var gameboardUid = await _gameboardService.GetRandomGameboardUidAsync(gameUid, cancellationToken);
-
-				if (gameboardUid == Guid.Empty)
-				{
-					_logger.LogInformation("Getting all the gameboard uids of the game that are not reserved.");
-
-					var gameBoardUids = await _gameboardService.GetGameBoardUidsAsync(gameUid, cancellationToken);
-					var uids = gameBoardUids.ToList();
-
-					_logger.LogInformation("Retrieved a total of {count} gameboard uids that are not reserved.", uids.Count);
-
-					var randomIndex = RandomNumberGenerator.GetInt32(uids.Count);
-
-					gameboardUid = uids[randomIndex];
-				}
-
-				gameBoard = await _gameboardService.GetGameBoardAsync(gameboardUid, cancellationToken);
+				return Guid.Empty;
 			}
 
 			_logger.LogInformation("Retrieved the gameboard {gameboardUid} from the cache.", gameBoard.Uid);

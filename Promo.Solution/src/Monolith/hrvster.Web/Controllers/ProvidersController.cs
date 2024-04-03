@@ -5,6 +5,7 @@ using hrvster.Core.Authentication;
 using hrvster.Core.Clients;
 using hrvster.Core.Subscriptions;
 using hrvster.Extensions.ModelExtensions;
+using hrvster.Infrastructure.Core;
 using hrvster.Models;
 using hrvster.Models.Company;
 using hrvster.Models.Options;
@@ -90,6 +91,7 @@ namespace hrvster.Web.Controllers
 				Uid = uid,
 				Providers = watchTypeProviders
 					.Where(a => a.ActiveInd)
+					.Where(a => a.WatchTypeProviderName != "Client")
 					.Select(a => new SelectListItem()
 					{
 						Text = a.WatchTypeProviderName,
@@ -423,6 +425,95 @@ namespace hrvster.Web.Controllers
 				controllerName = controllerName,
 				gameType = gameType
 			});
+		}
+
+		[HttpGet]
+		[Route("/providers/create/link")]
+		public async Task<IActionResult> CreateLink(Guid Uid, string actionName, string controllerName, string gameType)
+		{
+			if (string.IsNullOrWhiteSpace(gameType) ||
+				string.IsNullOrWhiteSpace(actionName) ||
+				string.IsNullOrWhiteSpace(controllerName))
+			{
+				return RedirectToAction("index", "Dashboard");
+			}
+
+			_hrvsterUser = _sessionManager.GetUserInformation();
+
+			var accountCompanies = await _accountCompanyService.GetAccountCompaniesAsync(_hrvsterUser.UserUid);
+			var accountCompany = accountCompanies.FirstOrDefault();
+
+			if (accountCompany == null)
+			{
+				_logger.LogWarning("Unable to get the company of the account with user uid {userUid}", _hrvsterUser.UserUid);
+
+				return RedirectToAction(actionName, controllerName, new { uid = Uid });
+			}
+
+			var gameDetail = await _gameService.GetGameDetailsAsync(Enum.Parse<GameTypesEnum>(gameType), Uid);
+
+			if (gameDetail == null)
+			{
+				_logger.LogWarning("Unable to get game details for the uid {uid} and the game type {gameType}", Uid, gameType);
+
+				return RedirectToAction(actionName, controllerName, new { uid = Uid });
+			}
+
+			var ruleUid = Guid.NewGuid();
+
+			var companyGameLink = await GetAccountCompanyLink(_hrvsterUser.UserUid, gameType, Uid);
+
+			var urlLink = $"{companyGameLink}?externalClient={accountCompany.Subdomain}&ruleUid={ruleUid}";
+
+			return View(new CreateLinkRequest
+			{
+				UrlLink = urlLink,
+				GameType = gameType,
+				GameUid = Uid,
+				RuleUid = ruleUid,
+				ActionName = actionName,
+				ControllerName = controllerName,
+				GameName = gameDetail.Name,
+				StartDate = gameDetail.StartDate,
+				EndDate = gameDetail.EndDate
+			});
+		}
+
+		[HttpPost]
+		[Route("/providers/create/link")]
+		public async Task<IActionResult> CreateLink(Guid Uid, string actionName, string controllerName, string gameType, CreateLinkRequest form)
+		{
+			if (string.IsNullOrWhiteSpace(gameType) ||
+				string.IsNullOrWhiteSpace(actionName) ||
+				string.IsNullOrWhiteSpace(controllerName))
+			{
+				return RedirectToAction("index", "Dashboard");
+			}
+
+			_hrvsterUser = _sessionManager.GetUserInformation();
+
+			var accountCompanies = await _accountCompanyService.GetAccountCompaniesAsync(_hrvsterUser.UserUid);
+			var accountCompany = accountCompanies.FirstOrDefault();
+
+			if (accountCompany == null)
+			{
+				_logger.LogWarning("Unable to get the company of the account with user uid {userUid}", _hrvsterUser.UserUid);
+
+				return RedirectToAction(actionName, controllerName, new { uid = Uid });
+			}
+
+			var gameDetail = await _gameService.GetGameDetailsAsync(Enum.Parse<GameTypesEnum>(gameType), Uid);
+
+			if (gameDetail == null)
+			{
+				_logger.LogWarning("Unable to get game details for the uid {uid} and the game type {gameType}", Uid, gameType);
+
+				return RedirectToAction(actionName, controllerName, new { uid = Uid });
+			}
+
+			await _gameService.CreateRuleLinkAsync(form.UrlLink, form.GameType, form.GameUid, form.RuleUid);
+
+			return RedirectToAction(actionName, controllerName, new { uid = Uid });
 		}
 
 		[HttpGet]

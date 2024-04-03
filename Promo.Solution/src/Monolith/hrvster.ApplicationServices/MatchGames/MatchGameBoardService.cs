@@ -281,6 +281,11 @@ namespace hrvster.ApplicationServices.MatchGames
 		{
 			var boardKeys = await GetBoardKeysFromCahceOrDatabase(gameUid, cancellationToken);
 
+			if(boardKeys == null || boardKeys.Count == 0)
+			{
+				return null;
+			}
+
 			var randomIndex = RandomNumberGenerator.GetInt32(boardKeys.Count);
 			var randomBoardUid = boardKeys[randomIndex];
 
@@ -292,6 +297,11 @@ namespace hrvster.ApplicationServices.MatchGames
 				_logger.LogInformation("Board is empty so retrieving the board from the databse.");
 
 				board = await _matchBoardsRepository.GetGameBoardAsync(randomBoardUid);
+			}
+			else
+			{
+				//make sure this board is not reservable again by removing it from the cache
+				await _cahceDataService.RemoveItemFromCacheAsync($"{CacheKeys.GameBoards}{randomBoardUid}");
 			}
 
 			return board;
@@ -308,16 +318,10 @@ namespace hrvster.ApplicationServices.MatchGames
 
 		private async Task<List<Guid>> GetBoardKeysFromCahceOrDatabase(Guid gameUid, CancellationToken cancellationToken)
 		{
-			var boardKeys = await GetBoardKeysAsync(gameUid);
+			//We removed getting it from cache
+			var boardUids = await _matchBoardsRepository.GetGameBoardUidsAsync(gameUid, cancellationToken);
 
-			if (boardKeys == null || boardKeys.Count == 0)
-			{
-				var boardUids = await _matchBoardsRepository.GetGameBoardUidsAsync(gameUid, cancellationToken);
-
-				boardKeys = boardUids.ToList();
-			}
-
-			return boardKeys;
+			return boardUids.ToList();
 		}
 
 		private async Task<List<Guid>> GetBoardKeysAsync(Guid gameUid)

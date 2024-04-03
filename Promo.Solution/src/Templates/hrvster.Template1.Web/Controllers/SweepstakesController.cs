@@ -1,18 +1,25 @@
 ﻿using Azure.Storage.Blobs.Models;
 using hrvster.ApplicationServices;
 using hrvster.ApplicationServices.Accounts;
+using hrvster.ApplicationServices.Common;
 using hrvster.ApplicationServices.Extensions.LogExtensions;
 using hrvster.ApplicationServices.Sweepstakes;
 using hrvster.Core.Authentication;
+using hrvster.Core.Clients;
 using hrvster.Models;
+using hrvster.Models.Options;
 using hrvster.Template1.Web.Models;
 using hrvster.Template1.Web.Models.Query;
 using hrvster.Templates.Core.Common;
 using hrvster.Templates.Infrastructure.Customizations;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using System.Text;
 using System.Threading;
+using System.Web;
 
 namespace hrvster.Template1.Web.Controllers;
 
@@ -25,6 +32,8 @@ public class SweepstakesController : Controller
 	private readonly ISweepstakesService _sweepStakeService;
 	private readonly IPlaySweepstakeService _playSweepstakeService;
 	private readonly IAccountsService _accountsService;
+	private readonly ICampaignService _campaignService;
+	private readonly HarvesterSettingsOptions _harvesterSettingOptions;
 
 	public SweepstakesController(
 		ILoggerFactory loggerFactory,
@@ -33,7 +42,9 @@ public class SweepstakesController : Controller
 		IMemberRepository memberRepository,
 		ISweepstakesService sweepStakesService,
 		IPlaySweepstakeService playSweepstakeService,
-		IAccountsService accountsService)
+		IAccountsService accountsService,
+		ICampaignService campaignService,
+		HarvesterSettingsOptions harvesterSettingOptions)
 	{
 		_logger = loggerFactory.CreateLogger<SweepstakesController>();
 		_gameService = gameService;
@@ -42,6 +53,8 @@ public class SweepstakesController : Controller
 		_sweepStakeService = sweepStakesService;
 		_playSweepstakeService = playSweepstakeService;
 		_accountsService = accountsService;
+		_campaignService = campaignService;
+		_harvesterSettingOptions = harvesterSettingOptions;
 	}
 
 	[HttpGet("routes")]
@@ -64,16 +77,15 @@ public class SweepstakesController : Controller
 	}
 
 
-	[HttpGet("Sweepstakes/PrePlay/{gameUid}/rule/{ruleUid}/externalClient/{externalClient}")]
+	[HttpGet("Sweepstakes/PrePlay")]
 	public async Task<IActionResult> PrePlay(
-		Guid gameUid,
-		Guid ruleUid,
-		string externalClient)
+		[FromQuery] Guid gameUid,
+		[FromQuery] Guid ruleUid,
+		[FromQuery] string externalClient,
+		[FromQuery] Guid campaignUid,
+		[FromQuery] string handshakeKey)
 	{
-		_sessionManager.SetKeyValue(TemplateSessionConstants.GameUid, gameUid.ToString());
-		_sessionManager.SetKeyValue(TemplateSessionConstants.RuleUid, ruleUid.ToString());
-		_sessionManager.SetKeyValue(TemplateSessionConstants.ExternalClient, externalClient);
-		_sessionManager.SetKeyValue(TemplateSessionConstants.GameType, GameTypesEnum.Sweeps.ToString());
+		_logger.LogInformation("Received a request to enter into the sweepstake game with uid {GameUid}", gameUid);
 
 		using (_logger.BeginPreplayForSweepsGameScope(gameUid, ruleUid, externalClient))
 		{
@@ -84,8 +96,6 @@ public class SweepstakesController : Controller
 
 				return ErrorRedirect("Unable to locate sweepstakes game.", StatusCodes.Status404NotFound);
 			}
-			
-			_sessionManager.SetKeyValue(SessionConstants.AccountUid, sweepGame.Account.AccountUid.ToString());
 
 			if (DateTime.UtcNow > sweepGame.EndDateUtc)
 			{
@@ -101,42 +111,57 @@ public class SweepstakesController : Controller
 				return ErrorRedirect("Game has not started.", StatusCodes.Status400BadRequest);
 			}
 
-			var accountUidString = _sessionManager.GetValue(SessionConstants.AccountUid);
-
-			if(string.IsNullOrWhiteSpace(accountUidString))
+			var campaign = await _campaignService.GetCampaignAsync(campaignUid, default);
+			if (campaign == null)
 			{
-				var code = GetProviderCode(externalClient);
-				_logger.LogInformation("Redirecting with provider code {code}", code);
+				_logger.LogError("Campaign not found!");
 
-				return RedirectToAction(
-					"ExternalLogin",
-					"Authentication",
-					new
-					{
-						providerCode = code
-					});
-			}
-
-			var accountUid = Guid.Parse(accountUidString);
-			if (string.IsNullOrWhiteSpace(accountUidString) || accountUid == Guid.Empty)
-			{
-				_logger.LogWarning("AccountUid is empty!");
-
-				return ErrorRedirect("AccountUid is empty!", StatusCodes.Status400BadRequest);
+				return ErrorRedirect("Campaign not found!", StatusCodes.Status400BadRequest);
 			}
 
 			if (!User.Identity.IsAuthenticated)
 			{
-				var code = GetProviderCode(externalClient);
-				_logger.LogInformation("Redirecting with provider code {code}", code);
+				if (externalClient == ExternalClientType.Twitter.ToString())
+				{
+					_logger.LogWarning("User is not authenticated.");
 
-				return RedirectToAction(
-					"ExternalLogin",
-					"Authentication",
-					new
+					var code = GetProviderCode(externalClient);
+					_logger.LogInformation("Redirecting with provider code {code}", code);
+
+					return RedirectToAction(
+						"ExternalLogin",
+						"Authentication",
+						new
+						{
+							providerCode = code
+						});
+				}
+				else
+				{
+					var handshakeKeyDecoded = HttpUtility.UrlDecode(handshakeKey);
+
+					var decryptedData = CryptoHelper.DecryptHandshakeKey(
+					handshakeKeyDecoded,
+						_harvesterSettingOptions.EncryptionKey,
+						_harvesterSettingOptions.EncryptionIV);
+
+					var userQuery = UserQuery.Parse(decryptedData);
+
+					var userDetailsForClient = new UserProviderDetails
 					{
-						providerCode = code
-					});
+						AccessToken = Guid.NewGuid().ToString(),
+						AccessTokenSecret = Guid.NewGuid().ToString(),
+						ExternalProfileId = userQuery.UserId,
+						Name = userQuery.UserName,
+						ScreenName = userQuery.UserName,
+						Description = $"{userQuery.UserName}-{userQuery.UserId}",
+						RefreshToken = Guid.NewGuid().ToString()
+					};
+
+					_logger.LogInformation("Signing in the user automatically.");
+
+					await SignInUserAsync(userDetailsForClient, ExternalClientType.Client);
+				}
 			}
 
 			var rules = await _gameService.GetRulesAsync(GameTypesEnum.Sweeps, gameUid, default);
@@ -163,10 +188,41 @@ public class SweepstakesController : Controller
 			{
 				gameUid,
 				ruleUid,
-				accountUid,
-				externalClient
+				campaign.Account.AccountUid,
+				externalClient,
+				campaignUid,
+				handshakeKey
 			});
 		}
+	}
+
+	private async Task SignInUserAsync(UserProviderDetails userDetails, ExternalClientType externalClient)
+	{
+		var principal = BuildPrincipalFromClaims(userDetails, externalClient);
+
+		await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
+	}
+
+	private static ClaimsPrincipal BuildPrincipalFromClaims(
+		UserProviderDetails userDetails, ExternalClientType externalClient)
+	{
+		var claims = new List<Claim>()
+			{
+				new Claim(ClaimTypes.NameIdentifier, userDetails.ExternalProfileId),
+				new Claim(ClaimTypes.Name, userDetails.Name),
+				new Claim(HrvsterClaimTypes.DisplayName, userDetails.ScreenName),
+				new Claim(HrvsterClaimTypes.AccessToken, userDetails.AccessToken),
+				new Claim(HrvsterClaimTypes.RefreshToken, userDetails.RefreshToken),
+				new Claim(HrvsterClaimTypes.Description, userDetails.Description),
+				new Claim(HrvsterClaimTypes.ExternalProfileId, userDetails.ExternalProfileId),
+				new Claim(HrvsterClaimTypes.ExternalClient, externalClient.ToString())
+			};
+
+		var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+
+		var principal = new ClaimsPrincipal(identity);
+
+		return principal;
 	}
 
 	private string GetProviderCode(string externalClient)
@@ -175,21 +231,19 @@ public class SweepstakesController : Controller
 				ExternalClientType.Twitter => hrvster.Models.Constants.TwitterProvider,
 				ExternalClientType.Facebook => hrvster.Models.Constants.FaceBookProvider,
 				ExternalClientType.Instagram => hrvster.Models.Constants.InstagramProvider,
+				ExternalClientType.Client => hrvster.Models.Constants.ClientProvider,
 				_ => hrvster.Models.Constants.TwitterProvider,
 			};
 
-	[HttpGet("Sweepstakes/Play/Game/{gameUid:Guid}/Rule/{ruleUid:Guid}/Account/{accountUid}/ExternalClient/{externalClient}")]
+	[HttpGet("Sweepstakes/Play")]
 	public async Task<IActionResult> Play(
-		Guid gameUid, 
-		Guid ruleUid, 
-		Guid accountUid, 
-		string externalClient)
+		[FromQuery] Guid gameUid, 
+		[FromQuery] Guid ruleUid, 
+		[FromQuery] Guid accountUid, 
+		[FromQuery] string externalClient,
+		[FromQuery] Guid campaignUid,
+		[FromQuery] string handshakeKey)
 	{
-		_sessionManager.SetKeyValue(TemplateSessionConstants.GameUid, gameUid.ToString());
-		_sessionManager.SetKeyValue(TemplateSessionConstants.RuleUid, ruleUid.ToString());
-		_sessionManager.SetKeyValue(TemplateSessionConstants.ExternalClient, externalClient);
-		_sessionManager.SetKeyValue(TemplateSessionConstants.GameType, GameTypesEnum.Sweeps.ToString());
-
 		using (_logger.BeginPlayForSweepsGameScope(gameUid, ruleUid, externalClient))
 		{
 			var gameDetails = await _gameService.GetGameDetailsAsync(GameTypesEnum.Sweeps, gameUid);
@@ -208,8 +262,6 @@ public class SweepstakesController : Controller
 				return ErrorRedirect("Unable to locate sweepstakes game.", StatusCodes.Status404NotFound);
 			}
 
-			_sessionManager.SetKeyValue(SessionConstants.AccountUid, sweepGame.Account.AccountUid.ToString());
-
 			if (DateTime.UtcNow > gameDetails.EndDateUtc)
 			{
 				_logger.LogWarning("Game has ended.");
@@ -224,23 +276,49 @@ public class SweepstakesController : Controller
 				return ErrorRedirect("Game has not started.", StatusCodes.Status400BadRequest);
 			}
 
-			_sessionManager.SetKeyValue(TemplateSessionConstants.GameUid, gameUid.ToString());
-			_sessionManager.SetKeyValue(TemplateSessionConstants.RuleUid, ruleUid.ToString());
-			_sessionManager.SetKeyValue(TemplateSessionConstants.ExternalClient, externalClient);
-			_sessionManager.SetKeyValue(TemplateSessionConstants.GameType, GameTypesEnum.Sweeps.ToString());
-
 			if (!User.Identity.IsAuthenticated)
 			{
-				var code = GetProviderCode(externalClient);
-				_logger.LogInformation("Redirecting with provider code {code}", code);
+				if (externalClient == ExternalClientType.Twitter.ToString())
+				{
+					_logger.LogWarning("User is not authenticated.");
 
-				return RedirectToAction(
-					"ExternalLogin",
-					"Authentication",
-					new
+					var code = GetProviderCode(externalClient);
+					_logger.LogInformation("Redirecting with provider code {code}", code);
+
+					return RedirectToAction(
+						"ExternalLogin",
+						"Authentication",
+						new
+						{
+							providerCode = code
+						});
+				}
+				else
+				{
+					var handshakeKeyDecoded = HttpUtility.UrlDecode(handshakeKey);
+
+					var decryptedData = CryptoHelper.DecryptHandshakeKey(
+					handshakeKeyDecoded,
+						_harvesterSettingOptions.EncryptionKey,
+						_harvesterSettingOptions.EncryptionIV);
+
+					var userQuery = UserQuery.Parse(decryptedData);
+
+					var userDetailsForClient = new UserProviderDetails
 					{
-						providerCode = code
-					});
+						AccessToken = Guid.NewGuid().ToString(),
+						AccessTokenSecret = Guid.NewGuid().ToString(),
+						ExternalProfileId = userQuery.UserId,
+						Name = userQuery.UserName,
+						ScreenName = userQuery.UserName,
+						Description = $"{userQuery.UserName}-{userQuery.UserId}",
+						RefreshToken = Guid.NewGuid().ToString()
+					};
+
+					_logger.LogInformation("Signing in the user automatically.");
+
+					await SignInUserAsync(userDetailsForClient, ExternalClientType.Client);
+				}
 			}
 
 			var rules = await _gameService.GetRulesAsync(GameTypesEnum.Sweeps, gameUid, default);
@@ -288,51 +366,74 @@ public class SweepstakesController : Controller
 				return ErrorRedirect("Unable to find external profile id for this user.", StatusCodes.Status400BadRequest);
 			}
 
-			var member = await _memberRepository.GetMemberViaExternalProfileIdAsync(accountUid, GetProfileType(externalClient), externalProfileId);
-			if (member == null)
+			if(externalClient == ExternalClientType.Twitter.ToString())
 			{
-				_logger.LogWarning("Unable to find member details.");
+				var member = await _memberRepository.GetMemberViaExternalProfileIdAsync(accountUid, GetProfileType(externalClient), externalProfileId);
+				if (member == null)
+				{
+					_logger.LogWarning("Unable to find member details.");
 
-				var memberCreationQuery = new MemberCreationQuery(gameUid, ruleUid, externalClient, GameTypesEnum.Sweeps.ToString());
+					var memberCreationQuery = new MemberCreationQuery(gameUid, ruleUid, externalClient, GameTypesEnum.Sweeps.ToString());
 
-				return RedirectToAction(
-					"CreateMember",
-					"Members",
-					memberCreationQuery);
+					return RedirectToAction(
+						"CreateMember",
+						"Members",
+						memberCreationQuery);
+				}
+
+				var playGame = new PlaySweepsGame
+				{
+					GameUid = gameUid,
+					RuleUid = ruleUid,
+					ExternalClient = externalClient,
+					NumberOfEntries = 1, //we can get this from the rules later on
+					GameName = gameDetails.Name,
+					GameStartDate = gameDetails.StartDate,
+					GameEndDate = gameDetails.EndDate,
+					ScreenName = member.Profiles.FirstOrDefault()?.Name,
+					FirstName = member.FirstName,
+					LastName = member.LastName,
+					AccountUid = accountUid,
+					CampaignUid = campaignUid,
+					HandshakeKey = handshakeKey
+				};
+
+				return View(playGame);
 			}
-
-			var playGame = new PlaySweepsGame
+			else
 			{
-				GameUid = gameUid,
-				RuleUid = ruleUid,
-				ExternalClient = externalClient,
-				NumberOfEntries = 1, //we can get this from the rules later on
-				GameName = gameDetails.Name,
-				GameStartDate = gameDetails.StartDate,
-				GameEndDate = gameDetails.EndDate,
-				ScreenName = member.Profiles.FirstOrDefault()?.Name,
-				FirstName = member.FirstName,
-				LastName = member.LastName,
-				AccountUid = accountUid
-			};
+				var playGame = new PlaySweepsGame
+				{
+					GameUid = gameUid,
+					RuleUid = ruleUid,
+					ExternalClient = externalClient,
+					NumberOfEntries = 1, //we can get this from the rules later on
+					GameName = gameDetails.Name,
+					GameStartDate = gameDetails.StartDate,
+					GameEndDate = gameDetails.EndDate,
+					ScreenName = userName,
+					FirstName = externalProfileId,
+					LastName = externalProfileId,
+					AccountUid = accountUid,
+					CampaignUid = campaignUid,
+					HandshakeKey = handshakeKey
+				};
 
-			return View(playGame);
+				return View(playGame);
+			}
 		}
 	}
 
-	[HttpPost("Sweepstakes/Play/Game/{gameUid:Guid}/Rule/{ruleUid:Guid}/Account/{accountUid}/ExternalClient/{externalClient}")]
+	[HttpPost("Sweepstakes/Play")]
 	public async Task<IActionResult> Play(
-		Guid gameUid, 
-		Guid ruleUid, 
-		Guid accountUid, 
-		string externalClient,
+		[FromQuery] Guid gameUid,
+		[FromQuery] Guid ruleUid,
+		[FromQuery] Guid accountUid,
+		[FromQuery] string externalClient,
+		[FromQuery] Guid campaignUid,
+		[FromQuery] string? handshakeKey,
 		PlaySweepsGame form)
 	{
-		_sessionManager.SetKeyValue(TemplateSessionConstants.GameUid, gameUid.ToString());
-		_sessionManager.SetKeyValue(TemplateSessionConstants.RuleUid, ruleUid.ToString());
-		_sessionManager.SetKeyValue(TemplateSessionConstants.ExternalClient, externalClient);
-		_sessionManager.SetKeyValue(TemplateSessionConstants.GameType, GameTypesEnum.Sweeps.ToString());
-
 		using (_logger.BeginPostPlayForSweepsGameScope(gameUid, ruleUid, externalClient))
 		{
 			var gameDetails = await _gameService.GetGameDetailsAsync(GameTypesEnum.Sweeps, gameUid);
@@ -367,23 +468,49 @@ public class SweepstakesController : Controller
 				return ErrorRedirect("Game has not started.", StatusCodes.Status400BadRequest);
 			}
 
-			_sessionManager.SetKeyValue(TemplateSessionConstants.GameUid, gameUid.ToString());
-			_sessionManager.SetKeyValue(TemplateSessionConstants.RuleUid, ruleUid.ToString());
-			_sessionManager.SetKeyValue(TemplateSessionConstants.ExternalClient, externalClient);
-			_sessionManager.SetKeyValue(TemplateSessionConstants.GameType, GameTypesEnum.Sweeps.ToString());
-
 			if (!User.Identity.IsAuthenticated)
 			{
-				var code = GetProviderCode(externalClient);
-				_logger.LogInformation("Redirecting with provider code {code}", code);
+				if (externalClient == ExternalClientType.Twitter.ToString())
+				{
+					_logger.LogWarning("User is not authenticated.");
 
-				return RedirectToAction(
-					"ExternalLogin",
-					"Authentication",
-					new
+					var code = GetProviderCode(externalClient);
+					_logger.LogInformation("Redirecting with provider code {code}", code);
+
+					return RedirectToAction(
+						"ExternalLogin",
+						"Authentication",
+						new
+						{
+							providerCode = code
+						});
+				}
+				else
+				{
+					var handshakeKeyDecoded = HttpUtility.UrlDecode(handshakeKey);
+
+					var decryptedData = CryptoHelper.DecryptHandshakeKey(
+					handshakeKeyDecoded,
+						_harvesterSettingOptions.EncryptionKey,
+						_harvesterSettingOptions.EncryptionIV);
+
+					var userQuery = UserQuery.Parse(decryptedData);
+
+					var userDetailsForClient = new UserProviderDetails
 					{
-						providerCode = code
-					});
+						AccessToken = Guid.NewGuid().ToString(),
+						AccessTokenSecret = Guid.NewGuid().ToString(),
+						ExternalProfileId = userQuery.UserId,
+						Name = userQuery.UserName,
+						ScreenName = userQuery.UserName,
+						Description = $"{userQuery.UserName}-{userQuery.UserId}",
+						RefreshToken = Guid.NewGuid().ToString()
+					};
+
+					_logger.LogInformation("Signing in the user automatically.");
+
+					await SignInUserAsync(userDetailsForClient, ExternalClientType.Client);
+				}
 			}
 
 			var userName = User.Identities
@@ -411,37 +538,67 @@ public class SweepstakesController : Controller
 				return ErrorRedirect("Unable to find external profile id for this user.", StatusCodes.Status400BadRequest);
 			}
 
-			var member = await _memberRepository.GetMemberViaExternalProfileIdAsync(accountUid, GetProfileType(externalClient), externalProfileId);
-			if (member == null)
+			if (externalClient == ExternalClientType.Twitter.ToString())
 			{
-				_logger.LogWarning("Unable to find member details.");
-
-				return ErrorRedirect("Unable to find member details.", StatusCodes.Status400BadRequest);
-			}
-
-			if(ModelState.IsValid)
-			{
-				var entryUid = await _playSweepstakeService.EnterSweepstakeAsync(
-					sweepGame,
-					ruleUid,
-					externalProfileId,
-					userName,
-					GetUserIdentifierType(externalClient),
-					MessageConstants.SweepstakeTweetReply,
-					externalClient,
-					member.Profiles.FirstOrDefault()?.AccessToken,
-					member.Profiles.FirstOrDefault()?.RefreshToken);
-
-				if (entryUid != Guid.Empty)
+				var member = await _memberRepository.GetMemberViaExternalProfileIdAsync(accountUid, GetProfileType(externalClient), externalProfileId);
+				if (member == null)
 				{
-					_logger.LogInformation("User has entered the sweepstakes game.");
+					_logger.LogWarning("Unable to find member details.");
 
-					return RedirectToActionPermanent("SweepEntered", new { entryUid = entryUid });
+					return ErrorRedirect("Unable to find member details.", StatusCodes.Status400BadRequest);
 				}
 
-				_logger.LogWarning("Unable to enter sweepstakes game.");
+				if (ModelState.IsValid)
+				{
+					var entryUid = await _playSweepstakeService.EnterSweepstakeAsync(
+						sweepGame,
+						ruleUid,
+						externalProfileId,
+						userName,
+						GetUserIdentifierType(externalClient),
+						MessageConstants.SweepstakeTweetReply,
+						externalClient,
+						member.Profiles.FirstOrDefault()?.AccessToken,
+						member.Profiles.FirstOrDefault()?.RefreshToken);
 
-				return RedirectToActionPermanent("SweepEntryFailed", new { gameUid, ruleUid, externalClient });
+					if (entryUid != Guid.Empty)
+					{
+						_logger.LogInformation("User has entered the sweepstakes game.");
+
+						return RedirectToActionPermanent("SweepEntered", new { entryUid = entryUid, externalClient = externalClient });
+					}
+
+					_logger.LogWarning("Unable to enter sweepstakes game.");
+
+					return RedirectToActionPermanent("SweepEntryFailed", new { gameUid, ruleUid, externalClient });
+				}
+			}
+			else
+			{
+				if(ModelState.IsValid)
+				{
+					var entryUid = await _playSweepstakeService.EnterSweepstakeAsync(
+						sweepGame,
+						ruleUid,
+						externalProfileId,
+						userName,
+						GetUserIdentifierType(externalClient),
+						MessageConstants.SweepstakeTweetReply,
+						externalClient,
+						string.Empty,
+						string.Empty);
+
+					if (entryUid != Guid.Empty)
+					{
+						_logger.LogInformation("User has entered the sweepstakes game.");
+
+						return RedirectToActionPermanent("SweepEntered", new { entryUid = entryUid, externalClient = externalClient });
+					}
+
+					_logger.LogWarning("Unable to enter sweepstakes game.");
+
+					return RedirectToActionPermanent("SweepEntryFailed", new { gameUid, ruleUid, externalClient });
+				}
 			}
 
 			return RedirectToActionPermanent("SweepEntryFailed", new { gameUid, ruleUid, externalClient });
@@ -449,8 +606,8 @@ public class SweepstakesController : Controller
 	}
 
 	[Authorize]
-	[HttpGet("Sweepstakes/Entered/{entryUid}")]
-	public async Task<IActionResult> SweepEntered(Guid entryUid)
+	[HttpGet("Sweepstakes/SweepEntered/Entry/{entryUid:Guid}/ExternalClient/{externalClient}")]
+	public async Task<IActionResult> SweepEntered(Guid entryUid, string externalClient)
 	{
 		var entry = await _sweepStakeService.GetSweepstakeEntryAsync(entryUid);
 
@@ -464,15 +621,29 @@ public class SweepstakesController : Controller
 		entry.Rule = rule;
 
 		var accountUidString = _sessionManager.GetValue(SessionConstants.AccountUid);
-		var accountUid = Guid.Parse(accountUidString);
-		if (string.IsNullOrWhiteSpace(accountUidString) || accountUid == Guid.Empty)
+		
+		if (string.IsNullOrWhiteSpace(accountUidString))
 		{
-			_logger.LogWarning("AccountUid is empty!");
+			var game = await _sweepStakeService.GetSweepstakeAsync(entry.Sweep.SweepUid, default);
+			if (game == null)
+			{
+				_logger.LogWarning("Game not found!");
 
-			return ErrorRedirect("AccountUid is empty!", StatusCodes.Status400BadRequest);
+				return ErrorRedirect("Game not found!", StatusCodes.Status400BadRequest);
+			}
+
+			var campaign = await _campaignService.GetCampaignAsync(game.Campaign.CampaignUid, default);
+			if (campaign == null)
+			{
+				_logger.LogWarning("Campaign not found!");
+
+				return ErrorRedirect("Campaign not found!", StatusCodes.Status400BadRequest);
+			}
+
+			accountUidString = campaign.Account.AccountUid.ToString();
 		}
 
-		var accountProfile = await _accountsService.GetProfileAsync(accountUid, ProfileType.Twitter);
+		var accountProfile = await _accountsService.GetProfileAsync(Guid.Parse(accountUidString), ProfileType.Twitter);
 
 		if(accountProfile == null)
 		{
@@ -534,12 +705,21 @@ public class SweepstakesController : Controller
 
 	private UserIdentifierType GetUserIdentifierType(string externalClient)
 	{
+		if (externalClient != ExternalClientType.Twitter.ToString() ||
+			externalClient != ExternalClientType.Facebook.ToString() ||
+			externalClient != ExternalClientType.Instagram.ToString())
+		{
+			externalClient = ExternalClientType.Client.ToString();
+		}
+
 		switch (Enum.Parse<ExternalClientType>(externalClient))
 		{
 			case ExternalClientType.Twitter:
 				return UserIdentifierType.TwitterHandle;
 			case ExternalClientType.Facebook:
 				return UserIdentifierType.FacebookHandle;
+			case ExternalClientType.Client:
+				return UserIdentifierType.Client;
 		}
 
 		return UserIdentifierType.TwitterHandle;
@@ -547,11 +727,21 @@ public class SweepstakesController : Controller
 
 	private string GetProfileType(string externalClient)
 	{
-		return Enum.Parse<ExternalClientType>(externalClient) switch
+		if(externalClient != ExternalClientType.Twitter.ToString() ||
+			externalClient != ExternalClientType.Facebook.ToString() ||
+			externalClient != ExternalClientType.Instagram.ToString())
+		{
+			externalClient = ExternalClientType.Client.ToString();
+		}
+
+		Enum.TryParse<ExternalClientType>(externalClient, out var externalClientEnum);
+
+		return externalClientEnum switch
 		{
 			ExternalClientType.Twitter => ProfileType.Twitter.ToString(),
 			ExternalClientType.Facebook => ProfileType.Facebook.ToString(),
-			_ => ProfileType.Twitter.ToString(),
+			ExternalClientType.Client => ProfileType.Client.ToString(),
+			_ => ProfileType.Client.ToString(),
 		};
 	}
 

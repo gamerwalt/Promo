@@ -1,10 +1,21 @@
 ﻿using hrvster.ApplicationServices;
+using hrvster.ApplicationServices.Common;
 using hrvster.ApplicationServices.Extensions.LogExtensions;
 using hrvster.Core.Authentication;
 using hrvster.Core.Clients;
 using hrvster.Models;
+using hrvster.Template1.Web.Models.Query;
 using hrvster.Templates.Core.Common;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.WebUtilities;
+using System.Security.Claims;
+using System.Security.Cryptography;
+using System.Threading;
+using hrvster.Models.Options;
+using System.Web;
+using hrvster.Models.Extensions;
 
 namespace hrvster.Template1.Web.Controllers
 {
@@ -14,17 +25,23 @@ namespace hrvster.Template1.Web.Controllers
 		private readonly IGameService _gameService;
 		private readonly ISessionManager _sessionManager;
 		private readonly ITwitterHttpService _twitterHttpService;
+		private readonly ICampaignService _campaignService;
+		private readonly HarvesterSettingsOptions _harvesterSettingOptions;
 
 		public GamesController(
 			ILoggerFactory loggerFactory,
 			IGameService gameService,
 			ISessionManager sessionManager,
-			ITwitterHttpService twitterHttpService)
+			ITwitterHttpService twitterHttpService,
+			ICampaignService campaignService,
+			HarvesterSettingsOptions harvesterSettingOptions)
 		{
 			_logger = loggerFactory.CreateLogger<GamesController>();
 			_gameService = gameService;
 			_sessionManager = sessionManager;
 			_twitterHttpService = twitterHttpService;
+			_campaignService = campaignService;
+			_harvesterSettingOptions = harvesterSettingOptions;
 		}
 
 		[HttpGet("Games")]
@@ -57,50 +74,69 @@ namespace hrvster.Template1.Web.Controllers
 		public async Task<IActionResult> Pick3MatchGame(
 			Guid gameUid,
 			[FromQuery] string externalClient,
-			[FromQuery] Guid ruleUid)
+			[FromQuery] Guid ruleUid,
+			[FromQuery] string handshakeKey)
 		{
 			_logger.LogInformation("Got a request to play the game for a pick 3 game with uid {gameUid}", gameUid);
+
+			await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
 
 			_sessionManager.SetKeyValue(TemplateSessionConstants.GameUid, gameUid.ToString());
 			_sessionManager.SetKeyValue(TemplateSessionConstants.RuleUid, ruleUid.ToString());
 			_sessionManager.SetKeyValue(TemplateSessionConstants.ExternalClient, externalClient);
 			_sessionManager.SetKeyValue(TemplateSessionConstants.GameType, GameTypesEnum.MatchGames.ToString());
 
-			var campaignUidString = _sessionManager.GetValue(SessionConstants.CampaignUid);
-			var accountUidString = _sessionManager.GetValue(SessionConstants.AccountUid);
-
-			if (string.IsNullOrEmpty(campaignUidString) || string.IsNullOrEmpty(accountUidString))
+			var game = await _gameService.GetGameDetailsAsync(GameTypesEnum.MatchGames, gameUid);
+			if (game == null)
 			{
-				_logger.LogError("CampaignUid or AccountUid is null or empty for the game uid {gameUid} with externalClient {externalClient} for rule {ruleUid}",
-					gameUid,
-					externalClient,
-					ruleUid);
+				_logger.LogError("Game not found!");
 
-				return RedirectToAction("HandleErrorCode", "Error", new { statusCode = 400 });
+				return RedirectToAction("HandlerErrorCode", "Error", new { statusCode = 400});
 			}
 
-			var campaignUid = Guid.Parse(campaignUidString);
-			var accountUid = Guid.Parse(_sessionManager.GetValue(SessionConstants.AccountUid));
-
-			if (campaignUid == Guid.Empty || accountUid == Guid.Empty)
+			var campaign = await _campaignService.GetCampaignAsync(game.CampaignUid, default);
+			if (campaign == null)
 			{
-				_logger.LogError("CampaignUid or AccountUid is empty for the game uid {gameUid} with externalClient {externalClient} for rule {ruleUid}",
-					gameUid,
-					externalClient,
-					ruleUid);
+				_logger.LogError("Campaign not found!");
 
-				return RedirectToAction("HandleErrorCode", "Error", new { statusCode = 400 });
+				return RedirectToAction("HandlerErrorCode", StatusCodes.Status400BadRequest);
 			}
 
-			_sessionManager.SetKeyValue(SessionConstants.CampaignUid, campaignUidString);
-			_sessionManager.SetKeyValue(SessionConstants.AccountUid, accountUidString);
+			//var campaignUidString = _sessionManager.GetValue(SessionConstants.CampaignUid);
+			//var accountUidString = _sessionManager.GetValue(SessionConstants.AccountUid);
 
-			using (_logger.Pick3MatchGameLoggingEntry(ruleUid, gameUid, campaignUid, accountUid))
+			//if (string.IsNullOrEmpty(campaignUidString) || string.IsNullOrEmpty(accountUidString))
+			//{
+			//	_logger.LogError("CampaignUid or AccountUid is null or empty for the game uid {gameUid} with externalClient {externalClient} for rule {ruleUid}",
+			//		gameUid,
+			//		externalClient,
+			//		ruleUid);
+
+			//	return RedirectToAction("HandleErrorCode", "Error", new { statusCode = 400 });
+			//}
+
+			//var campaignUid = Guid.Parse(campaignUidString);
+			//var accountUid = Guid.Parse(_sessionManager.GetValue(SessionConstants.AccountUid));
+
+			//if (campaignUid == Guid.Empty || accountUid == Guid.Empty)
+			//{
+			//	_logger.LogError("CampaignUid or AccountUid is empty for the game uid {gameUid} with externalClient {externalClient} for rule {ruleUid}",
+			//		gameUid,
+			//		externalClient,
+			//		ruleUid);
+
+			//	return RedirectToAction("HandleErrorCode", "Error", new { statusCode = 400 });
+			//}
+
+			_sessionManager.SetKeyValue(SessionConstants.CampaignUid, campaign.CampaignUid.ToString());
+			_sessionManager.SetKeyValue(SessionConstants.AccountUid, campaign.Account.AccountUid.ToString());
+
+			using (_logger.Pick3MatchGameLoggingEntry(ruleUid, gameUid, campaign.CampaignUid, campaign.Account.AccountUid))
 			{
 				_logger.LogInformation("Received a request to play the pick 3 match game from the social {externalClient}",
 				externalClient);
 
-				if (!await _gameService.GameExistsForAccountAsync(accountUid, gameUid))
+				if (!await _gameService.GameExistsForAccountAsync(campaign.Account.AccountUid, gameUid))
 				{
 					_logger.LogError("Game does not exist for the account.");
 
@@ -125,7 +161,13 @@ namespace hrvster.Template1.Web.Controllers
 					{
 						_logger.LogInformation("Redirecting to game controller.");
 
-						return RedirectToGame(GameTypesEnum.MatchGames.ToString(), gameUid, ruleUid, externalClient);
+						return RedirectToGame(
+							GameTypesEnum.MatchGames.ToString(), 
+							gameUid, 
+							ruleUid, 
+							externalClient, 
+							campaign.CampaignUid,
+							handshakeKey);
 					}
 				}
 
@@ -137,17 +179,49 @@ namespace hrvster.Template1.Web.Controllers
 					"Authentication",
 					new
 					{
-						providerCode = code
+						providerCode = code,
+						gameUid,
+						ruleUid,
+						externalClient,
+						gameType = GameTypesEnum.MatchGames.ToString(),
 					});
 			}
-			
-			//External Client 
-			_logger.LogInformation("Using External Client {externalClient}", externalClient);
 
-			return new OkObjectResult(new { message = $"We will need the User's MSNId or UserId or UserName from the client to authenticate on our app and also tell them who played the game (win or loss)" });
+			//External Client 
+			var handshakeKeyDecoded = HttpUtility.UrlDecode(handshakeKey);
+
+			var decryptedData = CryptoHelper.DecryptHandshakeKey(
+			handshakeKeyDecoded,
+				_harvesterSettingOptions.EncryptionKey,
+				_harvesterSettingOptions.EncryptionIV);
+
+			var userQuery = UserQuery.Parse(decryptedData);
+
+			var userDetailsForClient = new UserProviderDetails
+			{
+				AccessToken = Guid.NewGuid().ToString(),
+				AccessTokenSecret = Guid.NewGuid().ToString(),
+				ExternalProfileId = userQuery.UserId,
+				Name = userQuery.UserName,
+				ScreenName = userQuery.UserName,
+				Description = $"{userQuery.UserName}-{userQuery.UserId}",
+				RefreshToken = Guid.NewGuid().ToString()
+			};
+
+			_logger.LogInformation("Signing in the user automatically.");
+
+			await SignInUserAsync(userDetailsForClient, ExternalClientType.Client);
+
+			return await HandleGameAndUserProfile(
+				GameTypesEnum.MatchGames.ToString(),
+				gameUid,
+				ruleUid,
+				externalClient,
+				campaign.CampaignUid, 
+				handshakeKey);
 		}
 
-		private IActionResult RedirectToGame(string gameType, Guid gameUid, Guid ruleUid, string externalClient)
+		private IActionResult RedirectToGame(string gameType, Guid gameUid, Guid ruleUid, string externalClient, Guid campaignUid, string handshakeKey)
 		{
 			var controllerName = gameType == GameTypesEnum.Sweeps.ToString()
 				? "Sweepstakes"
@@ -155,55 +229,58 @@ namespace hrvster.Template1.Web.Controllers
 
 			var actionName = "PrePlay";
 
-			return RedirectToActionPermanent(actionName, controllerName, new { gameUid, ruleUid, externalClient });
+			return RedirectToActionPermanent(
+				actionName, 
+				controllerName, 
+				new 
+				{ 
+					gameUid, 
+					ruleUid, 
+					externalClient, 
+					campaignUid, 
+					handshakeKey 
+				});
 		}
 
 		[HttpGet("Games/Sweeps/{gameUid}")]
 		public async Task<IActionResult> Sweeps(
 			Guid gameUid,
 			[FromQuery] string externalClient,
-			[FromQuery] Guid ruleUid)
+			[FromQuery] Guid ruleUid,
+			[FromQuery] string handshakeKey)
 		{
+			await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+
 			_sessionManager.SetKeyValue(TemplateSessionConstants.GameUid, gameUid.ToString());
 			_sessionManager.SetKeyValue(TemplateSessionConstants.RuleUid, ruleUid.ToString());
 			_sessionManager.SetKeyValue(TemplateSessionConstants.ExternalClient, externalClient);
 			_sessionManager.SetKeyValue(TemplateSessionConstants.GameType, GameTypesEnum.Sweeps.ToString());
 
-			var campaignUidString = _sessionManager.GetValue(SessionConstants.CampaignUid);
-			var accountUidString = _sessionManager.GetValue(SessionConstants.AccountUid);
-
-			if (string.IsNullOrEmpty(campaignUidString) || string.IsNullOrEmpty(accountUidString))
+			var game = await _gameService.GetGameDetailsAsync(GameTypesEnum.Sweeps, gameUid);
+			if (game == null)
 			{
-				_logger.LogWarning("CampaignUid or AccountUid is null or empty for the game uid {gameUid} with externalClient {externalClient} for rule {ruleUid}",
-					gameUid,
-					externalClient,
-					ruleUid);
+				_logger.LogError("Game not found!");
 
-				return RedirectToAction("HandleErrorCode", "Error", new { statusCode = 400 });
+				return RedirectToAction("HandlerErrorCode", "Error", new { statusCode = 400 });
 			}
 
-			var campaignUid = Guid.Parse(campaignUidString);
-			var accountUid = Guid.Parse(_sessionManager.GetValue(SessionConstants.AccountUid));
-
-			if (campaignUid == Guid.Empty || accountUid == Guid.Empty)
+			var campaign = await _campaignService.GetCampaignAsync(game.CampaignUid, default);
+			if (campaign == null)
 			{
-				_logger.LogWarning("CampaignUid or AccountUid is empty for the game uid {gameUid} with externalClient {externalClient} for rule {ruleUid}",
-					gameUid,
-					externalClient,
-					ruleUid);
+				_logger.LogError("Campaign not found!");
 
-				return RedirectToAction("HandleErrorCode", "Error", new { statusCode = 400 });
+				return RedirectToAction("HandlerErrorCode", StatusCodes.Status400BadRequest);
 			}
 
-			_sessionManager.SetKeyValue(SessionConstants.CampaignUid, campaignUidString);
-			_sessionManager.SetKeyValue(SessionConstants.AccountUid, accountUidString);
+			_sessionManager.SetKeyValue(SessionConstants.CampaignUid, campaign.CampaignUid.ToString());
+			_sessionManager.SetKeyValue(SessionConstants.AccountUid, campaign.Account.AccountUid.ToString());
 
-			using (_logger.SweepsGameLoggingEntry(ruleUid, gameUid, campaignUid, accountUid))
+			using (_logger.SweepsGameLoggingEntry(ruleUid, gameUid, campaign.CampaignUid, campaign.Account.AccountUid))
 			{
 				_logger.LogInformation("Received a request to play the sweepstakes game from the social {externalClient}",
 				externalClient);
 
-				if (!await _gameService.GameExistsForAccountAsync(accountUid, gameUid))
+				if (!await _gameService.GameExistsForAccountAsync(campaign.Account.AccountUid, gameUid))
 				{
 					return RedirectToAction(nameof(GameDoesNotExist), new { gameUid, externalClient, ruleUid });
 				}
@@ -223,7 +300,7 @@ namespace hrvster.Template1.Web.Controllers
 
 						if (userDetails != null)
 						{
-							return RedirectToGame(GameTypesEnum.Sweeps.ToString(), gameUid, ruleUid, externalClient);
+							return RedirectToGame(GameTypesEnum.Sweeps.ToString(), gameUid, ruleUid, externalClient, campaign.CampaignUid, handshakeKey);
 						}
 					}
 
@@ -235,15 +312,110 @@ namespace hrvster.Template1.Web.Controllers
 						"Authentication",
 						new
 						{
-							providerCode = code
+							providerCode = code,
+							gameUid,
+							ruleUid,
+							externalClient,
+							gameType = GameTypesEnum.Sweeps.ToString(),
 						});
 				}
 
 				//External Client 
-				_logger.LogInformation("Using External Client {externalClient}", externalClient);
+				var handshakeKeyDecoded = HttpUtility.UrlDecode(handshakeKey);
 
-				return new OkObjectResult(new { message = $"We will need the User's MSNId or UserId or UserName from the client to authenticate on our app and also tell them who played the game (win or loss)" });
+				var decryptedData = CryptoHelper.DecryptHandshakeKey(
+				handshakeKeyDecoded,
+					_harvesterSettingOptions.EncryptionKey,
+					_harvesterSettingOptions.EncryptionIV);
+
+				var userQuery = UserQuery.Parse(decryptedData);
+
+				var userDetailsForClient = new UserProviderDetails
+				{
+					AccessToken = Guid.NewGuid().ToString(),
+					AccessTokenSecret = Guid.NewGuid().ToString(),
+					ExternalProfileId = userQuery.UserId,
+					Name = userQuery.UserName,
+					ScreenName = userQuery.UserName,
+					Description = $"{userQuery.UserName}-{userQuery.UserId}",
+					RefreshToken = Guid.NewGuid().ToString()
+				};
+
+				_logger.LogInformation("Signing in the user automatically.");
+
+				await SignInUserAsync(userDetailsForClient, ExternalClientType.Client);
+
+				return await HandleGameAndUserProfile(
+					GameTypesEnum.Sweeps.ToString(), 
+					gameUid, 
+					ruleUid, 
+					externalClient, 
+					campaign.CampaignUid,
+					handshakeKey);
 			}
+		}
+
+		private async Task<IActionResult> HandleGameAndUserProfile(
+			string gameType,
+			Guid gameUid,
+			Guid ruleUid,
+			string externalClient,
+			Guid campaignUid,
+			string handshakeKey)
+		{
+			var gameDetails = await _gameService.GetGameDetailsAsync(Enum.Parse<GameTypesEnum>(gameType), gameUid);
+
+			if (DateTime.UtcNow > gameDetails.EndDateUtc)
+			{
+				return RedirectToAction("HandlerErrorCode", 
+					new 
+					{ 
+						reason = "Game has ended.", 
+						statusCode = StatusCodes.Status400BadRequest 
+					});
+			}
+
+			if (DateTime.UtcNow < gameDetails.StartDateUtc)
+			{
+				return RedirectToAction("HandlerErrorCode",
+					new
+					{
+						reason = "Game has not started.",
+						statusCode = StatusCodes.Status400BadRequest
+					});
+			}
+
+			//Redirect directly to play the game if from client.
+			return RedirectToGame(gameType, gameUid, ruleUid, externalClient, campaignUid, handshakeKey);
+		}
+
+		private async Task SignInUserAsync(UserProviderDetails userDetails, ExternalClientType externalClient)
+		{
+			var principal = BuildPrincipalFromClaims(userDetails, externalClient);
+
+			await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
+		}
+
+		private static ClaimsPrincipal BuildPrincipalFromClaims(
+			UserProviderDetails userDetails, ExternalClientType externalClient)
+		{
+			var claims = new List<Claim>()
+			{
+				new Claim(ClaimTypes.NameIdentifier, userDetails.ExternalProfileId),
+				new Claim(ClaimTypes.Name, userDetails.Name),
+				new Claim(HrvsterClaimTypes.DisplayName, userDetails.ScreenName),
+				new Claim(HrvsterClaimTypes.AccessToken, userDetails.AccessToken),
+				new Claim(HrvsterClaimTypes.RefreshToken, userDetails.RefreshToken),
+				new Claim(HrvsterClaimTypes.Description, userDetails.Description),
+				new Claim(HrvsterClaimTypes.ExternalProfileId, userDetails.ExternalProfileId),
+				new Claim(HrvsterClaimTypes.ExternalClient, externalClient.ToString())
+			};
+
+			var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+
+			var principal = new ClaimsPrincipal(identity);
+
+			return principal;
 		}
 
 		private string GetProviderCode(string externalClient)

@@ -297,7 +297,7 @@
 									<td>
 										@if (@rule.ExternalId == "0")
 										{
-											@rule.UrlLink
+											<a href="@rule.UrlLink">Right Click and Copy</a>
 										}
 										else
 										{
@@ -434,6 +434,15 @@
 						asp-route-gameType="@GameTypesEnum.MatchGames.ToString()"
 						class="btn btn-lg btn-primary">
 						Create Hashtag
+					</a>
+					<a asp-action="CreateLink"
+					   asp-controller="Providers"
+					   asp-route-uid="@Model.MatchGame.MatchGameUid"
+					   asp-route-actionName=@ViewContext.RouteData.Values["action"]
+					   asp-route-controllerName=@ViewContext.RouteData.Values["controller"]
+					   asp-route-gameType="@GameTypesEnum.MatchGames.ToString()"
+					   class="btn btn-lg btn-secondary">
+						Create Link
 					</a>
 				</div>
 				<div class="separator"></div>

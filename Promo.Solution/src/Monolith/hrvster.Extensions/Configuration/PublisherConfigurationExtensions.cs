@@ -21,6 +21,8 @@ namespace hrvster.Extensions.Configuration
 							return sp.GetService<FacebookClient>();
 						case ExternalClientType.Instagram:
 							return sp.GetService<InstagramClient>();
+						case ExternalClientType.Client:
+							return sp.GetService<Client>();
 						default:
 							return sp.GetService<TwitterClient>();
 					}

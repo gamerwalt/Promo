@@ -2,6 +2,7 @@
 {
 	public enum ExternalClientType
 	{
+		Client,
 		Twitter,
 		Facebook,
 		Instagram
@@ -73,7 +74,8 @@
 		FacebookHandle,
 		InstagramHandle,
 		Email,
-		Phone
+		Phone,
+		Client
 	}
 
 	public enum WatchTypeCode
@@ -85,8 +87,9 @@
 
 	public enum ProfileType
 	{
+		Client,
 		Twitter,
-		Facebook,
+		Facebook
 	}
 
 	public enum ScheduledStatus

@@ -8,7 +8,9 @@
     asp-action="PlayMatch3Game"
     asp-route-Uid="@Model.GameUid"
     asp-route-gameplayUid="@Model.GameplayUid"
-    asp-route-externalClient="@Model.ExternalClient">
+    asp-route-externalClient="@Model.ExternalClient"
+    asp-route-campaignUid="@Model.CampaignUid"
+    asp-route-handshakeKey="@Model.HandshakeKey">
     <input type="text" asp-for="@Model.SelectedTiles" hidden>
     @Html.HiddenFor(m => m.GameUid)
     @Html.HiddenFor(m => m.GameplayUid)

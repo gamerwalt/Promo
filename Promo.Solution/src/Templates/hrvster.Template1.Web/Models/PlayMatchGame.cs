@@ -10,5 +10,8 @@
 		public List<Guid>? Tiles { get; set; }
 		public Guid? GameplayUid { get; set; }
 		public string? ExternalClient { get; set; }
+		public Guid CampaignUid { get; set; }
+		public string HandshakeKey { get; set; }
+		public Guid RuleUid { get; set; }
 	}
 }

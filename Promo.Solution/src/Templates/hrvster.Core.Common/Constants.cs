@@ -1,4 +1,6 @@
-﻿namespace hrvster.Templates.Core.Common
+﻿using System.Data;
+
+namespace hrvster.Templates.Core.Common
 {
 	public class Constants
 	{
@@ -41,6 +43,7 @@
 		public const string Description = "Description";
 		public const string RefreshToken = "RefreshToken";
 		public const string DisplayName = "DisplayName";
+		public const string ExternalClient = "ExternalClient";
 	}
 
 	public class MessageConstants

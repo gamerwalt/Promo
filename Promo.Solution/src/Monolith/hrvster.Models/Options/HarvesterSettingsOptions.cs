@@ -20,5 +20,7 @@
 		public string GameLinkReplaceText { get; set; }
 		public string HrvsterUrlForSubdomains { get; set; }
 		public string HrvsterAzureStorageConnectionString { get; set; }
+		public string EncryptionKey { get; set; }
+		public string EncryptionIV { get; set; }
 	}
 }

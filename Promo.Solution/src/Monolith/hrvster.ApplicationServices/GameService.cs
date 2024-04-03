@@ -28,6 +28,7 @@ namespace hrvster.ApplicationServices
 {
 	public interface IGameService
 	{
+		Task CreateRuleLinkAsync(string urlLink, string gameType, Guid gameUid, Guid ruleUid);
 		Task CreateRulePostAsync(Guid ruleUid, string urlLink, string externalClientType, HrvsterUser hrvsterUser, string gameType, Guid gameUid, int gameId, int watchTypeId, string watchValue, string post, bool postNow, DateTime scheduledDate, IFormFile media1, IFormFile media2, IFormFile media3, IFormFile media4, string pageId, bool following);
 		Task<bool> GameExistsForAccountAsync(Guid accountUid, Guid gameUid);
 		Task<bool> GameExistsForSubdomainAsync(string subdomain, Guid gameUid);
@@ -321,6 +322,70 @@ namespace hrvster.ApplicationServices
 						pageId);
 					break;
 			}
+		}
+
+		public async Task CreateRuleLinkAsync(string urlLink, string gameType, Guid gameUid, Guid ruleUid)
+		{
+			var game = await GetGameDetailsAsync(Enum.Parse<GameTypesEnum>(gameType), gameUid);
+
+			switch (Enum.Parse<GameTypesEnum>(gameType))
+			{
+				case GameTypesEnum.Sweeps:
+					await CreateSweepRuleLinkAsync(ruleUid, urlLink, gameType, game);
+					break;
+
+				case GameTypesEnum.MatchGames:
+					await CreateMatchRuleLinkAsync(ruleUid, urlLink, gameType, game);
+					break;
+			}
+		}
+
+		private async Task CreateMatchRuleLinkAsync(Guid ruleUid, string urlLink, string gameType, GameDetail game)
+		{
+			await _matchGameRulesRepository.CreateAsync(new Rule
+			{
+				RuleUid = ruleUid,
+				UrlLink = urlLink,
+				Game = new Game
+				{
+					Uid = game.Uid,
+					Id = game.Id
+				},
+				WatchTypeCode = WatchTypeCode.Tweet,
+				ExternalClientType = ExternalClientType.Client,
+				WatchValue = "Not Applicable",
+				ActiveInd = true,
+				ScheduledInd = false,
+				MustBeFollowing = false,
+				ExternalId = "0"
+			}, default);
+		}
+
+		private async Task CreateSweepRuleLinkAsync(Guid ruleUid, string urlLink, string gameType, GameDetail gameDetail)
+		{
+			await _sweepRulesRepository.CreateRuleAsync(new Rule
+			{
+				RuleUid = ruleUid,
+				UrlLink = urlLink,
+				Game = new Game
+				{
+					Uid = gameDetail.Uid,
+					Id = gameDetail.Id
+				},
+				Sweep = new Sweep
+				{
+					Uid = gameDetail.Uid,
+					Id = gameDetail.Id,
+					SweepUid = gameDetail.Uid,
+					SweepId = gameDetail.Id
+				},
+				WatchTypeCode = WatchTypeCode.Tweet,
+				ExternalClientType = ExternalClientType.Client,
+				WatchValue = "Not Applicable",
+				ActiveInd = true,
+				ScheduledInd = false,
+				MustBeFollowing = false
+			});
 		}
 
 		private async Task<bool> CreateSweepRulePostAsync(

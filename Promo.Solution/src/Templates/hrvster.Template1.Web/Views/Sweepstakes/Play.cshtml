@@ -10,24 +10,21 @@
         <h2>Enter The Sweepstake Game</h2>
     </div>
     <hr />
-    <div class="text-center mb-4">
+    <div class="text-center mb-2">
         <div>Welcome back <strong>@Model.FirstName @Model.LastName -- @Model.ScreenName</strong></div>
         <div>You have only <strong>@Model.NumberOfEntries</strong> entry you can have into this sweepstake at this time.</div>
         <div>Once you click on the <strong>Play</strong> button, you will be entered into the <strong>@Model.GameName</strong> Sweepstake</div>.
-    </div>
-    <hr />
-    <div class="text-center mb-4">
-        <div>Please note that once you enter this sweepstake, you will be replying to the tweet you used to enter this sweepstake with the text below.</div>
-        <hr />
-        <div><address><i>I just got an entry into the <strong>@Model.GameName</strong> sweepstake.</i></address></div>
     </div>
     <form asp-action="Play" 
     asp-route-gameUid="@Model.GameUid" 
     asp-route-ruleUid="@Model.RuleUid" 
     asp-route-accountUid="@Model.AccountUid"
-    asp-route-externalClient="@Model.ExternalClient" method="post">
+    asp-route-externalClient="@Model.ExternalClient"
+    asp-route-campaignUid="@Model.CampaignUid"
+    asp-route-handshakeKey="@Model.HandshakeKey" method="post">
         @Html.HiddenFor(x => x.GameName)
-        <div class="form-group text-center mt-3">
+        @Html.HiddenFor(x => x.HandshakeKey);
+        <div class="form-group text-center mt-2">
             <!-- Add text-center for alignment and mt-3 for margin top -->
             <button type="submit" class="btn btn-primary">Enter Sweepstake Now</button>
         </div>

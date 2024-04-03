@@ -1381,4 +1381,11 @@
     <Folder Include="wwwroot\tempImages\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Update="Views\Providers\CreateLink.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+  </ItemGroup>
+
 </Project>
