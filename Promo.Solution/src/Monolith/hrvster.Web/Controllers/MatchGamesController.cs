@@ -155,6 +155,8 @@ namespace hrvster.Web.Controllers
 						form.StartDate,
 						form.EndDate,
 						form.GenerateBoardDate,
+						form.AccumulatePointsOnLoss,
+						form.PointsPerLoss,
 						_hrvsterUser.WindowsTimeZone,
 						_hrvsterUser.IsDaylight)
 					))
@@ -274,6 +276,8 @@ namespace hrvster.Web.Controllers
 				matchGame.WinProbability = form.MatchGame.WinProbability;
 				matchGame.StartDate = form.MatchGame.StartDate;
 				matchGame.EndDate = form.MatchGame.EndDate;
+				matchGame.AccumulatePointsOnLoss = form.MatchGame.AccumulatePointsOnLoss;
+				matchGame.PointsPerLoss = form.MatchGame.PointsPerLoss;
 
 				await _matchGamesService.UpdateMatchGameAsync(
 					matchGame, 
@@ -358,7 +362,9 @@ namespace hrvster.Web.Controllers
 						EndDate = matchGame.EndDate,
 						EndDateUtc = matchGame.EndDateUtc,
 						IsGenerated = matchGame.HasBeenGenerated,
-						GenerateBoardDate = matchGame.GenerateBoardDate
+						GenerateBoardDate = matchGame.GenerateBoardDate,
+						AccumulatePointsOnLoss = matchGame.AccumulatePointsOnLoss,
+						PointsPerLoss = matchGame.PointsPerLoss
 					},
 					MatchImages = _mapper.Map<List<MatchImage>>(images),
 					MatchRules = _mapper.Map<List<MatchRule>>(rules),

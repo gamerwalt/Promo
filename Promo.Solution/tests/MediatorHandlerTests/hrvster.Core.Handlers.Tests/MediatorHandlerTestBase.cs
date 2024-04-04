@@ -35,6 +35,8 @@ namespace hrvster.Core.Handlers.Tests
 				model.StartDate,
 				model.EndDate,
                 model.GenerateBoardDate,
+                model.AccumulatePointsOnLoss,
+                model.PointsPerLoss,
 				TestData.WindowsTimezone,
 				false
 				);

@@ -49,6 +49,7 @@ namespace hrvster.Template1.Web.Controllers
 		private readonly ITwitterHttpService _twitterHttpService;
 		private readonly ICommunicationService _communicationService;
 		private readonly HarvesterSettingsOptions _harvesterSettingOptions;
+		private readonly IClientMemberService _clientMemberService;
 
 		public Pick3GameController(
 			ILoggerFactory loggerFactory,
@@ -69,7 +70,8 @@ namespace hrvster.Template1.Web.Controllers
 			IProfilesRepository profilesRepository,
 			ITwitterHttpService twitterHttpService,
 			ICommunicationService communicationService,
-			HarvesterSettingsOptions harvesterSettingOptions)
+			HarvesterSettingsOptions harvesterSettingOptions,
+			IClientMemberService clientMemberService)
 		{
 			_logger = loggerFactory.CreateLogger<Pick3GameController>();
 			_gameService = gameService;
@@ -90,6 +92,7 @@ namespace hrvster.Template1.Web.Controllers
 			_twitterHttpService = twitterHttpService;
 			_communicationService = communicationService;
 			_harvesterSettingOptions = harvesterSettingOptions;
+			_clientMemberService = clientMemberService;
 		}
 
 
@@ -568,18 +571,21 @@ namespace hrvster.Template1.Web.Controllers
 
 					if (ModelState.IsValid)
 					{
-						var userClaims = User.Identities.FirstOrDefault()?.Claims;
-						var externalProfileId = userClaims?.FirstOrDefault(x => x.Type == HrvsterClaimTypes.ExternalProfileId)?.Value;
-						var screenName = userClaims?.FirstOrDefault(x => x.Type == HrvsterClaimTypes.DisplayName)?.Value;
+						if(externalClient == ExternalClientType.Twitter.ToString())
+						{
+							var userClaims = User.Identities.FirstOrDefault()?.Claims;
+							var externalProfileId = userClaims?.FirstOrDefault(x => x.Type == HrvsterClaimTypes.ExternalProfileId)?.Value;
+							var screenName = userClaims?.FirstOrDefault(x => x.Type == HrvsterClaimTypes.DisplayName)?.Value;
 
-						await _reportingService.SaveMatchGameAsync(
-							gameUid,
-							gameplayUid,
-							form.BoardUid.GetValueOrDefault(),
-							GetUserIdentifierType(externalClient),
-							screenName,
-						externalProfileId,
-						cancellationToken);
+							await _reportingService.SaveMatchGameAsync(
+								gameUid,
+								gameplayUid,
+								form.BoardUid.GetValueOrDefault(),
+								GetUserIdentifierType(externalClient),
+								screenName,
+							externalProfileId,
+							cancellationToken);
+						}
 
 						//consider passing the accountUid, decryptedValues of the user here
 						return await ReturnWinOrLossAsync(gameUid, gameplayUid, ruleUid, form, externalClient, campaign.Account.AccountUid, handshakeKey, cancellationToken);
@@ -625,12 +631,18 @@ namespace hrvster.Template1.Web.Controllers
 		}
 
 		[HttpGet]
-		[Route("/Pick3/loss/{Uid:Guid}/gameplay/{gameplayUid:Guid}")]
+		[Route("/Pick3/loss/{Uid:Guid}/gameplay/{gameplayUid:Guid}/handshakeKey/{handshakeKey}/account/{accountUid}")]
 		public async Task<IActionResult> MatchGameLoss(
 			Guid Uid,
 			Guid gameplayUid,
+			string handshakeKey,
+			Guid accountUid,
 			CancellationToken cancellationToken)
 		{
+			var userQuery = GetUserQuery(handshakeKey);
+
+			var points = await _clientMemberService.GetClientMemberPointAsync(userQuery.UserId, userQuery.UserName, accountUid);
+
 			var gameplay = await _matchGameplayService.GetAsync(gameplayUid, cancellationToken);
 
 			if (!gameplay.PlayedIndicator && !gameplay.MatchBoard.PlayedIndicator && gameplay.WinIndicator)
@@ -650,7 +662,8 @@ namespace hrvster.Template1.Web.Controllers
 				GameName = gameboard.MatchGame.Name,
 				MatchBoard = _mapper.Map<Models.MatchBoard>(gameboard),
 				Tiles = GetMatchTiles(tiles),
-				SelectedTiles = LoadTileStrings(gameplay.SelectedTiles)
+				SelectedTiles = LoadTileStrings(gameplay.SelectedTiles),
+				Points = points
 			};
 
 			return View(model);
@@ -697,32 +710,6 @@ namespace hrvster.Template1.Web.Controllers
 			CancellationToken cancellationToken)
 		{
 			//decrypt and get the data from the handshakeKey
-
-			var handshakeKeyDecoded = HttpUtility.UrlDecode(handshakeKey);
-
-			var decryptedData = CryptoHelper.DecryptHandshakeKey(
-			handshakeKeyDecoded,
-				_harvesterSettingOptions.EncryptionKey,
-				_harvesterSettingOptions.EncryptionIV);
-
-			var userQuery = UserQuery.Parse(decryptedData);
-			var externalProfileId = userQuery.UserId;
-			var screenName = userQuery.UserName;
-
-			if (string.IsNullOrWhiteSpace(externalProfileId))
-			{
-				_logger.LogWarning("ExternalProfileId is empty!");
-
-				return ErrorRedirect("ExternalProfileId is empty!", StatusCodes.Status400BadRequest);
-			}
-
-			if (string.IsNullOrWhiteSpace(screenName))
-			{
-				_logger.LogWarning("ScreenName is empty!");
-
-				return ErrorRedirect("ScreenName is empty!", StatusCodes.Status400BadRequest);
-			}
-
 			var accountUidString = _sessionManager.GetValue(SessionConstants.AccountUid);
 			if (string.IsNullOrEmpty(accountUidString))
 			{
@@ -771,13 +758,10 @@ namespace hrvster.Template1.Web.Controllers
 				return ErrorRedirect("Profile not found!", StatusCodes.Status400BadRequest);
 			}
 
-			var member = await _memberRepository.GetMemberViaExternalProfileIdAsync(accountUid, GetProfileType(externalClient), externalProfileId);
-
 			var hashtag = rule.WatchValue;
 			var replyTo = $"@{profiles.ScreenName}";
 			var message = string.Empty;
 			
-
 			if (await _matchGameplayService.IsAWinAsync(gameUid: gameUid, gameplayUid, form.SelectedTiles, cancellationToken))
 			{
 				await SetGameplayAsWonAsync(gameplayUid, form, cancellationToken);
@@ -785,13 +769,40 @@ namespace hrvster.Template1.Web.Controllers
 
 				message = $"{replyTo} I just played the Pick 3 game {game.Name} and won. I just won a prize with a value of ${prize.Value}. {Environment.NewLine} {hashtag}";
 
+				var screenName = string.Empty;
+
 				if(externalClient == ExternalClientType.Twitter.ToString())
 				{
+					var userClaims = User.Identities.FirstOrDefault()?.Claims;
+					var externalProfileId = userClaims?.FirstOrDefault(x => x.Type == HrvsterClaimTypes.ExternalProfileId)?.Value;
+					screenName = userClaims?.FirstOrDefault(x => x.Type == HrvsterClaimTypes.DisplayName)?.Value;
+
+					var member = await _memberRepository.GetMemberViaExternalProfileIdAsync(accountUid, GetProfileType(externalClient), externalProfileId);
+
+					if (string.IsNullOrWhiteSpace(externalProfileId))
+					{
+						_logger.LogWarning("ExternalProfileId is empty!");
+
+						return ErrorRedirect("ExternalProfileId is empty!", StatusCodes.Status400BadRequest);
+					}
+
+					if (string.IsNullOrWhiteSpace(screenName))
+					{
+						_logger.LogWarning("ScreenName is empty!");
+
+						return ErrorRedirect("ScreenName is empty!", StatusCodes.Status400BadRequest);
+					}
+
 					var accessToken = member.Profiles.FirstOrDefault().AccessToken;
 					var refreshToken = member.Profiles.FirstOrDefault().RefreshToken;
 
 					await _twitterHttpService.PublishTweetInResponseToAsync(message, rule.ExternalId, accessToken, refreshToken);
 					await _communicationService.NotifyMemberOfWin(member.EmailAddress, game.Name, gameplayUid, prize.Name, prize.Value);
+				}
+				else
+				{
+					var userQuery = GetUserQuery(handshakeKey);
+					screenName = userQuery.UserName;
 				}
 
 				//Send email to owner
@@ -806,13 +817,59 @@ namespace hrvster.Template1.Web.Controllers
 
 			if(externalClient == ExternalClientType.Twitter.ToString())
 			{
+				var userClaims = User.Identities.FirstOrDefault()?.Claims;
+				var externalProfileId = userClaims?.FirstOrDefault(x => x.Type == HrvsterClaimTypes.ExternalProfileId)?.Value;
+				var screenName = userClaims?.FirstOrDefault(x => x.Type == HrvsterClaimTypes.DisplayName)?.Value;
+
+				var member = await _memberRepository.GetMemberViaExternalProfileIdAsync(accountUid, GetProfileType(externalClient), externalProfileId);
+
+				if (string.IsNullOrWhiteSpace(externalProfileId))
+				{
+					_logger.LogWarning("ExternalProfileId is empty!");
+
+					return ErrorRedirect("ExternalProfileId is empty!", StatusCodes.Status400BadRequest);
+				}
+
+				if (string.IsNullOrWhiteSpace(screenName))
+				{
+					_logger.LogWarning("ScreenName is empty!");
+
+					return ErrorRedirect("ScreenName is empty!", StatusCodes.Status400BadRequest);
+				}
+
 				var accessToken = member.Profiles.FirstOrDefault().AccessToken;
 				var refreshToken = member.Profiles.FirstOrDefault().RefreshToken;
 
 				await _twitterHttpService.PublishTweetInResponseToAsync(message, rule.ExternalId, accessToken, refreshToken);
-			}
 
-			return RedirectToAction("MatchGameLoss", new { Uid = gameUid, gameplayUid = gameplayUid });
+				return RedirectToAction("MatchGameLoss", new { Uid = gameUid, gameplayUid = gameplayUid });
+			}
+			else
+			{
+				if (game.AccumulatePointsOnLoss)
+				{
+					var userQuery = GetUserQuery(handshakeKey);
+
+					await _clientMemberService.CreateClientMemberPoints(game.PointsPerLoss, userQuery.UserId, userQuery.UserName, account);
+				}
+
+				return RedirectToAction("MatchGameLoss", new { Uid = gameUid, gameplayUid = gameplayUid, accountUid = accountUid, handshakeKey = handshakeKey });
+			}
+		}
+
+		private UserQuery GetUserQuery(string handshakeKey)
+		{
+			var handshakeKeyDecoded = HttpUtility.UrlDecode(handshakeKey);
+
+			var decryptedData = CryptoHelper.DecryptHandshakeKey(
+			handshakeKeyDecoded,
+				_harvesterSettingOptions.EncryptionKey,
+				_harvesterSettingOptions.EncryptionIV);
+
+			var userQuery = UserQuery.Parse(decryptedData);
+			var externalProfileId = userQuery.UserId;
+			var screenName = userQuery.UserName;
+			return userQuery;
 		}
 
 		private string GetProfileType(string externalClient)

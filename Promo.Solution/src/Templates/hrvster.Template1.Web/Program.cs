@@ -176,6 +176,8 @@ namespace hrvster.Template1.Web
 			builder.Services.AddTransient<ISweepNotificationRepository, SweepNotificationRepository>();
 			builder.Services.AddTransient<IMailRepository, MailRepository>();
 			builder.Services.AddTransient<ICampaignRepository, CampaignRepository>();
+			builder.Services.AddTransient<IClientMemberService, ClientMemberService>();
+			builder.Services.AddTransient<IClientMemberRepository, ClientMemberRepository>();
 			builder.Services.AddMatchGameRepositories();
 			builder.Services.AddPostSchedulers();
 			builder.Services.AddWatchTypeRepositories();

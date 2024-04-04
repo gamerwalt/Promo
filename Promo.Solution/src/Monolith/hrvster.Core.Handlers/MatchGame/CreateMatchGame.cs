@@ -54,8 +54,9 @@ namespace hrvster.Core.Handlers.MatchGame
 				WinProbability = request.WinProbability,
 				StartDate = request.StartDate,
 				EndDate = request.EndDate,
-				GenerateBoardDate = request.GenerateBoardDate
-				
+				GenerateBoardDate = request.GenerateBoardDate,
+				AccumulatePointsOnLoss = request.AccumulatePointsOnLoss,
+				PointsPerLoss = request.PointsPerLoss
 			};
 
 			_logger.LogInformation("Creating match game {matchGame} for account {accountUid}",

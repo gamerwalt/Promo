@@ -9,5 +9,6 @@
 		public List<MatchTile> Tiles { get; set; }
 		public List<Guid> SelectedTiles { get; set; }
 		public Guid GameplayUid { get; set; }
+		public int Points { get; set; }
 	}
 }

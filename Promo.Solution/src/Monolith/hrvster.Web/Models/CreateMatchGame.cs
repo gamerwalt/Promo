@@ -17,5 +17,7 @@ namespace hrvster.Web.Models
 		public DateTime EndDate { get; set; }
 		public DateTime GenerateBoardDate { get; set; }
 		public bool AcceptTerms { get; set; }
+		public bool AccumulatePointsOnLoss { get; set; }
+		public int PointsPerLoss { get; set; }
 	}
 }

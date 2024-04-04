@@ -19,6 +19,8 @@ namespace hrvster.Web.Models
 		public DateTime EndDateUtc { get; set; }
 		public DateTime GenerateBoardDate { get; set; }
 		public IEnumerable<SelectListItem> Promotions { get; set; }
+		public bool AccumulatePointsOnLoss { get; set; }
+		public int PointsPerLoss { get; set; }
 
 		public bool IsActive()
 		{

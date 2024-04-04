@@ -14,5 +14,7 @@ namespace hrvster.Games.Match.Models
 		public Guid CampaignUid { get; set; }
 		public DateTime GenerateBoardDate { get; set; }
 		public DateTime GenerateBoardDateUtc { get; set; }
+		public bool AccumulatePointsOnLoss { get; set; }
+		public int PointsPerLoss { get; set; }
 	}
 }

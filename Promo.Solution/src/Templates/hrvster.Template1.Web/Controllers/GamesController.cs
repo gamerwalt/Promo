@@ -16,6 +16,7 @@ using System.Threading;
 using hrvster.Models.Options;
 using System.Web;
 using hrvster.Models.Extensions;
+using hrvster.ApplicationServices.Accounts;
 
 namespace hrvster.Template1.Web.Controllers
 {
@@ -27,6 +28,7 @@ namespace hrvster.Template1.Web.Controllers
 		private readonly ITwitterHttpService _twitterHttpService;
 		private readonly ICampaignService _campaignService;
 		private readonly HarvesterSettingsOptions _harvesterSettingOptions;
+		private readonly IClientMemberService _clientMemberService;
 
 		public GamesController(
 			ILoggerFactory loggerFactory,
@@ -34,7 +36,8 @@ namespace hrvster.Template1.Web.Controllers
 			ISessionManager sessionManager,
 			ITwitterHttpService twitterHttpService,
 			ICampaignService campaignService,
-			HarvesterSettingsOptions harvesterSettingOptions)
+			HarvesterSettingsOptions harvesterSettingOptions,
+			IClientMemberService clientMemberService)
 		{
 			_logger = loggerFactory.CreateLogger<GamesController>();
 			_gameService = gameService;
@@ -42,6 +45,7 @@ namespace hrvster.Template1.Web.Controllers
 			_twitterHttpService = twitterHttpService;
 			_campaignService = campaignService;
 			_harvesterSettingOptions = harvesterSettingOptions;
+			_clientMemberService = clientMemberService;
 		}
 
 		[HttpGet("Games")]
@@ -75,7 +79,8 @@ namespace hrvster.Template1.Web.Controllers
 			Guid gameUid,
 			[FromQuery] string externalClient,
 			[FromQuery] Guid ruleUid,
-			[FromQuery] string handshakeKey)
+			[FromQuery] string handshakeKey,
+			CancellationToken cancellationToken)
 		{
 			_logger.LogInformation("Got a request to play the game for a pick 3 game with uid {gameUid}", gameUid);
 
@@ -101,32 +106,6 @@ namespace hrvster.Template1.Web.Controllers
 
 				return RedirectToAction("HandlerErrorCode", StatusCodes.Status400BadRequest);
 			}
-
-			//var campaignUidString = _sessionManager.GetValue(SessionConstants.CampaignUid);
-			//var accountUidString = _sessionManager.GetValue(SessionConstants.AccountUid);
-
-			//if (string.IsNullOrEmpty(campaignUidString) || string.IsNullOrEmpty(accountUidString))
-			//{
-			//	_logger.LogError("CampaignUid or AccountUid is null or empty for the game uid {gameUid} with externalClient {externalClient} for rule {ruleUid}",
-			//		gameUid,
-			//		externalClient,
-			//		ruleUid);
-
-			//	return RedirectToAction("HandleErrorCode", "Error", new { statusCode = 400 });
-			//}
-
-			//var campaignUid = Guid.Parse(campaignUidString);
-			//var accountUid = Guid.Parse(_sessionManager.GetValue(SessionConstants.AccountUid));
-
-			//if (campaignUid == Guid.Empty || accountUid == Guid.Empty)
-			//{
-			//	_logger.LogError("CampaignUid or AccountUid is empty for the game uid {gameUid} with externalClient {externalClient} for rule {ruleUid}",
-			//		gameUid,
-			//		externalClient,
-			//		ruleUid);
-
-			//	return RedirectToAction("HandleErrorCode", "Error", new { statusCode = 400 });
-			//}
 
 			_sessionManager.SetKeyValue(SessionConstants.CampaignUid, campaign.CampaignUid.ToString());
 			_sessionManager.SetKeyValue(SessionConstants.AccountUid, campaign.Account.AccountUid.ToString());
@@ -208,6 +187,8 @@ namespace hrvster.Template1.Web.Controllers
 				RefreshToken = Guid.NewGuid().ToString()
 			};
 
+			await CreateClientMemberAsync(userQuery, campaign.Account, cancellationToken);
+
 			_logger.LogInformation("Signing in the user automatically.");
 
 			await SignInUserAsync(userDetailsForClient, ExternalClientType.Client);
@@ -219,6 +200,11 @@ namespace hrvster.Template1.Web.Controllers
 				externalClient,
 				campaign.CampaignUid, 
 				handshakeKey);
+		}
+
+		private async Task CreateClientMemberAsync(UserQuery userQuery, Account account, CancellationToken cancellationToken)
+		{
+			await _clientMemberService.CreateAsync(userQuery.UserId, userQuery.UserName, account, cancellationToken);
 		}
 
 		private IActionResult RedirectToGame(string gameType, Guid gameUid, Guid ruleUid, string externalClient, Guid campaignUid, string handshakeKey)

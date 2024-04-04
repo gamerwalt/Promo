@@ -211,17 +211,39 @@
 									</div>
 								</div>
 							</div>
+							<div class="flex-column flex-lg-row-auto w-100 w-lg-250px w-xxl-325px mb-8 mb-lg-0 me-lg-9 me-5">
+								<div class="card">
+									<div class="card-body">
+										<div class="form-check form-check-solid form-switch fv-row mb-8 mt-4">
+											<label class="form-label form-check-label fs-6 fw-semibold" for="AccumulatePointsOnLoss">
+												<input class="form-check-input w-45px h-30px" type="checkbox" asp-for="MatchGame.AccumulatePointsOnLoss" />
+												Accumulate Points on Loss
+												<br />
+												<span asp-validation-for="MatchGame.AccumulatePointsOnLoss"></span>
+											</label>
+										</div>
+										<div class="fv-row mb-8">
+											<label class="d-flex align-items-center fs-6 fw-semibold form-label mb-2">
+												Points Per Loss
+											</label>
+											<input type="number" asp-for="MatchGame.PointsPerLoss" id="PointsPerLoss"
+												   class="form-control" placeholder="1" />
+											<span asp-validation-for="MatchGame.PointsPerLoss"></span>
+										</div>
+									</div>
+								</div>
+							</div>
 						</div>
 					</div>
 					<div class="card-footer">
-						@if(!Model.MatchGame.IsGenerated)
-						{
+						@* @if(!Model.MatchGame.IsGenerated)
+						{ *@
 							<div class="card-toolbar">
 								<button type="submit" class="btn btn-md btn-light btn-primary">
 									Update
 								</button>
 							</div>
-						}
+						@* } *@
 					</div>
 				</form>
 			</div>
@@ -481,9 +503,9 @@
 								@if (Model.MatchPlayRule?.PlayPerGame > 1)
 								{
 									<a asp-action="Update"
-							   asp-controller="MatchPlayRules"
-							   asp-route-Uid="@Model.MatchGame.MatchGameUid"
-							   asp-route-entryRuleUid="@Model.MatchPlayRule?.Uid" class="btn btn-lg btn-primary">
+									   asp-controller="MatchPlayRules"
+									   asp-route-Uid="@Model.MatchGame.MatchGameUid"
+									   asp-route-entryRuleUid="@Model.MatchPlayRule?.Uid" class="btn btn-lg btn-primary">
 										Update
 									</a>
 								}

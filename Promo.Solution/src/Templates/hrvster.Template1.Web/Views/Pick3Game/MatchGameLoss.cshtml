@@ -5,7 +5,14 @@
 <link rel="stylesheet" href="~/css/gameboard.css">
 <link rel="stylesheet" href="~/css/gameplayloss.css">
 <div class="game-wrapper">
-    <h1 class="lose-message">You Lost</h1>
+    <h4 class="lose-message">You Lost</h4>
+    @if (Model.Points > 0)
+    {
+        <div class="alert alert-info" role="alert">
+            Don't worry, you still have <span>@Model.Points points.</span><br/>
+            Keep playing and you could win even more points next time you play!
+        </div>
+    }
     <div class="gameboard">
         @foreach (var tile in Model.Tiles)
         {

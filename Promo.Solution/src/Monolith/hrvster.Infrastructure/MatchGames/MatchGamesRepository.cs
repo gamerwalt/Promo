@@ -66,7 +66,9 @@ namespace hrvster.Infrastructure.MatchGames
 				.AddParameter("endDate", matchGame.EndDate)
 				.AddParameter("endDateUtc", endDateUtc)
 				.AddParameter("generateBoardDate", matchGame.GenerateBoardDate)
-				.AddParameter("generateBoardDateUtc", generateBoardDateUtc);
+				.AddParameter("generateBoardDateUtc", generateBoardDateUtc)
+				.AddParameter("accumulatePointsOnLoss", matchGame.AccumulatePointsOnLoss)
+				.AddParameter("pointsPerLoss", matchGame.PointsPerLoss);
 
 			await conn.OpenAsync(cancellationToken);
 			await command.ExecuteNonQueryAsync(cancellationToken);
@@ -209,6 +211,8 @@ namespace hrvster.Infrastructure.MatchGames
 				.AddParameter("tileCountPerBoard", matchGame.TileCountPerBoard)
 				.AddParameter("numberOfWinnableBoards", matchGame.NumberOfWinnableBoards)
 				.AddParameter("winProbabilityPerBoard", matchGame.WinProbability)
+				.AddParameter("accumulatePointsOnLoss", matchGame.AccumulatePointsOnLoss)
+				.AddParameter("pointsPerLoss", matchGame.PointsPerLoss)
 				.AddParameter("startDate", matchGame.StartDate)
 				.AddParameter("startDateUtc", startDateUtc)
 				.AddParameter("endDate", matchGame.EndDate)
@@ -239,7 +243,9 @@ namespace hrvster.Infrastructure.MatchGames
 				HasBeenGenerated = reader.GetBoolean("is_generated"),
 				ReadyToBeGenerated = reader.GetBoolean("ready_to_generate"),
 				GenerateBoardDate = reader.GetDateTime("generate_board_date"),
-				GenerateBoardDateUtc = reader.GetDateTime("generate_board_date_utc")
+				GenerateBoardDateUtc = reader.GetDateTime("generate_board_date_utc"),
+				AccumulatePointsOnLoss = reader.GetBoolean("accumulate_points"),
+				PointsPerLoss = reader.GetInt32("points_per_loss")
 			};
 		}
 

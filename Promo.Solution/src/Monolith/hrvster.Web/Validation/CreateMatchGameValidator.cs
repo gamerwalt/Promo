@@ -89,6 +89,10 @@ namespace hrvster.Web.Validation
 				.Must((matchGame, generateBoardDate) => LessThan(matchGame, generateBoardDate))
 				.WithMessage("The generate board date should be less than the start date");
 
+			RuleFor(x => x.PointsPerLoss)
+				.GreaterThan(0)
+				.When(x => x.AccumulatePointsOnLoss)
+				.WithMessage("Points per loss must be greater than zero when accumulate points on loss is selected.");
 		}
 
 		private bool LessThan(CreateMatchGame matchGame, DateTime generateBoardDate)
