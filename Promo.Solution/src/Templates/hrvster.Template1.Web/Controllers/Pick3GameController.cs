@@ -144,14 +144,14 @@ namespace hrvster.Template1.Web.Controllers
 				var campaign = await _campaignService.GetCampaignAsync(campaignUid, cancellationToken);
 				if (campaign == null)
 				{
-					_logger.LogError("Campaign not found!");
+					_logger.LogError("Campaign {CampaignUid} not found!", campaignUid);
 
 					return ErrorRedirect("Campaign not found!", StatusCodes.Status400BadRequest);
 				}
 
 				if (!User.Identity.IsAuthenticated)
 				{
-					if(externalClient == ExternalClientType.Twitter.ToString())
+					if (externalClient == ExternalClientType.Twitter.ToString())
 					{
 						_logger.LogWarning("User is not authenticated.");
 
@@ -163,7 +163,13 @@ namespace hrvster.Template1.Web.Controllers
 							"Authentication",
 							new
 							{
-								providerCode = code
+								providerCode = code,
+								gameUid,
+								ruleUid,
+								externalClient,
+								gameType = GameTypesEnum.Sweeps.ToString(),
+								campaign.CampaignUid,
+								campaign.Account.AccountUid
 							});
 					}
 					else
@@ -321,6 +327,7 @@ namespace hrvster.Template1.Web.Controllers
 				if (externalClient == ExternalClientType.Twitter.ToString())
 				{
 					_logger.LogWarning("User is not authenticated.");
+					var campaign = await _campaignService.GetCampaignAsync(campaignUid, cancellationToken);
 
 					var code = GetProviderCode(externalClient);
 					_logger.LogInformation("Redirecting with provider code {code}", code);
@@ -330,7 +337,13 @@ namespace hrvster.Template1.Web.Controllers
 						"Authentication",
 						new
 						{
-							providerCode = code
+							providerCode = code,
+							gameUid,
+							ruleUid,
+							externalClient,
+							gameType = GameTypesEnum.Sweeps.ToString(),
+							campaignUid,
+							campaign.Account.AccountUid
 						});
 				}
 				else
@@ -446,7 +459,7 @@ namespace hrvster.Template1.Web.Controllers
 						MatchBoard = _mapper.Map<MatchBoard>(gameboard),
 						Tiles = LoadTiles(tiles),
 						ExternalClient = externalClient,
-						HandshakeKey = handshakeKey,
+						HandshakeKey = handshakeKey ?? Guid.NewGuid().ToString(),
 						CampaignUid = campaignUid,
 						RuleUid = ruleUid
 					};
@@ -477,6 +490,7 @@ namespace hrvster.Template1.Web.Controllers
 				if (externalClient == ExternalClientType.Twitter.ToString())
 				{
 					_logger.LogWarning("User is not authenticated.");
+					var campaign = await _campaignService.GetCampaignAsync(campaignUid, cancellationToken);
 
 					var code = GetProviderCode(externalClient);
 					_logger.LogInformation("Redirecting with provider code {code}", code);
@@ -486,7 +500,13 @@ namespace hrvster.Template1.Web.Controllers
 						"Authentication",
 						new
 						{
-							providerCode = code
+							providerCode = code,
+							gameUid,
+							ruleUid,
+							externalClient,
+							gameType = GameTypesEnum.Sweeps.ToString(),
+							campaignUid,
+							campaign.Account.AccountUid
 						});
 				}
 				else
@@ -874,9 +894,7 @@ namespace hrvster.Template1.Web.Controllers
 
 		private string GetProfileType(string externalClient)
 		{
-			if (externalClient != ExternalClientType.Twitter.ToString() ||
-			externalClient != ExternalClientType.Facebook.ToString() ||
-			externalClient != ExternalClientType.Instagram.ToString())
+			if(!externalClient.Equals(ExternalClientType.Twitter.ToString(), StringComparison.InvariantCultureIgnoreCase))
 			{
 				externalClient = ExternalClientType.Client.ToString();
 			}
@@ -894,9 +912,7 @@ namespace hrvster.Template1.Web.Controllers
 
 		private UserIdentifierType GetUserIdentifierType(string externalClient)
 		{
-			if (externalClient != ExternalClientType.Twitter.ToString() ||
-				externalClient != ExternalClientType.Facebook.ToString() ||
-				externalClient != ExternalClientType.Instagram.ToString())
+			if (!externalClient.Equals(ExternalClientType.Twitter.ToString(), StringComparison.InvariantCultureIgnoreCase))
 			{
 				externalClient = ExternalClientType.Client.ToString();
 			}
@@ -916,9 +932,7 @@ namespace hrvster.Template1.Web.Controllers
 
 		private ProfileType GetActualProfileType(string externalClient)
 		{
-			if(externalClient !=  ExternalClientType.Twitter.ToString() ||
-				externalClient != ExternalClientType.Facebook.ToString() ||
-				externalClient != ExternalClientType.Instagram.ToString())
+			if (!externalClient.Equals(ExternalClientType.Twitter.ToString(), StringComparison.InvariantCultureIgnoreCase))
 			{
 				externalClient = ExternalClientType.Client.ToString();
 			}
@@ -1011,9 +1025,7 @@ namespace hrvster.Template1.Web.Controllers
 
 		private string GetProviderCode(string externalClient)
 		{
-			if (externalClient != ExternalClientType.Twitter.ToString() ||
-				externalClient != ExternalClientType.Facebook.ToString() ||
-				externalClient != ExternalClientType.Instagram.ToString())
+			if (!externalClient.Equals(ExternalClientType.Twitter.ToString(), StringComparison.InvariantCultureIgnoreCase))
 			{
 				externalClient = ExternalClientType.Client.ToString();
 			}
@@ -1044,7 +1056,7 @@ namespace hrvster.Template1.Web.Controllers
 				new Claim(ClaimTypes.Name, userDetails.Name),
 				new Claim(HrvsterClaimTypes.DisplayName, userDetails.ScreenName),
 				new Claim(HrvsterClaimTypes.AccessToken, userDetails.AccessToken),
-				new Claim(HrvsterClaimTypes.RefreshToken, userDetails.RefreshToken),
+				new Claim(HrvsterClaimTypes.RefreshToken, userDetails.RefreshToken ?? Guid.NewGuid().ToString()),
 				new Claim(HrvsterClaimTypes.Description, userDetails.Description),
 				new Claim(HrvsterClaimTypes.ExternalProfileId, userDetails.ExternalProfileId),
 				new Claim(HrvsterClaimTypes.ExternalClient, externalClient.ToString())

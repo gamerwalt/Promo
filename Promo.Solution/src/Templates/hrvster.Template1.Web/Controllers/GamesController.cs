@@ -17,6 +17,7 @@ using hrvster.Models.Options;
 using System.Web;
 using hrvster.Models.Extensions;
 using hrvster.ApplicationServices.Accounts;
+using hrvster.Templates.Infrastructure.Customizations;
 
 namespace hrvster.Template1.Web.Controllers
 {
@@ -29,6 +30,7 @@ namespace hrvster.Template1.Web.Controllers
 		private readonly ICampaignService _campaignService;
 		private readonly HarvesterSettingsOptions _harvesterSettingOptions;
 		private readonly IClientMemberService _clientMemberService;
+		private readonly IMemberProfileRepository _memberProfileRepository;
 
 		public GamesController(
 			ILoggerFactory loggerFactory,
@@ -37,15 +39,17 @@ namespace hrvster.Template1.Web.Controllers
 			ITwitterHttpService twitterHttpService,
 			ICampaignService campaignService,
 			HarvesterSettingsOptions harvesterSettingOptions,
-			IClientMemberService clientMemberService)
+			IClientMemberService clientMemberService,
+			IMemberProfileRepository memberProfileRepository)
 		{
 			_logger = loggerFactory.CreateLogger<GamesController>();
-			_gameService = gameService;
-			_sessionManager = sessionManager;
-			_twitterHttpService = twitterHttpService;
-			_campaignService = campaignService;
-			_harvesterSettingOptions = harvesterSettingOptions;
-			_clientMemberService = clientMemberService;
+			_gameService = gameService ?? throw new ArgumentNullException(nameof(gameService));
+			_sessionManager = sessionManager ?? throw new ArgumentNullException(nameof(sessionManager));
+			_twitterHttpService = twitterHttpService ?? throw new ArgumentNullException(nameof(twitterHttpService));
+			_campaignService = campaignService ?? throw new ArgumentNullException(nameof(campaignService));
+			_harvesterSettingOptions = harvesterSettingOptions ?? throw new ArgumentNullException(nameof(harvesterSettingOptions));
+			_clientMemberService = clientMemberService ?? throw new ArgumentNullException(nameof(clientMemberService));
+			_memberProfileRepository = memberProfileRepository ?? throw new ArgumentNullException(nameof(memberProfileRepository));
 		}
 
 		[HttpGet("Games")]
@@ -134,19 +138,58 @@ namespace hrvster.Template1.Web.Controllers
 
 				if (!string.IsNullOrWhiteSpace(authKey))
 				{
-					var userDetails = _twitterHttpService.GetAuthenticatedUserAsync(authKey);
+					UserProviderDetails? userDetails;
 
-					if (userDetails != null)
+					var memberProfile = await _memberProfileRepository.GetByAccessTokenAsync(authKey);
+					if(memberProfile == null)
 					{
-						_logger.LogInformation("Redirecting to game controller.");
+						userDetails = await _twitterHttpService.GetAuthenticatedUserAsync(authKey);
+
+						if (userDetails != null)
+						{
+							_logger.LogInformation("Redirecting to game controller.");
+
+							await SignInUserAsync(userDetails, ExternalClientType.Twitter);
+
+							return RedirectToGame(
+								GameTypesEnum.MatchGames.ToString(),
+								gameUid,
+								ruleUid,
+								externalClient,
+								campaign.CampaignUid,
+								handshakeKey);
+						}
+					}
+					else
+					{
+						//AccessToken = accessTokenObject.AccessToken,
+						//RefreshToken = accessTokenObject.RefreshToken,
+						//Description = twitterUserResponse.Profile.Description,
+						//ExternalProfileId = twitterUserResponse.Profile.Id,
+						//Name = twitterUserResponse.Profile.Name,
+						//ScreenName = twitterUserResponse.Profile.Username,
+						//ProfileImage = twitterUserResponse.Profile.ProfileImageUrl,
+						//Location = twitterUserResponse.Profile.Location
+
+						await SignInUserAsync(new UserProviderDetails
+						{
+							AccessToken = authKey,
+							RefreshToken = memberProfile.RefreshToken,
+							AccessTokenSecret = memberProfile.AccessToken,
+							Description = memberProfile.Description,
+							BearerToken = memberProfile.AccessToken,
+							ExternalProfileId = memberProfile.ExternalProfileId,
+							ScreenName = memberProfile.ScreenName,
+							Name = memberProfile.Name
+						}, ExternalClientType.Twitter);
 
 						return RedirectToGame(
-							GameTypesEnum.MatchGames.ToString(), 
-							gameUid, 
-							ruleUid, 
-							externalClient, 
-							campaign.CampaignUid,
-							handshakeKey);
+								GameTypesEnum.MatchGames.ToString(),
+								gameUid,
+								ruleUid,
+								externalClient,
+								campaign.CampaignUid,
+								handshakeKey);
 					}
 				}
 
@@ -163,6 +206,8 @@ namespace hrvster.Template1.Web.Controllers
 						ruleUid,
 						externalClient,
 						gameType = GameTypesEnum.MatchGames.ToString(),
+						campaign.CampaignUid,
+						campaign.Account.AccountUid
 					});
 			}
 
@@ -303,6 +348,8 @@ namespace hrvster.Template1.Web.Controllers
 							ruleUid,
 							externalClient,
 							gameType = GameTypesEnum.Sweeps.ToString(),
+							campaign.CampaignUid,
+							campaign.Account.AccountUid
 						});
 				}
 

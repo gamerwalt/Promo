@@ -9,6 +9,7 @@ namespace hrvster.Templates.Infrastructure.Customizations
 	public interface IMemberProfileRepository
 	{
 		Task CreateMemberProfileAsync(Guid accountUid, MemberProfile memberProfile);
+		Task<MemberProfile?> GetByAccessTokenAsync(string authKey);
 		Task<MemberProfile> GetByExternalProfileIdAsync(Guid accountUid, string externalProfileId);
 		Task UpdateMemberProfileAsync(MemberProfile memberProfile);
 	}
@@ -42,6 +43,28 @@ namespace hrvster.Templates.Infrastructure.Customizations
 
 			await conn.OpenAsync();
 			await command.ExecuteNonQueryAsync();
+		}
+
+		public async Task<MemberProfile?> GetByAccessTokenAsync(string authKey)
+		{
+			var memberProfile = default(MemberProfile);
+
+			using (var conn = new MySqlConnection(_database.GetConnectionString()))
+			{
+				var command = conn.CreateCommand();
+				command.CommandText = "member_profile_get_by_access_token";
+				command.CommandType = CommandType.StoredProcedure;
+				command.AddParameter("accessToken", authKey);
+
+				await conn.OpenAsync();
+				using var reader = await command.ExecuteReaderAsync();
+				while (await reader.ReadAsync())
+				{
+					memberProfile = ReadMemberProfile(reader);
+				}
+			}
+
+			return memberProfile;
 		}
 
 		public async Task<MemberProfile> GetByExternalProfileIdAsync(Guid accountUid, string externalProfileId)

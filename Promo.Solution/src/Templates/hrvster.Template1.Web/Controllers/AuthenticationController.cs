@@ -50,12 +50,14 @@ public class AuthenticationController : Controller
 
 	[HttpGet]
 	[Route("Authentication/login/external/{providerCode}")]
-	public async Task<IActionResult> ExternalLogin(string providerCode, string gameUid, string ruleUid, string externalClient, string gameType)
+	public async Task<IActionResult> ExternalLogin(string providerCode, string gameUid, string ruleUid, string externalClient, string gameType, Guid campaignUid, Guid accountUid)
 	{
 		_sessionManager.SetKeyValue(TemplateSessionConstants.GameUid, gameUid);
 		_sessionManager.SetKeyValue(TemplateSessionConstants.RuleUid, ruleUid);
 		_sessionManager.SetKeyValue(TemplateSessionConstants.ExternalClient, externalClient);
 		_sessionManager.SetKeyValue(TemplateSessionConstants.GameType, gameType);
+		_sessionManager.SetKeyValue(SessionConstants.CampaignUid, campaignUid.ToString());
+		_sessionManager.SetKeyValue(SessionConstants.AccountUid, accountUid.ToString());
 
 		return new RedirectResult(
 				_twitterHttpService.GetAuthorizationUrl(
@@ -72,7 +74,7 @@ public class AuthenticationController : Controller
 			return ErrorRedirect("TwitterAuthenticationFailed", StatusCodes.Status401Unauthorized);
 		}
 
-		if (!IsValidSessionData(out var gameUid, out var ruleUid, out var externalClient, out var gameType))
+		if (!IsValidSessionData(out var gameUid, out var ruleUid, out var externalClient, out var gameType, out var campaignUid, out var accountUid))
 		{
 			_logger.LogError("Unable to determine either the gameuid, ruleuid, externalclient or gameType");
 			return ErrorRedirect("Missing required information.", StatusCodes.Status404NotFound);
@@ -84,6 +86,8 @@ public class AuthenticationController : Controller
 			return ErrorRedirect("TwitterAuthenticationFailed", StatusCodes.Status401Unauthorized);
 		}
 
+		_sessionManager.SetKeyValue(TemplateSessionConstants.AuthenticationKey, accessTokenObject.AccessToken);
+
 		var userDetails = await FetchAuthenticatedUserDetails(accessTokenObject);
 		if (userDetails == null)
 		{
@@ -92,7 +96,7 @@ public class AuthenticationController : Controller
 
 		await SignInUserAsync(userDetails, ExternalClientType.Twitter);
 
-		return await HandleGameAndUserProfile(userDetails, gameType, gameUid, ruleUid, externalClient);
+		return await HandleGameAndUserProfile(userDetails, gameType, gameUid, ruleUid, externalClient, campaignUid, accountUid);
 	}
 
 	//[HttpGet]
@@ -181,17 +185,21 @@ public class AuthenticationController : Controller
 
 	private bool IsRequestDenied() => Request.Query["denied"].Count > 0;
 
-	private bool IsValidSessionData(out Guid gameUid, out Guid ruleUid, out string externalClient, out string gameType)
+	private bool IsValidSessionData(out Guid gameUid, out Guid ruleUid, out string externalClient, out string gameType, out Guid campaignUid, out Guid accountUid)
 	{
 		gameUid = Guid.Parse(_sessionManager.GetValue(TemplateSessionConstants.GameUid));
 		ruleUid = Guid.Parse(_sessionManager.GetValue(TemplateSessionConstants.RuleUid));
 		externalClient = _sessionManager.GetValue(TemplateSessionConstants.ExternalClient);
 		gameType = _sessionManager.GetValue(TemplateSessionConstants.GameType);
+		campaignUid = Guid.Parse(_sessionManager.GetValue(SessionConstants.CampaignUid));
+		accountUid = Guid.Parse(_sessionManager.GetValue(SessionConstants.AccountUid));
 
 		return gameUid != Guid.Empty &&
 			   ruleUid != Guid.Empty &&
 			   !string.IsNullOrWhiteSpace(externalClient) &&
-			   !string.IsNullOrWhiteSpace(gameType);
+			   !string.IsNullOrWhiteSpace(gameType) &&
+			   campaignUid != Guid.Empty &&
+			   accountUid != Guid.Empty;
 	}
 
 	private async Task<AccessTokenResponse> FetchAccessToken()
@@ -214,7 +222,9 @@ public class AuthenticationController : Controller
 		string gameType,
 		Guid gameUid,
 		Guid ruleUid,
-		string externalClient)
+		string externalClient,
+		Guid campaignUid,
+		Guid accountUid)
 	{
 		var gameDetails = await _gameService.GetGameDetailsAsync(Enum.Parse<GameTypesEnum>(gameType), gameUid);
 
@@ -228,38 +238,10 @@ public class AuthenticationController : Controller
 			return ErrorRedirect("Game has not started.", StatusCodes.Status400BadRequest);
 		}
 
-		var accountUidString = _sessionManager.GetValue(SessionConstants.AccountUid);
-		if (string.IsNullOrWhiteSpace(accountUidString))
-		{
-			var game = await _gameService.GetGameDetailsAsync(Enum.Parse<GameTypesEnum>(gameType), gameUid);
-			if (game == null)
-			{
-				_logger.LogError("Game not found!");
-
-				return RedirectToAction("HandlerErrorCode", "Error", new { statusCode = 400 });
-			}
-
-			var campaign = await _campaignService.GetCampaignAsync(game.CampaignUid, default);
-			if (campaign == null)
-			{
-				_logger.LogError("Campaign not found!");
-
-				return RedirectToAction("HandlerErrorCode", StatusCodes.Status400BadRequest);
-			}
-
-			accountUidString = campaign.Account.AccountUid.ToString();
-		}
-
-		var accountUid = Guid.Parse(accountUidString);
-		if (accountUid == Guid.Empty)
-		{
-			return ErrorRedirect("AccountUid is missing.", StatusCodes.Status400BadRequest);
-		}
-
 		//Redirect directly to play the game if from client.
 		if(externalClient != ExternalClientType.Twitter.ToString())
 		{
-			return RedirectToGame(gameType, gameUid, ruleUid, externalClient);
+			return RedirectToGame(gameType, gameUid, ruleUid, externalClient, campaignUid);
 		}
 
 		var memberProfile = await _memberProfileRepository.GetByExternalProfileIdAsync(
@@ -282,10 +264,10 @@ public class AuthenticationController : Controller
 
 		await UpdateMemberProfileAsync(userDetails, memberProfile);
 
-		return RedirectToGame(gameType, gameUid, ruleUid, externalClient);
+		return RedirectToGame(gameType, gameUid, ruleUid, externalClient, campaignUid);
 	}
 
-	private IActionResult RedirectToGame(string gameType, Guid gameUid, Guid ruleUid, string externalClient)
+	private IActionResult RedirectToGame(string gameType, Guid gameUid, Guid ruleUid, string externalClient, Guid campaignUid)
 	{
 		var controllerName = gameType == GameTypesEnum.Sweeps.ToString()
 			? "Sweepstakes"
@@ -293,7 +275,7 @@ public class AuthenticationController : Controller
 
 		var actionName = "PrePlay";
 
-		return RedirectToAction(actionName, controllerName, new { gameUid, ruleUid, externalClient });
+		return RedirectToAction(actionName, controllerName, new { gameUid, ruleUid, externalClient, campaignUid });
 	}
 
 	private void LogMissingMemberProfile(UserProviderDetails userDetails)

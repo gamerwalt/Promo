@@ -133,7 +133,13 @@ public class SweepstakesController : Controller
 						"Authentication",
 						new
 						{
-							providerCode = code
+							providerCode = code,
+							gameUid,
+							ruleUid,
+							externalClient,
+							gameType = GameTypesEnum.Sweeps.ToString(),
+							campaignUid,
+							campaign.Account.AccountUid
 						});
 				}
 				else
@@ -281,6 +287,7 @@ public class SweepstakesController : Controller
 				if (externalClient == ExternalClientType.Twitter.ToString())
 				{
 					_logger.LogWarning("User is not authenticated.");
+					var campaign = await _campaignService.GetCampaignAsync(campaignUid, default);
 
 					var code = GetProviderCode(externalClient);
 					_logger.LogInformation("Redirecting with provider code {code}", code);
@@ -290,7 +297,13 @@ public class SweepstakesController : Controller
 						"Authentication",
 						new
 						{
-							providerCode = code
+							providerCode = code,
+							gameUid,
+							ruleUid,
+							externalClient,
+							gameType = GameTypesEnum.Sweeps.ToString(),
+							campaignUid,
+							campaign.Account.AccountUid
 						});
 				}
 				else
@@ -473,6 +486,7 @@ public class SweepstakesController : Controller
 				if (externalClient == ExternalClientType.Twitter.ToString())
 				{
 					_logger.LogWarning("User is not authenticated.");
+					var campaign = await _campaignService.GetCampaignAsync(campaignUid, default);
 
 					var code = GetProviderCode(externalClient);
 					_logger.LogInformation("Redirecting with provider code {code}", code);
@@ -482,7 +496,13 @@ public class SweepstakesController : Controller
 						"Authentication",
 						new
 						{
-							providerCode = code
+							providerCode = code,
+							gameUid,
+							ruleUid,
+							externalClient,
+							gameType = GameTypesEnum.Sweeps.ToString(),
+							campaignUid,
+							campaign.Account.AccountUid
 						});
 				}
 				else
@@ -705,9 +725,7 @@ public class SweepstakesController : Controller
 
 	private UserIdentifierType GetUserIdentifierType(string externalClient)
 	{
-		if (externalClient != ExternalClientType.Twitter.ToString() ||
-			externalClient != ExternalClientType.Facebook.ToString() ||
-			externalClient != ExternalClientType.Instagram.ToString())
+		if (!externalClient.Equals(ExternalClientType.Twitter.ToString(), StringComparison.InvariantCultureIgnoreCase))
 		{
 			externalClient = ExternalClientType.Client.ToString();
 		}
@@ -727,9 +745,7 @@ public class SweepstakesController : Controller
 
 	private string GetProfileType(string externalClient)
 	{
-		if(externalClient != ExternalClientType.Twitter.ToString() ||
-			externalClient != ExternalClientType.Facebook.ToString() ||
-			externalClient != ExternalClientType.Instagram.ToString())
+		if (!externalClient.Equals(ExternalClientType.Twitter.ToString(), StringComparison.InvariantCultureIgnoreCase))
 		{
 			externalClient = ExternalClientType.Client.ToString();
 		}
