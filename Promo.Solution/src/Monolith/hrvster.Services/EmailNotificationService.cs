@@ -3,7 +3,7 @@ using Microsoft.Extensions.Logging;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace hrvster.Services
+namespace hrvster.Services.Mailer
 {
 	public class EmailNotificationService : IService
 	{

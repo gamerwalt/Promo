@@ -77,21 +77,21 @@
 								<label class="required d-flex align-items-center fs-6 fw-semibold form-label mb-2">
 									Start Date
 								</label>
-								<input asp-for="StartDate" class="form-control" asp-format="{0:yyyy-MM-ddTHH:mm:ss}" type="datetime-local" />
+								<input asp-for="StartDate" class="form-control" asp-format="{0:yyyy-MM-ddTHH:mm}" type="datetime-local" />
 								<span asp-validation-for="StartDate"></span>
 							</div>
 							<div class="fv-row mb-8 w-lg-300px">
 								<label class="required d-flex align-items-center fs-6 fw-semibold form-label mb-2">
 									End Date
 								</label>
-								<input asp-for="EndDate" class="form-control" asp-format="{0:yyyy-MM-ddTHH:mm:ss}" type="datetime-local" />
+								<input asp-for="EndDate" class="form-control" asp-format="{0:yyyy-MM-ddTHH:mm}" type="datetime-local" />
 								<span asp-validation-for="EndDate"></span>
 							</div>
 							<div class="fv-row mb-8 w-lg-300px">
 								<label class="required d-flex align-items-center fs-6 fw-semibold form-label mb-2">
 									Date To Generate Boards
 								</label>
-								<input asp-for="GenerateBoardDate" class="form-control" asp-format="{0:yyyy-MM-ddTHH:mm:ss}" type="datetime-local" />
+								<input asp-for="GenerateBoardDate" class="form-control" asp-format="{0:yyyy-MM-ddTHH:mm}" type="datetime-local" />
 								<span asp-validation-for="GenerateBoardDate"></span>
 							</div>
 						</div>

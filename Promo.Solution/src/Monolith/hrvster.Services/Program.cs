@@ -59,7 +59,7 @@ namespace hrvster.Services
 					services.AddHostedService<HostedServices>();
 					services.AddSingleton<IService, ScheduledPostService>();
 					services.AddSingleton<IService, SweepstakesDrawService>();
-					services.AddSingleton<IService, EmailNotificationService>();
+					
 					services.AddSingleton<IService, AccountVerificationService>();
 					services.AddSingleton<IService, FlutterwaveEventService>();
 					services.AddSingleton<IService, HarvesterRestarterService>();

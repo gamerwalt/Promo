@@ -1,10 +1,14 @@
 ﻿using hrvster.Games.Match.Models;
 using hrvster.Infrastructure.Extensions;
+using Microsoft.Extensions.Logging;
 using MySqlConnector;
+using Newtonsoft.Json;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Net.NetworkInformation;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -13,9 +17,10 @@ namespace hrvster.Infrastructure.MatchGames
 {
 	public interface IMatchBoardsRepository
 	{
+		Task BulkInsertBoardsAndTiles(MatchGame matchGame, List<MatchBoard> currentBatch, CancellationToken cancellationToken);
 		Task CreateAsync(MatchBoard board, CancellationToken cancellationToken);
 		Task<IEnumerable<MatchBoard>> GetForMatchGameAsync(Guid matchGameUid, CancellationToken cancellationToken);
-		Task<MatchBoard> GetGameBoardAsync(Guid gameboardUid);
+		Task<MatchBoard> GetGameBoardAsync(Guid gameboardUid, CancellationToken token = default);
 		/// <summary>
 		/// Get a list of all the Board Uids for a specific game
 		/// </summary>
@@ -30,10 +35,94 @@ namespace hrvster.Infrastructure.MatchGames
 	public class MatchBoardsRepository : IMatchBoardsRepository
 	{
 		private readonly IDatabase _database;
+		private readonly ILogger<MatchBoardsRepository> _logger;
 
-		public MatchBoardsRepository(IDatabase database)
+		public MatchBoardsRepository(IDatabase database, ILoggerFactory loggerFactory)
 		{
 			_database = database;
+			_logger = loggerFactory.CreateLogger<MatchBoardsRepository>();
+		}
+
+		public async Task BulkInsertBoardsAndTiles(MatchGame matchGame, List<MatchBoard> boards, CancellationToken cancellationToken)
+		{
+			using var conn = new MySqlConnection(_database.GetConnectionString());
+			await conn.OpenAsync(cancellationToken);
+
+			// Adjust MySQL settings for bulk operations
+			_logger.LogInformation("Adjust MySQL settings for bulk operations.");
+			var originalMaxPacket = await GetGlobalVariable(conn, "max_allowed_packet", cancellationToken);
+			var originalForeignKeyChecks = await GetGlobalVariable(conn, "foreign_key_checks", cancellationToken);
+			await SetGlobalVariable(conn, "max_allowed_packet", "419430400", cancellationToken);
+			await SetGlobalVariable(conn, "foreign_key_checks", "0", cancellationToken);
+
+			try
+			{
+				// Bulk insert boards
+				var boardValues = new ConcurrentBag<string>();
+				await Parallel.ForEachAsync(boards, new ParallelOptions { CancellationToken = cancellationToken }, async (board, token) =>
+				{
+					var tiles = JsonConvert.SerializeObject(board.Tiles.Select(tile => new
+					{
+						tile_uid = Guid.NewGuid().ToString(),
+						image_id = tile.Image.Id,
+						prize_id = tile.WinIndicator ? tile.Prize.Id.ToString() : "NULL",
+						win_indicator = tile.WinIndicator ? 1 : 0
+					}));
+					string prizeId = board.IsWinnable ? $"{board.Prize.Id}" : "NULL";
+					boardValues.Add($"('{board.Uid}', {board.MatchGame.Id}, {prizeId}, {Convert.ToInt32(board.IsWinnable)}, '{tiles}')");
+					await Task.CompletedTask; // Placeholder for potential asynchronous work
+				});
+
+				var boardInsertQuery = $@"INSERT INTO match_boards (board_uid, match_game_id, prize_id, is_winnable, tiles) VALUES {string.Join(", ", boardValues)};";
+				_logger.LogInformation("Executing query for the boards.");
+				await ExecuteNonQuery(conn, boardInsertQuery, cancellationToken);
+			}
+			finally
+			{
+				if(conn.State == ConnectionState.Closed)
+				{
+					await conn.OpenAsync(cancellationToken);
+				}
+
+				_logger.LogInformation("Restore original MySQL settings.");
+				// Restore original MySQL settings
+				await SetGlobalVariable(conn, "max_allowed_packet", originalMaxPacket, cancellationToken);
+				await SetGlobalVariable(conn, "foreign_key_checks", originalForeignKeyChecks, cancellationToken);
+			}
+		}
+
+		private async Task<string> GetGlobalVariable(MySqlConnection conn, string variableName, CancellationToken cancellationToken)
+		{
+			if (conn.State == ConnectionState.Closed)
+			{
+				await conn.OpenAsync(cancellationToken);
+			}
+
+			using var command = new MySqlCommand($"SELECT @@{variableName};", conn);
+			return (await command.ExecuteScalarAsync()).ToString();
+		}
+
+		private async Task SetGlobalVariable(MySqlConnection conn, string variableName, string value, CancellationToken cancellationToken)
+		{
+			if (conn.State == ConnectionState.Closed)
+			{
+				await conn.OpenAsync(cancellationToken);
+			}
+
+			using var command = new MySqlCommand($"SET GLOBAL {variableName} = {value};", conn);
+			await command.ExecuteNonQueryAsync();
+		}
+
+		private async Task ExecuteNonQuery(MySqlConnection conn, string query, CancellationToken cancellationToken)
+		{
+			if (conn.State == ConnectionState.Closed)
+			{
+				await conn.OpenAsync(cancellationToken);
+			}
+
+			using var command = new MySqlCommand(query, conn);
+			command.CommandTimeout = 3600;
+			await command.ExecuteNonQueryAsync();
 		}
 
 		public async Task CreateAsync(MatchBoard board, CancellationToken cancellationToken)
@@ -77,8 +166,13 @@ namespace hrvster.Infrastructure.MatchGames
 			return matchBoards;
 		}
 
-		public async Task<MatchBoard> GetGameBoardAsync(Guid gameboardUid)
+		public async Task<MatchBoard> GetGameBoardAsync(Guid gameboardUid, CancellationToken token = default)
 		{
+			if(token.IsCancellationRequested)
+			{
+				token.ThrowIfCancellationRequested();
+			}
+
 			var matchBoard = default(MatchBoard);
 
 			using (var conn = new MySqlConnection(_database.GetConnectionString()))

@@ -13,6 +13,9 @@ namespace hrvster.Web
 		public static void Main(string[] args)
 		{
 			var env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+
+			Log.Information($"Main - hrvster.WEB - Environment : {env}");
+
 			var configuration = new ConfigurationBuilder()
 				.AddJsonFile("appsettings.json")
 				.AddJsonFile($"appsettings.{env}.json")

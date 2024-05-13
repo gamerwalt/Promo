@@ -47,13 +47,13 @@ namespace hrvster.Web.Validation
 
 			RuleFor(f => f.NumberOfBoards)
 				.NotEmpty()
-				.WithMessage("The number of boards need to be more than 0.")
+				.WithMessage("The number of boards need to be more than 15.")
 				.NotNull()
-				.WithMessage("The number of boards need to be more than 0.")
-				.GreaterThan(0)
-				.WithMessage("The number of boards need to be more than 0.")
-				.LessThan(1000)
-				.WithMessage("The number of boards need to be less than 1000.");
+				.WithMessage("The number of boards need to be more than 15.")
+				.GreaterThan(15)
+				.WithMessage("The number of boards need to be more than 15.")
+				.LessThan(10000000)
+				.WithMessage("The number of boards need to be less than 10,000,000.");
 			RuleFor(f => f.WinnableBoards)
 				.NotEmpty()
 				.WithMessage("The number of winnable boards should be within 1 and the number of boards.")

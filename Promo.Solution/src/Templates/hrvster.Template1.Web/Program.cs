@@ -113,7 +113,7 @@ namespace hrvster.Template1.Web
 
 			Log.Information("Added Cookies auth scheme.");
 
-			builder.Services.AddControllersWithViews();
+			builder.Services.AddControllersWithViews().AddRazorRuntimeCompilation();
 
 			builder.Services.AddMvc(o =>
 			{

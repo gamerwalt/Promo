@@ -41,7 +41,7 @@ namespace hrvster.Web.Validation
 
 					if (model.IsFiller) return true;
 
-					return totalPrizes + quantity <= winnableBoards;
+					return totalPrizes + quantity <= winnableBoards + 1;
 				})
 				.WithMessage("The total quantity of prizes, including the new prize, cannot exceed the number of winnable boards.");
 		}

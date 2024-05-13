@@ -40,6 +40,9 @@ namespace hrvster.ApplicationServices.Mails
 			_logger.LogInformation($"{nameof(ProcessAnyUnsentEmails)} processing started.");
 
 			var emailsToGoOut = await _mailRepository.GetUnsentAsync();
+
+			_logger.LogInformation($"{emailsToGoOut.Count()} emails to be sent.");
+
 			if (emailsToGoOut != null && emailsToGoOut.Count() != 0)
 			{
 				_logger.LogInformation($"There are {emailsToGoOut.Count()} emails that needs to be sent.");

@@ -3,13 +3,14 @@ using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using StackExchange.Redis;
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace hrvster.ApplicationServices.Caching
 {
 	public interface ICacheDataService
 	{
-		Task SetAsync<T>(string key, T value, TimeSpan? expiresIn = null);
+		Task SetAsync<T>(string key, T value, CancellationToken token = default, TimeSpan? expiresIn = null);
 		Task<T> GetAsync<T>(string key);
 		Task RemoveItemFromCacheAsync(string key);
 	}
@@ -59,8 +60,13 @@ namespace hrvster.ApplicationServices.Caching
 			return config;
 		}
 
-		public async Task SetAsync<T>(string key, T value, TimeSpan? expiresIn = null)
+		public async Task SetAsync<T>(string key, T value, CancellationToken token = default, TimeSpan? expiresIn = null)
 		{
+			if(token.IsCancellationRequested)
+			{
+				token.ThrowIfCancellationRequested();
+			}
+
 			var settings = new JsonSerializerSettings
 			{
 				ReferenceLoopHandling = ReferenceLoopHandling.Ignore,

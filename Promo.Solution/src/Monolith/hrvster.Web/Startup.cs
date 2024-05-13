@@ -36,6 +36,7 @@ namespace hrvster.Web
 		public void ConfigureServices(IServiceCollection services)
 		{
 			services.AddControllersWithViews()
+				.AddRazorRuntimeCompilation()
 				.AddNToastNotifyToastr(new NToastNotify.ToastrOptions
 				{
 					ProgressBar = true,

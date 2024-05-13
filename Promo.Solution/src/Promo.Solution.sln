@@ -189,7 +189,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "hrvster.Web.TestUtilities",
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "hrvster.Stripe.EventProcessor.Service", "Monolith\hrvster.Stripe.EventProcessor.Service\hrvster.Stripe.EventProcessor.Service.csproj", "{394246EF-EB8B-449F-8420-FA34EE37508B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "hrvster.Core.Notifications", "Monolith\hrvster.Core.Notifications\hrvster.Core.Notifications.csproj", "{213B163C-7DBD-4538-AF4B-FE4BB387CD5B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "hrvster.Core.Notifications", "Monolith\hrvster.Core.Notifications\hrvster.Core.Notifications.csproj", "{213B163C-7DBD-4538-AF4B-FE4BB387CD5B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Jobs", "Jobs", "{653088F2-42C3-4D0C-8EBF-7E278F1E04C0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "hrvster.Services.Mailer", "Monolith\Jobs\hrvster.Services.Mailer\hrvster.Services.Mailer.csproj", "{AE983099-6356-4FB6-B43E-B94BC830A65D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -349,6 +353,10 @@ Global
 		{213B163C-7DBD-4538-AF4B-FE4BB387CD5B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{213B163C-7DBD-4538-AF4B-FE4BB387CD5B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{213B163C-7DBD-4538-AF4B-FE4BB387CD5B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AE983099-6356-4FB6-B43E-B94BC830A65D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AE983099-6356-4FB6-B43E-B94BC830A65D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AE983099-6356-4FB6-B43E-B94BC830A65D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AE983099-6356-4FB6-B43E-B94BC830A65D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -417,6 +425,8 @@ Global
 		{67B32542-6133-419A-99F3-1309B932E18F} = {A6C98869-6DB5-4DC6-8C78-45F00E0A9695}
 		{394246EF-EB8B-449F-8420-FA34EE37508B} = {71429F9B-A81B-4A12-98DD-505C0F9FDB34}
 		{213B163C-7DBD-4538-AF4B-FE4BB387CD5B} = {71429F9B-A81B-4A12-98DD-505C0F9FDB34}
+		{653088F2-42C3-4D0C-8EBF-7E278F1E04C0} = {71429F9B-A81B-4A12-98DD-505C0F9FDB34}
+		{AE983099-6356-4FB6-B43E-B94BC830A65D} = {653088F2-42C3-4D0C-8EBF-7E278F1E04C0}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {94B46B7F-1545-465E-863A-AAD0C58A8C0F}

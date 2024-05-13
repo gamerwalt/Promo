@@ -65,7 +65,8 @@
 		AutoReplyLikedTweet,
 		AutoPlayFromTweet,
 		AutoPlayFromHashtag,
-		AutoPlayFromTweetReplyHashtag
+		AutoPlayFromTweetReplyHashtag,
+		ClientAppClick
 	}
 
 	public enum UserIdentifierType
