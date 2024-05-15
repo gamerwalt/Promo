@@ -86,7 +86,6 @@ namespace hrvster.ApplicationServices.MatchGames
 			_logger.LogInformation("Reserving the gameboard {gameboardUid}", gameBoard.Uid);
 			await _gameboardService.ReserveBoardAsync(gameBoard, cancellationToken);
 
-
 			return gameplayUid;
 		}
 
@@ -128,10 +127,12 @@ namespace hrvster.ApplicationServices.MatchGames
 			var listOfTiles = new List<MatchTile>();
 
 			var selectedTilesInGuid = selectedTiles.Split(',').ToList();
+			var board = await _gameboardService.GetGameBoardAsync(gameplay.MatchBoard.Uid, cancellationToken);
 
-			foreach(var tileUid in selectedTilesInGuid)
+			foreach (var tileUid in selectedTilesInGuid)
 			{
-				listOfTiles.Add(await _tilesRepository.GetTileAsync(tileUid, cancellationToken));
+				var thisTile = board.Tiles.Find(t => t.Uid.ToString() == tileUid);
+				listOfTiles.Add(thisTile);
 			}
 
 			if(!HaveTheSamePrize(listOfTiles))

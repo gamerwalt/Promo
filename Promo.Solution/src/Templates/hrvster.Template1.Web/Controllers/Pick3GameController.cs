@@ -443,7 +443,7 @@ namespace hrvster.Template1.Web.Controllers
 						return ErrorRedirect("Gameboard not found!", StatusCodes.Status400BadRequest);
 					}
 
-					var tiles = await _matchGameBoardService.GetTilesAsync(gameboard.Uid, cancellationToken);
+					var tiles = gameboard.Tiles;
 					if (tiles == null)
 					{
 						_logger.LogError("Tiles not found!");
@@ -635,7 +635,7 @@ namespace hrvster.Template1.Web.Controllers
 			}
 
 			var gameboard = await _matchGameBoardService.GetGameBoardAsync(gameplay.MatchBoard.Uid, cancellationToken);
-			var tiles = await _matchGameBoardService.GetTilesAsync(gameboard.Uid, cancellationToken);
+			var tiles = gameboard.Tiles;
 
 			var model = new GameplayWin
 			{
@@ -646,6 +646,8 @@ namespace hrvster.Template1.Web.Controllers
 				Tiles = GetMatchTiles(tiles),
 				SelectedTiles = LoadTileStrings(gameplay.SelectedTiles)
 			};
+
+			await _matchGameBoardService.RemoveBoardFromCacheAsync(gameboard.Uid, cancellationToken);
 
 			return View(model);
 		}
@@ -673,7 +675,7 @@ namespace hrvster.Template1.Web.Controllers
 			}
 
 			var gameboard = await _matchGameBoardService.GetGameBoardAsync(gameplay.MatchBoard.Uid, cancellationToken);
-			var tiles = await _matchGameBoardService.GetTilesAsync(gameboard.Uid, cancellationToken);
+			var tiles = gameboard.Tiles;
 
 			var model = new GameplayLoss
 			{
@@ -685,6 +687,8 @@ namespace hrvster.Template1.Web.Controllers
 				SelectedTiles = LoadTileStrings(gameplay.SelectedTiles),
 				Points = points
 			};
+
+			await _matchGameBoardService.RemoveBoardFromCacheAsync(gameboard.Uid, cancellationToken);
 
 			return View(model);
 		}

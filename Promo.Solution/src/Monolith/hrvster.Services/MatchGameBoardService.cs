@@ -48,11 +48,13 @@ namespace hrvster.Services
 							matchGame.Uid,
 							matchGame.Name);
 
-						await _matchGameBoardService.GenerateBoardsAsync(matchGame, cancellationToken);
-
-						_logger.LogInformation("Boards generated for game with uid {gameUid} and name {matchGameName}",
-							matchGame.Uid,
-							matchGame.Name);
+						if(!matchGame.HasBeenGenerated)
+						{
+							await _matchGameBoardService.GenerateBoardsAsync(matchGame, cancellationToken);
+							_logger.LogInformation("Boards generated for game with uid {gameUid} and name {matchGameName}",
+								matchGame.Uid,
+								matchGame.Name);
+						}
 
 						continue;
 					}

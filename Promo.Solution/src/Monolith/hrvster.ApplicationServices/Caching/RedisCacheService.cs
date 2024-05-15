@@ -13,6 +13,10 @@ namespace hrvster.ApplicationServices.Caching
 		Task SetAsync<T>(string key, T value, CancellationToken token = default, TimeSpan? expiresIn = null);
 		Task<T> GetAsync<T>(string key);
 		Task RemoveItemFromCacheAsync(string key);
+		Task SetAddAsync(string boardKeysKeyName, string value);
+		Task<string> GetRandomBoardKey(string boardKeysKeyName);
+		Task<string> GetBoardDetailsAsync(string key);
+		Task<string> GetTileDetailsAsync(string key);
 	}
 
 	public class RedisCacheService : ICacheDataService
@@ -91,5 +95,46 @@ namespace hrvster.ApplicationServices.Caching
 
 		public async Task RemoveItemFromCacheAsync(string key)
 			=> await _cache.KeyDeleteAsync(key);
+
+		public Task SetAddAsync(string boardKeysKeyName, string value)
+		{
+			return _cache.SetAddAsync(boardKeysKeyName, value);
+		}
+
+		public async Task<string> GetRandomBoardKey(string boardKeysKeyName)
+		{
+			var value = await _cache.SetPopAsync(boardKeysKeyName);
+
+			if(value.HasValue)
+			{
+				return value.ToString();
+			}
+
+			return string.Empty;
+		}
+
+		public async Task<string> GetBoardDetailsAsync(string key)
+		{
+			var value = await _cache.StringGetAsync(key);
+
+			if(value.HasValue)
+			{
+				return value.ToString();
+			}
+
+			return string.Empty;
+		}
+
+		public async Task<string> GetTileDetailsAsync(string key)
+		{
+			var value = await _cache.StringGetAsync(key);
+
+			if (value.HasValue)
+			{
+				return value.ToString();
+			}
+
+			return string.Empty;
+		}
 	}
 }
