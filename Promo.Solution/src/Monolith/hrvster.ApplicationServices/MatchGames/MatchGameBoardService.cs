@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using MimeKit.Cryptography;
 using Newtonsoft.Json;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
@@ -84,7 +85,7 @@ namespace hrvster.ApplicationServices.MatchGames
 				var numberOfBoards = matchGame.NumberOfBoards;
 				var numberOfWinnableBoards = matchGame.NumberOfWinnableBoards;
 				var random = new Random();
-				var generatedBoards = new List<MatchBoard>(numberOfBoards);
+				var generatedBoards = new ConcurrentBag<MatchBoard>();
 
 				_logger.LogInformation("Number of boards: {numberOfBoards}, number of winnable boards: {numberOfWinnableBoards}.", 
 					numberOfBoards, 
@@ -133,15 +134,13 @@ namespace hrvster.ApplicationServices.MatchGames
 				{
 					bool isWinnable = index < matchGame.NumberOfWinnableBoards;
 					var board = GenerateBoard(matchGame, isWinnable ? matchGame.WinProbability : 0, availablePrizes, isWinnable);
-					lock (generatedBoards)
-					{
-						generatedBoards.Add(board);
-					}
+					
+					generatedBoards.Add(board);
 					await Task.CompletedTask;
 				});
 
 				_logger.LogInformation("Shuffling boards.");
-				var shuffledBoards = ShuffleBoards(generatedBoards);
+				var shuffledBoards = ShuffleBoards(generatedBoards.ToList());
 
 				_logger.LogInformation("Saving boards.");
 				await SaveBoardsAsync2(matchGame, shuffledBoards, cancellationToken);
@@ -206,7 +205,7 @@ namespace hrvster.ApplicationServices.MatchGames
 				});
 			}
 
-			board.Tiles = board.Tiles.OrderBy(t => Guid.NewGuid()).ToList();
+			board.Tiles.Shuffle();
 
 			if (board.Tiles.Any(c => c.Uid == Guid.Empty))
 			{
@@ -256,14 +255,21 @@ namespace hrvster.ApplicationServices.MatchGames
 
 		private async Task SaveBoardsAsync2(MatchGame matchGame, List<MatchBoard> boards, CancellationToken cancellationToken)
 		{
-			int batchSize = 20000;  // Set a reasonable batch size for bulk operations
+			int batchSize = 50000;  // Set a reasonable batch size for bulk operations
 			for (int i = 0; i < boards.Count; i += batchSize)
 			{
 				var batch = boards.Skip(i).Take(batchSize).ToList();
 				_logger.LogInformation($"Saving batch of {batch.Count} boards, batch start index: {i}");
 				await _matchBoardsRepository.BulkInsertBoardsAndTiles(matchGame, batch, cancellationToken);
 			}
+
 			_logger.LogInformation("All boards saved successfully.");
+
+			_logger.LogInformation("Retrieving the board ids of all inserted boards started.");
+
+			var boardMappings = await _matchBoardsRepository.GetInsertedBoardIds(boards, cancellationToken);
+
+			_logger.LogInformation("Retrieving the board ids of all inserted boards finished.");
 
 			_logger.LogInformation("Saving boards into redis started.");
 
@@ -274,6 +280,7 @@ namespace hrvster.ApplicationServices.MatchGames
 				var tileKey = GetTileKeysName(board.Uid);
 				var cachedBoard = new CachedBoard
 				{
+					Id = boardMappings[board.Uid],
 					Uid = board.Uid,
 					IsWinnable = board.IsWinnable,
 					IsReserved = board.IsReserved,
@@ -418,6 +425,7 @@ namespace hrvster.ApplicationServices.MatchGames
 			
 			return new MatchBoard
 			{
+				Id = cachedBoard.Id,
 				Uid = cachedBoard.Uid,
 				MatchGame = new MatchGame { Id = cachedBoard.MatchGameId, Uid = cachedBoard.MatchGameUid, Name = cachedBoard.MatchGameName },
 				Prize = new MatchPrize { Id = cachedBoard.PrizeId, Uid = cachedBoard.PrizeUid },
@@ -484,6 +492,7 @@ namespace hrvster.ApplicationServices.MatchGames
 			var key = GetBoardKeyName(board.Uid);
 			var cachedBoard = new CachedBoard
 			{
+				Id = board.Id,
 				Uid = board.Uid,
 				IsWinnable = board.IsWinnable,
 				IsReserved = true,
@@ -540,6 +549,23 @@ namespace hrvster.ApplicationServices.MatchGames
 		{
 			await _cacheDataService.RemoveItemFromCacheAsync(GetBoardKeyName(boardUid));
 			await _cacheDataService.RemoveItemFromCacheAsync(GetTileKeysName(boardUid));
+		}
+	}
+
+	public static class ListExtensions
+	{
+		private static Random rng = new Random();
+		public static void Shuffle<T>(this IList<T> list)
+		{
+			int n = list.Count;
+			while (n > 1)
+			{
+				n--;
+				int k = rng.Next(n + 1);
+				T value = list[k];
+				list[k] = list[n];
+				list[n] = value;
+			}
 		}
 	}
 }

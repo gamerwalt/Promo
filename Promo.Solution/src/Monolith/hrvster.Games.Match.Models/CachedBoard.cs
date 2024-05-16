@@ -3,7 +3,9 @@
 namespace hrvster.Games.Match.Models
 {
 	public class CachedBoard
-	{
+	{ 
+		[JsonProperty("Id")]
+		public int Id { get; set; }
 
 		[JsonProperty("Uid")]
 		public Guid Uid { get; set; }

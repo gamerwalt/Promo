@@ -28,6 +28,7 @@ namespace hrvster.Infrastructure.MatchGames
 		/// <param name="cancellationToken">Cancellation Token</param>
 		/// <returns>List<Guid></Guid></returns>
 		Task<IEnumerable<Guid>> GetGameBoardUidsAsync(Guid gameUid, CancellationToken cancellationToken);
+		Task<Dictionary<Guid, int>> GetInsertedBoardIds(List<MatchBoard> boards, CancellationToken cancellationToken);
 		Task ReserveBoardAsync(Guid uid, CancellationToken cancellationToken);
 		Task UpdateAsPlayedAsync(Guid boardUid, CancellationToken cancellationToken);
 	}
@@ -287,6 +288,61 @@ namespace hrvster.Infrastructure.MatchGames
 
 			await conn.OpenAsync(cancellationToken);
 			await command.ExecuteNonQueryAsync(cancellationToken);
+		}
+
+		public async Task<Dictionary<Guid, int>> GetInsertedBoardIds(List<MatchBoard> boards, CancellationToken cancellationToken)
+		{
+			var insertedBoardIds = new Dictionary<Guid, int>();
+			var batchSize = 10000; // Adjust based on your needs
+			var totalBoards = boards.Count;
+
+			using var conn = new MySqlConnection(_database.GetConnectionString());
+			await conn.OpenAsync(cancellationToken);
+
+			var originalMaxPacket = await GetGlobalVariable(conn, "max_allowed_packet", cancellationToken);
+			var originalForeignKeyChecks = await GetGlobalVariable(conn, "foreign_key_checks", cancellationToken);
+			await SetGlobalVariable(conn, "max_allowed_packet", "419430400", cancellationToken);
+			await SetGlobalVariable(conn, "foreign_key_checks", "0", cancellationToken);
+
+			try
+			{
+				for (var i = 0; i < totalBoards; i += batchSize)
+				{
+					var batch = boards.Skip(i).Take(batchSize).ToList();
+					var boardUids = batch.Select(b => $"'{b.Uid}'").ToList();
+					var uidsParameter = string.Join(",", boardUids);
+
+					var query = $"SELECT board_id, board_uid FROM hrvster.match_boards WHERE board_uid IN ({uidsParameter})";
+
+					using (var command = new MySqlCommand(query, conn))
+					{
+						using (var reader = await command.ExecuteReaderAsync(cancellationToken))
+						{
+							while (await reader.ReadAsync(cancellationToken))
+							{
+								var id = reader.GetInt32("board_id");
+								var uid = reader.GetGuid("board_uid");
+
+								insertedBoardIds[uid] = id;
+							}
+						}
+					}
+				}
+			}
+			finally
+			{
+				if (conn.State == ConnectionState.Closed)
+				{
+					await conn.OpenAsync(cancellationToken);
+				}
+
+				_logger.LogInformation("Restore original MySQL settings.");
+				// Restore original MySQL settings
+				await SetGlobalVariable(conn, "max_allowed_packet", originalMaxPacket, cancellationToken);
+				await SetGlobalVariable(conn, "foreign_key_checks", originalForeignKeyChecks, cancellationToken);
+			}
+
+			return insertedBoardIds;
 		}
 	}
 }
