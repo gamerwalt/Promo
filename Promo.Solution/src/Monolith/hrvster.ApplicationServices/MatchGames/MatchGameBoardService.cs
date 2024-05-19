@@ -3,6 +3,8 @@ using hrvster.ApplicationServices.Exceptions;
 using hrvster.ApplicationServices.Extensions.LogExtensions;
 using hrvster.Games.Match.Models;
 using hrvster.Infrastructure.MatchGames;
+using hrvster.Infrastructure.MongoEntities.MatchGames;
+using hrvster.Infrastructure.MongoRepositories;
 using hrvster.Models;
 using Microsoft.Extensions.Logging;
 using MimeKit.Cryptography;
@@ -28,8 +30,8 @@ namespace hrvster.ApplicationServices.MatchGames
 		Task<IEnumerable<MatchTile>> GetTilesAsync(Guid boardUid, CancellationToken cancellationToken);
 		Task<bool> IsBoardPlayableByGameplayAsync(Guid gameplayUid, CancellationToken cancellationToken);
 		Task ReserveBoardAsync(MatchBoard gameBoard, CancellationToken cancellationToken);
-
 		Task RemoveBoardFromCacheAsync(Guid boardUid, CancellationToken cancellationToken);
+		Task GenerateBoardsWithNoTilesAsync(MatchGame matchGame, CancellationToken token);
 	}
 
 	public class MatchGameBoardService : IMatchGameBoardService
@@ -42,6 +44,7 @@ namespace hrvster.ApplicationServices.MatchGames
 		private readonly ICacheDataService _cacheDataService;
 		private readonly IMatchGamesService _matchGameService;
 		private readonly IMatchGamePlayRepository _gameplayRepository;
+		private readonly IMongoMatchTileRepository _mongoMatchTileRepository;
 
 		private const double MinWinProbability = 1;
 		private const int MaxWinProbability = 6;
@@ -49,7 +52,7 @@ namespace hrvster.ApplicationServices.MatchGames
 		private const string LossImageUid = "d1776f2a-2cb4-485c-9da4-b02d3714a0c8";
 		private const string BoardKeysKeyName = "boards:keys";
 		private const string BoardKeyKeyName = "board: ";
-		private const string TileKeysName = "keys: ";
+		private const string TileKeysName = "tiles: ";
 
 		public MatchGameBoardService(
 			ILoggerFactory loggerFactory,
@@ -59,7 +62,8 @@ namespace hrvster.ApplicationServices.MatchGames
 			IMatchTilesRepository matchTilesRepository,
 			ICacheDataService cacheDataService,
 			IMatchGamesService matchGamesService,
-			IMatchGamePlayRepository gameplayRepository)
+			IMatchGamePlayRepository gameplayRepository,
+			IMongoMatchTileRepository mongoMatchTileRepository)
 		{
 			_logger = loggerFactory.CreateLogger<MatchGameBoardService>();
 			_matchPrizeService = matchPrizeService;
@@ -69,11 +73,158 @@ namespace hrvster.ApplicationServices.MatchGames
 			_cacheDataService = cacheDataService;
 			_matchGameService = matchGamesService;
 			_gameplayRepository = gameplayRepository;
+			_mongoMatchTileRepository = mongoMatchTileRepository;
+		}
+
+		public async Task GenerateBoardsWithNoTilesAsync(MatchGame matchGame, CancellationToken token)
+		{
+			_logger.LogInformation("Generating board with no tiles started.");
+
+			var numberOfBoards = matchGame.NumberOfBoards;
+			var numberOfWinnableBoards = matchGame.NumberOfWinnableBoards;
+
+			_logger.LogInformation("Number of boards: {NumberOfBoards}, number of winnable boards: {NumberOfWinnableBoards}.",
+					numberOfBoards,
+					numberOfWinnableBoards);
+
+			_logger.LogInformation("Updating loss image for match game.");
+			await _matchImageService.UpdateLossImageAsync(matchGame.Uid, token);
+
+			_logger.LogInformation("Retrieving prizes for match game.");
+
+			var prizes = await _matchPrizeService.GetAllForMatchGameAsync(matchGame.Uid, token);
+			var prizeList = prizes.Where(c => !c.IsFiller).ToList();
+
+			_logger.LogInformation("Total prizes retrieved {TotalPrizes}.", prizeList.Count);
+
+			var availablePrizes = new List<MatchPrize>();
+			foreach (var prize in prizeList)
+			{
+				for (var i = 0; i < prize.Quantity; i++)
+				{
+					availablePrizes.Add(prize);
+				}
+				_logger.LogInformation("Added the prize {PrizeName} to available prizes.", prize.Name);
+			}
+
+			availablePrizes.Shuffle();
+
+			var options = new ParallelOptions
+			{
+				CancellationToken = token,
+				MaxDegreeOfParallelism = Environment.ProcessorCount
+			};
+
+			_logger.LogInformation("Generating boards with no tiles.");
+
+			await GenerateAndSaveBoardsWithNoTilesAsync(matchGame, numberOfBoards, availablePrizes, options, token);
+
+			_logger.LogInformation("Board generation completed.");
+		}
+
+		private async Task GenerateAndSaveBoardsWithNoTilesAsync(
+			MatchGame matchGame,
+			int numberOfBoards,
+			List<MatchPrize> availablePrizes,
+			ParallelOptions options,
+			CancellationToken cancellationToken)
+		{
+			var generatedBoards = new List<MatchBoard>();
+
+			await Parallel.ForEachAsync(Enumerable.Range(0, numberOfBoards), options, async (index, token) =>
+			{
+				var isWinnable = index < matchGame.NumberOfWinnableBoards;
+				var board = GenerateBoardWithNoTiles(matchGame, isWinnable ? matchGame.WinProbability : 0, availablePrizes, isWinnable);
+				lock (generatedBoards)
+				{
+					generatedBoards.Add(board);
+				}
+				await Task.CompletedTask;
+			});
+
+			await SaveBoardsWithNoTilesAsync(matchGame, generatedBoards, cancellationToken);
+		}
+
+		private MatchBoard GenerateBoardWithNoTiles(
+			MatchGame matchGame, 
+			int winProbability, 
+			List<MatchPrize> availablePrizes, 
+			bool winnable)
+		{
+			var normalizedWinProbability = (winProbability - 1) / 5.0;
+
+			var board = new MatchBoard
+			{
+				Uid = Guid.NewGuid(),
+				MatchGame = matchGame,
+				WinProbability = normalizedWinProbability,
+				IsWinnable = winnable,
+				Tiles = new List<MatchTile>(9)
+			};
+
+			var randomIndex = RandomNumberGenerator.GetInt32(availablePrizes.Count);
+			var winningPrize = availablePrizes[randomIndex];
+			board.Prize = winningPrize;
+
+			return board;
+		}
+
+		private async Task SaveBoardsWithNoTilesAsync(
+			MatchGame matchGame, 
+			List<MatchBoard> boards, 
+			CancellationToken cancellationToken)
+		{
+			var batchSize = 40000;  // Set a reasonable batch size for bulk operations
+			for (var i = 0; i < boards.Count; i += batchSize)
+			{
+				var batch = boards.Skip(i).Take(batchSize).ToList();
+
+				_logger.LogInformation("Saving batch of {BatchCount} boards, batch start index: {I}", batch.Count, i);
+
+				await _matchBoardsRepository.BulkInsertBoardsAndNoTilesAsync(matchGame, batch, cancellationToken);
+			}
+
+			_logger.LogInformation("Boards saved successfully into the database.");
+
+			_logger.LogInformation("Retrieving the board ids of all inserted boards started.");
+
+			var boardMappings = await _matchBoardsRepository.GetInsertedBoardIds(boards, cancellationToken);
+
+			_logger.LogInformation("Retrieving the board ids of all inserted boards finished.");
+
+			_logger.LogInformation("Saving boards into redis started.");
+
+			var options = new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount };
+			await Parallel.ForEachAsync(boards, options, async (board, cancellationToken) =>
+			{
+				var key = GetBoardKeyName(board.Uid);
+				var cachedBoard = new CachedBoard
+				{
+					Id = boardMappings[board.Uid],
+					Uid = board.Uid,
+					IsWinnable = board.IsWinnable,
+					IsReserved = board.IsReserved,
+					PrizeId = board.Prize.Id,
+					PrizeUid = board.Prize.Uid,
+					MatchGameId = board.MatchGame.Id,
+					MatchGameUid = board.MatchGame.Uid,
+					MatchGameName = board.MatchGame.Name,
+				};
+				
+				await _cacheDataService.SetAddAsync(GetBoardKeysKeyName(matchGame.Uid), board.Uid.ToString());
+				await _cacheDataService.SetAsync(key, cachedBoard);
+			});
+
+
+			_logger.LogInformation("Saving boards keys into redis completed.");
+
+			_logger.LogInformation("Setting the match game as processed.");
+			await _matchGameService.SetMatchGameAsProcessedAsync(matchGame, cancellationToken);
 		}
 
 		public async Task GenerateBoardsAsync(MatchGame matchGame, CancellationToken cancellationToken)
 		{
-			using(_logger.BeginGenerateBoard(matchGame.Name, matchGame.Uid))
+			using (_logger.BeginGenerateBoard(matchGame.Name, matchGame.Uid))
 			{
 				_logger.LogInformation("Generating board started.");
 
@@ -87,15 +238,15 @@ namespace hrvster.ApplicationServices.MatchGames
 				var random = new Random();
 				var generatedBoards = new ConcurrentBag<MatchBoard>();
 
-				_logger.LogInformation("Number of boards: {numberOfBoards}, number of winnable boards: {numberOfWinnableBoards}.", 
-					numberOfBoards, 
+				_logger.LogInformation("Number of boards: {numberOfBoards}, number of winnable boards: {numberOfWinnableBoards}.",
+					numberOfBoards,
 					numberOfWinnableBoards);
 
 				_logger.LogInformation("Updating loss image for match game.");
 				await _matchImageService.UpdateLossImageAsync(matchGame.Uid, cancellationToken);
 
 				_logger.LogInformation("Retrieving prizes for match game.");
-				
+
 				var prizes = await _matchPrizeService.GetAllForMatchGameAsync(matchGame.Uid, cancellationToken);
 				var prizeList = prizes.ToList();
 
@@ -103,12 +254,12 @@ namespace hrvster.ApplicationServices.MatchGames
 
 				var images = await _matchImageService.GetForMatchGameAsync(matchGame.Uid, cancellationToken);
 				var lossImage = images.FirstOrDefault(c => c.IsLoss);
-				
+
 				var availablePrizes = new List<MatchPrize>();
 
 				_logger.LogInformation("Generating available prizes.");
 				var lossPrize = prizeList.FirstOrDefault(c => c.IsFiller);
-				if(lossPrize != null)
+				if (lossPrize != null)
 				{
 					prizeList.Remove(lossPrize);
 				}
@@ -129,24 +280,78 @@ namespace hrvster.ApplicationServices.MatchGames
 				};
 
 				_logger.LogInformation("Generating boards.");
-
-				await Parallel.ForEachAsync(Enumerable.Range(0, numberOfBoards), options, async (index, token) =>
-				{
-					bool isWinnable = index < matchGame.NumberOfWinnableBoards;
-					var board = GenerateBoard(matchGame, isWinnable ? matchGame.WinProbability : 0, availablePrizes, isWinnable);
-					
-					generatedBoards.Add(board);
-					await Task.CompletedTask;
-				});
-
-				_logger.LogInformation("Shuffling boards.");
-				var shuffledBoards = ShuffleBoards(generatedBoards.ToList());
-
-				_logger.LogInformation("Saving boards.");
-				await SaveBoardsAsync2(matchGame, shuffledBoards, cancellationToken);
+				await GenerateAndSaveBoardsAsync(matchGame, numberOfBoards, availablePrizes, options, cancellationToken);
 
 				_logger.LogInformation("Board generation completed.");
 			}
+		}
+
+		private async Task GenerateAndSaveBoardsAsync(
+			MatchGame matchGame, 
+			int numberOfBoards, 
+			List<MatchPrize> availablePrizes, 
+			ParallelOptions options, 
+			CancellationToken cancellationToken)
+		{
+			var numberOfThreads = Math.Min(numberOfBoards/ 1000000, Environment.ProcessorCount);
+
+			var boardsPerThread = numberOfBoards / numberOfThreads;
+
+			var uniqueBoardUids = new ConcurrentDictionary<Guid, bool>();
+			var tasks = new List<Task>();
+
+			for(var threadIndex = 0; threadIndex < numberOfThreads; threadIndex++)
+			{
+				int start = threadIndex * boardsPerThread;
+				int end = (threadIndex == numberOfThreads - 1) ? numberOfBoards : start + boardsPerThread;
+
+				tasks.Add(Task.Run(()
+					=> ProcessBoardsAndSaveAsync(matchGame, start, end, availablePrizes, uniqueBoardUids, cancellationToken)));
+			}
+
+			await Task.WhenAll(tasks);
+			//await Parallel.ForEachAsync(Enumerable.Range(0, numberOfBoards), options, async (index, token) =>
+			//{
+			//	var isWinnable = index < matchGame.NumberOfWinnableBoards;
+			//	var board = GenerateBoard(matchGame, isWinnable ? matchGame.WinProbability : 0, availablePrizes, isWinnable);
+
+			//	generatedBoards.Add(board);
+			//	await Task.CompletedTask;
+			//});
+
+			//_logger.LogInformation("Shuffling boards.");
+			//var shuffledBoards = ShuffleBoards(generatedBoards.ToList());
+
+			//_logger.LogInformation("Saving boards.");
+			//await SaveBoardsAsync2(matchGame, shuffledBoards, cancellationToken);
+		}
+
+		private async Task ProcessBoardsAndSaveAsync(
+			MatchGame matchGame, 
+			int start, 
+			int end, 
+			List<MatchPrize> availablePrizes, 
+			ConcurrentDictionary<Guid, bool> uniqueBoardUids, 
+			CancellationToken cancellationToken)
+		{
+			var generatedBoards = new ConcurrentBag<MatchBoard>();
+
+			for (var i = start; i < end; i++)
+			{
+				var isWinnable = i < matchGame.NumberOfWinnableBoards;
+				var board = GenerateBoard(matchGame, isWinnable ? matchGame.WinProbability : 0, availablePrizes, isWinnable);
+
+				if (uniqueBoardUids.TryAdd(board.Uid, true))
+				{
+					generatedBoards.Add(board);
+				}
+				else
+				{
+					_logger.LogWarning($"Duplicate UID generated: {board.Uid}");
+				}
+			}
+
+			await SaveBoardsAsync2(matchGame, generatedBoards, cancellationToken);
 		}
 
 		private List<MatchBoard> ShuffleBoards(List<MatchBoard> boards)
@@ -189,7 +394,7 @@ namespace hrvster.ApplicationServices.MatchGames
 			var otherPrizes = availablePrizes.Except(new List<MatchPrize> { winningPrize }).ToList();
 			var otherPrizesMaxCount = (normalizedWinProbability >= 0.5) ? 2 : 1;
 
-			GenerateTiles(board, otherPrizes, false, 9 - winningTilesCount, otherPrizesMaxCount);
+			GenerateLoosingTiles(board, otherPrizes, false, 9 - winningTilesCount, otherPrizesMaxCount);
 
 			// Ensure the board always has 9 tiles
 			while (board.Tiles.Count < 9)
@@ -217,7 +422,7 @@ namespace hrvster.ApplicationServices.MatchGames
 
 		private void GenerateTiles(MatchBoard board, MatchPrize prize, bool winIndicator, int count)
 		{
-			for (int i = 0; i < count; i++)
+			for (var i = 0; i < count; i++)
 			{
 				board.Tiles.Add(new MatchTile
 				{
@@ -230,12 +435,12 @@ namespace hrvster.ApplicationServices.MatchGames
 			}
 		}
 
-		private void GenerateTiles(MatchBoard board, List<MatchPrize> prizes, bool winIndicator, int count, int maxPerPrize = 1)
+		private void GenerateLoosingTiles(MatchBoard board, List<MatchPrize> prizes, bool winIndicator, int count, int maxPerPrize = 1)
 		{
-			int tileAdded = 0;
+			var tileAdded = 0;
 			foreach (var prize in prizes)
 			{
-				for (int i = 0; i < maxPerPrize; i++)
+				for (var i = 0; i < maxPerPrize; i++)
 				{
 					if (tileAdded >= count) return;  // Stop when enough tiles are added
 
@@ -253,10 +458,10 @@ namespace hrvster.ApplicationServices.MatchGames
 		}
 
 
-		private async Task SaveBoardsAsync2(MatchGame matchGame, List<MatchBoard> boards, CancellationToken cancellationToken)
+		private async Task SaveBoardsAsync2(MatchGame matchGame, ConcurrentBag<MatchBoard> boards, CancellationToken cancellationToken)
 		{
-			int batchSize = 50000;  // Set a reasonable batch size for bulk operations
-			for (int i = 0; i < boards.Count; i += batchSize)
+			var batchSize = 50000;  // Set a reasonable batch size for bulk operations
+			for (var i = 0; i < boards.Count; i += batchSize)
 			{
 				var batch = boards.Skip(i).Take(batchSize).ToList();
 				_logger.LogInformation($"Saving batch of {batch.Count} boards, batch start index: {i}");
@@ -267,7 +472,7 @@ namespace hrvster.ApplicationServices.MatchGames
 
 			_logger.LogInformation("Retrieving the board ids of all inserted boards started.");
 
-			var boardMappings = await _matchBoardsRepository.GetInsertedBoardIds(boards, cancellationToken);
+			var boardMappings = await _matchBoardsRepository.GetInsertedBoardIds(boards.ToList(), cancellationToken);
 
 			_logger.LogInformation("Retrieving the board ids of all inserted boards finished.");
 

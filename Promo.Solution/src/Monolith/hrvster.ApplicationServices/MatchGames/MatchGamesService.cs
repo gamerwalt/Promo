@@ -19,6 +19,7 @@ namespace hrvster.ApplicationServices.MatchGames
 		Task<bool> GamePlayableAsync(Guid uid, CancellationToken cancellationToken);
 		Task<IEnumerable<MatchGame>> GetAccountMatchGamesAsync(Guid userUid, CancellationToken cancellationToken);
 		Task<IEnumerable<MatchGame>> GetCampaignMatchGamesAsync(Guid campaignUid, CancellationToken cancellationToken);
+		Task<IEnumerable<MatchGame>> GetGamesReadyForTileCreationAsync(CancellationToken token);
 		MatchGame GetMatchGame(Guid matchGameUid);
 		Task<MatchGame> GetMatchGameAsync(Guid matchGameUid, CancellationToken cancellationToken);
 		Task<IEnumerable<MatchGame>> GetMatchGamesToGenerateBoardAsync(CancellationToken token);
@@ -27,6 +28,7 @@ namespace hrvster.ApplicationServices.MatchGames
 		Task<IEnumerable<Rule>> GetRulesAsync(Guid gameUid, CancellationToken cancellationToken);
 		IEnumerable<Rule> GetRulesMatching(string watchValue);
 		Task<IEnumerable<Rule>> GetRulesMatchingAsync(string watchValue, CancellationToken cancellationToken);
+		Task SetAsReadyForTilesToBeProcessedAsync(MatchGame matchGame, CancellationToken token);
 		Task SetAsReadyToBeProcessedAsync(MatchGame matchGame, CancellationToken cancellationToken);
 		Task SetMatchGameAsProcessedAsync(MatchGame matchGame, CancellationToken cancellationToken);
 		Task UpdateMatchGameAsync(MatchGame matchGame, string timeZone, bool isDaylight, CancellationToken cancellationToken);
@@ -89,6 +91,8 @@ namespace hrvster.ApplicationServices.MatchGames
 		public async Task<IEnumerable<Rule>> GetRulesAsync(Guid gameUid, CancellationToken cancellationToken)
 			=> await _matchGameRulesRepository.GetAllRulesAsync(gameUid, cancellationToken);
 
+		public async Task<IEnumerable<MatchGame>> GetGamesReadyForTileCreationAsync(CancellationToken token)
+			=> await _repository.GetGamesReadyForTileCreationAsync(token);
 
 		public async Task DeleteGameRuleAsync(
 			Guid ruleUid, 
@@ -250,6 +254,11 @@ namespace hrvster.ApplicationServices.MatchGames
 				throw new ArgumentException("Match game campaign needs to be supplied.");
 
 			await _repository.UpdateAsync(matchGame, timeZone, isDaylight, cancellationToken);
+		}
+
+		public Task SetAsReadyForTilesToBeProcessedAsync(MatchGame matchGame, CancellationToken token)
+		{
+			return _repository.SetAsReadyForTilesToBeProcessedAsync(matchGame.Uid, token);
 		}
 	}
 }

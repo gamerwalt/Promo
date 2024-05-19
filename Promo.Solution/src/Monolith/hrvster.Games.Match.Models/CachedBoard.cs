@@ -34,6 +34,8 @@ namespace hrvster.Games.Match.Models
 
 	public class CachedTile
 	{
+		[JsonProperty("BoardUid")]
+		public Guid BoardUid { get; set; }
 		[JsonProperty("TileUid")]
 		public Guid TileUid { get; set; }
 		[JsonProperty("ImageId")]

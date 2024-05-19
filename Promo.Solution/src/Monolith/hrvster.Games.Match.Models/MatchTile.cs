@@ -8,5 +8,19 @@
 		public MatchImage Image { get; set; }
 		public MatchPrize Prize { get; set; }
 		public bool WinIndicator { get; set; }
+		public double Random { get; set; }
+
+		public MatchTile CloneWithNewProperties(Guid uid, double random, MatchBoard board, bool winIndicator)
+		{
+			return new MatchTile
+			{
+				Uid = uid,
+				Board = board,
+				WinIndicator = winIndicator,
+				Prize = this.Prize,
+				Image = this.Image,
+				Random = random
+			};
+		}
 	}
 }

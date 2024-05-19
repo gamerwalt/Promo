@@ -1,0 +1,11 @@
+﻿{
+  "profiles": {
+    "hrvster.Services.Tiles.MongoDb.Import": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    }
+  }
+}

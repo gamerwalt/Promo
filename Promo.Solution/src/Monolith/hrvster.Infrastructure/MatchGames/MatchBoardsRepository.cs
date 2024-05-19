@@ -8,8 +8,6 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using System.Net.NetworkInformation;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -17,6 +15,7 @@ namespace hrvster.Infrastructure.MatchGames
 {
 	public interface IMatchBoardsRepository
 	{
+		Task BulkInsertBoardsAndNoTilesAsync(MatchGame matchGame, List<MatchBoard> boards, CancellationToken cancellationToken);
 		Task BulkInsertBoardsAndTiles(MatchGame matchGame, List<MatchBoard> currentBatch, CancellationToken cancellationToken);
 		Task CreateAsync(MatchBoard board, CancellationToken cancellationToken);
 		Task<IEnumerable<MatchBoard>> GetForMatchGameAsync(Guid matchGameUid, CancellationToken cancellationToken);
@@ -44,13 +43,53 @@ namespace hrvster.Infrastructure.MatchGames
 			_logger = loggerFactory.CreateLogger<MatchBoardsRepository>();
 		}
 
+		public async Task BulkInsertBoardsAndNoTilesAsync(
+			MatchGame matchGame,
+			List<MatchBoard> boards,
+			CancellationToken cancellationToken)
+		{
+			using var conn = new MySqlConnection(_database.GetConnectionString());
+			await conn.OpenAsync(cancellationToken);
+
+    		var originalMaxPacket = await GetGlobalVariable(conn, "max_allowed_packet", cancellationToken);
+			var originalForeignKeyChecks = await GetGlobalVariable(conn, "foreign_key_checks", cancellationToken);
+			await SetGlobalVariable(conn, "max_allowed_packet", "419430400", cancellationToken);
+			await SetGlobalVariable(conn, "foreign_key_checks", "0", cancellationToken);
+
+			try
+			{
+				var boardValues = new ConcurrentBag<string>();
+				await Parallel.ForEachAsync(boards, new ParallelOptions { CancellationToken = cancellationToken }, async (board, token) =>
+				{
+					var prizeId = board.IsWinnable ? $"{board.Prize.Id}" : "NULL";
+					boardValues.Add($"('{board.Uid}', {board.MatchGame.Id}, {prizeId}, {Convert.ToInt32(board.IsWinnable)})");
+
+					await Task.CompletedTask; // Placeholder for potential asynchronous work
+				});
+
+				var boardInsertQuery = $@"INSERT INTO match_boards (board_uid, match_game_id, prize_id, is_winnable) VALUES {string.Join(", ", boardValues)};";
+				await ExecuteNonQuery(conn, boardInsertQuery, cancellationToken);
+			}
+			finally
+			{
+				if (conn.State == ConnectionState.Closed)
+				{
+					await conn.OpenAsync(cancellationToken);
+				}
+
+				// Restore original MySQL settings
+				await SetGlobalVariable(conn, "max_allowed_packet", originalMaxPacket, cancellationToken);
+				await SetGlobalVariable(conn, "foreign_key_checks", originalForeignKeyChecks, cancellationToken);
+			}
+		}
+
 		public async Task BulkInsertBoardsAndTiles(MatchGame matchGame, List<MatchBoard> boards, CancellationToken cancellationToken)
 		{
 			using var conn = new MySqlConnection(_database.GetConnectionString());
 			await conn.OpenAsync(cancellationToken);
 
 			// Adjust MySQL settings for bulk operations
-			_logger.LogInformation("Adjust MySQL settings for bulk operations.");
+
 			var originalMaxPacket = await GetGlobalVariable(conn, "max_allowed_packet", cancellationToken);
 			var originalForeignKeyChecks = await GetGlobalVariable(conn, "foreign_key_checks", cancellationToken);
 			await SetGlobalVariable(conn, "max_allowed_packet", "419430400", cancellationToken);
@@ -80,7 +119,7 @@ namespace hrvster.Infrastructure.MatchGames
 			}
 			finally
 			{
-				if(conn.State == ConnectionState.Closed)
+				if (conn.State == ConnectionState.Closed)
 				{
 					await conn.OpenAsync(cancellationToken);
 				}
@@ -169,7 +208,7 @@ namespace hrvster.Infrastructure.MatchGames
 
 		public async Task<MatchBoard> GetGameBoardAsync(Guid gameboardUid, CancellationToken token = default)
 		{
-			if(token.IsCancellationRequested)
+			if (token.IsCancellationRequested)
 			{
 				token.ThrowIfCancellationRequested();
 			}
@@ -230,7 +269,7 @@ namespace hrvster.Infrastructure.MatchGames
 		private MatchBoard CreateFrom(MySqlDataReader reader)
 		{
 			var isWinnable = reader.GetBoolean("is_winnable");
-			if(isWinnable)
+			if (isWinnable)
 			{
 				return new MatchBoard()
 				{

@@ -24,6 +24,8 @@ namespace hrvster.Infrastructure.MatchGames
 		MatchGame Get(Guid matchGameUid, CancellationToken cancellationToken);
 		Task<IEnumerable<MatchGame>> GetGameReadyForGenerationAsync(CancellationToken token);
 		Task<IEnumerable<Models.Rule>> GetRulesAsync(CancellationToken cancellationToken);
+		Task SetAsReadyForTilesToBeProcessedAsync(Guid uid, CancellationToken token);
+		Task<IEnumerable<MatchGame>> GetGamesReadyForTileCreationAsync(CancellationToken token);
 	}
 
 	public class MatchGamesRepository : IMatchGamesRepository
@@ -175,6 +177,19 @@ namespace hrvster.Infrastructure.MatchGames
 			await command.ExecuteNonQueryAsync(cancellationToken);
 		}
 
+		public async Task SetAsReadyForTilesToBeProcessedAsync(Guid uid, CancellationToken token)
+		{
+			using var conn = new MySqlConnection(_database.GetConnectionString());
+			var command = conn.CreateCommand();
+			command.CommandText = "match_game_set_as_tiles_generation_ready";
+			command.CommandType = CommandType.StoredProcedure;
+			command
+				.AddParameter("matchGameUid", uid);
+
+			await conn.OpenAsync(token);
+			await command.ExecuteNonQueryAsync(token);
+		}
+
 		public async Task SetAsReadyToBeGeneratedAsync(MatchGame matchGame, CancellationToken cancellationToken)
 		{
 			using var conn = new MySqlConnection(_database.GetConnectionString());
@@ -284,6 +299,27 @@ namespace hrvster.Infrastructure.MatchGames
 				await conn.OpenAsync(cancellationToken);
 				using var reader = await command.ExecuteReaderAsync(cancellationToken);
 				while (await reader.ReadAsync(cancellationToken))
+				{
+					matchGames.Add(CreateFrom(reader));
+				}
+			}
+
+			return matchGames;
+		}
+
+		public async Task<IEnumerable<MatchGame>> GetGamesReadyForTileCreationAsync(CancellationToken token)
+		{
+			var matchGames = new List<MatchGame>();
+
+			using (var conn = new MySqlConnection(_database.GetConnectionString()))
+			{
+				var command = conn.CreateCommand();
+				command.CommandText = "match_games_get_ready_for_tile_generation";
+				command.CommandType = CommandType.StoredProcedure;
+
+				await conn.OpenAsync(token);
+				using var reader = await command.ExecuteReaderAsync(token);
+				while (await reader.ReadAsync(token))
 				{
 					matchGames.Add(CreateFrom(reader));
 				}

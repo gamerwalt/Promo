@@ -18,6 +18,7 @@ using hrvster.Infrastructure.Accounts;
 using hrvster.Infrastructure.Facebook;
 using hrvster.Infrastructure.Harvester;
 using hrvster.Infrastructure.MatchGames;
+using hrvster.Infrastructure.MongoRepositories;
 using hrvster.Infrastructure.Subscriptions;
 using hrvster.Middleware;
 using hrvster.Models;
@@ -178,6 +179,7 @@ namespace hrvster.Template1.Web
 			builder.Services.AddTransient<ICampaignRepository, CampaignRepository>();
 			builder.Services.AddTransient<IClientMemberService, ClientMemberService>();
 			builder.Services.AddTransient<IClientMemberRepository, ClientMemberRepository>();
+			builder.Services.AddTransient<IMongoMatchTileRepository>(sp => GenerateMongoMatchTileRepository(builder.Configuration));
 			builder.Services.AddMatchGameRepositories();
 			builder.Services.AddPostSchedulers();
 			builder.Services.AddWatchTypeRepositories();
@@ -287,6 +289,15 @@ namespace hrvster.Template1.Web
 			});
 
 			app.Run();
+		}
+
+		private static IMongoMatchTileRepository GenerateMongoMatchTileRepository(ConfigurationManager configuration)
+		{
+			var connectionString = configuration["MongoDbSettings:ConnectionString"];
+			var databaseName = configuration["MongoDbSettings:DatabaseName"];
+			var matchTileCollectionName = configuration["MongoDbSettings:TileCollection"];
+
+			return new MongoMatchTileRepository(connectionString, databaseName, matchTileCollectionName);
 		}
 
 		private static Tweetinvi.TwitterClient GenerateTwitterClient(IServiceProvider c)
