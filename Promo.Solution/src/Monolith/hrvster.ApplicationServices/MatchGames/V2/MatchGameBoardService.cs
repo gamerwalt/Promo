@@ -149,6 +149,8 @@ namespace hrvster.ApplicationServices.MatchGames.V2
 				}
 			});
 
+			allTiles.Shuffle();
+
 			_logger.LogInformation("Finished Generating tiles.");
 
 			await SaveTilesAsync(game.Uid, boardList, allTiles, token);
@@ -165,14 +167,14 @@ namespace hrvster.ApplicationServices.MatchGames.V2
 				token.ThrowIfCancellationRequested();
 			}
 
-			_logger.LogInformation("Saving tiles into the file.");
-
 			var batchSize = 100000;  // Number of tiles per batch
 			var numberOfBatches = (int)Math.Ceiling((double)allTiles.Count / batchSize);
 
 			if(boardList.Count > 500000)
 			{
 				//Serialize and write to files
+				_logger.LogInformation("Saving tiles into the file.");
+
 				for (var i = 0; i < numberOfBatches; i++)
 				{
 					using var file = File.CreateText($"C:\\hrvster\\tiles\\tiles_batch_{i + 1}_{gameUid}.json");
@@ -197,6 +199,7 @@ namespace hrvster.ApplicationServices.MatchGames.V2
 			}
 			else
 			{
+				_logger.LogInformation("Saving tiles into the Database directly.");
 				//Save into the database
 				for (var i = 0; i < numberOfBatches; i++)
 				{

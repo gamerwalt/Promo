@@ -31,6 +31,8 @@ namespace hrvster.Services.BoardTilesSeeder
 
 				await _matchGameBoardService.GenerateTilesForBoardAsync(matchGame, token);
 
+				await _matchGamesService.SetAsTilesGeneratedAsync(matchGame, token);
+
 				_logger.LogInformation("Finished generating tiles for the game {GameName}", matchGame.Name);
 			}
 

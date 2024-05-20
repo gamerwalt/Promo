@@ -50,7 +50,7 @@ namespace hrvster.ApplicationServices.MatchGames
 		private const int MaxWinProbability = 6;
 
 		private const string LossImageUid = "d1776f2a-2cb4-485c-9da4-b02d3714a0c8";
-		private const string BoardKeysKeyName = "boards:keys";
+		private const string GameBoardKeysName = "boards:keys";
 		private const string BoardKeyKeyName = "board: ";
 		private const string TileKeysName = "tiles: ";
 
@@ -142,6 +142,8 @@ namespace hrvster.ApplicationServices.MatchGames
 				await Task.CompletedTask;
 			});
 
+			generatedBoards.Shuffle();
+
 			await SaveBoardsWithNoTilesAsync(matchGame, generatedBoards, cancellationToken);
 		}
 
@@ -211,7 +213,7 @@ namespace hrvster.ApplicationServices.MatchGames
 					MatchGameName = board.MatchGame.Name,
 				};
 				
-				await _cacheDataService.SetAddAsync(GetBoardKeysKeyName(matchGame.Uid), board.Uid.ToString());
+				await _cacheDataService.SetAddAsync(GetGameBoardsKeysName(matchGame.Uid), board.Uid.ToString());
 				await _cacheDataService.SetAsync(key, cachedBoard);
 			});
 
@@ -507,7 +509,7 @@ namespace hrvster.ApplicationServices.MatchGames
 					WinIndicator = tile.WinIndicator
 				}).ToList();
 
-				await _cacheDataService.SetAddAsync(GetBoardKeysKeyName(matchGame.Uid), board.Uid.ToString());
+				await _cacheDataService.SetAddAsync(GetGameBoardsKeysName(matchGame.Uid), board.Uid.ToString());
 
 				await _cacheDataService.SetAsync(key, cachedBoard);
 				await _cacheDataService.SetAsync(tileKey, cachedTiles);
@@ -525,9 +527,9 @@ namespace hrvster.ApplicationServices.MatchGames
 			return $"{BoardKeyKeyName}{boardUid}";
 		}
 
-		private static string GetBoardKeysKeyName(Guid gameUid)
+		private static string GetGameBoardsKeysName(Guid gameUid)
 		{
-			return $"{BoardKeysKeyName}.{gameUid}";
+			return $"{GameBoardKeysName}.{gameUid}";
 		}
 
 		private static string GetTileKeysName(Guid boardUid)
@@ -653,7 +655,7 @@ namespace hrvster.ApplicationServices.MatchGames
 
 		private async Task<Guid> GetBoardKeysFromCahceOrDatabase(Guid gameUid, CancellationToken cancellationToken)
 		{
-			var randomBoardUidString = await _cacheDataService.GetRandomBoardKey(GetBoardKeysKeyName(gameUid));
+			var randomBoardUidString = await _cacheDataService.GetRandomBoardKey(GetGameBoardsKeysName(gameUid));
 
 			var boardUid = randomBoardUidString.ToString();
 

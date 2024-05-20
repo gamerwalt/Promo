@@ -163,27 +163,33 @@ namespace hrvster.ApplicationServices.MatchGames
 
 		private bool HaveTheSamePrize(List<MatchTile> listOfTiles)
 		{
-			var same = true;
+			if (listOfTiles == null || listOfTiles.Count == 0)
+			{
+				return false; // Return false if the list is empty or null
+			}
 
 			var firstTile = listOfTiles.FirstOrDefault();
-			var firstPrize = firstTile.Prize;
-
-			foreach(var tile in listOfTiles)
+			if (firstTile?.Prize == null || firstTile.Prize.Uid == Guid.Empty)
 			{
-				if (tile.Prize == null)
+				return false; // Return false if the first tile's prize is null or has an empty Uid
+			}
+
+			var firstPrizeId = firstTile.Prize.Id;
+
+			foreach (var tile in listOfTiles)
+			{
+				if (tile.Prize == null || tile.Prize.Uid == Guid.Empty)
 				{
-					same = false;
-					break;
+					return false; // Prize is null or Uid is empty
 				}
 
-				if (tile.Prize.Id != firstPrize.Id)
+				if (tile.Prize.Id != firstPrizeId)
 				{
-					same = false;
-					break;
+					return false; // Prize ID does not match the first tile's prize ID
 				}
 			}
 
-			return same;
+			return true; // All checks passed, all prizes are the same
 		}
 	}
 }

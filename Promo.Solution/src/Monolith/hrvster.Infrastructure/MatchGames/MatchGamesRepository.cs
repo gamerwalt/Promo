@@ -26,6 +26,7 @@ namespace hrvster.Infrastructure.MatchGames
 		Task<IEnumerable<Models.Rule>> GetRulesAsync(CancellationToken cancellationToken);
 		Task SetAsReadyForTilesToBeProcessedAsync(Guid uid, CancellationToken token);
 		Task<IEnumerable<MatchGame>> GetGamesReadyForTileCreationAsync(CancellationToken token);
+		Task SetAsTilesGeneratedAsync(MatchGame matchGame, CancellationToken token);
 	}
 
 	public class MatchGamesRepository : IMatchGamesRepository
@@ -175,6 +176,24 @@ namespace hrvster.Infrastructure.MatchGames
 
 			await conn.OpenAsync(cancellationToken);
 			await command.ExecuteNonQueryAsync(cancellationToken);
+		}
+
+		public async Task SetAsTilesGeneratedAsync(MatchGame matchGame, CancellationToken token)
+		{
+			if(token.IsCancellationRequested)
+			{
+				token.ThrowIfCancellationRequested();
+			}
+
+			using var conn = new MySqlConnection(_database.GetConnectionString());
+			var command = conn.CreateCommand();
+			command.CommandText = "match_game_set_as_tiles_generated";
+			command.CommandType = CommandType.StoredProcedure;
+			command
+				.AddParameter("matchGameUid", matchGame.Uid);
+
+			await conn.OpenAsync(token);
+			await command.ExecuteNonQueryAsync(token);
 		}
 
 		public async Task SetAsReadyForTilesToBeProcessedAsync(Guid uid, CancellationToken token)
