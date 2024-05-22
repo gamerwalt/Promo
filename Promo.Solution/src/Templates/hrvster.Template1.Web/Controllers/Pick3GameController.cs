@@ -656,19 +656,21 @@ namespace hrvster.Template1.Web.Controllers
 		}
 
 		[HttpGet]
-		[Route("/Pick3/loss/{Uid:Guid}/gameplay/{gameplayUid:Guid}/handshakeKey/{handshakeKey}/account/{accountUid}")]
+		[Route("/Pick3/GamePlayLoss/Pick3Gameplay/{gameplayUid:Guid}/i/{userId}/n/{userName}/account/{accountUid:Guid}")]
 		public async Task<IActionResult> MatchGameLoss(
-			Guid Uid,
 			Guid gameplayUid,
-			string handshakeKey,
+			string userId,
+			string userName,
 			Guid accountUid,
 			CancellationToken cancellationToken)
 		{
 			_logger.LogInformation("The gameplay {GameplayUid} has been deemed a LOSS.", gameplayUid);
+			var points = 0;
 
-			var userQuery = GetUserQuery(handshakeKey);
-
-			var points = await _clientMemberService.GetClientMemberPointAsync(userQuery.UserId, userQuery.UserName, accountUid);
+			if(!string.IsNullOrWhiteSpace(userId))
+			{
+				points = await _clientMemberService.GetClientMemberPointAsync(userId, userName, accountUid);
+			}
 
 			var gameplay = await _matchGameplayService.GetAsync(gameplayUid, cancellationToken);
 
@@ -877,10 +879,13 @@ namespace hrvster.Template1.Web.Controllers
 			}
 			else
 			{
+				var userId = string.Empty;
+				var userName = string.Empty;
 				if (game.AccumulatePointsOnLoss)
 				{
 					var userQuery = GetUserQuery(handshakeKey);
-
+					userId = userQuery.UserId;
+					userName = userQuery.UserName;
 					await _clientMemberService.CreateClientMemberPoints(game.PointsPerLoss, userQuery.UserId, userQuery.UserName, account);
 
 					_logger.LogInformation("User {UserName} lost the game for gameplay uid {GamePlayUid}", userQuery.UserName, gameplayUid);
@@ -888,7 +893,7 @@ namespace hrvster.Template1.Web.Controllers
 
 				_logger.LogInformation("Redirecting user to the loss page.");
 
-				return RedirectToAction("MatchGameLoss", new { Uid = gameUid, gameplayUid = gameplayUid, accountUid = accountUid, handshakeKey = handshakeKey });
+				return RedirectToAction("MatchGameLoss", new { gameplayUid = gameplayUid, accountUid = accountUid, userId = userId, userName = userName });
 			}
 		}
 
