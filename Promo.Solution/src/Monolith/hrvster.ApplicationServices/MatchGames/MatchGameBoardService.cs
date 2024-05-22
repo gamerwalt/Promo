@@ -6,12 +6,16 @@ using hrvster.Infrastructure.MatchGames;
 using hrvster.Infrastructure.MongoEntities.MatchGames;
 using hrvster.Infrastructure.MongoRepositories;
 using hrvster.Models;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using MimeKit.Cryptography;
 using Newtonsoft.Json;
+using SharpCompress.Common;
+using StackExchange.Redis;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text.RegularExpressions;
@@ -45,6 +49,7 @@ namespace hrvster.ApplicationServices.MatchGames
 		private readonly IMatchGamesService _matchGameService;
 		private readonly IMatchGamePlayRepository _gameplayRepository;
 		private readonly IMongoMatchTileRepository _mongoMatchTileRepository;
+		private readonly IConfiguration _config;
 
 		private const double MinWinProbability = 1;
 		private const int MaxWinProbability = 6;
@@ -63,7 +68,8 @@ namespace hrvster.ApplicationServices.MatchGames
 			ICacheDataService cacheDataService,
 			IMatchGamesService matchGamesService,
 			IMatchGamePlayRepository gameplayRepository,
-			IMongoMatchTileRepository mongoMatchTileRepository)
+			IMongoMatchTileRepository mongoMatchTileRepository,
+			IConfiguration config)
 		{
 			_logger = loggerFactory.CreateLogger<MatchGameBoardService>();
 			_matchPrizeService = matchPrizeService;
@@ -74,6 +80,7 @@ namespace hrvster.ApplicationServices.MatchGames
 			_matchGameService = matchGamesService;
 			_gameplayRepository = gameplayRepository;
 			_mongoMatchTileRepository = mongoMatchTileRepository;
+			_config = config;
 		}
 
 		public async Task GenerateBoardsWithNoTilesAsync(MatchGame matchGame, CancellationToken token)
@@ -194,8 +201,76 @@ namespace hrvster.ApplicationServices.MatchGames
 
 			_logger.LogInformation("Retrieving the board ids of all inserted boards finished.");
 
-			_logger.LogInformation("Saving boards into redis started.");
+			if(boards.Count > 100000)
+			{
+				_logger.LogInformation("Saving boards into a file to import into redis later.");
 
+				await GenerateBoardFilesForRedisAsync(matchGame, boards, boardMappings);
+
+				_logger.LogInformation("Saving boards keys into files completed.");
+			}
+			else
+			{
+				_logger.LogInformation("Saving boards into a file to import into redis later.");
+
+				await SaveIntoRedisAsync(matchGame, boards, boardMappings);
+
+				_logger.LogInformation("Saving boards keys into files completed.");
+			}
+
+			_logger.LogInformation("Setting the match game as processed.");
+
+			await _matchGameService.SetMatchGameAsProcessedAsync(matchGame, cancellationToken);
+			await _matchGameService.SetAsReadyForTilesToBeProcessedAsync(matchGame, cancellationToken);
+		}
+
+		private async Task GenerateBoardFilesForRedisAsync(MatchGame matchGame, List<MatchBoard> boards, Dictionary<Guid, int> boardMappings)
+		{
+			int.TryParse(_config["BatchSizeToSaveIntoRedis"], out var batchSize);
+
+			var directoryPath = Environment.CurrentDirectory;
+			_logger.LogInformation("Environment path is {Directory}", directoryPath);
+
+			var totalBoards = boards.Count;
+			var totalFiles = (int)Math.Ceiling(totalBoards / (double)batchSize);
+
+			for (var fileIndex = 0; fileIndex < totalFiles; fileIndex++)
+			{
+				var filePath = Path.Combine(directoryPath, $"redis_commands_part{fileIndex + 1}.text");
+
+				using var writer = new StreamWriter(filePath);
+				var start = fileIndex * batchSize;
+				var end = Math.Min((fileIndex + 1) * batchSize, totalBoards);
+
+				for (var i = start; i < end; i++)
+				{
+					var board = boards[i];
+					var key = GetBoardKeyName(board.Uid);
+					var cachedBoard = new CachedBoard
+					{
+						Id = boardMappings[board.Uid],
+						Uid = board.Uid,
+						IsWinnable = board.IsWinnable,
+						IsReserved = board.IsReserved,
+						PrizeId = board.Prize.Id,
+						PrizeUid = board.Prize.Uid,
+						MatchGameId = board.MatchGame.Id,
+						MatchGameUid = board.MatchGame.Uid,
+						MatchGameName = board.MatchGame.Name,
+					};
+					var value = JsonConvert.SerializeObject(cachedBoard);
+
+					// Write SET command for each board to file
+					await writer.WriteLineAsync($"SET {key} \"{value}\"");
+
+					// Additionally, add UID to a set of all board UIDs
+					await writer.WriteLineAsync($"SADD board_uids {board.Uid}");
+				}
+			}
+		}
+
+		private async Task SaveIntoRedisAsync(MatchGame matchGame, List<MatchBoard> boards, Dictionary<Guid, int> boardMappings)
+		{
 			var options = new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount };
 			await Parallel.ForEachAsync(boards, options, async (board, cancellationToken) =>
 			{
@@ -212,16 +287,11 @@ namespace hrvster.ApplicationServices.MatchGames
 					MatchGameUid = board.MatchGame.Uid,
 					MatchGameName = board.MatchGame.Name,
 				};
-				
+				_logger.LogInformation("Saving the board with uid {BoardUid} into cache.", board.Uid);
+
 				await _cacheDataService.SetAddAsync(GetGameBoardsKeysName(matchGame.Uid), board.Uid.ToString());
 				await _cacheDataService.SetAsync(key, cachedBoard);
 			});
-
-
-			_logger.LogInformation("Saving boards keys into redis completed.");
-
-			_logger.LogInformation("Setting the match game as processed.");
-			await _matchGameService.SetMatchGameAsProcessedAsync(matchGame, cancellationToken);
 		}
 
 		public async Task GenerateBoardsAsync(MatchGame matchGame, CancellationToken cancellationToken)

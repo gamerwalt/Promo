@@ -1,6 +1,5 @@
 using hrvster.ApplicationServices.Caching;
 using hrvster.ApplicationServices.JobContracts;
-using hrvster.ApplicationServices.Mails;
 using hrvster.Core.Clients.Publishers;
 using hrvster.Extensions.Configuration;
 using hrvster.Extensions.OptionsConfiguration;
@@ -32,13 +31,6 @@ namespace hrvster.Services.BoardAndPrizeSeeder
 				.AddJsonFile("appsettings.json")
 				.AddJsonFile($"appsettings.{env ?? "Development"}.json", optional: true, reloadOnChange: true)
 				.Build();
-			Log.Logger = new LoggerConfiguration()
-				.ReadFrom.Configuration(Configuration)
-				.Enrich.FromLogContext()
-				.WriteTo.Loggly()
-				.WriteTo.Console()
-				.MinimumLevel.Debug()
-				.CreateLogger();
 
 			CreateHostBuilder(args).Build().Run();
 		}
@@ -50,7 +42,8 @@ namespace hrvster.Services.BoardAndPrizeSeeder
 						.Enrich.FromLogContext()
 						.WriteTo.Loggly()
 						.WriteTo.Console()
-						.MinimumLevel.Debug(), preserveStaticLogger: true)
+						.WriteTo.File("C:/hrvster/logs/hrvsterBoardAndPrizeSeeder/logs.txt", Serilog.Events.LogEventLevel.Verbose)
+						.MinimumLevel.Verbose(), preserveStaticLogger: true)
 				.ConfigureServices((hostContext, services) =>
 				{
 					Log.Information("Starting Host for hrvster.Services.BoardAndPrizeSeeder");

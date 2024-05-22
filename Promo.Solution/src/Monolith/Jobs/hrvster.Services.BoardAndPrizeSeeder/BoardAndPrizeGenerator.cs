@@ -51,8 +51,6 @@ namespace hrvster.Services.BoardAndPrizeSeeder
 							_logger.LogInformation("Boards generated for game with uid {GameUid} and name {MatchGameName}",
 								matchGame.Uid,
 								matchGame.Name);
-
-							await _matchGamesService.SetAsReadyForTilesToBeProcessedAsync(matchGame, token);
 						}
 
 						continue;

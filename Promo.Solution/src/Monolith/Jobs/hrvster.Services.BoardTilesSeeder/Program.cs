@@ -33,13 +33,6 @@ namespace hrvster.Services.BoardTilesSeeder
 				.AddJsonFile("appsettings.json")
 				.AddJsonFile($"appsettings.{env ?? "Development"}.json", optional: true, reloadOnChange: true)
 				.Build();
-			Log.Logger = new LoggerConfiguration()
-				.ReadFrom.Configuration(Configuration)
-				.Enrich.FromLogContext()
-				.WriteTo.Loggly()
-				.WriteTo.Console()
-				.MinimumLevel.Debug()
-				.CreateLogger();
 
 			CreateHostBuilder(args).Build().Run();
 		}
@@ -51,7 +44,8 @@ namespace hrvster.Services.BoardTilesSeeder
 						.Enrich.FromLogContext()
 						.WriteTo.Loggly()
 						.WriteTo.Console()
-						.MinimumLevel.Debug(), preserveStaticLogger: true)
+						.WriteTo.File("C:/hrvster/logs/hrvsterBoardTilesSeeder/logs.txt", Serilog.Events.LogEventLevel.Verbose)
+						.MinimumLevel.Verbose(), preserveStaticLogger: true)
 				.ConfigureServices((hostContext, services) =>
 				{
 					Log.Information("Starting Host for hrvster.Services.BoardTilesSeeder");

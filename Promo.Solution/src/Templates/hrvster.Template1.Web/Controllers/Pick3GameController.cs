@@ -321,7 +321,7 @@ namespace hrvster.Template1.Web.Controllers
 			[FromQuery] string handshakeKey,
 			CancellationToken cancellationToken)
 		{
-
+			_logger.LogInformation("Playing the game for the gameplay {GameplayUid}", gameplayUid);
 			if (!User.Identity.IsAuthenticated)
 			{
 				if (externalClient == ExternalClientType.Twitter.ToString())
@@ -485,6 +485,7 @@ namespace hrvster.Template1.Web.Controllers
 			PlayMatchGame form, 
 			CancellationToken cancellationToken)
 		{
+			_logger.LogInformation("User has played the game the game for the gameplay {GameplayUid}", gameplayUid);
 			if (!User.Identity.IsAuthenticated)
 			{
 				if (externalClient == ExternalClientType.Twitter.ToString())
@@ -625,6 +626,8 @@ namespace hrvster.Template1.Web.Controllers
 			Guid gameplayUid,
 			CancellationToken cancellationToken)
 		{
+			_logger.LogInformation("The gameplay {GameplayUid} has been deemed a WIN.", gameplayUid);
+
 			var gameplay = await _matchGameplayService.GetAsync(gameplayUid, cancellationToken);
 
 			if (!gameplay.PlayedIndicator && !gameplay.MatchBoard.PlayedIndicator && !gameplay.WinIndicator)
@@ -661,6 +664,8 @@ namespace hrvster.Template1.Web.Controllers
 			Guid accountUid,
 			CancellationToken cancellationToken)
 		{
+			_logger.LogInformation("The gameplay {GameplayUid} has been deemed a LOSS.", gameplayUid);
+
 			var userQuery = GetUserQuery(handshakeKey);
 
 			var points = await _clientMemberService.GetClientMemberPointAsync(userQuery.UserId, userQuery.UserName, accountUid);
@@ -733,6 +738,8 @@ namespace hrvster.Template1.Web.Controllers
 			string handshakeKey,
 			CancellationToken cancellationToken)
 		{
+			_logger.LogInformation("Determining if the gameplay {GameplayUid} is a win or a loss", gameplayUid);
+
 			//decrypt and get the data from the handshakeKey
 			var accountUidString = _sessionManager.GetValue(SessionConstants.AccountUid);
 			if (string.IsNullOrEmpty(accountUidString))
@@ -875,7 +882,11 @@ namespace hrvster.Template1.Web.Controllers
 					var userQuery = GetUserQuery(handshakeKey);
 
 					await _clientMemberService.CreateClientMemberPoints(game.PointsPerLoss, userQuery.UserId, userQuery.UserName, account);
+
+					_logger.LogInformation("User {UserName} lost the game for gameplay uid {GamePlayUid}", userQuery.UserName, gameplayUid);
 				}
+
+				_logger.LogInformation("Redirecting user to the loss page.");
 
 				return RedirectToAction("MatchGameLoss", new { Uid = gameUid, gameplayUid = gameplayUid, accountUid = accountUid, handshakeKey = handshakeKey });
 			}

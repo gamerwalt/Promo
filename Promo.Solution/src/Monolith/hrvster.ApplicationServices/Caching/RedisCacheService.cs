@@ -1,4 +1,5 @@
-﻿using hrvster.Models.Options;
+﻿using hrvster.Games.Match.Models;
+using hrvster.Models.Options;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using StackExchange.Redis;
@@ -17,6 +18,7 @@ namespace hrvster.ApplicationServices.Caching
 		Task<string> GetRandomBoardKey(string boardKeysKeyName);
 		Task<string> GetBoardDetailsAsync(string key);
 		Task<string> GetTileDetailsAsync(string key);
+		IDatabase GetDatabase();
 	}
 
 	public class RedisCacheService : ICacheDataService
@@ -136,5 +138,8 @@ namespace hrvster.ApplicationServices.Caching
 
 			return string.Empty;
 		}
+
+		public IDatabase GetDatabase()
+			=> _cache;
 	}
 }

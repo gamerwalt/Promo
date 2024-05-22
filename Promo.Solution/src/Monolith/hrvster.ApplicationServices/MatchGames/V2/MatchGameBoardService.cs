@@ -170,7 +170,7 @@ namespace hrvster.ApplicationServices.MatchGames.V2
 			var batchSize = 100000;  // Number of tiles per batch
 			var numberOfBatches = (int)Math.Ceiling((double)allTiles.Count / batchSize);
 
-			if(boardList.Count > 500000)
+			if(boardList.Count > 100000)
 			{
 				//Serialize and write to files
 				_logger.LogInformation("Saving tiles into the file.");

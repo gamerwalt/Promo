@@ -1,5 +1,6 @@
 ﻿using hrvster.Games.Match.Models;
 using hrvster.Infrastructure.Extensions;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using MySqlConnector;
 using Newtonsoft.Json;
@@ -10,6 +11,7 @@ using System.Data;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Tweetinvi.Core.Events;
 
 namespace hrvster.Infrastructure.MatchGames
 {
@@ -36,11 +38,13 @@ namespace hrvster.Infrastructure.MatchGames
 	{
 		private readonly IDatabase _database;
 		private readonly ILogger<MatchBoardsRepository> _logger;
+		private readonly IConfiguration _config;
 
-		public MatchBoardsRepository(IDatabase database, ILoggerFactory loggerFactory)
+		public MatchBoardsRepository(IDatabase database, ILoggerFactory loggerFactory, IConfiguration config)
 		{
 			_database = database;
 			_logger = loggerFactory.CreateLogger<MatchBoardsRepository>();
+			_config = config;
 		}
 
 		public async Task BulkInsertBoardsAndNoTilesAsync(
@@ -50,11 +54,6 @@ namespace hrvster.Infrastructure.MatchGames
 		{
 			using var conn = new MySqlConnection(_database.GetConnectionString());
 			await conn.OpenAsync(cancellationToken);
-
-    		var originalMaxPacket = await GetGlobalVariable(conn, "max_allowed_packet", cancellationToken);
-			var originalForeignKeyChecks = await GetGlobalVariable(conn, "foreign_key_checks", cancellationToken);
-			await SetGlobalVariable(conn, "max_allowed_packet", "419430400", cancellationToken);
-			await SetGlobalVariable(conn, "foreign_key_checks", "0", cancellationToken);
 
 			try
 			{
@@ -76,10 +75,6 @@ namespace hrvster.Infrastructure.MatchGames
 				{
 					await conn.OpenAsync(cancellationToken);
 				}
-
-				// Restore original MySQL settings
-				await SetGlobalVariable(conn, "max_allowed_packet", originalMaxPacket, cancellationToken);
-				await SetGlobalVariable(conn, "foreign_key_checks", originalForeignKeyChecks, cancellationToken);
 			}
 		}
 
@@ -87,13 +82,6 @@ namespace hrvster.Infrastructure.MatchGames
 		{
 			using var conn = new MySqlConnection(_database.GetConnectionString());
 			await conn.OpenAsync(cancellationToken);
-
-			// Adjust MySQL settings for bulk operations
-
-			var originalMaxPacket = await GetGlobalVariable(conn, "max_allowed_packet", cancellationToken);
-			var originalForeignKeyChecks = await GetGlobalVariable(conn, "foreign_key_checks", cancellationToken);
-			await SetGlobalVariable(conn, "max_allowed_packet", "419430400", cancellationToken);
-			await SetGlobalVariable(conn, "foreign_key_checks", "0", cancellationToken);
 
 			try
 			{
@@ -123,34 +111,7 @@ namespace hrvster.Infrastructure.MatchGames
 				{
 					await conn.OpenAsync(cancellationToken);
 				}
-
-				_logger.LogInformation("Restore original MySQL settings.");
-				// Restore original MySQL settings
-				await SetGlobalVariable(conn, "max_allowed_packet", originalMaxPacket, cancellationToken);
-				await SetGlobalVariable(conn, "foreign_key_checks", originalForeignKeyChecks, cancellationToken);
 			}
-		}
-
-		private async Task<string> GetGlobalVariable(MySqlConnection conn, string variableName, CancellationToken cancellationToken)
-		{
-			if (conn.State == ConnectionState.Closed)
-			{
-				await conn.OpenAsync(cancellationToken);
-			}
-
-			using var command = new MySqlCommand($"SELECT @@{variableName};", conn);
-			return (await command.ExecuteScalarAsync()).ToString();
-		}
-
-		private async Task SetGlobalVariable(MySqlConnection conn, string variableName, string value, CancellationToken cancellationToken)
-		{
-			if (conn.State == ConnectionState.Closed)
-			{
-				await conn.OpenAsync(cancellationToken);
-			}
-
-			using var command = new MySqlCommand($"SET GLOBAL {variableName} = {value};", conn);
-			await command.ExecuteNonQueryAsync();
 		}
 
 		private async Task ExecuteNonQuery(MySqlConnection conn, string query, CancellationToken cancellationToken)
@@ -332,16 +293,15 @@ namespace hrvster.Infrastructure.MatchGames
 		public async Task<Dictionary<Guid, int>> GetInsertedBoardIds(List<MatchBoard> boards, CancellationToken cancellationToken)
 		{
 			var insertedBoardIds = new Dictionary<Guid, int>();
-			var batchSize = 10000; // Adjust based on your needs
+			int.TryParse(_config["BatchGetIdFromDatabase"], out var batchSize); // Adjust based on your needs
+			if(batchSize == 0)
+			{
+				batchSize = 50000;
+			}
 			var totalBoards = boards.Count;
 
 			using var conn = new MySqlConnection(_database.GetConnectionString());
 			await conn.OpenAsync(cancellationToken);
-
-			var originalMaxPacket = await GetGlobalVariable(conn, "max_allowed_packet", cancellationToken);
-			var originalForeignKeyChecks = await GetGlobalVariable(conn, "foreign_key_checks", cancellationToken);
-			await SetGlobalVariable(conn, "max_allowed_packet", "419430400", cancellationToken);
-			await SetGlobalVariable(conn, "foreign_key_checks", "0", cancellationToken);
 
 			try
 			{
@@ -353,18 +313,14 @@ namespace hrvster.Infrastructure.MatchGames
 
 					var query = $"SELECT board_id, board_uid FROM hrvster.match_boards WHERE board_uid IN ({uidsParameter})";
 
-					using (var command = new MySqlCommand(query, conn))
+					using var command = new MySqlCommand(query, conn);
+					using var reader = await command.ExecuteReaderAsync(cancellationToken);
+					while (await reader.ReadAsync(cancellationToken))
 					{
-						using (var reader = await command.ExecuteReaderAsync(cancellationToken))
-						{
-							while (await reader.ReadAsync(cancellationToken))
-							{
-								var id = reader.GetInt32("board_id");
-								var uid = reader.GetGuid("board_uid");
+						var id = reader.GetInt32("board_id");
+						var uid = reader.GetGuid("board_uid");
 
-								insertedBoardIds[uid] = id;
-							}
-						}
+						insertedBoardIds[uid] = id;
 					}
 				}
 			}
@@ -374,11 +330,6 @@ namespace hrvster.Infrastructure.MatchGames
 				{
 					await conn.OpenAsync(cancellationToken);
 				}
-
-				_logger.LogInformation("Restore original MySQL settings.");
-				// Restore original MySQL settings
-				await SetGlobalVariable(conn, "max_allowed_packet", originalMaxPacket, cancellationToken);
-				await SetGlobalVariable(conn, "foreign_key_checks", originalForeignKeyChecks, cancellationToken);
 			}
 
 			return insertedBoardIds;
