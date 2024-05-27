@@ -2,7 +2,7 @@
 {
 	public class MatchTile
 	{
-		public int Id { get; set; }
+		public long Id { get; set; }
 		public Guid Uid { get; set; }
 		public MatchBoard Board { get; set; }
 		public MatchImage Image { get; set; }

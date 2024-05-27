@@ -120,7 +120,7 @@ namespace hrvster.Infrastructure.MatchGames
 			var winIndicator = reader.GetBoolean("win_indicator");
 			return new MatchTile
 			{
-				Id = reader.GetInt32("tile_id"),
+				Id = reader.GetLongValue("tile_id"),
 				Uid = reader.GetGuid("tile_uid"),
 				WinIndicator = reader.GetBoolean("win_indicator"),
 				Board = new MatchBoard

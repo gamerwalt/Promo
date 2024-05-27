@@ -1,0 +1,26 @@
+﻿@model GameplayLoss
+@{
+    ViewData["Title"] = "You Lost";
+}
+<link rel="stylesheet" href="~/css/gameboard.css">
+<link rel="stylesheet" href="~/css/gameplayloss.css">
+<div class="game-wrapper">
+    <h4 class="lose-message">You Lost</h4>
+    @if (Model.Points > 0)
+    {
+        <div class="alert alert-info" role="alert">
+            Don't worry, you still have <span>@Model.Points points.</span><br/>
+            Keep playing and you could win even more points next time you play!
+        </div>
+    }
+    <div class="gameboard">
+        @foreach (var tile in Model.Tiles)
+        {
+            <div class="tile @((Model.SelectedTiles.Contains(tile.Uid)) ? "matched" : "")"
+                    data-uid="@tile.Uid"
+                    style="background-image: url('@tile.ImageUrl'); background-size: cover;">
+            </div>
+        }
+    </div>
+</div>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>

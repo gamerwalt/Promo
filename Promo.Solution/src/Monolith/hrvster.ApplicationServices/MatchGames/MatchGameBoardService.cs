@@ -3,19 +3,14 @@ using hrvster.ApplicationServices.Exceptions;
 using hrvster.ApplicationServices.Extensions.LogExtensions;
 using hrvster.Games.Match.Models;
 using hrvster.Infrastructure.MatchGames;
-using hrvster.Infrastructure.MongoEntities.MatchGames;
-using hrvster.Infrastructure.MongoRepositories;
 using hrvster.Models;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using MimeKit.Cryptography;
 using Newtonsoft.Json;
-using SharpCompress.Common;
-using StackExchange.Redis;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.IO;
+using System.Diagnostics;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text.RegularExpressions;
@@ -36,6 +31,7 @@ namespace hrvster.ApplicationServices.MatchGames
 		Task ReserveBoardAsync(MatchBoard gameBoard, CancellationToken cancellationToken);
 		Task RemoveBoardFromCacheAsync(Guid boardUid, CancellationToken cancellationToken);
 		Task GenerateBoardsWithNoTilesAsync(MatchGame matchGame, CancellationToken token);
+		Task LoadBoardUidsIntoRedisAsync(int gameId, CancellationToken token);
 	}
 
 	public class MatchGameBoardService : IMatchGameBoardService
@@ -48,7 +44,6 @@ namespace hrvster.ApplicationServices.MatchGames
 		private readonly ICacheDataService _cacheDataService;
 		private readonly IMatchGamesService _matchGameService;
 		private readonly IMatchGamePlayRepository _gameplayRepository;
-		private readonly IMongoMatchTileRepository _mongoMatchTileRepository;
 		private readonly IConfiguration _config;
 
 		private const double MinWinProbability = 1;
@@ -68,7 +63,6 @@ namespace hrvster.ApplicationServices.MatchGames
 			ICacheDataService cacheDataService,
 			IMatchGamesService matchGamesService,
 			IMatchGamePlayRepository gameplayRepository,
-			IMongoMatchTileRepository mongoMatchTileRepository,
 			IConfiguration config)
 		{
 			_logger = loggerFactory.CreateLogger<MatchGameBoardService>();
@@ -79,7 +73,6 @@ namespace hrvster.ApplicationServices.MatchGames
 			_cacheDataService = cacheDataService;
 			_matchGameService = matchGamesService;
 			_gameplayRepository = gameplayRepository;
-			_mongoMatchTileRepository = mongoMatchTileRepository;
 			_config = config;
 		}
 
@@ -155,9 +148,9 @@ namespace hrvster.ApplicationServices.MatchGames
 		}
 
 		private MatchBoard GenerateBoardWithNoTiles(
-			MatchGame matchGame, 
-			int winProbability, 
-			List<MatchPrize> availablePrizes, 
+			MatchGame matchGame,
+			int winProbability,
+			List<MatchPrize> availablePrizes,
 			bool winnable)
 		{
 			var normalizedWinProbability = (winProbability - 1) / 5.0;
@@ -179,11 +172,12 @@ namespace hrvster.ApplicationServices.MatchGames
 		}
 
 		private async Task SaveBoardsWithNoTilesAsync(
-			MatchGame matchGame, 
-			List<MatchBoard> boards, 
+			MatchGame matchGame,
+			List<MatchBoard> boards,
 			CancellationToken cancellationToken)
 		{
-			var batchSize = 40000;  // Set a reasonable batch size for bulk operations
+			var tasks = new List<Task>();
+			int.TryParse(_config["BoardBatchSize"], out var batchSize);
 			for (var i = 0; i < boards.Count; i += batchSize)
 			{
 				var batch = boards.Skip(i).Take(batchSize).ToList();
@@ -196,27 +190,19 @@ namespace hrvster.ApplicationServices.MatchGames
 			_logger.LogInformation("Boards saved successfully into the database.");
 
 			_logger.LogInformation("Retrieving the board ids of all inserted boards started.");
+			Stopwatch getStopWatch = Stopwatch.StartNew();
 
 			var boardMappings = await _matchBoardsRepository.GetInsertedBoardIds(boards, cancellationToken);
 
-			_logger.LogInformation("Retrieving the board ids of all inserted boards finished.");
+			getStopWatch.Stop();
 
-			if(boards.Count > 100000)
-			{
-				_logger.LogInformation("Saving boards into a file to import into redis later.");
+			_logger.LogInformation("Retrieving the board ids of all inserted boards finished and took {Minutes} minutes", getStopWatch.Elapsed.Minutes);
 
-				await GenerateBoardFilesForRedisAsync(matchGame, boards, boardMappings);
+			_logger.LogInformation("Saving boards into a Redis directly.");
 
-				_logger.LogInformation("Saving boards keys into files completed.");
-			}
-			else
-			{
-				_logger.LogInformation("Saving boards into a file to import into redis later.");
+			await SaveIntoRedisAsync(matchGame, boards, boardMappings);
 
-				await SaveIntoRedisAsync(matchGame, boards, boardMappings);
-
-				_logger.LogInformation("Saving boards keys into files completed.");
-			}
+			_logger.LogInformation("Saving boards keys into Redis completed.");
 
 			_logger.LogInformation("Setting the match game as processed.");
 
@@ -224,27 +210,56 @@ namespace hrvster.ApplicationServices.MatchGames
 			await _matchGameService.SetAsReadyForTilesToBeProcessedAsync(matchGame, cancellationToken);
 		}
 
-		private async Task GenerateBoardFilesForRedisAsync(MatchGame matchGame, List<MatchBoard> boards, Dictionary<Guid, int> boardMappings)
+		public async Task LoadBoardUidsIntoRedisAsync(int gameId, CancellationToken token)
+		{
+			var gameUidTask = _matchBoardsRepository.GetGameUidAsync(gameId, token);
+			var boardUidsTask = _matchBoardsRepository.GetForMatchGameByIdAsync(gameId, token);
+
+			await Task.WhenAll(gameUidTask, boardUidsTask);
+
+			var gameUid = gameUidTask.Result;
+			var boardUids = boardUidsTask.Result;
+
+			_logger.LogInformation("Loaded the board uids for the game with id {GameId}", gameId);
+
+			int.TryParse(_config["BatchSizeToSaveIntoRedis"], out var batchSize);
+			var boardUidList = boardUids.ToList();
+
+			var total = boardUidList.Count();
+			var batchTasks = new List<Task>();
+
+			for (var i = 0; i < total; i += batchSize)
+			{
+				var batch = boardUids.Skip(i).Take(batchSize).ToList();
+				_logger.LogInformation("Processing batch from index {StartIndex} to {EndIndex}", i, i + batchSize - 1);
+
+				foreach (var boardUid in batch)
+				{
+					batchTasks.Add(_cacheDataService.SetAddAsync(GetGameBoardsKeysName(gameUid), boardUid.ToString()));
+				}
+
+				await Task.WhenAll(batchTasks);
+				_logger.LogInformation("Completed processing and saving batch {BatchNumber} to Redis", (i / batchSize) + 1);
+				batchTasks.Clear(); // Clear the list of tasks for the next batch
+			}
+
+			_logger.LogInformation("All boards for the game with id {GameId have been processed and saved into Redis.", gameId);
+		}
+
+		private async Task SaveIntoRedisAsync(MatchGame matchGame, List<MatchBoard> boards, Dictionary<Guid, int> boardMappings)
 		{
 			int.TryParse(_config["BatchSizeToSaveIntoRedis"], out var batchSize);
 
-			var directoryPath = Environment.CurrentDirectory;
-			_logger.LogInformation("Environment path is {Directory}", directoryPath);
-
 			var totalBoards = boards.Count;
-			var totalFiles = (int)Math.Ceiling(totalBoards / (double)batchSize);
+			var batchTasks = new List<Task>();
 
-			for (var fileIndex = 0; fileIndex < totalFiles; fileIndex++)
+			for (var i = 0; i < totalBoards; i += batchSize)
 			{
-				var filePath = Path.Combine(directoryPath, $"redis_commands_part{fileIndex + 1}.text");
+				var batch = boards.Skip(i).Take(batchSize).ToList(); // Create the current batch
+				_logger.LogInformation("Processing batch from index {StartIndex} to {EndIndex}", i, i + batchSize - 1);
 
-				using var writer = new StreamWriter(filePath);
-				var start = fileIndex * batchSize;
-				var end = Math.Min((fileIndex + 1) * batchSize, totalBoards);
-
-				for (var i = start; i < end; i++)
+				foreach (var board in batch)
 				{
-					var board = boards[i];
 					var key = GetBoardKeyName(board.Uid);
 					var cachedBoard = new CachedBoard
 					{
@@ -258,40 +273,19 @@ namespace hrvster.ApplicationServices.MatchGames
 						MatchGameUid = board.MatchGame.Uid,
 						MatchGameName = board.MatchGame.Name,
 					};
-					var value = JsonConvert.SerializeObject(cachedBoard);
 
-					// Write SET command for each board to file
-					await writer.WriteLineAsync($"SET {key} \"{value}\"");
-
-					// Additionally, add UID to a set of all board UIDs
-					await writer.WriteLineAsync($"SADD board_uids {board.Uid}");
+					// Queueing tasks without awaiting them immediately
+					batchTasks.Add(_cacheDataService.SetAddAsync(GetGameBoardsKeysName(matchGame.Uid), board.Uid.ToString()));
+					batchTasks.Add(_cacheDataService.SetAsync(key, cachedBoard));
 				}
+
+				// Await all tasks in the current batch
+				await Task.WhenAll(batchTasks);
+				_logger.LogInformation("Completed processing and saving batch {BatchNumber} to Redis", (i / batchSize) + 1);
+				batchTasks.Clear(); // Clear the list of tasks for the next batch
 			}
-		}
 
-		private async Task SaveIntoRedisAsync(MatchGame matchGame, List<MatchBoard> boards, Dictionary<Guid, int> boardMappings)
-		{
-			var options = new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount };
-			await Parallel.ForEachAsync(boards, options, async (board, cancellationToken) =>
-			{
-				var key = GetBoardKeyName(board.Uid);
-				var cachedBoard = new CachedBoard
-				{
-					Id = boardMappings[board.Uid],
-					Uid = board.Uid,
-					IsWinnable = board.IsWinnable,
-					IsReserved = board.IsReserved,
-					PrizeId = board.Prize.Id,
-					PrizeUid = board.Prize.Uid,
-					MatchGameId = board.MatchGame.Id,
-					MatchGameUid = board.MatchGame.Uid,
-					MatchGameName = board.MatchGame.Name,
-				};
-				_logger.LogInformation("Saving the board with uid {BoardUid} into cache.", board.Uid);
-
-				await _cacheDataService.SetAddAsync(GetGameBoardsKeysName(matchGame.Uid), board.Uid.ToString());
-				await _cacheDataService.SetAsync(key, cachedBoard);
-			});
+			_logger.LogInformation("All boards have been processed and saved into Redis.");
 		}
 
 		public async Task GenerateBoardsAsync(MatchGame matchGame, CancellationToken cancellationToken)
@@ -359,20 +353,20 @@ namespace hrvster.ApplicationServices.MatchGames
 		}
 
 		private async Task GenerateAndSaveBoardsAsync(
-			MatchGame matchGame, 
-			int numberOfBoards, 
-			List<MatchPrize> availablePrizes, 
-			ParallelOptions options, 
+			MatchGame matchGame,
+			int numberOfBoards,
+			List<MatchPrize> availablePrizes,
+			ParallelOptions options,
 			CancellationToken cancellationToken)
 		{
-			var numberOfThreads = Math.Min(numberOfBoards/ 1000000, Environment.ProcessorCount);
+			var numberOfThreads = Math.Min(numberOfBoards / 1000000, Environment.ProcessorCount);
 
 			var boardsPerThread = numberOfBoards / numberOfThreads;
 
 			var uniqueBoardUids = new ConcurrentDictionary<Guid, bool>();
 			var tasks = new List<Task>();
 
-			for(var threadIndex = 0; threadIndex < numberOfThreads; threadIndex++)
+			for (var threadIndex = 0; threadIndex < numberOfThreads; threadIndex++)
 			{
 				int start = threadIndex * boardsPerThread;
 				int end = (threadIndex == numberOfThreads - 1) ? numberOfBoards : start + boardsPerThread;
@@ -399,11 +393,11 @@ namespace hrvster.ApplicationServices.MatchGames
 		}
 
 		private async Task ProcessBoardsAndSaveAsync(
-			MatchGame matchGame, 
-			int start, 
-			int end, 
-			List<MatchPrize> availablePrizes, 
-			ConcurrentDictionary<Guid, bool> uniqueBoardUids, 
+			MatchGame matchGame,
+			int start,
+			int end,
+			List<MatchPrize> availablePrizes,
+			ConcurrentDictionary<Guid, bool> uniqueBoardUids,
 			CancellationToken cancellationToken)
 		{
 			var generatedBoards = new ConcurrentBag<MatchBoard>();
@@ -608,8 +602,8 @@ namespace hrvster.ApplicationServices.MatchGames
 		}
 
 		private async Task SaveBoardsAsync(
-			MatchGame matchGame, 
-			List<MatchBoard> generatedBoards, 
+			MatchGame matchGame,
+			List<MatchBoard> generatedBoards,
 			CancellationToken cancellationToken)
 		{
 			var boardKeys = new List<Guid>();
@@ -670,10 +664,9 @@ namespace hrvster.ApplicationServices.MatchGames
 
 		public async Task<MatchBoard> GetRandomBoardAsync(Guid gameUid, CancellationToken cancellationToken)
 		{
-			var randomBoard = default(MatchBoard);
-			var randomBoardUid = await GetBoardKeysFromCahceOrDatabase(gameUid, cancellationToken);
+			var randomBoardUid = await GetBoardKeysFromCacheOrDatabase(gameUid, cancellationToken);
 
-			_logger.LogInformation("Retrieving the board with uid {boardUid} from the cache.", randomBoardUid);
+			_logger.LogInformation("Retrieving the board with uid {BoardUid} from the cache.", randomBoardUid);
 
 			return await GetBoardFromCacheAsync(randomBoardUid);
 		}
@@ -681,61 +674,80 @@ namespace hrvster.ApplicationServices.MatchGames
 		private async Task<MatchBoard> GetBoardFromCacheAsync(Guid randomBoardUid)
 		{
 			var boardString = await _cacheDataService.GetBoardDetailsAsync(GetBoardKeyName(randomBoardUid));
+			var cachedBoard = default(CachedBoard);
+			IEnumerable<MatchTile> tiles = new List<MatchTile>();
 
 			if (string.IsNullOrWhiteSpace(boardString))
 			{
-				throw new NoMoreBoardForThisGameException($"There are no more boards for the game");
-			}
+				//get it from the database
+				var board = await _matchBoardsRepository.GetGameBoardAsync(randomBoardUid, default);
 
-			var unescapedBoardString = Regex.Unescape(boardString);
-
-			var cachedBoard = JsonConvert.DeserializeObject<CachedBoard>(unescapedBoardString);
-
-			var tileString = await _cacheDataService.GetTileDetailsAsync(GetTileKeysName(cachedBoard.Uid));
-
-			if (string.IsNullOrWhiteSpace(tileString))
-			{
-				throw new NoMoreBoardForThisGameException($"There are no tiles for the game");
-			}
-
-			var cachedTiles = JsonConvert.DeserializeObject<List<CachedTile>>(Regex.Unescape(tileString));
-			
-			return new MatchBoard
-			{
-				Id = cachedBoard.Id,
-				Uid = cachedBoard.Uid,
-				MatchGame = new MatchGame { Id = cachedBoard.MatchGameId, Uid = cachedBoard.MatchGameUid, Name = cachedBoard.MatchGameName },
-				Prize = new MatchPrize { Id = cachedBoard.PrizeId, Uid = cachedBoard.PrizeUid },
-				IsWinnable = cachedBoard.IsWinnable,
-				IsReserved = cachedBoard.IsReserved,
-				Tiles = cachedTiles.Select(tile => new MatchTile
+				if (board == null)
 				{
-					Uid = tile.TileUid,
-					Image = new MatchImage { Id = tile.ImageId, Uid = tile.ImageUid, LocationUrl = tile.ImageUrl },
-					Prize = new MatchPrize { Id = tile.PrizeId, Uid = tile.PrizeUid },
-					WinIndicator = tile.WinIndicator
-				}).ToList()
-			};
+					throw new NoMoreBoardForThisGameException($"There are no more boards for the game");
+				}
+
+				tiles = await _matchTilesRepository.GetForBoardAsync(randomBoardUid, default);
+
+				//save this to cache
+				await _cacheDataService.SetAsync(GetTileKeysName(randomBoardUid), tiles);
+				board.Tiles = tiles.ToList();
+
+				return board;
+			}
+			else
+			{
+				var unescapedBoardString = Regex.Unescape(boardString);
+
+				cachedBoard = JsonConvert.DeserializeObject<CachedBoard>(unescapedBoardString);
+
+				//Get the tiles from the database instead
+				tiles = await _matchTilesRepository.GetForBoardAsync(randomBoardUid, default);
+
+				//save this to cache
+				await _cacheDataService.SetAsync(GetTileKeysName(randomBoardUid), tiles);
+
+				return new MatchBoard
+				{
+					Id = cachedBoard.Id,
+					Uid = cachedBoard.Uid,
+					MatchGame = new MatchGame { Id = cachedBoard.MatchGameId, Uid = cachedBoard.MatchGameUid, Name = cachedBoard.MatchGameName },
+					Prize = new MatchPrize { Id = cachedBoard.PrizeId, Uid = cachedBoard.PrizeUid },
+					IsWinnable = cachedBoard.IsWinnable,
+					IsReserved = cachedBoard.IsReserved,
+					Tiles = tiles.ToList()
+				};
+			}
 		}
 
 		public Task<Guid> GetRandomGameboardUidAsync(Guid gameUid, CancellationToken cancellationToken)
 		{
-			return GetBoardKeysFromCahceOrDatabase(gameUid, cancellationToken);
+			return GetBoardKeysFromCacheOrDatabase(gameUid, cancellationToken);
 		}
 
-		private async Task<Guid> GetBoardKeysFromCahceOrDatabase(Guid gameUid, CancellationToken cancellationToken)
+		private async Task<Guid> GetBoardKeysFromCacheOrDatabase(Guid gameUid, CancellationToken cancellationToken)
 		{
 			var randomBoardUidString = await _cacheDataService.GetRandomBoardKey(GetGameBoardsKeysName(gameUid));
 
-			var boardUid = randomBoardUidString.ToString();
+			Guid uid;
 
-			if(string.IsNullOrWhiteSpace(boardUid))
+			if (string.IsNullOrWhiteSpace(randomBoardUidString))
 			{
-				_logger.LogError($"There are no more boards for the game with uid {gameUid}.");
-				throw new NoMoreBoardForThisGameException("There are no more boards for this game.");
+				//Let's check the database mysql
+				uid = await _matchBoardsRepository.GetRandomBoardAsync(gameUid, cancellationToken);
+
+				if (uid == Guid.Empty)
+				{
+					_logger.LogError($"There are no more boards for the game with uid {gameUid}.");
+					throw new NoMoreBoardForThisGameException("There are no more boards for this game.");
+				}
+			}
+			else
+			{
+				uid = Guid.Parse(randomBoardUidString);
 			}
 
-			return Guid.Parse(boardUid);
+			return uid;
 		}
 
 		private async Task<List<Guid>> GetBoardKeysAsync(Guid gameUid)
@@ -754,7 +766,7 @@ namespace hrvster.ApplicationServices.MatchGames
 		{
 			return await GetBoardFromCacheAsync(gameBoardUid);
 		}
-			
+
 
 		public async Task<IEnumerable<Guid>> GetGameBoardUidsAsync(Guid gameUid, CancellationToken cancellationToken)
 			=> await _matchBoardsRepository.GetGameBoardUidsAsync(gameUid, cancellationToken);
@@ -786,19 +798,19 @@ namespace hrvster.ApplicationServices.MatchGames
 		public async Task<bool> IsBoardPlayableByGameplayAsync(Guid gameplayUid, CancellationToken cancellationToken)
 		{
 			var gameplay = await _gameplayRepository.GetAsync(gameplayUid, cancellationToken);
-			if(gameplay == null)
+			if (gameplay == null)
 			{
 				_logger.LogWarning("Gameplay doesn't exist for {uid}", gameplayUid);
 				return false;
 			}
 
-			if(gameplay.MatchBoard == null)
+			if (gameplay.MatchBoard == null)
 			{
 				_logger.LogWarning("Gameplay with uid {uid} is not attached to a gameboard.", gameplayUid);
 				return false;
 			}
 
-			if(!gameplay.MatchBoard.IsReserved)
+			if (!gameplay.MatchBoard.IsReserved)
 			{
 				_logger.LogWarning("Gameboard with uid {boardUid} for gameplay {uid} is not reserved",
 					gameplay.MatchBoard.Uid,
@@ -806,7 +818,7 @@ namespace hrvster.ApplicationServices.MatchGames
 				return false;
 			}
 
-			if(gameplay.PlayedIndicator || gameplay.MatchBoard.PlayedIndicator)
+			if (gameplay.PlayedIndicator || gameplay.MatchBoard.PlayedIndicator)
 			{
 				_logger.LogWarning("Either the gameboard with uid {boardUid} or the gameplay with uid {uid} has been played.",
 					gameplay.MatchBoard.Uid,

@@ -5,7 +5,6 @@ using hrvster.Extensions.Configuration;
 using hrvster.Extensions.OptionsConfiguration;
 using hrvster.Infrastructure.Facebook;
 using hrvster.Infrastructure.MatchGames;
-using hrvster.Infrastructure.MongoRepositories;
 using hrvster.Models;
 using MediatR;
 using Serilog;
@@ -73,7 +72,6 @@ namespace hrvster.Services.Tiles.MongoDb.Import
 						.AddTransient<IMatchGamePlayRepository, MatchGamePlayRepository>()
 						.AddTransient<IMatchTilesRepository, MatchTilesRepository>()
 						.AddTransient<IMatchPlayRulesRepository, MatchPlayRulesRepository>()
-						.AddTransient<IMongoMatchTileRepository>(sp => GenerateMongoMatchTileRepository(Configuration))
 						.AddTransient<ICacheDataService, RedisCacheService>()
 						.AddHarvsterConfigurationOption(Configuration)
 						.AddTransient<
@@ -106,16 +104,13 @@ namespace hrvster.Services.Tiles.MongoDb.Import
 			var matchTileCollectionName = configuration["MongoDbSettings:TileCollection"];
 			var directory = configuration["TileFilesLocation"];
 
-			return new MongoDBTileImporter(loggerFactory, connectionString, databaseName, matchTileCollectionName, directory);
-		}
-
-		private static IMongoMatchTileRepository GenerateMongoMatchTileRepository(IConfiguration configuration)
-		{
-			var connectionString = configuration["MongoDbSettings:ConnectionString"];
-			var databaseName = configuration["MongoDbSettings:DatabaseName"];
-			var matchTileCollectionName = configuration["MongoDbSettings:TileCollection"];
-
-			return new MongoMatchTileRepository(connectionString, databaseName, matchTileCollectionName);
+			return new MongoDBTileImporter(
+				loggerFactory,
+				connectionString,
+				databaseName,
+				matchTileCollectionName,
+				directory,
+				configuration);
 		}
 
 		private static void AddMediator(IServiceCollection services)

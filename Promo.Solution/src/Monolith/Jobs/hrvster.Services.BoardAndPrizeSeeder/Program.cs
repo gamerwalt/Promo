@@ -5,7 +5,6 @@ using hrvster.Extensions.Configuration;
 using hrvster.Extensions.OptionsConfiguration;
 using hrvster.Infrastructure.Facebook;
 using hrvster.Infrastructure.MatchGames;
-using hrvster.Infrastructure.MongoRepositories;
 using hrvster.Models;
 using MediatR;
 using Serilog;
@@ -75,7 +74,6 @@ namespace hrvster.Services.BoardAndPrizeSeeder
 						.AddTransient<IMatchPlayRulesRepository, MatchPlayRulesRepository>()
 						.AddTransient<ICacheDataService, RedisCacheService>()
 						.AddHarvsterConfigurationOption(Configuration)
-						.AddTransient<IMongoMatchTileRepository>(sp => GenerateMongoMatchTileRepository(Configuration))
 						.AddTransient<Func<ExternalClientType, IExternalClient>>(sp => serviceTypeName =>
 						{
 							switch (serviceTypeName)
@@ -95,15 +93,6 @@ namespace hrvster.Services.BoardAndPrizeSeeder
 
 					AddMediator(services);
 				});
-
-		private static IMongoMatchTileRepository GenerateMongoMatchTileRepository(IConfiguration configuration)
-		{
-			var connectionString = configuration["MongoDbSettings:ConnectionString"];
-			var databaseName = configuration["MongoDbSettings:DatabaseName"];
-			var matchTileCollectionName = configuration["MongoDbSettings:TileCollection"];
-
-			return new MongoMatchTileRepository(connectionString, databaseName, matchTileCollectionName);
-		}
 
 		private static void AddMediator(IServiceCollection services)
 			=> services.AddMediatR(typeof(Program));

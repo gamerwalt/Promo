@@ -1,14 +1,11 @@
 ﻿using hrvster.ApplicationServices.Caching;
 using hrvster.Games.Match.Models;
 using hrvster.Infrastructure.MatchGames;
-using hrvster.Infrastructure.MongoEntities.MatchGames;
-using hrvster.Infrastructure.MongoRepositories;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -27,7 +24,7 @@ namespace hrvster.ApplicationServices.MatchGames.V2
 		private readonly IMatchPrizeService _matchPrizeService;
 		private readonly IMatchImageService _matchImageService;
 		private readonly ICacheDataService _cacheDataService;
-		private readonly IMongoMatchTileRepository _mongoMatchTileRepository;
+		private readonly IConfiguration _config;
 
 		private const string TileKeysName = "tiles: ";
 		private static ThreadLocal<Random> localRandom = new ThreadLocal<Random>(() => new Random(Guid.NewGuid().GetHashCode()));
@@ -40,15 +37,15 @@ namespace hrvster.ApplicationServices.MatchGames.V2
 			IMatchBoardsRepository matchBoardsRepository,
 			IMatchPrizeService matchPrizeService,
 			IMatchImageService matchImageService,
-			IMongoMatchTileRepository mongoMatchTileRepository,
-			ICacheDataService cacheDataService)
+			ICacheDataService cacheDataService,
+			IConfiguration config)
 		{
 			_logger = loggerFactory.CreateLogger<MatchGameBoardService>();
 			_matchBoardsRepository = matchBoardsRepository;
 			_matchPrizeService = matchPrizeService;
 			_matchImageService = matchImageService;
-			_mongoMatchTileRepository = mongoMatchTileRepository;
 			_cacheDataService = cacheDataService;
+			_config = config;
 		}
 
 		public async Task GenerateTilesForBoardAsync(MatchGame matchGame, CancellationToken token)
@@ -167,20 +164,106 @@ namespace hrvster.ApplicationServices.MatchGames.V2
 				token.ThrowIfCancellationRequested();
 			}
 
-			var batchSize = 100000;  // Number of tiles per batch
-			var numberOfBatches = (int)Math.Ceiling((double)allTiles.Count / batchSize);
+			_logger.LogInformation("Saving the tiles into the database.");
 
-			if(boardList.Count > 100000)
+			await _matchBoardsRepository.SaveAllTilesAsync(boardList, token);
+
+			_logger.LogInformation("The tiles for the game with uid {GameUid} has been saved to the database.", gameUid);
+			#region oldCode
+			//int.TryParse(_config["TileSaveMongoDBBatchSize"], out var batchSize);
+			//var numberOfBatches = (int)Math.Ceiling((double)allTiles.Count / batchSize);
+
+			//if (boardList.Count > 100000)
+			//{
+			//	_logger.LogInformation("Saving tiles into the file.");
+			//	int.TryParse(_config["BoardsPerFile"], out var boardsPerFile);
+			//	var batchCounter = 0;
+			//	var totalBatches = (boardList.Count + boardsPerFile - 1) / boardsPerFile; // Calculate total number of batches
+
+			//	for (var i = 0; i < boardList.Count; i += boardsPerFile)
+			//	{
+			//		var batchBoards = boardList.Skip(i).Take(boardsPerFile).ToList();
+			//		var tilesToSave = batchBoards.SelectMany(board => board.Tiles.Select(tile => new CachedTile
+			//		{
+			//			BoardUid = tile.Board.Uid,
+			//			TileUid = tile.Uid,
+			//			ImageId = tile.Image.Id,
+			//			ImageUid = tile.Image.Uid,
+			//			ImageUrl = tile.Image.LocationUrl,
+			//			PrizeId = tile.WinIndicator ? tile.Prize.Id : 0,
+			//			PrizeUid = tile.WinIndicator ? tile.Prize.Uid : Guid.Empty,
+			//			WinIndicator = tile.WinIndicator
+			//		})).ToList();
+
+			//		var fileName = $"C:\\hrvster\\tiles\\tiles_batch_{++batchCounter}_{gameUid}.json";
+
+			//		using (var file = File.CreateText(fileName))
+			//		{
+			//			var serializer = new JsonSerializer();
+			//			serializer.Serialize(file, tilesToSave);
+			//		}
+
+			//		_logger.LogInformation("Batch {BatchCounter} of {TotalBatches} written to file {FileName}", batchCounter, totalBatches, fileName);
+			//	}
+
+			//	_logger.LogInformation("All tiles for the game with uid {GameUid} have been written to files.", gameUid);
+			//}
+			//else
+			//{
+			//_logger.LogInformation("Saving tiles into the Database directly.");
+			////Save into the database
+			//var batchTasks = new List<Task>();
+			//int.TryParse(_config["TotalBatchesToSave"], out var counterToAwait);
+			//if(counterToAwait == 0)
+			//{
+			//	counterToAwait = 500;
+			//}
+
+			//for (var i = 0; i < numberOfBatches; i++)
+			//{
+			//	var tilesToSave = allTiles.Select(tile => new MatchTileEntity
+			//	{
+			//		Board = new MatchBoard { Id = tile.Id, Uid = tile.Uid },
+			//		WinIndicator = tile.WinIndicator,
+			//		Prize = tile.WinIndicator ? new MatchPrize { Id = tile.Prize.Id, Uid = tile.Prize.Uid } : null,
+			//		Image = tile.Image,
+			//		Random = localRandom.Value.NextDouble(),
+			//		Uid = tile.Uid
+			//	}).Skip(i * batchSize).Take(batchSize);
+
+			//	batchTasks.Add(_mongoMatchTileRepository.SaveTilesAsync(tilesToSave));
+			//	counterToAwait++;
+
+			//	if(counterToAwait == 100)
+			//	{
+			//		_logger.LogInformation("Awaiting 100 tasks.");
+			//		await Task.WhenAll(batchTasks);
+			//		batchTasks.Clear();
+			//	}
+			//}
+			//}
+
+			//await SaveTilesIntoCacheAsync(boardList);
+			#endregion oldCode
+		}
+
+		private async Task SaveTilesIntoCacheAsync(List<MatchBoard> boardList)
+		{
+			_logger.LogInformation("Saving tiles into the cache.");
+
+			int.TryParse(_config["TileSaveBatchSize"], out var batchSize);
+			var totalBoards = boardList.Count;
+			var batchTasks = new List<Task>();
+
+			for (var i = 0; i < totalBoards; i += batchSize)
 			{
-				//Serialize and write to files
-				_logger.LogInformation("Saving tiles into the file.");
+				var batchBoards = boardList.Skip(i).Take(batchSize).ToList();
+				_logger.LogInformation("Processing tile batch from index {StartIndex} to {EndIndex}", i, i + batchSize - 1);
 
-				for (var i = 0; i < numberOfBatches; i++)
+				foreach (var board in batchBoards)
 				{
-					using var file = File.CreateText($"C:\\hrvster\\tiles\\tiles_batch_{i + 1}_{gameUid}.json");
-					var serializer = new JsonSerializer();
-
-					var tilesToSave = allTiles.Select(tile => new CachedTile
+					var tileKey = GetTileKeysName(board.Uid);
+					var cachedTiles = board.Tiles.Select(tile => new CachedTile
 					{
 						BoardUid = tile.Board.Uid,
 						TileUid = tile.Uid,
@@ -190,59 +273,18 @@ namespace hrvster.ApplicationServices.MatchGames.V2
 						PrizeId = tile.WinIndicator ? tile.Prize.Id : 0,
 						PrizeUid = tile.WinIndicator ? tile.Prize.Uid : Guid.Empty,
 						WinIndicator = tile.WinIndicator
-					}).Skip(i * batchSize).Take(batchSize);
+					}).ToList();
 
-					serializer.Serialize(file, tilesToSave);
+					batchTasks.Add(_cacheDataService.SetAsync(tileKey, cachedTiles));
 				}
 
-				_logger.LogInformation("The tiles for the game with uid {GameUid} has been written to a file.", gameUid);
-			}
-			else
-			{
-				_logger.LogInformation("Saving tiles into the Database directly.");
-				//Save into the database
-				for (var i = 0; i < numberOfBatches; i++)
-				{
-					var tilesToSave = allTiles.Select(tile => new MatchTileEntity
-					{
-						Board = new MatchBoard { Id = tile.Id, Uid = tile.Uid },
-						WinIndicator = tile.WinIndicator,
-						Prize = tile.WinIndicator ? new MatchPrize { Id = tile.Prize.Id, Uid = tile.Prize.Uid } : null,
-						Image = tile.Image,
-						Random = localRandom.Value.NextDouble(),
-						Uid = tile.Uid
-					}).Skip(i * batchSize).Take(batchSize);
-
-					await _mongoMatchTileRepository.SaveTilesAsync(tilesToSave);
-				}
-
-				_logger.LogInformation("The tiles for the game with uid {GameUid} has been saved to the database.", gameUid);
+				// Await all tasks in the current batch
+				await Task.WhenAll(batchTasks);
+				_logger.LogInformation("Completed processing and saving tile batch {BatchNumber} to Redis", (i / batchSize) + 1);
+				batchTasks.Clear(); // Clear the list of tasks for the next batch
 			}
 
-			_logger.LogInformation("Saving tiles into the cache.");
-
-			var options = new ParallelOptions { MaxDegreeOfParallelism = 4 }; // Reduced parallelism
-
-			await Parallel.ForEachAsync(boardList, options, async (board, cancellationToken) =>
-			{
-				var tileKey = GetTileKeysName(board.Uid);
-
-				var cachedTiles = board.Tiles.Select(tile => new CachedTile
-				{
-					BoardUid = tile.Board.Uid,
-					TileUid = tile.Uid,
-					ImageId = tile.Image.Id,
-					ImageUid = tile.Image.Uid,
-					ImageUrl = tile.Image.LocationUrl,
-					PrizeId = tile.WinIndicator ? tile.Prize.Id : 0,
-					PrizeUid = tile.WinIndicator ? tile.Prize.Uid : Guid.Empty,
-					WinIndicator = tile.WinIndicator
-				}).ToList();
-
-				await _cacheDataService.SetAsync(tileKey, cachedTiles);
-			});
-
-
+			_logger.LogInformation("All tiles have been processed and saved into the cache.");
 		}
 
 		private IEnumerable<MatchTile> GenerateTiles(

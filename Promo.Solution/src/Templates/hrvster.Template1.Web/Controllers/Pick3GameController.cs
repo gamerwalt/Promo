@@ -28,6 +28,7 @@ using System.Web;
 
 namespace hrvster.Template1.Web.Controllers
 {
+	[Route("Pick3")]
 	public class Pick3GameController : Controller
 	{
 		private readonly ILogger<Pick3GameController> _logger;
@@ -97,7 +98,7 @@ namespace hrvster.Template1.Web.Controllers
 
 
 		[HttpGet]
-		[Route("Pick3/PrePlay")]
+		[Route("PrePlay")]
 		public async Task<IActionResult> PrePlay(
 			[FromQuery] Guid gameUid,
 			[FromQuery] Guid ruleUid,
@@ -311,7 +312,7 @@ namespace hrvster.Template1.Web.Controllers
 
 
 		[HttpGet]
-		[Route("Pick3/Play")]
+		[Route("Play")]
 		public async Task<IActionResult> Play(
 			[FromQuery] Guid gameUid, 
 			[FromQuery] Guid ruleUid,
@@ -474,7 +475,7 @@ namespace hrvster.Template1.Web.Controllers
 		}
 
 		[HttpPost]
-		[Route("Pick3/Play")]
+		[Route("Play")]
 		public async Task<IActionResult> Play(
 			[FromQuery] Guid gameUid,
 			[FromQuery] Guid ruleUid,
@@ -620,7 +621,7 @@ namespace hrvster.Template1.Web.Controllers
 		}
 
 		[HttpGet]
-		[Route("/Pick3/win/{Uid:Guid}/gameplay/{gameplayUid:Guid}")]
+		[Route("win/{Uid:Guid}/gameplay/{gameplayUid:Guid}")]
 		public async Task<IActionResult> MatchGameWin(
 			Guid Uid,
 			Guid gameplayUid,
@@ -656,7 +657,7 @@ namespace hrvster.Template1.Web.Controllers
 		}
 
 		[HttpGet]
-		[Route("/Pick3/GamePlayLoss/Pick3Gameplay/{gameplayUid:Guid}/i/{userId}/n/{userName}/account/{accountUid:Guid}")]
+		[Route("GamePlayLoss/Pick3Gameplay/{gameplayUid:Guid}/i/{userId}/n/{userName}/account/{accountUid:Guid}")]
 		public async Task<IActionResult> MatchGameLoss(
 			Guid gameplayUid,
 			string userId,
@@ -693,6 +694,42 @@ namespace hrvster.Template1.Web.Controllers
 				Tiles = GetMatchTiles(tiles),
 				SelectedTiles = LoadTileStrings(gameplay.SelectedTiles),
 				Points = points
+			};
+
+			await _matchGameBoardService.RemoveBoardFromCacheAsync(gameboard.Uid, cancellationToken);
+
+			return View(model);
+		}
+
+		[HttpGet]
+		[Route("MatchGameLossTwitter/Pick3Gameplay/{gameplayUid:Guid}")]
+		public async Task<IActionResult> MatchGameLossTwitter(
+			Guid gameplayUid,
+			CancellationToken cancellationToken)
+		{
+			_logger.LogInformation("The gameplay {GameplayUid} has been deemed a LOSS.", gameplayUid);
+			
+			var gameplay = await _matchGameplayService.GetAsync(gameplayUid, cancellationToken);
+
+			if (!gameplay.PlayedIndicator && !gameplay.MatchBoard.PlayedIndicator && gameplay.WinIndicator)
+			{
+				_logger.LogWarning("Gameplay {GameplayUid} is not a loss", gameplayUid);
+
+				return ErrorRedirect($"Gameplay {gameplayUid} is not a loss", StatusCodes.Status400BadRequest);
+			}
+
+			var gameboard = await _matchGameBoardService.GetGameBoardAsync(gameplay.MatchBoard.Uid, cancellationToken);
+			var tiles = gameboard.Tiles;
+
+			var model = new GameplayLoss
+			{
+				GameplayUid = gameplay.Uid,
+				GameUid = gameboard.MatchGame.Uid,
+				GameName = gameboard.MatchGame.Name,
+				MatchBoard = _mapper.Map<Models.MatchBoard>(gameboard),
+				Tiles = GetMatchTiles(tiles),
+				SelectedTiles = LoadTileStrings(gameplay.SelectedTiles),
+				Points = 0
 			};
 
 			await _matchGameBoardService.RemoveBoardFromCacheAsync(gameboard.Uid, cancellationToken);
@@ -800,7 +837,7 @@ namespace hrvster.Template1.Web.Controllers
 				await SetGameplayAsWonAsync(gameplayUid, form, cancellationToken);
 				var prize = await _matchGamesService.GetPrizeFromGameplayUidAsync(gameplayUid, cancellationToken);
 
-				message = $"{replyTo} I just played the Pick 3 game {game.Name} and won. I just won a prize with a value of ${prize.Value}. {Environment.NewLine} {hashtag}";
+				message = $"{replyTo} I just played the Pick 3 game {game.Name} and won. I just won a prize with a value of {prize.Value} Naira. {Environment.NewLine} {hashtag}";
 
 				var screenName = string.Empty;
 
@@ -875,7 +912,9 @@ namespace hrvster.Template1.Web.Controllers
 
 				await _twitterHttpService.PublishTweetInResponseToAsync(message, rule.ExternalId, accessToken, refreshToken);
 
-				return RedirectToAction("MatchGameLoss", new { Uid = gameUid, gameplayUid = gameplayUid });
+				_logger.LogInformation("Redirecting user to the loss page for a twitter loss.");
+
+				return RedirectToAction("MatchGameLossTwitter", new { gameplayUid = gameplayUid });
 			}
 			else
 			{

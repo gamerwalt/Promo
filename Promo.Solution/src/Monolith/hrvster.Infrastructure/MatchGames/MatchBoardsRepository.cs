@@ -8,10 +8,10 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Tweetinvi.Core.Events;
 
 namespace hrvster.Infrastructure.MatchGames
 {
@@ -21,6 +21,8 @@ namespace hrvster.Infrastructure.MatchGames
 		Task BulkInsertBoardsAndTiles(MatchGame matchGame, List<MatchBoard> currentBatch, CancellationToken cancellationToken);
 		Task CreateAsync(MatchBoard board, CancellationToken cancellationToken);
 		Task<IEnumerable<MatchBoard>> GetForMatchGameAsync(Guid matchGameUid, CancellationToken cancellationToken);
+		Task<IEnumerable<Guid>> GetForMatchGameByIdAsync(int gameId, CancellationToken token);
+		Task<Guid> GetGameUidAsync(int gameId, CancellationToken token);
 		Task<MatchBoard> GetGameBoardAsync(Guid gameboardUid, CancellationToken token = default);
 		/// <summary>
 		/// Get a list of all the Board Uids for a specific game
@@ -30,7 +32,9 @@ namespace hrvster.Infrastructure.MatchGames
 		/// <returns>List<Guid></Guid></returns>
 		Task<IEnumerable<Guid>> GetGameBoardUidsAsync(Guid gameUid, CancellationToken cancellationToken);
 		Task<Dictionary<Guid, int>> GetInsertedBoardIds(List<MatchBoard> boards, CancellationToken cancellationToken);
+		Task<Guid> GetRandomBoardAsync(Guid gameUid, CancellationToken cancellationToken);
 		Task ReserveBoardAsync(Guid uid, CancellationToken cancellationToken);
+		Task SaveAllTilesAsync(List<MatchBoard> boardList, CancellationToken token);
 		Task UpdateAsPlayedAsync(Guid boardUid, CancellationToken cancellationToken);
 	}
 
@@ -76,6 +80,127 @@ namespace hrvster.Infrastructure.MatchGames
 					await conn.OpenAsync(cancellationToken);
 				}
 			}
+		}
+
+		public async Task SaveAllTilesAsync(List<MatchBoard> boardList, CancellationToken token)
+		{
+			if (token.IsCancellationRequested)
+			{
+				token.ThrowIfCancellationRequested();
+			}
+			var numberOfLoops = 0;
+			var tileCount = 0;
+			int.TryParse(_config["TileBatchToSave"], out var batchSize);
+			int.TryParse(_config["TileTaskToAwait"], out var maxConcurrentTasks);
+
+			var boardBatches = boardList.Batch(batchSize);
+			var totalBoardBatches = boardBatches.ToList().Count;
+
+			_logger.LogInformation("Total batches: {Total}", totalBoardBatches);
+
+
+			foreach (var boardBatch in boardBatches)
+			{
+				Stopwatch clock = Stopwatch.StartNew();
+				clock.Start();
+				var total = boardBatch.Count();
+				_logger.LogInformation("Working on batch of {Total} boards", total);
+
+				var taskList = new List<Task>();
+
+				foreach (var board in boardBatch)
+				{
+					var tileValues = new List<string>();
+
+					foreach (var tile in board.Tiles)
+					{
+						tileCount++;
+						var prizeId = tile.WinIndicator ? tile.Prize.Id.ToString() : "NULL";
+
+						tileValues.Add(
+							$"('{tile.Uid}', {board.Id}, {tile.Image.Id}, {prizeId}, {tile.WinIndicator}, {tile.WinIndicator})");
+					}
+
+					var query = $@"INSERT INTO match_tiles 
+                           (tile_uid, board_id, image_id, prize_id, win_indicator, is_winnable) 
+                           VALUES {string.Join(", ", tileValues)};";
+
+					taskList.Add(Task.Run(async () =>
+					{
+						using var conn = new MySqlConnection(_database.GetConnectionString());
+						await conn.OpenAsync(token);
+
+						try
+						{
+							var cmd = new MySqlCommand(query, conn);
+							await cmd.ExecuteNonQueryAsync(token);
+						}
+						finally
+						{
+							if (conn.State == ConnectionState.Open)
+							{
+								await conn.CloseAsync();
+							}
+						}
+					}, token));
+
+					if (taskList.Count >= maxConcurrentTasks)
+					{
+						await Task.WhenAll(taskList);
+
+						taskList.Clear();
+					}
+				}
+
+				// Await any remaining tasks in the list
+				if (taskList.Any())
+				{
+					await Task.WhenAll(taskList);
+					taskList.Clear();
+				}
+
+				numberOfLoops++;
+				clock.Stop();
+				_logger.LogInformation("***********************************************************");
+				_logger.LogWarning("We have now looped a total of {NumberOfLoops}", numberOfLoops);
+				_logger.LogWarning("Finished awaiting... total of {TileCount} saved successfully.", tileCount);
+				_logger.LogWarning("Total elapsed time for {TileCount} is {ElapsedTime} minutes", tileCount, clock.Elapsed.TotalMinutes);
+				_logger.LogInformation("***********************************************************");
+			}
+
+			_logger.LogInformation("All tiles have been processed and saved.");
+		}
+
+		public async Task<Guid> GetRandomBoardAsync(Guid gameUid, CancellationToken cancellationToken)
+		{
+			var query = "SELECT board_uid FROM match_boards ORDER BY RAND() LIMIT 1";
+			using var conn = new MySqlConnection(_database.GetConnectionString());
+			var command = new MySqlCommand(query, conn);
+			await conn.OpenAsync();
+			var randomBoardUid = (string)await command.ExecuteScalarAsync(cancellationToken);
+
+			if (string.IsNullOrWhiteSpace(randomBoardUid))
+			{
+				return Guid.Empty;
+			}
+
+			return Guid.Parse(randomBoardUid);
+		}
+
+		public async Task<Guid> GetGameUidAsync(int gameId, CancellationToken token)
+		{
+			var query = $"SELECT match_game_uid FROM match_games WHERE match_game_id = {gameId}";
+			using var conn = new MySqlConnection(_database.GetConnectionString());
+			var command = new MySqlCommand(query, conn);
+			await conn.OpenAsync();
+			var gameUid = (string)await command.ExecuteScalarAsync(token);
+
+			if (string.IsNullOrWhiteSpace(gameUid))
+			{
+				return Guid.Empty;
+			}
+
+			return Guid.Parse(gameUid);
 		}
 
 		public async Task BulkInsertBoardsAndTiles(MatchGame matchGame, List<MatchBoard> boards, CancellationToken cancellationToken)
@@ -290,11 +415,36 @@ namespace hrvster.Infrastructure.MatchGames
 			await command.ExecuteNonQueryAsync(cancellationToken);
 		}
 
+		public async Task<IEnumerable<Guid>> GetForMatchGameByIdAsync(int gameId, CancellationToken token)
+		{
+			var boardUids = new List<Guid>();
+			int.TryParse(_config["BatchGetIdFromDatabase"], out var batchSize); // Adjust based on your needs
+			if (batchSize == 0)
+			{
+				batchSize = 50000;
+			}
+
+			using var conn = new MySqlConnection(_database.GetConnectionString());
+			await conn.OpenAsync(token);
+			var query = $"SELECT board_uid FROM hrvster.match_boards WHERE match_game_id = {gameId}";
+			using var command = conn.CreateCommand();
+			command.CommandText = query;
+			using (var reader = await command.ExecuteReaderAsync(token))
+			{
+				while(await reader.ReadAsync(token))
+				{
+					boardUids.Add(reader.GetGuid("board_uid"));
+				}
+			}
+
+			return boardUids;
+		}
+
 		public async Task<Dictionary<Guid, int>> GetInsertedBoardIds(List<MatchBoard> boards, CancellationToken cancellationToken)
 		{
 			var insertedBoardIds = new Dictionary<Guid, int>();
 			int.TryParse(_config["BatchGetIdFromDatabase"], out var batchSize); // Adjust based on your needs
-			if(batchSize == 0)
+			if (batchSize == 0)
 			{
 				batchSize = 50000;
 			}

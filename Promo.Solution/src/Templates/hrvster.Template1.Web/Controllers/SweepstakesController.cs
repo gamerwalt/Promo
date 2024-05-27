@@ -23,6 +23,7 @@ using System.Web;
 
 namespace hrvster.Template1.Web.Controllers;
 
+[Route("Sweeps")]
 public class SweepstakesController : Controller
 {
 	private readonly ILogger<SweepstakesController> _logger;
@@ -77,7 +78,7 @@ public class SweepstakesController : Controller
 	}
 
 
-	[HttpGet("Sweepstakes/PrePlay")]
+	[HttpGet("PrePlay")]
 	public async Task<IActionResult> PrePlay(
 		[FromQuery] Guid gameUid,
 		[FromQuery] Guid ruleUid,
@@ -241,7 +242,7 @@ public class SweepstakesController : Controller
 				_ => hrvster.Models.Constants.TwitterProvider,
 			};
 
-	[HttpGet("Sweepstakes/Play")]
+	[HttpGet("Play")]
 	public async Task<IActionResult> Play(
 		[FromQuery] Guid gameUid, 
 		[FromQuery] Guid ruleUid, 
@@ -437,7 +438,7 @@ public class SweepstakesController : Controller
 		}
 	}
 
-	[HttpPost("Sweepstakes/Play")]
+	[HttpPost("Play")]
 	public async Task<IActionResult> Play(
 		[FromQuery] Guid gameUid,
 		[FromQuery] Guid ruleUid,
@@ -626,7 +627,7 @@ public class SweepstakesController : Controller
 	}
 
 	[Authorize]
-	[HttpGet("Sweepstakes/SweepEntered/Entry/{entryUid:Guid}/ExternalClient/{externalClient}")]
+	[HttpGet("SweepEntered/Entry/{entryUid:Guid}/ExternalClient/{externalClient}")]
 	public async Task<IActionResult> SweepEntered(Guid entryUid, string externalClient)
 	{
 		var entry = await _sweepStakeService.GetSweepstakeEntryAsync(entryUid);

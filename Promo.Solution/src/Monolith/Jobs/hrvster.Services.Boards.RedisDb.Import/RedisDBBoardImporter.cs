@@ -6,85 +6,69 @@ namespace hrvster.Services.Boards.RedisDb.Import
 	public class RedisDBBoardImporter : IService
 	{
 		private readonly ILogger<RedisDBBoardImporter> _logger;
-		private readonly string _connectionString;
-		private readonly string _databaseName;
-		private readonly string _matchTileCollectionName;
+		private readonly string _redisHost;
+		private readonly string _redisAccessKey;
+		private readonly int _redisPort;
 		private readonly string _directory;
 		private readonly IConfiguration _config;
 
 		public RedisDBBoardImporter(
 			ILoggerFactory loggerFactory,
-			string connectionString,
-			string databaseName,
-			string matchTileCollectionName,
+			string redisHost,
+			string redisAccessKey,
+			string redisPort,
 			string directory,
 			IConfiguration config)
 		{
 			_logger = loggerFactory.CreateLogger<RedisDBBoardImporter>();
-			_connectionString = connectionString;
-			_databaseName = databaseName;
-			_matchTileCollectionName = matchTileCollectionName;
+			_redisHost = redisHost;
+			_redisAccessKey = redisAccessKey;
+			_redisPort = int.Parse(redisPort);
 			_directory = directory;
 			_config = config;
 		}
 
 		public async Task ProcessService(CancellationToken token)
 		{
-			var textFiles = Directory.GetFiles(_directory, "*.text");
-			var backupLocation = _config["BoardFilesBackupLocation"];
-
-			foreach (var filePath in textFiles)
+			var filePaths = Directory.GetFiles(_directory, "*.text");
+			var options = new ParallelOptions { MaxDegreeOfParallelism = 4 }; // Reduced parallelism
+			foreach (var filePath in filePaths)
 			{
-				_logger.LogInformation($"Loading {filePath} into Redis...");
-
-				// Unix/Linux command to run redis-cli with the --pipe option
-				// For Windows, you might need to adjust the command to use "type" instead of "cat" and "cmd.exe" instead of "/bin/bash"
-				var command = $"cat \"{filePath}\" | redis-cli --pipe";
-
-				// ProcessStartInfo setup
-				var psi = new ProcessStartInfo
+				var commands = await File.ReadAllLinesAsync(filePath);
+				await Parallel.ForEachAsync(commands, options, async (command, cancellationToken) =>
 				{
-					FileName = "cmd.exe", // Use "cmd.exe" on Windows
-					Arguments = $"-c \"{command}\"",
-					UseShellExecute = false,
-					RedirectStandardOutput = true,
-					RedirectStandardError = true,
-					CreateNoWindow = true
-				};
+					await ExecuteRedisCommandAsync(command);
+				});
 
-				try
-				{
-					using (Process process = Process.Start(psi))
-					{
-						// Reading output to the console.
-						string output = process.StandardOutput.ReadToEnd();
-						string errors = process.StandardError.ReadToEnd();
-						process.WaitForExit(); // Wait for the process to complete
+				Console.WriteLine($"Processed {filePath}");
+			}
+		}
 
-						// Log or handle the output and errors appropriately
-						_logger.LogInformation("Output from Redis loading process:");
-						_logger.LogInformation(output);
-						if (!string.IsNullOrEmpty(errors))
-						{
-							_logger.LogInformation("Errors during Redis loading:");
-							_logger.LogError(errors);
-						}
+		private async Task ExecuteRedisCommandAsync(string command)
+		{
+			var processStartInfo = new ProcessStartInfo
+			{
+				FileName = @"C:\Users\hrvster-dev-user\AppData\Roaming\npm\rdcli.cmd",
+				Arguments = $"-h {_redisHost} -p {_redisPort} -a {_redisAccessKey} --tls \"{command}\"",
+				RedirectStandardOutput = true,
+				RedirectStandardError = true,
+				UseShellExecute = false,
+				CreateNoWindow = true
+			};
 
-						// If the file was processed without errors, move it to the backup directory
-						if (process.ExitCode == 0)
-						{
-							var backupFilePath = Path.Combine(backupLocation, Path.GetFileName(filePath));
-							File.Move(filePath, backupFilePath);
-							_logger.LogInformation($"Moved processed file to backup: {backupFilePath}");
-						}
-					}
-				}
-				catch (Exception ex)
-				{
-					// Log or handle exceptions
-					_logger.LogInformation("Exception occurred:");
-					_logger.LogInformation(ex.Message);
-				}
+			using var process = new Process { StartInfo = processStartInfo };
+			process.Start();
+			var result = await process.StandardOutput.ReadToEndAsync();
+			var error = await process.StandardError.ReadToEndAsync();
+			await process.WaitForExitAsync();
+
+			if (!string.IsNullOrEmpty(error))
+			{
+				_logger.LogWarning("Error: {Error}", error);
+			}
+			else
+			{
+				_logger.LogInformation("Success: {Message}", result);
 			}
 		}
 	}

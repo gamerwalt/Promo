@@ -101,12 +101,18 @@ namespace hrvster.Services.Boards.RedisDb.Import
 		private static IService CreateMongoDbBoardImporter(IConfiguration configuration, IServiceProvider sp)
 		{
 			var loggerFactory = sp.GetRequiredService<ILoggerFactory>();
-			var connectionString = configuration["MongoDbSettings:ConnectionString"];
-			var databaseName = configuration["MongoDbSettings:DatabaseName"];
-			var matchTileCollectionName = configuration["MongoDbSettings:TileCollection"];
+			var redisHost = configuration["RedisHost"];
+			var redisAccessKey = configuration["RedisAccessKey"];
+			var redisPort = configuration["RedisPort"];
 			var directory = configuration["BoardFilesLocation"];
 
-			return new RedisDBBoardImporter(loggerFactory, connectionString, databaseName, matchTileCollectionName, directory, configuration);
+			return new RedisDBBoardImporter(
+				loggerFactory, 
+				redisHost, 
+				redisAccessKey, 
+				redisPort, 
+				directory, 
+				configuration);
 		}
 
 		private static IMongoMatchTileRepository GenerateMongoMatchTileRepository(IConfiguration configuration)

@@ -13,6 +13,12 @@ namespace hrvster.Template1.Web.Controllers
 			_logger = loggerFactory.CreateLogger<ErrorController>();
 		}
 
+		[HttpGet]
+		public IActionResult NoMoreBoardForThisGame()
+		{
+			return View();
+		}
+
 		[HttpGet("HandleErrorCode")]
 		public async Task<IActionResult> HandleErrorCode(string reason, int statusCode)
 		{
