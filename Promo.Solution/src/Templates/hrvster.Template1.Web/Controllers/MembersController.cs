@@ -5,6 +5,7 @@ using hrvster.Core.Authentication;
 using hrvster.Models;
 using hrvster.Template1.Web.Models;
 using hrvster.Template1.Web.Models.Query;
+using hrvster.Template1.Web.Validators;
 using hrvster.Templates.Core.Common;
 using hrvster.Templates.Infrastructure.Customizations;
 using hrvster.Templates.Models.Extensions;
@@ -89,7 +90,7 @@ public class MembersController : Controller
 				{
 					_logger.LogInformation("Member already exists. Returning to play the game.");
 
-					return RedirectToGame(query.GameType, query.GameUid, query.RuleUid, query.ExternalClient);
+					return RedirectToGame(query.GameType, query.GameUid, query.RuleUid, gameDetails.CampaignUid, query.ExternalClient);
 				}
 			}
 
@@ -110,48 +111,71 @@ public class MembersController : Controller
 	[HttpPost("Members/Create")]
 	public async Task<IActionResult> CreateMember([FromQuery] MemberCreationQuery query, CreateMember form)
 	{
-		var accountUidString = _sessionManager.GetValue(SessionConstants.AccountUid);
-		if (string.IsNullOrWhiteSpace(accountUidString))
-		{
-			_logger.LogWarning("AccountUid is empty!");
-			return ErrorRedirect("AccountUid is empty!", StatusCodes.Status400BadRequest);
-		}
+		_logger.LogInformation("Posting for Create Member.");
+		var gameDetails = await _gameService.GetGameDetailsAsync(Enum.Parse<GameTypesEnum>(query.GameType), query.GameUid);
 
-		var accountUid = Guid.Parse(accountUidString);
-		if (accountUid == Guid.Empty)
-		{
-			_logger.LogWarning("AccountUid is empty!");
-			return ErrorRedirect("AccountUid is empty!", StatusCodes.Status400BadRequest);
-		}
+		var validator = new CreateMemberValidator();
+		var result = validator.Validate(form);
 
-		using (_logger.CreateMemberPagePostLogScope(query.RuleUid, query.GameUid, query.ExternalClient, accountUid))
+		if (result.IsValid)
 		{
-			if (!IsValidGameSession(query.GameType))
+			var accountUidString = _sessionManager.GetValue(SessionConstants.AccountUid);
+			if (string.IsNullOrWhiteSpace(accountUidString))
 			{
-				_logger.LogWarning("Game type empty!");
-				return ErrorRedirect("Game type empty!", StatusCodes.Status400BadRequest);
+				_logger.LogWarning("AccountUid is empty!");
+				return ErrorRedirect("AccountUid is empty!", StatusCodes.Status400BadRequest);
 			}
 
-			var gameDetails = await _gameService.GetGameDetailsAsync(Enum.Parse<GameTypesEnum>(query.GameType), query.GameUid);
-
-			if (!IsGameActive(gameDetails))
+			var accountUid = Guid.Parse(accountUidString);
+			if (accountUid == Guid.Empty)
 			{
-				_logger.LogWarning("Either game has not started or it has ended.");
-				return ErrorRedirect("Either game has not started or it has ended.", StatusCodes.Status400BadRequest);
+				_logger.LogWarning("AccountUid is empty!");
+				return ErrorRedirect("AccountUid is empty!", StatusCodes.Status400BadRequest);
 			}
 
-			if (ModelState.IsValid)
+			using (_logger.CreateMemberPagePostLogScope(query.RuleUid, query.GameUid, query.ExternalClient, accountUid))
 			{
-				var memberProfile = User.Claims.ToMemberProfile();
-				var newMember = _mapper.Map<Member>(form);
+				if (!IsValidGameSession(query.GameType))
+				{
+					_logger.LogWarning("Game type empty!");
+					return ErrorRedirect("Game type empty!", StatusCodes.Status400BadRequest);
+				}
 
-				await CreateNewMember(accountUid, newMember, memberProfile);
+				if (!IsGameActive(gameDetails))
+				{
+					_logger.LogWarning("Either game has not started or it has ended.");
+					return ErrorRedirect("Either game has not started or it has ended.", StatusCodes.Status400BadRequest);
+				}
 
-				return RedirectToGame(query.GameType, query.GameUid, query.RuleUid, query.ExternalClient);
+				if (ModelState.IsValid)
+				{
+					var memberProfile = User.Claims.ToMemberProfile();
+					var newMember = _mapper.Map<Member>(form);
+
+					await CreateNewMember(accountUid, newMember, memberProfile);
+
+					return RedirectToGame(query.GameType, query.GameUid, query.RuleUid, gameDetails.CampaignUid, query.ExternalClient);
+				}
+
+				return View(form);
 			}
-
-			return View(form);
 		}
+
+		foreach(var error in result.Errors)
+		{
+			ModelState.AddModelError(error.PropertyName, error.ErrorMessage);
+		}
+		
+		return View(new CreateMember
+		{
+			GameUid = query.GameUid,
+			RuleUid = query.RuleUid,
+			ExternalClient = query.ExternalClient,
+			GameName = gameDetails.Name,
+			GameStartDate = gameDetails.StartDate,
+			GameEndDate = gameDetails.EndDate,
+			GameType = query.GameType
+		});
 	}
 
 	private static bool IsGameActive(GameDetail gameDetails)
@@ -178,7 +202,7 @@ public class MembersController : Controller
 		_logger.LogInformation("New member created.");
 	}
 
-	private IActionResult RedirectToGame(string gameType, Guid gameUid, Guid ruleUid, string externalClient)
+	private IActionResult RedirectToGame(string gameType, Guid gameUid, Guid ruleUid, Guid campaignUid, string externalClient)
 	{
 		var controllerName = gameType == GameTypesEnum.Sweeps.ToString()
 			? "Sweepstakes"
@@ -186,7 +210,7 @@ public class MembersController : Controller
 
 		var actionName = "PrePlay";
 
-		return RedirectToAction(actionName, controllerName, new { gameUid, ruleUid, externalClient });
+		return RedirectToAction(actionName, controllerName, new { gameUid, ruleUid, externalClient, campaignUid });
 	}
 
 	private IActionResult ErrorRedirect(string reason, int statusCode)

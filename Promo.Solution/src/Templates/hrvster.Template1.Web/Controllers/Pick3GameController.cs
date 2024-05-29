@@ -3,6 +3,7 @@ using hrvster.ApplicationServices;
 using hrvster.ApplicationServices.Accounts;
 using hrvster.ApplicationServices.Common;
 using hrvster.ApplicationServices.Communications;
+using hrvster.ApplicationServices.Exceptions;
 using hrvster.ApplicationServices.Extensions.LogExtensions;
 using hrvster.ApplicationServices.MatchGames;
 using hrvster.ApplicationServices.Reporting;
@@ -28,7 +29,7 @@ using System.Web;
 
 namespace hrvster.Template1.Web.Controllers
 {
-	[Route("Pick3")]
+	[Route("Pick3Game")]
 	public class Pick3GameController : Controller
 	{
 		private readonly ILogger<Pick3GameController> _logger;
@@ -118,28 +119,36 @@ namespace hrvster.Template1.Web.Controllers
 				{
 					_logger.LogError("Game not found!");
 
-					return ErrorRedirect("Game not found!", StatusCodes.Status400BadRequest);
+					await HttpContext.SignOutAsync();
+
+					throw new GameNotFoundException();
 				}
 
 				if(DateTime.UtcNow > game.EndDateUtc)
 				{
 					_logger.LogError("Game is past end date.");
 
-					return ErrorRedirect("Game is past end date", StatusCodes.Status400BadRequest);
+					await HttpContext.SignOutAsync();
+
+					throw new GameHasEndedException();
 				}
 
 				if(DateTime.UtcNow < game.StartDateUtc)
 				{
 					_logger.LogError("Game has not started.");
 
-					return ErrorRedirect("Game has not started.", StatusCodes.Status400BadRequest);
+					await HttpContext.SignOutAsync();
+
+					throw new GameHasNotYetStartedException();
 				}
 
 				if(!game.GameBoardsHasBeenGenerated())
 				{
 					_logger.LogError("Game boards have not been generated.");
 
-					return ErrorRedirect("Game boards have not been generated.", StatusCodes.Status400BadRequest);
+					await HttpContext.SignOutAsync();
+
+					throw new GameBoardsNotGeneratedException();
 				}
 
 				var campaign = await _campaignService.GetCampaignAsync(campaignUid, cancellationToken);
@@ -147,7 +156,9 @@ namespace hrvster.Template1.Web.Controllers
 				{
 					_logger.LogError("Campaign {CampaignUid} not found!", campaignUid);
 
-					return ErrorRedirect("Campaign not found!", StatusCodes.Status400BadRequest);
+					await HttpContext.SignOutAsync();
+
+					throw new CampaignNotFoundException();
 				}
 
 				if (!User.Identity.IsAuthenticated)
@@ -212,12 +223,16 @@ namespace hrvster.Template1.Web.Controllers
 				{
 					_logger.LogError("ExternalProfileId is empty!");
 
+					await HttpContext.SignOutAsync();
+
 					return ErrorRedirect("ExternalProfileId is empty!", StatusCodes.Status400BadRequest);
 				}
 
 				if (string.IsNullOrWhiteSpace(screenName))
 				{
 					_logger.LogError("ScreenName is empty!");
+
+					await HttpContext.SignOutAsync();
 
 					return ErrorRedirect("ScreenName is empty!", StatusCodes.Status400BadRequest);
 				}
@@ -228,6 +243,8 @@ namespace hrvster.Template1.Web.Controllers
 				{
 					_logger.LogError("User cannot play game!");
 
+					await HttpContext.SignOutAsync();
+
 					return ErrorRedirect("User cannot play game!", StatusCodes.Status400BadRequest);
 				}
 
@@ -235,6 +252,8 @@ namespace hrvster.Template1.Web.Controllers
 				if (blacklisted.Any(c => c.UserId.Equals(externalProfileId)))
 				{
 					_logger.LogError("User is blacklisted!");
+
+					await HttpContext.SignOutAsync();
 
 					return ErrorRedirect("User is blacklisted!", StatusCodes.Status400BadRequest);
 				}
@@ -244,6 +263,8 @@ namespace hrvster.Template1.Web.Controllers
 				{
 					_logger.LogError("No rules have been configured for the game with uid {gameUid}", gameUid);
 
+					await HttpContext.SignOutAsync();
+
 					return ErrorRedirect("No rules have been configured for the game!", StatusCodes.Status400BadRequest);
 				}
 
@@ -251,6 +272,8 @@ namespace hrvster.Template1.Web.Controllers
 				if (rule == null)
 				{
 					_logger.LogError("No rule found for the game with uid {gameUid} and ruleUid {ruleUid}", gameUid, ruleUid);
+
+					await HttpContext.SignOutAsync();
 
 					return ErrorRedirect("No rule found for the game!", StatusCodes.Status400BadRequest);
 				}
@@ -284,6 +307,8 @@ namespace hrvster.Template1.Web.Controllers
 				{
 					_logger.LogError("THere are no more gameboards available for the game with uid {GameUid}", gameUid);
 
+					await HttpContext.SignOutAsync();
+
 					return ErrorRedirect("There are no more game boards available!", StatusCodes.Status400BadRequest);
 				}
 
@@ -292,6 +317,8 @@ namespace hrvster.Template1.Web.Controllers
 					_logger.LogError("No gameboard found for {Screename} with External Profile Id {externalProfileId}",
 						screenName,
 						externalProfileId);
+
+					await HttpContext.SignOutAsync();
 
 					return ErrorRedirect("No gameboard found for the user!", StatusCodes.Status400BadRequest);
 				}
@@ -302,6 +329,8 @@ namespace hrvster.Template1.Web.Controllers
 						gameplayUid,
 						screenName,
 						externalProfileId);
+
+					await HttpContext.SignOutAsync();
 
 					return ErrorRedirect("Gameboard is not playable for the user!", StatusCodes.Status400BadRequest);
 				}
@@ -386,6 +415,8 @@ namespace hrvster.Template1.Web.Controllers
 					{
 						_logger.LogError("Game not found!");
 
+						await HttpContext.SignOutAsync();
+
 						return ErrorRedirect("Game not found!", StatusCodes.Status400BadRequest);
 					}
 
@@ -393,19 +424,25 @@ namespace hrvster.Template1.Web.Controllers
 					{
 						_logger.LogError("Game is past end date.");
 
-						return ErrorRedirect("Game is past end date", StatusCodes.Status400BadRequest);
+						await HttpContext.SignOutAsync();
+
+						throw new GameHasEndedException();
 					}
 
 					if (DateTime.UtcNow < game.StartDateUtc)
 					{
 						_logger.LogError("Game has not started.");
 
-						return ErrorRedirect("Game has not started.", StatusCodes.Status400BadRequest);
+						await HttpContext.SignOutAsync();
+
+						throw new GameHasNotYetStartedException();
 					}
 
 					if (!game.GameBoardsHasBeenGenerated())
 					{
 						_logger.LogError("Game boards have not been generated.");
+
+						await HttpContext.SignOutAsync();
 
 						return ErrorRedirect("Game boards have not been generated.", StatusCodes.Status400BadRequest);
 					}
@@ -418,12 +455,16 @@ namespace hrvster.Template1.Web.Controllers
 					{
 						_logger.LogError("No gameboard found for {gameplayUid}", gameplayUid);
 
+						await HttpContext.SignOutAsync();
+
 						return ErrorRedirect("No gameboard found for the user!", StatusCodes.Status400BadRequest);
 					}
 
 					if (!await _matchGameBoardService.IsBoardPlayableByGameplayAsync(gameplayUid, cancellationToken))
 					{
 						_logger.LogError("Gameboard with Gameplay Uid {gameplayUid} is not playable", gameplayUid);
+
+						await HttpContext.SignOutAsync();
 
 						return ErrorRedirect("Gameboard is not playable for the user!", StatusCodes.Status400BadRequest);
 					}
@@ -433,6 +474,8 @@ namespace hrvster.Template1.Web.Controllers
 					{
 						_logger.LogError("Gameplay not found!");
 
+						await HttpContext.SignOutAsync();
+
 						return ErrorRedirect("Gameplay not found!", StatusCodes.Status400BadRequest);
 					}
 
@@ -441,6 +484,8 @@ namespace hrvster.Template1.Web.Controllers
 					{
 						_logger.LogError("Gameboard not found!");
 
+						await HttpContext.SignOutAsync();
+
 						return ErrorRedirect("Gameboard not found!", StatusCodes.Status400BadRequest);
 					}
 
@@ -448,6 +493,8 @@ namespace hrvster.Template1.Web.Controllers
 					if (tiles == null)
 					{
 						_logger.LogError("Tiles not found!");
+
+						await HttpContext.SignOutAsync();
 
 						return ErrorRedirect("Tiles not found!", StatusCodes.Status400BadRequest);
 					}
@@ -549,6 +596,8 @@ namespace hrvster.Template1.Web.Controllers
 					{
 						_logger.LogWarning("Game not found!");
 
+						await HttpContext.SignOutAsync();
+
 						return ErrorRedirect("Game not found!", StatusCodes.Status400BadRequest);
 					}
 
@@ -556,19 +605,25 @@ namespace hrvster.Template1.Web.Controllers
 					{
 						_logger.LogError("Game is past end date.");
 
-						return ErrorRedirect("Game is past end date", StatusCodes.Status400BadRequest);
+						await HttpContext.SignOutAsync();
+
+						throw new GameHasEndedException();
 					}
 
 					if (DateTime.UtcNow < game.StartDateUtc)
 					{
 						_logger.LogError("Game has not started.");
 
-						return ErrorRedirect("Game has not started.", StatusCodes.Status400BadRequest);
+						await HttpContext.SignOutAsync();
+
+						throw new GameHasNotYetStartedException();
 					}
 
 					if (!game.GameBoardsHasBeenGenerated())
 					{
 						_logger.LogError("Game boards have not been generated.");
+
+						await HttpContext.SignOutAsync();
 
 						return ErrorRedirect("Game boards have not been generated.", StatusCodes.Status400BadRequest);
 					}
@@ -579,14 +634,18 @@ namespace hrvster.Template1.Web.Controllers
 
 					if (gameplayUid == Guid.Empty)
 					{
-						_logger.LogWarning("No gameboard found for {gameplayUid}", gameplayUid);
+						_logger.LogWarning("No gameboard found for {GameplayUid}", gameplayUid);
+
+						await HttpContext.SignOutAsync();
 
 						return ErrorRedirect("No gameboard found for the user!", StatusCodes.Status400BadRequest);
 					}
 
 					if (!await _matchGameBoardService.IsBoardPlayableByGameplayAsync(gameplayUid, default))
 					{
-						_logger.LogWarning("Gameboard with Gameplay Uid {gameplayUid} is not playable", gameplayUid);
+						_logger.LogWarning("Gameboard with Gameplay Uid {GameplayUid} is not playable", gameplayUid);
+
+						await HttpContext.SignOutAsync();
 
 						return ErrorRedirect("Gameboard is not playable for the user!", StatusCodes.Status400BadRequest);
 					}
@@ -633,7 +692,9 @@ namespace hrvster.Template1.Web.Controllers
 
 			if (!gameplay.PlayedIndicator && !gameplay.MatchBoard.PlayedIndicator && !gameplay.WinIndicator)
 			{
-				_logger.LogWarning("Gameplay {gameplayUid} is not a win", gameplayUid);
+				_logger.LogWarning("Gameplay {GameplayUid} is not a win", gameplayUid);
+
+				await HttpContext.SignOutAsync();
 
 				return ErrorRedirect("Gameplay is not a win!", StatusCodes.Status400BadRequest);
 			}
@@ -715,6 +776,8 @@ namespace hrvster.Template1.Web.Controllers
 			{
 				_logger.LogWarning("Gameplay {GameplayUid} is not a loss", gameplayUid);
 
+				await HttpContext.SignOutAsync();
+
 				return ErrorRedirect($"Gameplay {gameplayUid} is not a loss", StatusCodes.Status400BadRequest);
 			}
 
@@ -785,6 +848,8 @@ namespace hrvster.Template1.Web.Controllers
 			{
 				_logger.LogWarning("AccountUid not found in session!");
 
+				await HttpContext.SignOutAsync();
+
 				return ErrorRedirect("AccountUid not found in session!", StatusCodes.Status400BadRequest);
 			}
 
@@ -792,6 +857,8 @@ namespace hrvster.Template1.Web.Controllers
 			if (rule == null)
 			{
 				_logger.LogWarning("Rule not found!");
+
+				await HttpContext.SignOutAsync();
 
 				return ErrorRedirect("Rule not found!", StatusCodes.Status400BadRequest);
 			}
@@ -801,6 +868,8 @@ namespace hrvster.Template1.Web.Controllers
 			{
 				_logger.LogWarning("Game not found!");
 
+				await HttpContext.SignOutAsync();
+
 				return ErrorRedirect("Game not found!", StatusCodes.Status400BadRequest);
 			}
 
@@ -808,6 +877,8 @@ namespace hrvster.Template1.Web.Controllers
 			if (campaign == null)
 			{
 				_logger.LogWarning("Campaign not found!");
+
+				await HttpContext.SignOutAsync();
 
 				return ErrorRedirect("Campaign not found!", StatusCodes.Status400BadRequest);
 			}
@@ -817,6 +888,8 @@ namespace hrvster.Template1.Web.Controllers
 			{
 				_logger.LogWarning("Account not found!");
 
+				await HttpContext.SignOutAsync();
+
 				return ErrorRedirect("Account not found!", StatusCodes.Status400BadRequest);
 			}
 
@@ -824,6 +897,8 @@ namespace hrvster.Template1.Web.Controllers
 			if (profiles == null)
 			{
 				_logger.LogWarning("Profile not found!");
+
+				await HttpContext.SignOutAsync();
 
 				return ErrorRedirect("Profile not found!", StatusCodes.Status400BadRequest);
 			}
@@ -853,12 +928,16 @@ namespace hrvster.Template1.Web.Controllers
 					{
 						_logger.LogWarning("ExternalProfileId is empty!");
 
+						await HttpContext.SignOutAsync();
+
 						return ErrorRedirect("ExternalProfileId is empty!", StatusCodes.Status400BadRequest);
 					}
 
 					if (string.IsNullOrWhiteSpace(screenName))
 					{
 						_logger.LogWarning("ScreenName is empty!");
+
+						await HttpContext.SignOutAsync();
 
 						return ErrorRedirect("ScreenName is empty!", StatusCodes.Status400BadRequest);
 					}
@@ -885,8 +964,12 @@ namespace hrvster.Template1.Web.Controllers
 
 			message = $"{replyTo} I just played the Pick 3 game {game.Name} and lost unfortunately ;). {Environment.NewLine} {hashtag}";
 
+			_logger.LogInformation("Message to send via twitter is {Message}", message);
+
 			if(externalClient == ExternalClientType.Twitter.ToString())
 			{
+				_logger.LogInformation("External client is {client}", externalClient);
+
 				var userClaims = User.Identities.FirstOrDefault()?.Claims;
 				var externalProfileId = userClaims?.FirstOrDefault(x => x.Type == HrvsterClaimTypes.ExternalProfileId)?.Value;
 				var screenName = userClaims?.FirstOrDefault(x => x.Type == HrvsterClaimTypes.DisplayName)?.Value;
@@ -897,6 +980,8 @@ namespace hrvster.Template1.Web.Controllers
 				{
 					_logger.LogWarning("ExternalProfileId is empty!");
 
+					await HttpContext.SignOutAsync();
+
 					return ErrorRedirect("ExternalProfileId is empty!", StatusCodes.Status400BadRequest);
 				}
 
@@ -904,8 +989,21 @@ namespace hrvster.Template1.Web.Controllers
 				{
 					_logger.LogWarning("ScreenName is empty!");
 
+					await HttpContext.SignOutAsync();
+
 					return ErrorRedirect("ScreenName is empty!", StatusCodes.Status400BadRequest);
 				}
+
+				if(member == null)
+				{
+					_logger.LogInformation("Could not find member. Will just redirect.");
+
+					await HttpContext.SignOutAsync();
+
+					return RedirectToAction("MatchGameLossTwitter", new { gameplayUid = gameplayUid });
+				}
+
+				_logger.LogInformation("Found member, will attempt to post the message to twitter.");
 
 				var accessToken = member.Profiles.FirstOrDefault().AccessToken;
 				var refreshToken = member.Profiles.FirstOrDefault().RefreshToken;
@@ -913,6 +1011,8 @@ namespace hrvster.Template1.Web.Controllers
 				await _twitterHttpService.PublishTweetInResponseToAsync(message, rule.ExternalId, accessToken, refreshToken);
 
 				_logger.LogInformation("Redirecting user to the loss page for a twitter loss.");
+
+				await HttpContext.SignOutAsync();
 
 				return RedirectToAction("MatchGameLossTwitter", new { gameplayUid = gameplayUid });
 			}
@@ -1074,7 +1174,7 @@ namespace hrvster.Template1.Web.Controllers
 
 		private IActionResult ErrorRedirect(string reason, int statusCode)
 		{
-			_logger.LogError("Redirecting to the error handler with reason {reason}", reason);
+			_logger.LogError("Redirecting to the error handler with reason {Reason}", reason);
 
 			return RedirectToActionPermanent(
 				"HandleErrorCode",

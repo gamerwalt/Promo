@@ -9,8 +9,8 @@ namespace hrvster.Template1.Web.Validators
 		{
 			RuleFor(x => x.EmailAddress)
 				.EmailAddress().WithMessage("Please supply a valid email address.")
-				.NotEmpty().WithMessage("Please supply your first name.")
-				.NotNull().WithMessage("Please supply your first name.");
+				.NotEmpty().WithMessage("Please supply your email address.")
+				.NotNull().WithMessage("Please supply your email address.");
 
 			RuleFor(x => x.FirstName)
 				.NotEmpty().WithMessage("Please supply your first name.")

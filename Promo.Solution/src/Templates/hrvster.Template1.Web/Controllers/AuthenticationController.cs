@@ -1,5 +1,6 @@
 ﻿using hrvster.ApplicationServices;
 using hrvster.ApplicationServices.Common;
+using hrvster.ApplicationServices.Exceptions;
 using hrvster.Core.Authentication;
 using hrvster.Core.Clients;
 using hrvster.Core.Clients.Publishers;
@@ -230,12 +231,12 @@ public class AuthenticationController : Controller
 
 		if (DateTime.UtcNow > gameDetails.EndDateUtc)
 		{
-			return ErrorRedirect("Game has ended.", StatusCodes.Status400BadRequest);
+			throw new GameHasEndedException();
 		}
 
 		if (DateTime.UtcNow < gameDetails.StartDateUtc)
 		{
-			return ErrorRedirect("Game has not started.", StatusCodes.Status400BadRequest);
+			throw new GameHasNotYetStartedException();
 		}
 
 		//Redirect directly to play the game if from client.

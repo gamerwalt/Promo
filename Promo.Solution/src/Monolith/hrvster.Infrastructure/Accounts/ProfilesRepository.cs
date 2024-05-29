@@ -20,6 +20,7 @@ namespace hrvster.Infrastructure.Accounts
 		Task CreateProfileAsync(Profile profile);
 		Task<Profile> GetProfileByProfileUidAsync(Guid profileUid);
 		Task UpdateTokensAsync(Guid profileUid, string accessToken, string refreshToken);
+		Task<Profile> GetProfileBelongingToMatchRuleAsync(Guid ruleUid, ProfileType profileType);
 	}
 
 	public class ProfilesRepository : IProfilesRepository
@@ -222,6 +223,29 @@ namespace hrvster.Infrastructure.Accounts
 			return profile;
 		}
 
+		public async Task<Profile> GetProfileBelongingToMatchRuleAsync(Guid ruleUid, ProfileType profileType)
+		{
+			var profile = default(Profile);
+
+			using (var conn = new MySqlConnection(_database.GetConnectionString()))
+			{
+				var command = conn.CreateCommand();
+				command.CommandText = "profile_get_by_rule_uid_for_match_games";
+				command.CommandType = CommandType.StoredProcedure;
+				command.AddParameter(nameof(ruleUid), ruleUid)
+					.AddParameter("profileType", profileType);
+
+				await conn.OpenAsync();
+				using var reader = await command.ExecuteReaderAsync();
+				while (await reader.ReadAsync())
+				{
+					profile = CreateRecordFrom(reader);
+				}
+			}
+
+			return profile;
+		}
+
 		public async Task RemoveProfileAsync(Guid accountUid, ProfileType profileType)
 		{
 			using (var conn = new MySqlConnection(_database.GetConnectionString()))
@@ -262,5 +286,7 @@ namespace hrvster.Infrastructure.Accounts
 			await conn.OpenAsync();
 			await command.ExecuteNonQueryAsync();
 		}
+
+		
 	}
 }

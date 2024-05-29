@@ -33,19 +33,19 @@ namespace hrvster.Web.Controllers
 			return View(sweepRulesAndPrizes);
 		}
 
+		//https://localhost:5001/GameRules/MatchGames/NG/en/20a8861d-32ac-431f-879a-029ee9b3a927
 		[HttpGet]
 		[Route("GameRules/MatchGames/NG/en/{gameUid}")]
 		public async Task<IActionResult> MatchGames([FromRoute] Guid gameUid)
 		{
-			//var gameAndPrizes = await _mediator.Send(new GetMatchGameAndPrizesRequest(gameUid));
+			var gameAndPrizes = await _mediator.Send(new GetMatchGameAndPrizesRequest(gameUid));
 
-			//if(gameAndPrizes.Profile == null)
-			//{
-			//	return Redirect("https://hrvster.com");
-			//}
+			if (gameAndPrizes.Profile == null)
+			{
+				return Redirect("https://hrvster.com");
+			}
 
-			//return View(gameAndPrizes);
-			return new OkObjectResult("OK");
+			return View(gameAndPrizes);
 		}
 	}
 }

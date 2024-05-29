@@ -40,4 +40,11 @@
     <Folder Include="wwwroot\_content\NToastNotify\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Update="Views\Error\GameHasEnded.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+  </ItemGroup>
+
 </Project>

@@ -18,6 +18,7 @@ using System.Web;
 using hrvster.Models.Extensions;
 using hrvster.ApplicationServices.Accounts;
 using hrvster.Templates.Infrastructure.Customizations;
+using hrvster.ApplicationServices.Exceptions;
 
 namespace hrvster.Template1.Web.Controllers
 {
@@ -147,7 +148,11 @@ namespace hrvster.Template1.Web.Controllers
 
 						if (userDetails != null)
 						{
-							_logger.LogInformation("Redirecting to game controller.");
+							_logger.LogInformation("Redirecting to game controller GameUid: {GameUid}, RuleUid: {RuleUid}, ExternalClient: {ExternalClient}, CampaignUid {CampaignUid} .",
+								gameUid,
+								ruleUid,
+								externalClient,
+								campaign.CampaignUid);
 
 							await SignInUserAsync(userDetails, ExternalClientType.Twitter);
 
@@ -259,6 +264,8 @@ namespace hrvster.Template1.Web.Controllers
 				: "Pick3Game";
 
 			var actionName = "PrePlay";
+
+			_logger.LogInformation("Redirecting to Preplay for {GameType} now.", gameType);
 
 			return RedirectToActionPermanent(
 				actionName, 
@@ -410,12 +417,7 @@ namespace hrvster.Template1.Web.Controllers
 
 			if (DateTime.UtcNow < gameDetails.StartDateUtc)
 			{
-				return RedirectToAction("HandlerErrorCode",
-					new
-					{
-						reason = "Game has not started.",
-						statusCode = StatusCodes.Status400BadRequest
-					});
+				throw new GameHasNotYetStartedException();
 			}
 
 			//Redirect directly to play the game if from client.

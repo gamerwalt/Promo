@@ -27,6 +27,36 @@ namespace hrvster.Exceptions
 
 				context.Response.Redirect("/Error/NoMoreBoardForThisGame");
 			}
+			catch(GameHasNotYetStartedException ex)
+			{
+				_logger.LogError($"Caught exception: {ex.Message}");
+
+				context.Response.Redirect("/Error/GameHasNotYetStarted");
+			}
+			catch(GameHasEndedException ex)
+			{
+				_logger.LogError($"Caught exception: {ex.Message}");
+
+				context.Response.Redirect("/Error/GameHasEnded");
+			}
+			catch(GameNotFoundException ex)
+			{
+				_logger.LogError("Caught a game not found exception.");
+
+				context.Response.Redirect("/Error/GameNotFound");
+			}
+			catch(GameBoardsNotGeneratedException ex)
+			{
+				_logger.LogError("The gameboards have not been generated for this game.");
+
+				context.Response.Redirect("/Error/GameBoardsNotGenerated");
+			}
+			catch(CampaignNotFoundException ex)
+			{
+				_logger.LogError("The campaign could not be found.");
+
+				context.Response.Redirect("/Error/CampaignNotFound");
+			}
 			catch (Exception ex)
 			{
 				_logger.LogError($"Something went wrong: {ex.Message}");

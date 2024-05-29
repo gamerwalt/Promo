@@ -19,6 +19,36 @@ namespace hrvster.Template1.Web.Controllers
 			return View();
 		}
 
+		[HttpGet]
+		public IActionResult GameHasNotYetStarted()
+		{
+			return View();
+		}
+
+		[HttpGet]
+		public IActionResult GameHasEnded()
+		{
+			return View();
+		}
+
+		[HttpGet]
+		public IActionResult GameNotFound()
+		{
+			return View();
+		}
+
+		[HttpGet]
+		public IActionResult GameBoardsNotGenerated()
+		{
+			return View();
+		}
+
+		[HttpGet]
+		public IActionResult CampaignNotFound()
+		{
+			return View();
+		}
+
 		[HttpGet("HandleErrorCode")]
 		public async Task<IActionResult> HandleErrorCode(string reason, int statusCode)
 		{
@@ -40,7 +70,7 @@ namespace hrvster.Template1.Web.Controllers
 					break;
 			}
 
-			_logger.LogError("An error occurred. StatusCode: {statusCode}. Error Message: {errorMessage}, Reason: {reason}",
+			_logger.LogError("An error occurred. StatusCode: {statusCode}. Error Message: {ErrorMessage}, Reason: {Reason}",
 				statusCode,
 				errorMessage,
 				reason);
