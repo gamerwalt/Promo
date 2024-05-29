@@ -23,5 +23,5 @@
 }
 
 .tile:not(.selected):not(.matched) {
-    filter: blur(3px);
+    filter: blur(2px);
 }

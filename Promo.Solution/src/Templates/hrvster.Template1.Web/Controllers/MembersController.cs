@@ -195,6 +195,7 @@ public class MembersController : Controller
 		newMember.Uid = Guid.NewGuid();
 		memberProfile.Uid = Guid.NewGuid();
 		memberProfile.Member = newMember;
+		memberProfile.ProfileType = ProfileType.Twitter;
 
 		await _memberRepository.CreateMemberAsync(accountUid, newMember);
 		await _memberProfileRepository.CreateMemberProfileAsync(accountUid, memberProfile);

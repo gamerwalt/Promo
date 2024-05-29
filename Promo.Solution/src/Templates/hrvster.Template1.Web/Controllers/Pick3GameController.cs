@@ -921,8 +921,11 @@ namespace hrvster.Template1.Web.Controllers
 					var userClaims = User.Identities.FirstOrDefault()?.Claims;
 					var externalProfileId = userClaims?.FirstOrDefault(x => x.Type == HrvsterClaimTypes.ExternalProfileId)?.Value;
 					screenName = userClaims?.FirstOrDefault(x => x.Type == HrvsterClaimTypes.DisplayName)?.Value;
+					var profileType = GetProfileType(externalClient);
 
-					var member = await _memberRepository.GetMemberViaExternalProfileIdAsync(accountUid, GetProfileType(externalClient), externalProfileId);
+					_logger.LogInformation("Finding member via AccountUid: {AccountUid}, ProfileType: {ProfileType}, ExternalProfileId: {ExternalProfileId}.", accountUid, profileType, externalProfileId);
+
+					var member = await _memberRepository.GetMemberViaExternalProfileIdAsync(accountUid, profileType, externalProfileId);
 
 					if (string.IsNullOrWhiteSpace(externalProfileId))
 					{
@@ -942,11 +945,27 @@ namespace hrvster.Template1.Web.Controllers
 						return ErrorRedirect("ScreenName is empty!", StatusCodes.Status400BadRequest);
 					}
 
+					if (member == null)
+					{
+						_logger.LogInformation("Could not find member. Will just redirect.");
+
+						await HttpContext.SignOutAsync();
+
+						return RedirectToAction("MatchGameWin", new { Uid = gameUid, gameplayUid = gameplayUid });
+					}
+
+					_logger.LogInformation("Will send message now to Twitter.");
+
 					var accessToken = member.Profiles.FirstOrDefault().AccessToken;
 					var refreshToken = member.Profiles.FirstOrDefault().RefreshToken;
 
 					await _twitterHttpService.PublishTweetInResponseToAsync(message, rule.ExternalId, accessToken, refreshToken);
+
+					_logger.LogInformation("Message sent to twitter. Will notify member of win.");
+
 					await _communicationService.NotifyMemberOfWin(member.EmailAddress, game.Name, gameplayUid, prize.Name, prize.Value);
+
+					_logger.LogInformation("Member notified of the win.");
 				}
 				else
 				{

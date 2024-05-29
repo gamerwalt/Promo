@@ -1,6 +1,8 @@
 ﻿using hrvster.Infrastructure.Extensions;
 using hrvster.Models;
+using hrvster.Models.Extensions;
 using hrvster.Templates.Models.Members;
+using Microsoft.Extensions.Logging;
 using MySqlConnector;
 using System.Data;
 
@@ -16,15 +18,19 @@ namespace hrvster.Templates.Infrastructure.Customizations
 
 	public class MemberProfileRepository : IMemberProfileRepository
 	{
+		private readonly ILogger<MemberProfileRepository> _logger;
 		private readonly hrvster.Infrastructure.IDatabase _database;
 
-		public MemberProfileRepository(hrvster.Infrastructure.IDatabase database)
+		public MemberProfileRepository(hrvster.Infrastructure.IDatabase database, ILoggerFactory loggerFactory)
 		{
 			_database = database;
+			_logger = loggerFactory.CreateLogger<MemberProfileRepository>();
 		}
 
 		public async Task CreateMemberProfileAsync(Guid accountUid, MemberProfile memberProfile)
 		{
+			_logger.LogInformation("Creating the user with {User}", memberProfile.ToJsonString());
+
 			using var conn = new MySqlConnection(_database.GetConnectionString());
 			var command = conn.CreateCommand();
 			command.CommandText = "member_profile_create";

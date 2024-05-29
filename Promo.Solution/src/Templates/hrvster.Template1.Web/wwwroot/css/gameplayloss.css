@@ -19,9 +19,9 @@
 }
 
 .tile:not(.selected):not(.matched) {
-    opacity: 1;
+    opacity: 0.5;
 }
 
 .tile:not(.selected):not(.matched) {
-    filter: blur(1px);
+    filter: blur(2px);
 }
