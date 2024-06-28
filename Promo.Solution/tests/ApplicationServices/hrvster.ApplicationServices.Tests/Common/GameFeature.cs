@@ -38,11 +38,16 @@ namespace hrvster.ApplicationServices.Tests.Common
         public IPlansRepository PlansRepository { get; private set; }
         public IMatchGameRulesRepository MatchGameRulesRepository { get; private set; }
         public IBlacklistedUserRepository BlacklistedUsersRepository { get; private set; }
+        public IMatchPrizesRepository MatchPrizeRepository { get; private set; }
+        public IMatchImagesRepository MatchImagesRepository { get; private set; }
 
         public IAccountSubscriptionService AccountSubscriptionService { get; private set; }
         public ISubscriptionService SubscriptionService { get; private set; }
         public IMatchGamesService MatchGamesService { get; private set; }
         public IGameService GameService { get; private set; }
+        public IMatchPrizeService MatchPrizeService { get; private set; }
+        public IMatchImageService MatchImageService { get; private set; }
+        public IMatchGameBoardService MatchGameBoardService { get; private set; }
 
         public Mock<IExternalClient> MockedExternalClient { get; private set; }
         public Mock<TwitterClient> MockedTwitterClient { get; private set; }
@@ -87,12 +92,17 @@ namespace hrvster.ApplicationServices.Tests.Common
             PlansRepository = ServiceProvider.GetService<IPlansRepository>();
             MatchGameRulesRepository = ServiceProvider.GetService<IMatchGameRulesRepository>();
             BlacklistedUsersRepository = ServiceProvider.GetService<IBlacklistedUserRepository>();
+            MatchPrizeRepository = ServiceProvider.GetService<IMatchPrizesRepository>();
+            MatchImagesRepository = ServiceProvider.GetService<IMatchImagesRepository>();
 
             SweepstakesService = ServiceProvider.GetService<ISweepstakesService>();
             AccountSubscriptionService = ServiceProvider.GetService<IAccountSubscriptionService>();
             SubscriptionService = ServiceProvider.GetService<ISubscriptionService>();
             MatchGamesService = ServiceProvider.GetService<IMatchGamesService>();
             GameService = ServiceProvider.GetService<IGameService>();
+            MatchPrizeService = ServiceProvider.GetService<IMatchPrizeService>();
+            MatchImageService = ServiceProvider.GetService<IMatchImageService>();
+            MatchGameBoardService = ServiceProvider.GetService<IMatchGameBoardService>();
 
             hrvsterUser = ServiceProvider.GetService<HrvsterUser>();
             hrvsterUser.EmailAddress = TestData.EmailAddress;

@@ -77,3 +77,8 @@ docker push hrvsterdevservices.azurecr.io/promodev/promorulesapi
 
 docker tag promosweepsapi hrvsterdevservices.azurecr.io/promodev/promosweepsapi
 docker push hrvsterdevservices.azurecr.io/promodev/promosweepsapi
+
+
+hrvster Colors
+Picton Blue 5: #45B1E8
+Cold Purple 2: #ABA0D9

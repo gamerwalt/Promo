@@ -1,27 +1,32 @@
-﻿body {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    margin: 0;
-    font-family: sans-serif;
-    background-image: url('/images/Pick3Background.jpg');
-    background-size: cover;
-    background-position: center;
+﻿.tile {
+    background-color: lightblue;
+    cursor: pointer;
+    padding-bottom: 100%; /* Maintain aspect ratio */
+    position: relative;
+    border: 1px solid #000;
+    background-position: center; /* Center the background image */
+    background-repeat: no-repeat; /* Prevent the image from repeating */
+    background-size: cover; /* Adjust the size of the image to fit the tile */
+    display: flex; /* Ensures content is centered */
+    align-items: center; /* Center content vertically */
+    justify-content: center; /* Center content horizontally */
 }
+
 .tile.matched {
-    border: 8px solid limegreen;
+    border: 4px solid darkgreen;
 }
 
-.tile {
-    background-size: cover;
-    background-repeat: no-repeat;
-}
+    .tile:not(.selected):not(.matched) {
+        filter: blur(1px); /* Adjusted blur value */
+    }
 
-.tile:not(.selected):not(.matched) {
-    opacity: 0.5;
-}
-
-.tile:not(.selected):not(.matched) {
-    filter: blur(2px);
+.gameboard {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-gap: 5px;
+    width: 80%; /* Reduced from 100% to 80% */
+    transform: scale(1); /* Added scaling factor */
+    position: relative;
+    z-index: 1;
+    margin: 0 auto; /* Center the gameboard */
 }

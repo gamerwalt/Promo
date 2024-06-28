@@ -41,7 +41,7 @@ form {
     padding-bottom: 100%; /* Maintain aspect ratio */
     position: relative;
     border: 1px solid #000;
-    background-image: url('/images/PrizeBox.png');
+    background-image: url('/images/PrizeBox2.png');
     background-position: center; /* Center the background image */
     background-repeat: no-repeat; /* Prevent the image from repeating */
     background-size: contain; /* Adjust the size of the image to fit the tile */
@@ -89,7 +89,6 @@ form {
     flex-grow: 1;
     border-radius: 0;
     font-weight: bold;
-    text-transform: uppercase;
     border: none;
     height: 3em;
 }
@@ -133,12 +132,12 @@ form {
 
     .btn-reset {
         margin-left: 0;
-        margin-top: 1em;
+        margin-top: 0;
     }
 
     .btn-submit {
         margin-right: 0;
-        margin-bottom: 1em;
+        margin-bottom: 0;
     }
 }
 

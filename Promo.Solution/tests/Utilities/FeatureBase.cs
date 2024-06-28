@@ -21,6 +21,8 @@ namespace TestUtilities
             ConfigureServices?.Invoke(serviceCollection);
             additionalServiceConfiguration?.Invoke(serviceCollection);
 
+            serviceCollection.AddSingleton<IConfiguration>(Configuration);
+
             ServiceProvider = serviceCollection.BuildServiceProvider();
 
             return this as TFeature;

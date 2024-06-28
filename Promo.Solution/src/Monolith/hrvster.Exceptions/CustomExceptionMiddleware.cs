@@ -57,9 +57,34 @@ namespace hrvster.Exceptions
 
 				context.Response.Redirect("/Error/CampaignNotFound");
 			}
+			catch(UserHasExceededNumberOfPlaysException ex)
+			{
+				_logger.LogError("This user has played too much.");
+
+				context.Response.Redirect("/Error/PlayedTooMuch");
+			}
+			catch(UserIsBlacklisted ex)
+			{
+				_logger.LogError("The user is blacklisted.");
+
+				context.Response.Redirect("/Error/UserIsBlacklisted");
+			}
+			catch(GameBoardNoMorePlayableException ex)
+			{
+				_logger.LogError("Gameboard no more playable.");
+
+				context.Response.Redirect("/Error/GameboardNoMorePlayable");
+			}
+			catch(BadGameBoardForGameException ex)
+			{
+				_logger.LogError("The gameboard selected does not belong to the game.");
+
+				context.Response.Redirect("/Error/WrongGaemboardForGame");
+			}
 			catch (Exception ex)
 			{
 				_logger.LogError($"Something went wrong: {ex.Message}");
+				_logger.LogError($"Stack Trace: {ex.StackTrace}");
 
 				context.Response.Redirect("/Error/500");
 			}

@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using Moq;
 using System;
+using Tweetinvi.WebLogic;
 
 namespace TestUtilities.Mocks.Publishers
 {
@@ -34,15 +35,15 @@ namespace TestUtilities.Mocks.Publishers
             ILoggerFactory loggerFactory,
             TwitterAccount twitterAccount)
         {
+            // Remove existing TwitterClient registrations
             services.RemoveAll<TwitterClient>();
 
+            // Create a mock of TwitterClient with the required dependencies
             var mock = new Mock<TwitterClient>(loggerFactory, twitterAccount);
 
+            // Set up the necessary methods and properties of the mock
             mock.SetupPublishAsync();
             mock.SetupPublishResponse();
-
-            services.AddSingleton(mock);
-            services.AddSingleton(mock.Object);
 
             return services;
         }

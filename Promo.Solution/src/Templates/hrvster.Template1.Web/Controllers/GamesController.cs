@@ -1,24 +1,20 @@
 ﻿using hrvster.ApplicationServices;
+using hrvster.ApplicationServices.Accounts;
 using hrvster.ApplicationServices.Common;
+using hrvster.ApplicationServices.Exceptions;
 using hrvster.ApplicationServices.Extensions.LogExtensions;
 using hrvster.Core.Authentication;
 using hrvster.Core.Clients;
 using hrvster.Models;
+using hrvster.Models.Options;
 using hrvster.Template1.Web.Models.Query;
 using hrvster.Templates.Core.Common;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.WebUtilities;
-using System.Security.Claims;
-using System.Security.Cryptography;
-using System.Threading;
-using hrvster.Models.Options;
-using System.Web;
-using hrvster.Models.Extensions;
-using hrvster.ApplicationServices.Accounts;
 using hrvster.Templates.Infrastructure.Customizations;
-using hrvster.ApplicationServices.Exceptions;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
+using System.Web;
 
 namespace hrvster.Template1.Web.Controllers
 {
@@ -101,13 +97,19 @@ namespace hrvster.Template1.Web.Controllers
 			{
 				_logger.LogError("Game not found!");
 
-				return RedirectToAction("HandlerErrorCode", "Error", new { statusCode = 400});
+				await HttpContext.SignOutAsync();
+				HttpContext.Session.Clear();
+
+				return RedirectToAction("HandlerErrorCode", "Error", new { statusCode = 400 });
 			}
 
 			var campaign = await _campaignService.GetCampaignAsync(game.CampaignUid, default);
 			if (campaign == null)
 			{
 				_logger.LogError("Campaign not found!");
+
+				await HttpContext.SignOutAsync();
+				HttpContext.Session.Clear();
 
 				return RedirectToAction("HandlerErrorCode", StatusCodes.Status400BadRequest);
 			}
@@ -133,7 +135,7 @@ namespace hrvster.Template1.Web.Controllers
 				_sessionManager.SetKeyValue(TemplateSessionConstants.GameType, GameTypesEnum.MatchGames.ToString());
 			}
 
-			if(externalClient == ExternalClientType.Twitter.ToString())
+			if (externalClient == ExternalClientType.Twitter.ToString())
 			{
 				var authKey = _sessionManager.GetValue(TemplateSessionConstants.AuthenticationKey);
 
@@ -142,7 +144,7 @@ namespace hrvster.Template1.Web.Controllers
 					UserProviderDetails? userDetails;
 
 					var memberProfile = await _memberProfileRepository.GetByAccessTokenAsync(authKey);
-					if(memberProfile == null)
+					if (memberProfile == null)
 					{
 						userDetails = await _twitterHttpService.GetAuthenticatedUserAsync(authKey);
 
@@ -248,7 +250,7 @@ namespace hrvster.Template1.Web.Controllers
 				gameUid,
 				ruleUid,
 				externalClient,
-				campaign.CampaignUid, 
+				campaign.CampaignUid,
 				handshakeKey);
 		}
 
@@ -268,15 +270,15 @@ namespace hrvster.Template1.Web.Controllers
 			_logger.LogInformation("Redirecting to Preplay for {GameType} now.", gameType);
 
 			return RedirectToActionPermanent(
-				actionName, 
-				controllerName, 
-				new 
-				{ 
-					gameUid, 
-					ruleUid, 
-					externalClient, 
-					campaignUid, 
-					handshakeKey 
+				actionName,
+				controllerName,
+				new
+				{
+					gameUid,
+					ruleUid,
+					externalClient,
+					campaignUid,
+					handshakeKey
 				});
 		}
 
@@ -386,10 +388,10 @@ namespace hrvster.Template1.Web.Controllers
 				await SignInUserAsync(userDetailsForClient, ExternalClientType.Client);
 
 				return await HandleGameAndUserProfile(
-					GameTypesEnum.Sweeps.ToString(), 
-					gameUid, 
-					ruleUid, 
-					externalClient, 
+					GameTypesEnum.Sweeps.ToString(),
+					gameUid,
+					ruleUid,
+					externalClient,
 					campaign.CampaignUid,
 					handshakeKey);
 			}
@@ -407,11 +409,11 @@ namespace hrvster.Template1.Web.Controllers
 
 			if (DateTime.UtcNow > gameDetails.EndDateUtc)
 			{
-				return RedirectToAction("HandlerErrorCode", 
-					new 
-					{ 
-						reason = "Game has ended.", 
-						statusCode = StatusCodes.Status400BadRequest 
+				return RedirectToAction("HandlerErrorCode",
+					new
+					{
+						reason = "Game has ended.",
+						statusCode = StatusCodes.Status400BadRequest
 					});
 			}
 

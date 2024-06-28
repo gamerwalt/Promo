@@ -173,7 +173,7 @@ namespace hrvster.Infrastructure.MatchGames
 
 		public async Task<Guid> GetRandomBoardAsync(Guid gameUid, CancellationToken cancellationToken)
 		{
-			var query = "SELECT board_uid FROM match_boards ORDER BY RAND() LIMIT 1";
+			var query = $"SELECT board_uid FROM match_boards as mb LEFT JOIN match_game_plays as mp ON mp.game_board_id = mb.board_id INNER JOIN match_games as mg ON mg.match_game_id = mb.match_game_id WHERE mg.match_game_uid = '{gameUid}' AND mp.game_board_id IS NULL AND mb.is_reserved = 0 ORDER BY RAND() LIMIT 1";
 			using var conn = new MySqlConnection(_database.GetConnectionString());
 			var command = new MySqlCommand(query, conn);
 			await conn.OpenAsync();
@@ -426,7 +426,7 @@ namespace hrvster.Infrastructure.MatchGames
 
 			using var conn = new MySqlConnection(_database.GetConnectionString());
 			await conn.OpenAsync(token);
-			var query = $"SELECT board_uid FROM hrvster.match_boards WHERE match_game_id = {gameId}";
+			var query = $"SELECT board_uid FROM match_boards WHERE match_game_id = {gameId}";
 			using var command = conn.CreateCommand();
 			command.CommandText = query;
 			using (var reader = await command.ExecuteReaderAsync(token))
@@ -461,7 +461,7 @@ namespace hrvster.Infrastructure.MatchGames
 					var boardUids = batch.Select(b => $"'{b.Uid}'").ToList();
 					var uidsParameter = string.Join(",", boardUids);
 
-					var query = $"SELECT board_id, board_uid FROM hrvster.match_boards WHERE board_uid IN ({uidsParameter})";
+					var query = $"SELECT board_id, board_uid FROM match_boards WHERE board_uid IN ({uidsParameter})";
 
 					using var command = new MySqlCommand(query, conn);
 					using var reader = await command.ExecuteReaderAsync(cancellationToken);

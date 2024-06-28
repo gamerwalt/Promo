@@ -33,20 +33,41 @@ namespace hrvster.Middleware
 
 		public async Task InvokeAsync(HttpContext context)
 		{
-			var pathSegments = context.Request.Path.Value.Split("/");
+			try
+			{
+				var pathSegments = context.Request.Path.Value.Split("/");
 
-			if (IsErrorPage(pathSegments))
+				if (IsErrorPage(pathSegments))
+				{
+					await _next(context);
+					return;
+				}
+
+				if (IsSpinToWinRequest(pathSegments, context))
+				{
+					await _next(context);
+				}
+
+				if (IsGameRequest(pathSegments, context))
+				{
+					await HandleGameRequest(context, pathSegments);
+				}
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex.Message);
+				_logger.LogError(ex.StackTrace);
+				throw;
+			}
+			finally
 			{
 				await _next(context);
-				return;
 			}
+		}
 
-			if (IsGameRequest(pathSegments, context))
-			{
-				await HandleGameRequest(context, pathSegments);
-			}
-
-			await _next(context);
+		private bool IsSpinToWinRequest(string[] pathSegments, HttpContext context)
+		{
+			return pathSegments[1] == "SpinToWin";
 		}
 
 		private bool IsErrorPage(string[] pathSegments)
@@ -70,7 +91,7 @@ namespace hrvster.Middleware
 				throw new ArgumentException("The Game uid does not exist.");
 			}
 
-			if(!Guid.TryParse(gameUidString, out Guid gameUid))
+			if (!Guid.TryParse(gameUidString, out Guid gameUid))
 			{
 				return;
 			}

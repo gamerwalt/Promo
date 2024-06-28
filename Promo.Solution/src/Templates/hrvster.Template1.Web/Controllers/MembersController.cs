@@ -180,7 +180,8 @@ public class MembersController : Controller
 
 	private static bool IsGameActive(GameDetail gameDetails)
 	{
-		return DateTime.UtcNow <= gameDetails.EndDate && DateTime.UtcNow >= gameDetails.StartDate;
+		return true;
+		//return DateTime.UtcNow <= gameDetails.EndDateUtc && DateTime.UtcNow >= gameDetails.StartDateUtc;
 	}
 
 	private static bool IsValidGameSession(string gameType)

@@ -2,38 +2,42 @@
 @{
     ViewData["Title"] = "Play Pick 3 Match Game";
 }
-<link rel="stylesheet" href="~/css/gameboard.css">
-<div style="text-align: center;">
-    <p class="fw-bold"><strong>How to Play</strong></p>
-    <div class="text-black fw-bold">Select 3 Boxes</div>
-    <div class="text-black fw-bold">Change your mind? Click the box again to unselect</div>
-    <div class="text-black fw-bold">Happy with your 3? Click the submit button to check</div>
-</div>
-<form formnovalidate 
-    asp-action="Play"
-    asp-route-gameUid="@Model.GameUid"
-    asp-route-ruleUid="@Model.RuleUid"
-    asp-route-gameplayUid="@Model.GameplayUid"
-    asp-route-externalClient="@Model.ExternalClient"
-    asp-route-campaignUid="@Model.CampaignUid"
-    asp-route-handshakeKey="@Model.HandshakeKey">
-    <input type="text" asp-for="@Model.SelectedTiles" hidden>
-    @Html.HiddenFor(m => m.GameUid)
-    @Html.HiddenFor(m => m.GameplayUid)
-    <div class="gameboard">
-        @foreach (var uid in Model.Tiles)
-        {
-            <div class="tile" data-uid="@uid"></div>
-        }
-        <div class="button-container">
-            <div class="button-wrapper">
-                <button type="submit" class="btn btn-submit btn-primary btn-block" disabled>Submit</button>
+<link rel="stylesheet" href="~/css/site.css">
+<div class="section-game">
+    <div class="container">
+        <div class="content-wrapper d-flex justify-content-center align-items-center flex-column vh-100">
+            <div style="text-align: center">
+                <h4 class="fw-bold"><strong>How to Play</strong></h4>
+                <div class="text-black fw-bold font-weight-bold">
+                    <p>Select 3 Boxes</p>
+                    <p>Change your mind? Click the box again to unselect</p>
+                    <p>Happy with your 3? Click the 'Did I Win' button to check</p>
+                </div>
             </div>
-            <div class="button-wrapper">
-                <button type="button" id="reset" class="btn btn-reset" disabled>Reset</button>
-            </div>
+            <form formnovalidate
+                  asp-action="Play"
+                  asp-route-gameUid="@Model.GameUid"
+                  asp-route-ruleUid="@Model.RuleUid"
+                  asp-route-gameplayUid="@Model.GameplayUid"
+                  asp-route-externalClient="@Model.ExternalClient"
+                  asp-route-campaignUid="@Model.CampaignUid"
+                  asp-route-handshakeKey="@Model.HandshakeKey">
+                <input type="text" asp-for="@Model.SelectedTiles" hidden>
+                @Html.HiddenFor(m => m.GameUid)
+                @Html.HiddenFor(m => m.GameplayUid)
+                <div class="gameboard">
+                    @foreach (var uid in Model.Tiles)
+                    {
+                        <div class="tile" data-uid="@uid"></div>
+                    }
+                </div>
+                <div class="button-container">
+                    <button type="submit" class="btn btn-submit btn-primary btn-block" disabled>Did I Win</button>
+                    <button type="button" id="reset" class="btn btn-reset" disabled>Reset</button>
+                </div>
+            </form>
         </div>
     </div>
-</form>
+</div>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="~/js/playGameboard.js"></script>

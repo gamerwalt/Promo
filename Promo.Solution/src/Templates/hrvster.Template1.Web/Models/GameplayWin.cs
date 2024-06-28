@@ -9,5 +9,7 @@
 		public List<MatchTile> Tiles { get; set; }
 		public List<Guid> SelectedTiles { get; set; }
 		public Guid GameplayUid { get; set; }
+		public string PrizeName { get; set; }
+		public string? PrizeValueString { get; set; }
 	}
 }

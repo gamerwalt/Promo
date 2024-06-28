@@ -38,6 +38,7 @@ namespace hrvster.ApplicationServices
 		Task<IEnumerable<Rule>> GetRulesAsync(GameTypesEnum gameType, Guid gameUid, CancellationToken cancellationToken);
 		IEnumerable<Rule> GetRulesMatching(GameTypesEnum gameType, string watchValue);
 		Task<IEnumerable<Rule>> GetRulesMatchingAsync(GameTypesEnum gameType, string text, CancellationToken cancellationToken);
+		Task<bool> IsMatchGameCompletedAsync(Guid gameUid, CancellationToken cancellationToken);
 	}
 
 	public class GameService : IGameService
@@ -54,6 +55,7 @@ namespace hrvster.ApplicationServices
 		private readonly ISweepRulesRepository _sweepRulesRepository;
 		private readonly IMatchGameRulesRepository _matchGameRulesRepository;
 		private readonly IWatchTypesRepository _watchTypesRepository;
+		private readonly IMatchGameplayService _matchGamePlayService;
 
 		public GameService(
 			ILoggerFactory loggerFactory,
@@ -67,7 +69,8 @@ namespace hrvster.ApplicationServices
 			IScheduledPostRepository scheduledPostRepository,
 			ISweepRulesRepository sweepRulesRepository,
 			IMatchGameRulesRepository matchGameRulesRepository,
-			IWatchTypesRepository watchTypesRepository)
+			IWatchTypesRepository watchTypesRepository,
+			IMatchGameplayService matchGamePlayService)
 		{
 			_logger = loggerFactory.CreateLogger<GameService>();
 			_sweepService = sweepstakesService;
@@ -81,6 +84,21 @@ namespace hrvster.ApplicationServices
 			_sweepRulesRepository = sweepRulesRepository;
 			_matchGameRulesRepository = matchGameRulesRepository;
 			_watchTypesRepository = watchTypesRepository;
+			_matchGamePlayService = matchGamePlayService;
+		}
+
+		public async Task<bool> IsMatchGameCompletedAsync(Guid gameUid, CancellationToken cancellationToken)
+		{
+			var gameDetails = await _matchGameService.GetMatchGameAsync(gameUid, cancellationToken);
+
+			if(gameDetails == null)
+			{
+				return true;
+			}
+
+			var totalGamePlays = await _matchGamePlayService.GetTotalGamePlaysAsync(gameUid, cancellationToken);
+
+			return totalGamePlays >= gameDetails.NumberOfBoards;
 		}
 
 		public async Task<IEnumerable<Rule>> GetRulesAsync(

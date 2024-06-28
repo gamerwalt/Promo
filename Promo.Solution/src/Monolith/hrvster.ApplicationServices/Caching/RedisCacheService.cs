@@ -19,6 +19,7 @@ namespace hrvster.ApplicationServices.Caching
 		Task<string> GetBoardDetailsAsync(string key);
 		Task<string> GetTileDetailsAsync(string key);
 		IDatabase GetDatabase();
+		Task SetKeyExpireAsync(string keyName, double totalHours);
 	}
 
 	public class RedisCacheService : ICacheDataService
@@ -36,7 +37,6 @@ namespace hrvster.ApplicationServices.Caching
 			_hrvsterSettings = hrvsterSettings;
 
 			var connectionStringForRedis = _hrvsterSettings.RedisCache;
-			_logger.LogInformation($"Connecting to {connectionStringForRedis}");
 
 			try
 			{
@@ -141,5 +141,10 @@ namespace hrvster.ApplicationServices.Caching
 
 		public IDatabase GetDatabase()
 			=> _cache;
+
+		public Task SetKeyExpireAsync(string keyName, double totalHours)
+		{
+			return _cache.KeyExpireAsync(keyName, TimeSpan.FromHours(totalHours));
+		}
 	}
 }

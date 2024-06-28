@@ -1,0 +1,10 @@
+﻿@model ErrorReason
+@{
+    ViewData["Title"] = "Error";
+    Layout = "~/Views/Shared/_Error_Layout.cshtml";
+}
+
+<div class="exception-container">
+    <div class="message">We're sorry, but something went wrong. Please try again. If it happens a second time, we're out of gameboards.</div>
+    <img src="~/images/NoMoreBoards.png" alt="Error Image" class="exception-image" />
+</div>

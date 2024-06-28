@@ -1,29 +1,347 @@
-html {
-    font-size: 14px;
-}
-
-@media (min-width: 768px) {
-    html {
-        font-size: 16px;
-    }
-}
-
-html {
-    position: relative;
-    min-height: 100%;
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
 body {
-    margin-top: 120px; /* to prevent the header from overlapping content */
-    margin-bottom: 120px; /* to prevent the footer from overlapping content */
+    font-family: sans-serif;
+    background: rgb(69, 177, 232);
+    background: radial-gradient( circle, rgba(69, 177, 232, 1) 0%, rgba(171, 160, 217, 1) 95% );
 }
 
-    /* Error page specific styles */
+.section-game form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    max-width: 100%;
+    width: 450px;
+    background-color: black;
+    border: 1px solid white;
+    padding: 1em;
+    gap: 20px;
+}
 
-    body.error-page {
-        margin-top: 0;
-        margin-bottom: 0;
+.section-game .content-wrapper {
+    gap: 1em;
+}
+
+.section-game p {
+    margin: 0;
+}
+
+.gameboard {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-gap: 5px;
+    width: 100%;
+    position: relative;
+    z-index: 1; /* Give the gameboard a z-index lower than the win/lose messages */
+}
+
+.tile {
+    background-color: lightblue;
+    cursor: pointer;
+    padding-bottom: 100%; /* Maintain aspect ratio */
+    position: relative;
+    border: 1px solid #000;
+    background-image: url("/images/PrizeBox2.png");
+    background-position: center; /* Center the background image */
+    background-repeat: no-repeat; /* Prevent the image from repeating */
+    background-size: cover; /* Adjust the size of the image to fit the tile */
+    display: flex; /* Ensures content is centered */
+    align-items: center; /* Center content vertically */
+    justify-content: center; /* Center content horizontally */
+}
+
+    .tile::after {
+        content: "";
+        display: block;
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        box-sizing: border-box;
+        opacity: 0;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 1; /* Ensure it's above the background image but below any other content */
     }
+
+    .tile.selected::after {
+        opacity: 0.85;
+    }
+
+.button-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1em;
+    width: 100%;
+    justify-content: center;
+}
+
+.btn-submit,
+.btn-reset {
+    width: calc(50% - 0.5em);
+    flex-grow: 1;
+    border-radius: 0;
+    font-weight: bold;
+    border: none;
+    height: 3em;
+}
+
+.btn-submit {
+    width: 100%;
+}
+
+.btn-reset {
+    width: 100%;
+}
+
+.btn-submit {
+    background-color: #0d6efd;
+    color: #fff;
+}
+
+.btn-reset {
+    background-color: #fff;
+    color: #0d6efd;
+    border: 1px solid #0d6efd;
+}
+
+    .btn-reset:hover,
+    .btn-reset:focus {
+        background-color: #f8f9fa;
+        color: #0d6efd;
+        border: 1px solid #0d6efd;
+    }
+
+.btn-submit:hover,
+.btn-submit:focus {
+    background-color: #0069d9;
+    color: #fff;
+}
+
+.button-wrapper button {
+    box-sizing: border-box;
+    cursor: pointer;
+}
+
+#more {
+    display: none;
+}
+
+#btn-more {
+    cursor: pointer;
+    font-weight: 400;
+    font-size: 15px;
+    /* color: #aba0d9; */
+    color: #45b1e8;
+}
+
+    #btn-more:after {
+        content: "\f078";
+        font-family: FontAwesome;
+        font-style: normal;
+        font-weight: normal;
+        text-decoration: inherit;
+        margin-left: 5px;
+        font-size: 14px;
+    }
+
+.section-form p {
+    font-size: 15px;
+}
+
+.section-form .btn-primary {
+    width: 100%;
+    background-color: #45b1e8;
+    border: none;
+}
+
+    .section-form .btn-primary:hover {
+        background-color: #3bb0eb;
+    }
+
+.section-form .form-control:disabled {
+    background-color: #fff;
+    border-radius: 0.25rem 0 0 0.25rem;
+}
+
+#PhoneNumber {
+    border-radius: 0 0.25rem 0.25rem 0;
+}
+
+.heading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+    .heading h1 {
+        text-align: center;
+    }
+
+.game-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    width: 100%;
+    position: relative;
+}
+
+.lose-message {
+    font-size: 2em;
+    font-weight: bold;
+    color: white;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.win-message {
+    font-size: 2em;
+    font-weight: bold;
+    color: white;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.header {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    height: 4em;
+    z-index: 1000; /* To make sure the header is always on top */
+}
+
+.header-background {
+    width: 100%;
+    height: 100%;
+}
+
+    .header-background img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+.logo-container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+    .logo-container img {
+        height: 60px; /* adjust this to change the logo size */
+        width: auto;
+    }
+
+.form-container {
+    max-width: 800px; /* Or whatever width you prefer */
+    background-color: #fff;
+    border-radius: 5px;
+    gap: 40px;
+}
+
+.text-danger {
+    color: red;
+    font-weight: bold;
+}
+
+.header {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    height: 4em;
+    z-index: 1000; /* To make sure the header is always on top */
+}
+
+.header-background {
+    width: 100%;
+    height: 100%;
+}
+
+    .header-background img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+.logo-container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+    .logo-container img {
+        height: 60px; /* adjust this to change the logo size */
+        width: auto;
+    }
+
+.footer {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    height: 3em;
+    background-color: #f8f9fa;
+    z-index: 1000; /* To make sure the footer is always on top */
+}
+
+.footer-background {
+    width: 100%;
+    height: 100%;
+}
+
+    .footer-background img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+.footer-content-container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+@media screen and (max-width: 767px) {
+    .form-container {
+        flex-direction: column;
+        height: 600px;
+        overflow: scroll;
+    }
+}
+
+@media screen and (max-width: 575px) {
+    .section-game p {
+        font-size: 14px;
+    }
+
+    .section-game h4 {
+        font-size: 20px;
+    }
+
+    .section-form .phone-wrapper {
+        flex-wrap: nowrap;
+    }
+
+    .section-form .phone-wrapper div:first-child {
+        width: 100px;
+    }
+}
+
+
+/* Error page specific styles */
+
+body.error-page {
+    margin-top: 0;
+    margin-bottom: 0;
+}
 
 .exception-container {
     height: 100vh; /* take up the full viewport height */
@@ -56,6 +374,6 @@ body {
     transition: background-color 0.3s ease;
 }
 
-    .exception-home-button:hover {
-        background-color: #aaa;
-    }
+.exception-home-button:hover {
+    background-color: #aaa;
+}

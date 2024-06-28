@@ -376,3 +376,11 @@ Promo.Solution/src/Promo.Reporting.API/appsettings.Development.json
 Promo.Solution/src/Promo.Reporting.API/Properties/launchSettings.json
 Promo.Solution/docker-compose.yml
 Possible Screens for hrvster app.docx
+/Promo.Solution/src/Monolith/hrvster.PaymentPendingChecker.Service/appsettings.Production.json
+/Promo.Solution/src/Monolith/hrvster.Services/appsettings.Production.json
+/Promo.Solution/src/Monolith/hrvster.Services/appsettings.Production.json
+/Promo.Solution/src/Monolith/Jobs/hrvster.Services.BoardAndPrizeSeeder/appsettings.Production.json
+/Promo.Solution/src/Monolith/Jobs/hrvster.Services.Mailer/appsettings.Production.json
+/Promo.Solution/src/Templates/hrvster.Template1.Web/appsettings.Production.json
+/Promo.Solution/src/Monolith/Jobs/hrvster.Services.BoardTilesSeeder/appsettings.Production.json
+/Promo.Solution/src/Monolith/hrvster.Web/appsettings.Production.json

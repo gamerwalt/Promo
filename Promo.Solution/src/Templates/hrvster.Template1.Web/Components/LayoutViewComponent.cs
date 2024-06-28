@@ -11,6 +11,8 @@ namespace hrvster.Template1.Web.Components
 		private readonly ILayoutService _layoutService;
 		private readonly ISessionManager _sessionManager;
 
+		private const string HrvsterAccountUid = "eae9d83d-a73e-4e28-9ee4-631e66ec4b9f";
+
 		public LayoutViewComponent(
 			ILoggerFactory loggerFactory,
 			ILayoutService layoutService, 
@@ -26,9 +28,8 @@ namespace hrvster.Template1.Web.Components
 			var accountUidString = _sessionManager.GetValue(SessionConstants.AccountUid);
 			if (string.IsNullOrWhiteSpace(accountUidString))
 			{
-				_logger.LogWarning(view + " view component: Unable to get account uid from session");
-
-				throw new Exception("Unable to get account uid from session");
+				//Set the account uid to hrvster's own
+				accountUidString = HrvsterAccountUid;
 			}
 
 			var accountUid = Guid.Parse(accountUidString);

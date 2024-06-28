@@ -1,4 +1,5 @@
-﻿using hrvster.Games.Match.Models;
+﻿using hrvster.ApplicationServices.Exceptions;
+using hrvster.Games.Match.Models;
 using hrvster.Infrastructure.MatchGames;
 using hrvster.Infrastructure.Reporting;
 using hrvster.Models;
@@ -19,6 +20,7 @@ namespace hrvster.ApplicationServices.MatchGames
 		Task<bool> GameBeenPlayedAsync(Guid gameplayUid, CancellationToken cancellationToken);
 		Task<IEnumerable<MatchPlay>> GetAllGamePlays(Guid gameUid, CancellationToken cancellationToken);
 		Task<MatchPlay> GetAsync(Guid gameplayUid, CancellationToken cancellationToken);
+		Task<int> GetTotalGamePlaysAsync(Guid gameUid, CancellationToken cancellationToken);
 		Task<bool> IsAWinAsync(Guid gameUid, Guid gameplayUid, string selectedTiles, CancellationToken cancellationToken);
 		Task MarkAsPlayedAndLostAsync(Guid gameplayUid, string selectedTiles, CancellationToken cancellationToken);
 		Task MarkAsPlayedAndWinAsync(Guid gameplayUid, string selectedTiles, CancellationToken cancellationToken);
@@ -78,6 +80,10 @@ namespace hrvster.ApplicationServices.MatchGames
 				return Guid.Empty;
 			}
 
+			_logger.LogInformation("Gameboard retrieved from the database or cache. Now validating gameboard.");
+
+			await ValidateGameBoardBelongsToMatchGameAsync(gameUid, gameBoard, cancellationToken);
+
 			_logger.LogInformation("Retrieved the gameboard {gameboardUid} from the cache.", gameBoard.Uid);
 
 			_logger.LogInformation("Creating a game play for the gameboard {gameboardUid}", gameBoard.Uid);
@@ -86,7 +92,26 @@ namespace hrvster.ApplicationServices.MatchGames
 			_logger.LogInformation("Reserving the gameboard {gameboardUid}", gameBoard.Uid);
 			await _gameboardService.ReserveBoardAsync(gameBoard, cancellationToken);
 
+			_logger.LogInformation("Returning the gameplay uid {GameplayUid} to the controller.", gameplayUid);
+
 			return gameplayUid;
+		}
+
+		private async Task<bool> ValidateGameBoardBelongsToMatchGameAsync(Guid gameUid, MatchBoard gameBoard, CancellationToken cancellationToken)
+		{
+			if(cancellationToken.IsCancellationRequested)
+			{
+				cancellationToken.ThrowIfCancellationRequested();
+			}
+
+			if(gameBoard.MatchGame.Uid != gameUid)
+			{
+				_logger.LogWarning("Matchgame uid does not match gameuid MatchGameUid: {matchgameUid}, gameUid: {gameUid}.", gameBoard.MatchGame.Uid,
+					gameUid);
+				throw new BadGameBoardForGameException();
+			}
+
+			return gameBoard.MatchGame.Uid == gameUid;
 		}
 
 		private async Task<Guid> CreateGamePlayAsync(
@@ -110,6 +135,9 @@ namespace hrvster.ApplicationServices.MatchGames
 
 		public async Task<IEnumerable<MatchPlay>> GetAllGamePlays(Guid gameUid, CancellationToken cancellationToken)
 			=> await _gameplayRepository.GetForGamePlayAsync(gameUid, cancellationToken);
+
+		public async Task<int> GetTotalGamePlaysAsync(Guid gameUid, CancellationToken cancellationToken)
+			=> await _gameplayRepository.GetTotalGamePlaysAsync(gameUid, cancellationToken);
 
 		public async Task<MatchPlay> GetAsync(Guid gameplayUid, CancellationToken cancellationToken)
 			=> await _repository.GetAsync(gameplayUid, cancellationToken);

@@ -62,7 +62,7 @@
             OFFICIAL RULES
         </h1>
         <p>
-            This Game is intended for viewing and participation in Nigeria only and shall be construed and evaluated according to the laws of Niger.
+            This Game is intended for viewing and participation in Nigeria only and shall be construed and evaluated according to the laws of Nigeria.
             Please do not enter if you are not a legal resident of, and not located in, Nigeria at time of entry.
             VOID OUTSIDE OF NIGERIA AND WHERE PROHIBITED BY LAW.
         </p>
@@ -70,38 +70,35 @@
             NO PURCHASE OR PAYMENT OF ANY KIND IS NECESSARY TO ENTER OR WIN. A PURCHASE WILL NOT INCREASE YOUR CHANCE OF WINNING.
         </p>
         <p>
-            Game Period: Game starts @Model.Game.StartDate.ToString("MMM dd, yyyy, hh:mm:ss tt") UTC and ends
-            @Model.Game.EndDate.ToString("MMM dd, yyyy, hh:mm:ss tt") UTC and will consist of a draw that will take place
+        Game Period: Game starts @Model.Game.StartDateUtc.ToString("MMM dd, yyyy, hh:mm:ss tt") W. Central Africa Standard Time and ends
+        @Model.Game.EndDateUtc.ToString("MMM dd, yyyy, hh:mm:ss tt") W. Central Africa Standard Time.
         </p>
         <ol>
             <li>
-                <strong>ELIGIBILITY</strong>: To enter and be eligible to win a prize, you must be a legal resident of Nigeria,
-                have a valid email address, reply to the original tweet with the hashtag, and be a follower of the twitter account of the tweet you interacted with. 
+                <strong>ELIGIBILITY</strong>: To play to win a prize, you must be a legal resident of Nigeria,
+                have a valid email address, click the link on the tweet or click the link and submit personal details to play. 
                 Minors must have permission from a parent/legal guardian to participate in the Game. 
                 Persons in any of the following categories are NOT eligible to participate or win a prize: 
-                (a) any person who, at any time on or after @Model.Game.StartDate.ToString("d"), 
+                (a) any person who, at any time on or after @Model.Game.StartDateUtc.ToString("MMM dd, yyyy, hh:mm:ss tt") W. Central Africa Standard Time, 
                     was or is a director, officer, agent, representative, or employee of hrvster or its affiliates, subsidiaries, 
                     or service agencies, who are directly involved in the planning or execution of the Game; 
                 (b) any other individuals engaged in the development, production or distribution of materials for the 
                     Game or engaged in the administration or execution of this Game 
                     (collectively, with the entities listed in 1(a), the “Game Entities”); 
                 (c) persons who are or purport to be immediate family members (defined as biological or step-mother/ father, sister, 
-                brother, daughter, son, dependent or spouse of any of the foregoing) 
-                of any person in any of the preceding categories, regardless of where they live, 
-                or any person who resides in the same household as any person in any of the preceding categories; and 
+                    brother, daughter, son, dependent or spouse of any of the foregoing) 
+                    of any person in any of the preceding categories, regardless of where they live, 
+                    or any person who resides in the same household as any person in any of the preceding categories; and 
                 (d) persons who Sponsor is prohibited from allowing to participate in the Program under applicable law. 
-                ontest is subject to all applicable federal, state and local laws and regulations.
+                    contest is subject to all applicable federal, state and local laws and regulations.
             </li>
             <li>
-                <strong>HOW TO ENTER: No Purchase Necessary</strong>Reply to the tweets below and make sure you at least key in the hashtag.
-                Please ensure your account on twitter is verifiable. All entries must be in the form of a reply to any of the tweets below and must be 
-                twitted by @Model.Game.EndDate.ToString("MMM dd, yyyy, hh:mm:ss tt") UTC.
                 <table cellpadding="6" cellspacing="6" align="center">
                     <caption><strong>Rules</strong></caption>
                     <thead>
                         <tr>
                             <th>Tweet</th>
-                            <th>Hashtag (Must be in your reply)</th>
+                            <th>Hashtag (Must be in your reply if required)</th>
                             <th>Must Follow Account?</th>
                         </tr>
                         @foreach(var rule in Model.Rules)
@@ -116,7 +113,7 @@
                                     <i><strong>@rule.WatchValue</strong></i>
                                 </td>
                                 <td>
-                                    @rule.MustBeFollowing
+                                    No
                                 </td>
                             </tr>
                         }
@@ -161,7 +158,7 @@
             <li>
             <strong>HOW TO CLAIM YOUR PRIZE</strong> You will be notified either by a DM or a tweet on twitter if you are one of the selected winners.
                 The account owner <a href="@TwitterUserLink" target="_blank">@TwitterUser</a> will be responsible to disbursing and fulfilling the prizes to the winners.
-                However, hrvster will be responsible for performing the draw on behalf of <a href="@TwitterUserLink" target="_blank">@TwitterUser</a> if this is a Game.
+                However, hrvster will be responsible for performing the draw on behalf of <a href="@TwitterUserLink" target="_blank">@TwitterUser</a> if this is a Sweepstake.
             </li>
             <li>
                 hrvster reserves the right to disqualify any entrant's entry into the Game (and void all associated entries) 

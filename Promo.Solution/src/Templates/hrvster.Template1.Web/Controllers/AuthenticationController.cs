@@ -72,19 +72,19 @@ public class AuthenticationController : Controller
 	{
 		if (IsRequestDenied())
 		{
-			return ErrorRedirect("TwitterAuthenticationFailed", StatusCodes.Status401Unauthorized);
+			return await ErrorRedirect("TwitterAuthenticationFailed", StatusCodes.Status401Unauthorized);
 		}
 
 		if (!IsValidSessionData(out var gameUid, out var ruleUid, out var externalClient, out var gameType, out var campaignUid, out var accountUid))
 		{
 			_logger.LogError("Unable to determine either the gameuid, ruleuid, externalclient or gameType");
-			return ErrorRedirect("Missing required information.", StatusCodes.Status404NotFound);
+			return await ErrorRedirect("Missing required information.", StatusCodes.Status404NotFound);
 		}
 
 		var accessTokenObject = await FetchAccessToken();
 		if (accessTokenObject == null)
 		{
-			return ErrorRedirect("TwitterAuthenticationFailed", StatusCodes.Status401Unauthorized);
+			return await ErrorRedirect("TwitterAuthenticationFailed", StatusCodes.Status401Unauthorized);
 		}
 
 		_sessionManager.SetKeyValue(TemplateSessionConstants.AuthenticationKey, accessTokenObject.AccessToken);
@@ -92,7 +92,7 @@ public class AuthenticationController : Controller
 		var userDetails = await FetchAuthenticatedUserDetails(accessTokenObject);
 		if (userDetails == null)
 		{
-			return ErrorRedirect("TwitterAuthenticationFailed", StatusCodes.Status401Unauthorized);
+			return await ErrorRedirect("TwitterAuthenticationFailed", StatusCodes.Status401Unauthorized);
 		}
 
 		await SignInUserAsync(userDetails, ExternalClientType.Twitter);
@@ -231,11 +231,16 @@ public class AuthenticationController : Controller
 
 		if (DateTime.UtcNow > gameDetails.EndDateUtc)
 		{
+			await HttpContext.SignOutAsync();
+			HttpContext.Session.Clear();
 			throw new GameHasEndedException();
 		}
 
 		if (DateTime.UtcNow < gameDetails.StartDateUtc)
 		{
+			await HttpContext.SignOutAsync();
+			HttpContext.Session.Clear();
+
 			throw new GameHasNotYetStartedException();
 		}
 
@@ -286,8 +291,11 @@ public class AuthenticationController : Controller
 		_logger.LogInformation("Redirecting to create a member for this authenticated user.");
 	}
 
-	private IActionResult ErrorRedirect(string reason, int statusCode)
+	private async Task<IActionResult> ErrorRedirect(string reason, int statusCode)
 	{
+		await HttpContext.SignOutAsync();
+		HttpContext.Session.Clear();
+
 		return RedirectToActionPermanent(
 			"HandleErrorCode",
 			"Error",

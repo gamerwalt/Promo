@@ -63,8 +63,6 @@ namespace hrvster.Template1.Web
 			Log.Logger = new LoggerConfiguration()
 				.ReadFrom.Configuration(builder.Configuration)
 				.Enrich.FromLogContext()
-				.MinimumLevel.Verbose()
-				.WriteTo.Loggly()
 				.WriteTo.Console()
 				.CreateLogger();
 

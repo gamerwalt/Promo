@@ -1,0 +1,11 @@
+﻿{
+  "profiles": {
+    "hrvster.Services.RedisGame.Purge": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    }
+  }
+}

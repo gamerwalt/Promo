@@ -1,19 +1,29 @@
-﻿@model GameplayWin
+﻿@using System.Globalization
+@model GameplayWin
 @{
     ViewData["Title"] = "You Won";
+    var cultureInfo = new System.Globalization.CultureInfo("en-NG");
 }
-<link rel="stylesheet" href="~/css/gameboard.css">
+<link rel="stylesheet" href="~/css/site.css">
 <link rel="stylesheet" href="~/css/gameplaywin.css">
-<div class="game-wrapper">
-    <h1 class="win-message">You Won</h1>
-    <div class="gameboard">
-        @foreach(var tile in Model.Tiles)
-        {
-            <div 
-                class="tile @((Model.SelectedTiles.Contains(tile.Uid)) ? "matched" : "")" 
-                data-uid="@tile.Uid" 
-                style="background-image: url('@tile.ImageUrl')"></div>
-        }
+<div class="section-game">
+    <div class="container">
+        <div class="content-wrapper d-flex justify-content-center align-items-center flex-column vh-100">
+            <div style="text-align: center">
+                <h4 class="win-message text-center">
+                    You won the prize @Model.PrizeName with a value of @Model.PrizeValueString
+                </h4>
+            </div>
+            <div class="gameboard">
+                @foreach(var tile in Model.Tiles)
+                {
+                    <div 
+                        class="tile @((Model.SelectedTiles.Contains(tile.Uid)) ? "matched" : "")" 
+                        data-uid="@tile.Uid" 
+                        style="background-image: url('@tile.ImageUrl')"></div>
+                }
+            </div>
+        </div>
     </div>
 </div>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>

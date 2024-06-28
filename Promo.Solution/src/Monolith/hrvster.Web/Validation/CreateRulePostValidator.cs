@@ -51,7 +51,7 @@ namespace hrvster.Web.Validation
 
 			RuleFor(c => c.Post)
 				.Must(c => BeMaximumTweet(c))
-				.WithMessage("The text cannot go beyond 140.");
+				.WithMessage("The text cannot go beyond 200.");
 
 			RuleFor(c => c)
 				.Must(c => WatchValueShouldBeWithinTweetText(c))
@@ -145,7 +145,7 @@ namespace hrvster.Web.Validation
 
 		private bool BeMaximumTweet(string tweet)
 		{
-			return tweet?.Length <= 140;
+			return tweet?.Length <= 200;
 		}
 	}
 }

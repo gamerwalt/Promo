@@ -45,6 +45,14 @@ namespace hrvster.Web.Controllers
 				return Redirect("https://hrvster.com");
 			}
 
+			var saskatoonTimezone = TimeZoneInfo.FindSystemTimeZoneById("Canada/Saskatchewan");
+			var watTimeZone = TimeZoneInfo.FindSystemTimeZoneById("W. Central Africa Standard Time");
+			var watStartTime = TimeZoneInfo.ConvertTime(gameAndPrizes.Game.StartDate, saskatoonTimezone, watTimeZone);
+			var watEndTime = TimeZoneInfo.ConvertTime(gameAndPrizes.Game.EndDate, saskatoonTimezone, watTimeZone);
+
+			gameAndPrizes.Game.StartDateUtc = watStartTime;
+			gameAndPrizes.Game.EndDateUtc = watEndTime;
+
 			return View(gameAndPrizes);
 		}
 	}

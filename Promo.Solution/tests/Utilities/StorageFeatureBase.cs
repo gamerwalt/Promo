@@ -1,5 +1,11 @@
-﻿using hrvster.Extensions.Configuration;
+﻿using hrvster.ApplicationServices.Caching;
+using hrvster.ApplicationServices.Harvesters.Facebook;
+using hrvster.Core.Clients.Publishers;
+using hrvster.Extensions.Configuration;
 using hrvster.Extensions.OptionsConfiguration;
+using hrvster.Infrastructure.Facebook;
+using hrvster.Infrastructure.MatchGames;
+using hrvster.Models;
 using hrvster.Web.Mapper;
 using Microsoft.Extensions.DependencyInjection;
 using MySqlConnector;
@@ -59,6 +65,36 @@ namespace TestUtilities
 					.AddSignatureUtility()
 					.AddCacheService()
 					.AddReportingService()
+                    .AddTransient<IMatchGamesRepository, MatchGamesRepository>()
+                    .AddTransient<IMatchPrizesRepository, MatchPrizesRepository>()
+                    .AddTransient<IMatchImagesRepository, MatchImagesRepository>()
+                    .AddTransient<IMatchBoardsRepository, MatchBoardsRepository>()
+                    .AddTransient<IMatchGameRulesRepository, MatchGameRulesRepository>()
+                    .AddTransient<IMatchRulePageRepository, MatchRulePageRepository>()
+                    .AddTransient<IFacebookPageRepository, FacebookPageRepository>()
+                    .AddTransient<IMatchGamePlayRepository, MatchGamePlayRepository>()
+                    .AddTransient<IMatchTilesRepository, MatchTilesRepository>()
+                    .AddTransient<IMatchPlayRulesRepository, MatchPlayRulesRepository>()
+					.AddTransient<IFacebookPageSerivce, FacebookPageSerivce>()
+                    .AddTransient<ICacheDataService, RedisCacheService>()
+                    .AddHarvsterConfigurationOption(Configuration)
+					.AddTwitterHttpService(Configuration)
+                    .AddTransient<Func<ExternalClientType, IExternalClient>>(sp => serviceTypeName =>
+                    {
+                        switch (serviceTypeName)
+                        {
+                            case ExternalClientType.Twitter:
+                                return sp.GetService<TwitterClient>();
+                            case ExternalClientType.Facebook:
+                                return sp.GetService<FacebookClient>();
+                            case ExternalClientType.Instagram:
+                                return sp.GetService<InstagramClient>();
+                            default:
+                                return sp.GetService<TwitterClient>();
+                        }
+                    })
+					.AddPostSchedulers()
+                    .AddSendGrid(Configuration)
 					.AddHttpClient();
 
 				services.MockFirebaseAuthManager()

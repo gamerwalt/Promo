@@ -1,4 +1,5 @@
 ﻿using hrvster.Template1.Web.Models;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 
@@ -49,6 +50,31 @@ namespace hrvster.Template1.Web.Controllers
 			return View();
 		}
 
+		[HttpGet]
+		public IActionResult PlayedTooMuch()
+		{
+			return View();
+		}
+
+		[HttpGet]
+		public IActionResult UserIsBlacklisted()
+		{
+			return View();
+		}
+
+		[HttpGet]
+		public IActionResult GameboardNoMorePlayable()
+		{
+			return View();
+		}
+
+		[HttpGet]
+		public IActionResult WrongGaemboardForGame()
+		{
+			return View();
+		}
+
+
 		[HttpGet("HandleErrorCode")]
 		public async Task<IActionResult> HandleErrorCode(string reason, int statusCode)
 		{
@@ -90,11 +116,13 @@ namespace hrvster.Template1.Web.Controllers
 				Message = reason
 			};
 
+			await HttpContext.SignOutAsync();
+
 			return View(statusCode.ToString(), model);
 		}
 
 		[Route("Error")]
-		public IActionResult HandleException()
+		public async Task<IActionResult> HandleException()
 		{
 			var exceptionFeature = HttpContext.Features.Get<IExceptionHandlerPathFeature>();
 
@@ -107,6 +135,8 @@ namespace hrvster.Template1.Web.Controllers
 					exceptionType,
 					exceptionMessage);
 			}
+
+			await HttpContext.SignOutAsync();
 
 			return View("Exception");
 		}

@@ -6,12 +6,34 @@
     <title>@ViewData["Title"] - hrvster.Template1.Web</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <style>
+        .message {
+            font-size: 1.2em;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .card-body {
+            background: linear-gradient(180deg, #a8c0ff, #f0f2f5);
+            padding: 20px;
+            border-radius: 10px;
+        }
+        .img-fluid {
+            border-radius: 10px;
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
+    <div class="container d-flex justify-content-center align-items-center vh-100">
+        <div class="card text-center">
+            <div class="card-body">
+                @RenderBody()
+            </div>
+        </div>
     </div>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>

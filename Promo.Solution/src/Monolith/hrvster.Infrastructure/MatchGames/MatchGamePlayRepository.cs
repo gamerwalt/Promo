@@ -18,6 +18,7 @@ namespace hrvster.Infrastructure.MatchGames
 		Task FulfillPrizeAsync(Guid gameplayUid, CancellationToken cancellationToken);
 		Task<MatchPlay> GetAsync(Guid gameplayUid, CancellationToken cancellationToken);
 		Task<IEnumerable<MatchPlay>> GetForGamePlayAsync(Guid gameUid, CancellationToken cancellationToken);
+		Task<int> GetTotalGamePlaysAsync(Guid gameUid, CancellationToken cancellationToken);
 		Task MarkAsPlayedAndLossAsync(Guid gameplayUid, string selectedTiles, CancellationToken cancellationToken);
 		Task MarkAsPlayedAndWonAsync(Guid gameplayUid, string selectedTiles, CancellationToken cancellationToken);
 	}
@@ -41,6 +42,28 @@ namespace hrvster.Infrastructure.MatchGames
 
 			await conn.OpenAsync(cancellationToken);
 			await command.ExecuteNonQueryAsync(cancellationToken);
+		}
+
+		public async Task<int> GetTotalGamePlaysAsync(Guid gameUid, CancellationToken cancellationToken)
+		{
+			var totalPlays = 0;
+
+			using (var conn = new MySqlConnection(_database.GetConnectionString()))
+			{
+				var command = conn.CreateCommand();
+				command.CommandText = "match_gameplays_get_total";
+				command.CommandType = CommandType.StoredProcedure;
+				command.AddParameter("gameUid", gameUid);
+
+				await conn.OpenAsync(cancellationToken);
+				using var reader = await command.ExecuteReaderAsync(cancellationToken);
+				if (await reader.ReadAsync(cancellationToken))
+				{
+					totalPlays = reader.GetInt32("total_plays");
+				}
+			}
+
+			return totalPlays;
 		}
 
 		public async Task CreateAsync(Guid gameplayUid, int id, string screenName, Models.UserIdentifierType handleType, CancellationToken cancellationToken)
