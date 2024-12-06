@@ -1,86 +1,187 @@
-﻿body, html {
+﻿@import url("https://fonts.googleapis.com/css2?family=Quicksand:wght@300..700&display=swap");
+
+body,
+html {
     height: 100%;
     margin: 0;
-    font-family: Arial, sans-serif;
+    font-family: "Quicksand", sans-serif;
+    background: rgb(69, 177, 232);
+    background: radial-gradient( circle, rgba(69, 177, 232, 1) 0%, rgba(171, 160, 217, 1) 95% );
 }
 
-.container {
-    background: black;
+.section-wheel {
+    color: #fff;
 }
 
-.spin-wheel {
+.pie {
     position: relative;
-    width: 300px;
-    height: 300px;
+    width: 55vw;
+    height: 55vw;
+    max-width: 370px;
+    max-height: 370px;
+    margin: 0 auto;
 }
 
-.wheel {
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    position: relative;
-    overflow: hidden;
-    transition: transform 4s ease-out;
-}
-
-.segment {
-    position: absolute;
-    width: 50%;
-    height: 100%;
-    background-size: contain;
-    background-position: center;
-    background-repeat: no-repeat;
-    background-image: url('/images/SpinToWin/Pie1-01.png');
-    left: 50%;
-    top: 50%;
-    transform-origin: 1% 32%;
-}
-
-    .segment:nth-child(1) {
-        transform: rotate(0deg) translate(-50%, -50%);
+    .pie div {
+        position: absolute;
+        cursor: pointer;
+        width: 50%;
+        height: 50%;
+        left: 50%;
+        bottom: 50%;
+        transform-origin: bottom left;
+        transition: all 200ms ease-out;
     }
 
-    .segment:nth-child(2) {
-        transform: rotate(45deg) translate(-50%, -50%);
-    }
+        .pie div::before {
+            content: "";
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-size: contain;
+            background-position: center;
+            background-repeat: no-repeat;
+            transform-origin: center center;
+            transform: rotate(45deg);
+        }
 
-    .segment:nth-child(3) {
-        transform: rotate(90deg) translate(-50%, -50%);
-    }
+        .pie div:nth-child(1)::before {
+            background-image: url("../images/SpinToWin/Pie1-01.png");
+        }
 
-    .segment:nth-child(4) {
-        transform: rotate(135deg) translate(-50%, -50%);
-    }
+        .pie div:nth-child(2) {
+            transform: rotate(45deg);
+        }
 
-    .segment:nth-child(5) {
-        transform: rotate(180deg) translate(-50%, -50%);
-    }
+            .pie div:nth-child(2)::before {
+                background-image: url("../images/SpinToWin/Pie1-01.png");
+            }
 
-    .segment:nth-child(6) {
-        transform: rotate(225deg) translate(-50%, -50%);
-    }
+        .pie div:nth-child(3) {
+            transform: rotate(90deg);
+        }
 
-    .segment:nth-child(7) {
-        transform: rotate(270deg) translate(-50%, -50%);
-    }
+            .pie div:nth-child(3)::before {
+                background-image: url("../images/SpinToWin/Pie1-01.png");
+            }
 
-    .segment:nth-child(8) {
-        transform: rotate(315deg) translate(-50%, -50%);
-    }
+        .pie div:nth-child(4) {
+            transform: rotate(135deg);
+        }
+
+            .pie div:nth-child(4)::before {
+                background-image: url("../images/SpinToWin/Pie1-01.png");
+            }
+
+        .pie div:nth-child(5) {
+            transform: rotate(180deg);
+        }
+
+            .pie div:nth-child(5)::before {
+                background-image: url("../images/SpinToWin/Pie1-01.png");
+            }
+
+        .pie div:nth-child(6) {
+            transform: rotate(225deg);
+        }
+
+            .pie div:nth-child(6)::before {
+                background-image: url("../images/SpinToWin/Pie1-01.png");
+            }
+
+        .pie div:nth-child(7) {
+            transform: rotate(270deg);
+        }
+
+            .pie div:nth-child(7)::before {
+                background-image: url("../images/SpinToWin/Pie1-01.png");
+            }
+
+        .pie div:nth-child(8) {
+            transform: rotate(315deg);
+        }
+
+            .pie div:nth-child(8)::before {
+                background-image: url("../images/SpinToWin/Pie1-01.png");
+            }
 
 .needle {
     position: absolute;
-    top: -20px;
+    width: 0;
+    height: 0;
+    border-left: 20px solid transparent;
+    border-right: 20px solid transparent;
+    border-bottom: 35px solid #f5f5f5;
+    top: 35%;
     left: 50%;
-    width: 10px;
-    height: 40px;
-    background-color: #fff;
-    transform: translateX(-50%);
-    z-index: 10;
+    transform: translate(-50%, -100%);
+    z-index: 1;
+}
+
+.btn-primary {
+    background-color: #45b1e8;
+    border-color: #45b1e8;
+}
+
+    .btn-primary:hover {
+        background-color: #42a3d3;
+        border-color: #42a3d3;
+    }
+
+.btn-play-again:active {
+    background-color: #45b1e8 !important;
+    border-color: #45b1e8 !important;
 }
 
 #spinButton {
-    margin-top: 10em;
-    padding: 10px 20px;
+    position: absolute;
     font-size: 18px;
+    z-index: 1000;
+    border-radius: 50%;
+    border: 5px solid #f5f5f5;
+    /* width: 15vw;
+        height: 15vw; */
+    width: 120px;
+    height: 120px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+    #spinButton:hover {
+        background-color: #42a3d3;
+    }
+
+    #spinButton:disabled {
+        opacity: 1;
+        color: #fff;
+        background-color: #42a3d3;
+    }
+
+.instructions {
+    margin-top: 6em;
+}
+
+.result-page {
+    display: none;
+    text-align: center;
+    color: white;
+}
+
+    .result-page h1 {
+        margin-top: 20%;
+    }
+
+@media screen and (max-width: 430px) {
+    #spinButton {
+        border: 3px solid #f5f5f5;
+        width: 90px;
+        height: 90px;
+    }
+
+    .needle {
+        border-left: 15px solid transparent;
+        border-right: 15px solid transparent;
+        border-bottom: 29px solid #f5f5f5;
+    }
 }

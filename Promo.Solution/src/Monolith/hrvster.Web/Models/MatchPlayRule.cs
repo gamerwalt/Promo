@@ -1,5 +1,4 @@
-﻿using Microsoft.WindowsAzure.Storage.Blob.Protocol;
-using System;
+﻿using System;
 
 namespace hrvster.Web.Models
 {

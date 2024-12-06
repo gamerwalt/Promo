@@ -100,6 +100,7 @@ namespace hrvster.Web
 				.AddReportingService()
 				.AddPostSchedulers()
 				.AddPaymentPlanProvider(Configuration)
+				.AddSpinToWin(Configuration)
 				.AddProvidersService();
 
 			services.AddHttpClient<IRebrandlyService, RebrandlyService>();

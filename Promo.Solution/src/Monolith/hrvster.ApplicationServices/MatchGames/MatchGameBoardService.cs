@@ -210,11 +210,11 @@ namespace hrvster.ApplicationServices.MatchGames
 
 			_logger.LogInformation("Retrieving the board ids of all inserted boards finished and took {Minutes} minutes", getStopWatch.Elapsed.Minutes);
 
-			_logger.LogInformation("Saving boards into a Redis directly.");
+			//_logger.LogInformation("Saving boards into a Redis directly.");
 
-			await SaveIntoRedisAsync(matchGame, boards, boardMappings);
+			//await SaveIntoRedisAsync(matchGame, boards, boardMappings);
 
-			_logger.LogInformation("Saving boards keys into Redis completed.");
+			//_logger.LogInformation("Saving boards keys into Redis completed.");
 
 			_logger.LogInformation("Setting the match game as processed.");
 
@@ -691,7 +691,7 @@ namespace hrvster.ApplicationServices.MatchGames
 
 		private async Task<MatchBoard> GetBoardFromCacheAsync(Guid randomBoardUid)
 		{
-			var boardString = await _cacheDataService.GetBoardDetailsAsync(GetBoardKeyName(randomBoardUid));
+			var boardString = string.Empty;// await _cacheDataService.GetBoardDetailsAsync(GetBoardKeyName(randomBoardUid));
 			var cachedBoard = default(CachedBoard);
 			IEnumerable<MatchTile> tiles = new List<MatchTile>();
 
@@ -712,7 +712,7 @@ namespace hrvster.ApplicationServices.MatchGames
 					tiles = await _matchTilesRepository.GetForBoardAsync(randomBoardUid, default);
 
 					//save this to cache
-					await _cacheDataService.SetAsync(GetTileKeysName(randomBoardUid), tiles);
+					//await _cacheDataService.SetAsync(GetTileKeysName(randomBoardUid), tiles);
 					board.Tiles = tiles.ToList();
 				}
 				catch (Exception ex)
@@ -757,7 +757,7 @@ namespace hrvster.ApplicationServices.MatchGames
 
 		private async Task<Guid> GetBoardKeysFromCacheOrDatabase(Guid gameUid, CancellationToken cancellationToken)
 		{
-			var randomBoardUidString = await _cacheDataService.GetRandomBoardKey(GetGameBoardsKeysName(gameUid));
+			var randomBoardUidString = string.Empty;// await _cacheDataService.GetRandomBoardKey(GetGameBoardsKeysName(gameUid));
 
 			Guid uid;
 
@@ -831,21 +831,21 @@ namespace hrvster.ApplicationServices.MatchGames
 				_logger.LogInformation("Preparing the board to add to the cache.");
 
 				//update the board
-				var key = GetBoardKeyName(board.Uid);
-				var cachedBoard = new CachedBoard
-				{
-					Id = board.Id,
-					Uid = board.Uid,
-					IsWinnable = board.IsWinnable,
-					IsReserved = true,
-					PrizeId = board.IsWinnable ? board.Prize.Id : 0,
-					PrizeUid = board.IsWinnable ? board.Prize.Uid : Guid.Empty,
-					MatchGameId = board.MatchGame.Id,
-					MatchGameUid = board.MatchGame.Uid,
-					MatchGameName = board.MatchGame.Name,
-				};
+				//var key = GetBoardKeyName(board.Uid);
+				//var cachedBoard = new CachedBoard
+				//{
+				//	Id = board.Id,
+				//	Uid = board.Uid,
+				//	IsWinnable = board.IsWinnable,
+				//	IsReserved = true,
+				//	PrizeId = board.IsWinnable ? board.Prize.Id : 0,
+				//	PrizeUid = board.IsWinnable ? board.Prize.Uid : Guid.Empty,
+				//	MatchGameId = board.MatchGame.Id,
+				//	MatchGameUid = board.MatchGame.Uid,
+				//	MatchGameName = board.MatchGame.Name,
+				//};
 
-				await _cacheDataService.SetAsync(key, cachedBoard);
+				//await _cacheDataService.SetAsync(key, cachedBoard);
 
 				_logger.LogInformation("Done with reserving gameboard.");
 			}
@@ -898,8 +898,8 @@ namespace hrvster.ApplicationServices.MatchGames
 
 		public async Task RemoveBoardFromCacheAsync(Guid boardUid, CancellationToken cancellationToken)
 		{
-			await _cacheDataService.RemoveItemFromCacheAsync(GetBoardKeyName(boardUid));
-			await _cacheDataService.RemoveItemFromCacheAsync(GetTileKeysName(boardUid));
+			//await _cacheDataService.RemoveItemFromCacheAsync(GetBoardKeyName(boardUid));
+			//await _cacheDataService.RemoveItemFromCacheAsync(GetTileKeysName(boardUid));
 		}
 	}
 

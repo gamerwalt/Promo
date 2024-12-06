@@ -1,0 +1,140 @@
+﻿@using hrvster.Extensions.ModelExtensions
+@using hrvster.Web.Models.SpinToWin
+
+@model CreateSpinToWinGame
+@{
+    ViewData["Title"] = $"Create Spin To Win Game";
+}
+<div class="card card-flush">
+    <form asp-controller="SpinToWin" asp-action="Create" class="form-horizontal form-material mx-2">
+        <div class="card-header">
+            <h3 class="card-title">Create Spin To Win Game</h3>
+        </div>
+        <div class="card-body">
+			<div class="d-flex flex-column flex-lg-row">
+				<div class="flex-lg-row-fluid me-lg-15 order-2 order-lg-1 mb-10 mb-lg-0">
+					<div class="card">
+						<div class="card-body">
+							<div class="fv-row mb-8 w-lg-500px">
+								<label class="required d-flex align-items-center fs-6 fw-semibold form-label mb-2">
+									Promotion
+								</label>
+								<select asp-for="PromotionUid" asp-items=@Model.Promotions class="form-select form-control-lg">
+									@if (!Model.Promotions.Any(s => s.Selected))
+									{
+										<option value="@Guid.Empty">Please select promotion</option>
+									}
+								</select>
+								<span asp-validation-for="PromotionUid"></span>
+							</div>
+							<div class="fv-row mb-8">
+								<label class="required d-flex align-items-center fs-6 fw-semibold form-label mb-2">
+									Name
+								</label>
+								<input type="text" asp-for="Name" id="Name" class="form-control" placeholder="Name" maxlength="90" />
+								<span asp-validation-for="Name"></span>
+							</div>
+							<div class="fv-row mb-8">
+								<label class="d-flex align-items-center fs-6 fw-semibold form-label mb-2">
+									Description
+								</label>
+								<textarea rows="4" cols="5" asp-for="Description" id="Description" class="form-control" placeholder="Name" maxlength="90"></textarea>
+								<span asp-validation-for="Description"></span>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="d-flex flex-column flex-lg-row">
+				<div class="flex-column flex-lg-row-auto w-100 w-lg-250px w-xxl-325px mb-8 mb-lg-0 me-lg-9 me-5">
+					<div class="card">
+						<div class="card-body">
+							<div class="fv-row mb-8">
+								<label class="required d-flex align-items-center fs-6 fw-semibold form-label mb-2">
+									Number of Spins
+								</label>
+								<input type="number" asp-for="NumberOfSpins" id="NumberOfSpins"
+									   class="form-control" placeholder="1" />
+								<span asp-validation-for="NumberOfSpins"></span>
+							</div>
+							<div class="fv-row mb-8">
+								<label class="required d-flex align-items-center fs-6 fw-semibold form-label mb-2">
+									Maximum Physical Prize Win
+								</label>
+								<input type="number" asp-for="MaximumWinForPhysicalPrizes" id="MaximumWinForPhysicalPrizes"
+									   class="form-control" placeholder="1" />
+								<span asp-validation-for="MaximumWinForPhysicalPrizes"></span>
+							</div>
+							<div class="fv-row mb-8">
+								<label class="required d-flex align-items-center fs-6 fw-semibold form-label mb-2">
+									Maximum Digital Points Win
+								</label>
+								<input type="number" asp-for="MaximumWinForPointPrizes" id="MaximumWinForPointPrizes"
+									   class="form-control" placeholder="1" />
+								<span asp-validation-for="MaximumWinForPointPrizes"></span>
+							</div>
+							<div class="fv-row mb-8">
+								<label class="required d-flex align-items-center fs-6 fw-semibold form-label mb-2">
+									# of Points Required For Free Play
+								</label>
+								<input type="number" asp-for="PointsForFreePlay" id="PointsForFreePlay"
+									   class="form-control" placeholder="1" />
+								<span asp-validation-for="PointsForFreePlay"></span>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="flex-column flex-lg-row-auto w-100 w-lg-250px w-xxl-325px mb-8 mb-lg-0 me-lg-9 me-5">
+					<div class="card">
+						<div class="card-body">
+							<div class="fv-row mb-8 w-lg-300px">
+								<label class="required d-flex align-items-center fs-6 fw-semibold form-label mb-2">
+									Start Date
+								</label>
+								<input asp-for="StartDate" class="form-control" asp-format="{0:yyyy-MM-ddTHH:mm}" type="datetime-local" />
+								<span asp-validation-for="StartDate"></span>
+							</div>
+							<div class="fv-row mb-8 w-lg-300px">
+								<label class="required d-flex align-items-center fs-6 fw-semibold form-label mb-2">
+									End Date
+								</label>
+								<input asp-for="EndDate" class="form-control" asp-format="{0:yyyy-MM-ddTHH:mm}" type="datetime-local" />
+								<span asp-validation-for="EndDate"></span>
+							</div>
+							<div class="fv-row mb-8 w-lg-300px">
+								<label class="required d-flex align-items-center fs-6 fw-semibold form-label mb-2">
+									Date To Generate Pies
+								</label>
+								<input asp-for="PieGenerateDate" class="form-control" asp-format="{0:yyyy-MM-ddTHH:mm}" type="datetime-local" />
+								<span asp-validation-for="PieGenerateDate"></span>
+							</div>
+							<div class="form-check form-check-solid form-switch fv-row">
+								<input class="form-check-input w-45px h-30px" type="checkbox" asp-for="SpreadMainPrizesPerDay" />
+								<label class="form-label form-check-label fs-6 fw-semibold" for="SpreadMainPrizesPerDay">
+									<span asp-validation-for="SpreadMainPrizesPerDay"></span>
+								</label>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="fv-row mb-8 w-lg-500px">
+				<div class="form-check form-check-solid form-switch fv-row">
+					<input class="form-check-input w-45px h-30px" type="checkbox" asp-for="AcceptTerms" />
+					<label class="form-label form-check-label fs-6 fw-semibold" for="allowmarketing">
+						Accept <a target="_blank" asp-controller="Terms" asp-action="SweepstakesTermsAndConditions" class="link-primary">Game and Prizes Terms and Conditions</a>
+						<br />
+						<span asp-validation-for="AcceptTerms"></span>
+					</label>
+				</div>
+			</div>
+		</div>
+        <div class="card-footer">
+			<div class="card-toolbar">
+				<button type="submit" class="btn btn-md btn-light btn-primary">
+					Create Game
+				</button>
+			</div>
+        </div>
+    </form>
+</div>

@@ -22,5 +22,7 @@
 		public string HrvsterAzureStorageConnectionString { get; set; }
 		public string EncryptionKey { get; set; }
 		public string EncryptionIV { get; set; }
+		public string StorageAccountName { get; set; }
+		public string StorageAccountKey { get; set; }
 	}
 }
