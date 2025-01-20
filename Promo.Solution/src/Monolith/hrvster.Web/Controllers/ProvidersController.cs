@@ -22,6 +22,8 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using hrvster.Models.Extensions;
+using FirebaseAdmin.Messaging;
 
 namespace hrvster.Web.Controllers
 {
@@ -83,6 +85,15 @@ namespace hrvster.Web.Controllers
 		public async Task<IActionResult> SelectProvider(Guid uid, string actionName, string controllerName, string gameType)
 		{
 			_hrvsterUser = _sessionManager.GetUserInformation();
+
+			var ruleCount = await GetGameRuleCountsForAsync(_hrvsterUser.UserUid);
+
+			if (ruleCount > _hrvsterOptions.MaxRulesPerAccount)
+			{
+				_logger.LogWarning("Account with uid {accountUid} has a total of {activeRulesCount} active hashtags and their current max is {maxHashtags}", _hrvsterUser.UserUid, ruleCount, _hrvsterOptions.MaxRulesPerAccount);
+				_notificationService.AddErrorToastMessage("You have reached the maximum number of rules you can create.");
+				return RedirectToAction(actionName, controllerName, new { uid = uid });
+			}
 
 			var watchTypeProviders = await _providersService.GetWathcTypeProvidersAsync();
 
@@ -440,6 +451,15 @@ namespace hrvster.Web.Controllers
 
 			_hrvsterUser = _sessionManager.GetUserInformation();
 
+			var ruleCount = await GetGameRuleCountsForAsync(_hrvsterUser.UserUid);
+
+			if (ruleCount > _hrvsterOptions.MaxRulesPerAccount)
+			{
+				_logger.LogWarning("Account with uid {accountUid} has a total of {activeRulesCount} active hashtags and their current max is {maxHashtags}", _hrvsterUser.UserUid, ruleCount, _hrvsterOptions.MaxRulesPerAccount);
+				_notificationService.AddErrorToastMessage("You have reached the maximum number of rules you can create.");
+				return RedirectToAction(actionName, controllerName, new { uid = Uid });
+			}
+
 			var accountCompanies = await _accountCompanyService.GetAccountCompaniesAsync(_hrvsterUser.UserUid);
 			var accountCompany = accountCompanies.FirstOrDefault();
 
@@ -492,6 +512,15 @@ namespace hrvster.Web.Controllers
 
 			_hrvsterUser = _sessionManager.GetUserInformation();
 
+			var ruleCount = await GetGameRuleCountsForAsync(_hrvsterUser.UserUid);
+
+			if (ruleCount > _hrvsterOptions.MaxRulesPerAccount)
+			{
+				_logger.LogWarning("Account with uid {accountUid} has a total of {activeRulesCount} active hashtags and their current max is {maxHashtags}", _hrvsterUser.UserUid, ruleCount, _hrvsterOptions.MaxRulesPerAccount);
+				_notificationService.AddErrorToastMessage("You have reached the maximum number of rules you can create.");
+				return RedirectToAction(actionName, controllerName, new { uid = Uid });
+			}
+
 			var accountCompanies = await _accountCompanyService.GetAccountCompaniesAsync(_hrvsterUser.UserUid);
 			var accountCompany = accountCompanies.FirstOrDefault();
 
@@ -528,6 +557,15 @@ namespace hrvster.Web.Controllers
 			}
 
 			_hrvsterUser = _sessionManager.GetUserInformation();
+
+			var ruleCount = await GetGameRuleCountsForAsync(_hrvsterUser.UserUid);
+
+			if (ruleCount > _hrvsterOptions.MaxRulesPerAccount)
+			{
+				_logger.LogWarning("Account with uid {accountUid} has a total of {activeRulesCount} active hashtags and their current max is {maxHashtags}", _hrvsterUser.UserUid, ruleCount, _hrvsterOptions.MaxRulesPerAccount);
+				_notificationService.AddErrorToastMessage("You have reached the maximum number of rules you can create.");
+				return RedirectToAction(actionName, controllerName, new { uid = Uid });
+			}
 
 			var watchTypes = await _providersService.GetWatchTypesAsync();
 
@@ -571,6 +609,15 @@ namespace hrvster.Web.Controllers
 			}
 
 			_hrvsterUser = _sessionManager.GetUserInformation();
+
+			var ruleCount = await GetGameRuleCountsForAsync(_hrvsterUser.UserUid);
+
+			if (ruleCount > _hrvsterOptions.MaxRulesPerAccount)
+			{
+				_logger.LogWarning("Account with uid {accountUid} has a total of {activeRulesCount} active hashtags and their current max is {maxHashtags}", _hrvsterUser.UserUid, ruleCount, _hrvsterOptions.MaxRulesPerAccount);
+				_notificationService.AddErrorToastMessage("You have reached the maximum number of rules you can create.");
+				return RedirectToAction(actionName, controllerName, new { uid = Uid });
+			}
 
 			var accountCompanies = await _accountCompanyService.GetAccountCompaniesAsync(_hrvsterUser.UserUid);
 			var accountCompany = accountCompanies.FirstOrDefault();
@@ -710,6 +757,15 @@ namespace hrvster.Web.Controllers
 			}
 
 			return new { Uid = uid };
+		}
+
+		private async Task<int> GetGameRuleCountsForAsync(Guid userUid)
+		{
+			var rules = await _accountsService.GetAllRulesAsync(userUid);
+
+			if (rules == null) return 0;
+
+			return rules.GetActiveRules().Count();
 		}
 	}
 }

@@ -1,6 +1,7 @@
 ﻿using hrvster.ApplicationServices.Subscription;
 using hrvster.Core.Authentication;
 using hrvster.Models;
+using hrvster.Models.Options;
 using hrvster.Models.Subscriptions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
@@ -23,17 +24,23 @@ namespace hrvster.Core.Subscriptions
 		private readonly ISubscriptionService _subscriptionManager;
 		private readonly IAccountSubscriptionService _accountSubscriptionService;
 		private readonly ISessionManager _sessionManager;
+		private readonly PaymentPendingOptions _paymentPendingSettings;
+		private readonly HarvesterSettingsOptions _hrvsterSettings;
 
 		public ShouldBeSubscribedFilter(
 			ILoggerFactory loggerFactory,
 			ISubscriptionService subscriptionManager,
 			IAccountSubscriptionService accountSubscriptionService,
-			ISessionManager sessionManager)
+			ISessionManager sessionManager,
+			PaymentPendingOptions paymentPendingSettings,
+			HarvesterSettingsOptions hrvsterSettings)
 		{
 			_logger = loggerFactory.CreateLogger<ShouldBeSubscribedFilter>();
 			_sessionManager = sessionManager;
 			_subscriptionManager = subscriptionManager;
 			_accountSubscriptionService = accountSubscriptionService;
+			_paymentPendingSettings = paymentPendingSettings;
+			_hrvsterSettings = hrvsterSettings;
 		}
 
 		public void OnAuthorization(AuthorizationFilterContext context)
@@ -76,27 +83,62 @@ namespace hrvster.Core.Subscriptions
 			{
 				case SubscriptionStatus.UnSubscribed:
 				case SubscriptionStatus.PendingPayment:
-				case SubscriptionStatus.EndOfSubscription:
-					_logger.LogWarning("Redirecting user to unsubscribed page.");
-						
-					context.Result = new RedirectToActionResult(
-						"Index",
-						"Subscriptions",
-						new { subscriptionStatus = SubscriptionStatus.UnSubscribed.ToString() });
-				
-					break;
-				case SubscriptionStatus.Subscribed:
-					if(IsSubscriptionEndDate(accountSubscription))
+					_logger.LogWarning("User is pending payment. We will check if the time is up.");
+					if(accountSubscription.IsTrial)
 					{
-						_logger.LogWarning("Redirecting user to unsubscribed page.");
-
-						context.Result = new RedirectToActionResult(
-							"Index",
-							"Subscriptions",
-							new { SubscriptionStatus = SubscriptionStatus.EndOfSubscription.ToString() } );
+						var currentDaysInTrial = (DateTime.UtcNow - accountSubscription.StartDateUtc).TotalDays;
+						if(currentDaysInTrial > _hrvsterSettings.TrialDays)
+						{
+							context.Result = new RedirectToActionResult(
+								"Index",
+								"Subscriptions",
+								new { SubscriptionStatus = SubscriptionStatus.EndOfSubscription.ToString() });
+						}
+						break;
 					}
-
+					else
+					{
+						var currentHoursInPendingPayment = (DateTime.UtcNow - accountSubscription.StartDateUtc).TotalHours;
+						if(currentHoursInPendingPayment > _paymentPendingSettings.NumberOfHoursBeforeRollback)
+						{
+							context.Result = new RedirectToActionResult(
+								"Index",
+								"Subscriptions",
+								new { SubscriptionStatus = SubscriptionStatus.EndOfSubscription.ToString() });
+						}
+					}
 					break;
+
+				case SubscriptionStatus.EndOfSubscription:
+					EndOfSubscription(context);
+					break;
+
+				case SubscriptionStatus.Subscribed:
+					IsStillSubscribed(context, accountSubscription);
+					break;
+			}
+		}
+
+		private void EndOfSubscription(AuthorizationFilterContext context)
+		{
+			_logger.LogWarning("Redirecting user to unsubscribed page.");
+
+			context.Result = new RedirectToActionResult(
+				"Index",
+				"Subscriptions",
+				new { subscriptionStatus = SubscriptionStatus.UnSubscribed.ToString() });
+		}
+
+		private void IsStillSubscribed(AuthorizationFilterContext context, AccountSubscription accountSubscription)
+		{
+			if (IsSubscriptionEndDate(accountSubscription))
+			{
+				_logger.LogWarning("Redirecting user to unsubscribed page.");
+
+				context.Result = new RedirectToActionResult(
+					"Index",
+					"Subscriptions",
+					new { SubscriptionStatus = SubscriptionStatus.EndOfSubscription.ToString() });
 			}
 		}
 

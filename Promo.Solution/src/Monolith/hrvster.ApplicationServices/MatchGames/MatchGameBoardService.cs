@@ -204,7 +204,7 @@ namespace hrvster.ApplicationServices.MatchGames
 			_logger.LogInformation("Retrieving the board ids of all inserted boards started.");
 			Stopwatch getStopWatch = Stopwatch.StartNew();
 
-			var boardMappings = await _matchBoardsRepository.GetInsertedBoardIds(boards, cancellationToken);
+			//var boardMappings = await _matchBoardsRepository.GetInsertedBoardIds(boards, cancellationToken);
 
 			getStopWatch.Stop();
 

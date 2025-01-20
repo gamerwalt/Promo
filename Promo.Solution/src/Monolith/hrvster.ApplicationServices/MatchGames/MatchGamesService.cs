@@ -1,10 +1,11 @@
-﻿using hrvster.Games.Match.Models;
+﻿using hrvster.ApplicationServices.Subscription;
+using hrvster.Games.Match.Models;
 using hrvster.Infrastructure.Accounts;
 using hrvster.Infrastructure.Facebook;
 using hrvster.Infrastructure.MatchGames;
 using hrvster.Models;
+using hrvster.Models.Options;
 using Microsoft.Extensions.Logging;
-using Org.BouncyCastle.Asn1.Ocsp;
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -32,7 +33,7 @@ namespace hrvster.ApplicationServices.MatchGames
 		Task SetAsReadyToBeProcessedAsync(MatchGame matchGame, CancellationToken cancellationToken);
 		Task SetAsTilesGeneratedAsync(MatchGame matchGame, CancellationToken token);
 		Task SetMatchGameAsProcessedAsync(MatchGame matchGame, CancellationToken cancellationToken);
-		Task UpdateMatchGameAsync(MatchGame matchGame, string timeZone, bool isDaylight, CancellationToken cancellationToken);
+		Task UpdateMatchGameAsync(MatchGame matchGame, string timeZone, bool isDaylight, Guid userUid, CancellationToken cancellationToken);
 	}
 
 	public class MatchGamesService : IMatchGamesService
@@ -47,6 +48,8 @@ namespace hrvster.ApplicationServices.MatchGames
 		private readonly Func<ExternalClientType, Core.Clients.Publishers.IExternalClient> _publisherResolver;
 		private readonly IMatchPrizeService _matchPrizeService;
 		private readonly IMatchGamePlayRepository _matchGamePlayRepository;
+		private readonly HarvesterSettingsOptions _hrvsterSettings;
+		private readonly IAccountSubscriptionService _accountSubscriptionService;
 
 		public MatchGamesService(
 			ILoggerFactory loggerFactory,
@@ -58,7 +61,9 @@ namespace hrvster.ApplicationServices.MatchGames
 			IFacebookPageRepository facebookPageRepository,
 			Func<ExternalClientType, Core.Clients.Publishers.IExternalClient> publisherResolver,
 			IMatchGamePlayRepository matchGamePlayRepository,
-			IMatchPrizeService matchPrizeService)
+			IMatchPrizeService matchPrizeService,
+			HarvesterSettingsOptions hrvsterSettings,
+			IAccountSubscriptionService accountSubscriptionService)
 		{
 			_logger = loggerFactory.CreateLogger<MatchGamesService>();
 			_repository = repository;
@@ -70,6 +75,8 @@ namespace hrvster.ApplicationServices.MatchGames
 			_publisherResolver = publisherResolver;
 			_matchGamePlayRepository = matchGamePlayRepository;
 			_matchPrizeService = matchPrizeService;
+			_hrvsterSettings = hrvsterSettings;
+			_accountSubscriptionService = accountSubscriptionService;
 		}
 
 		public async Task<MatchPrize> GetPrizeFromGameplayUidAsync(Guid gameplayUid, CancellationToken cancellationToken)
@@ -99,16 +106,16 @@ namespace hrvster.ApplicationServices.MatchGames
 			=> await _repository.SetAsTilesGeneratedAsync(matchGame, token);
 
 		public async Task DeleteGameRuleAsync(
-			Guid ruleUid, 
-			Guid gameUid, 
+			Guid ruleUid,
+			Guid gameUid,
 			Guid userUid,
-			ExternalClientType externalClientType, 
-			string externalId, 
+			ExternalClientType externalClientType,
+			string externalId,
 			CancellationToken cancellationToken)
 		{
 			var rule = await _matchGameRulesRepository.GetAsync(ruleUid);
 
-			if(rule == null)
+			if (rule == null)
 			{
 				_logger.LogError("Unable to delete the game rule with uid {ruleUid} because we could not locate the rule.",
 					ruleUid);
@@ -183,7 +190,7 @@ namespace hrvster.ApplicationServices.MatchGames
 				return false;
 			}
 
-			if(!game.HasBeenGenerated)
+			if (!game.HasBeenGenerated)
 			{
 				_logger.LogWarning("Gameboards for the game has not been generated.");
 				return false;
@@ -251,11 +258,29 @@ namespace hrvster.ApplicationServices.MatchGames
 			=> _repository.SetAsGeneratedAsync(matchGame, cancellationToken);
 
 		public async Task UpdateMatchGameAsync(
-			MatchGame matchGame, string timeZone, bool isDaylight, CancellationToken cancellationToken)
+			MatchGame matchGame,
+			string timeZone,
+			bool isDaylight,
+			Guid userUid,
+			CancellationToken cancellationToken)
 		{
 			if (matchGame == null) throw new ArgumentNullException(nameof(matchGame));
 			if (matchGame.CampaignId == 0 || matchGame.CampaignUid == Guid.Empty)
 				throw new ArgumentException("Match game campaign needs to be supplied.");
+
+			var accountSubscription = await _accountSubscriptionService.GetAccountSubscriptionAsync(userUid);
+
+			if(accountSubscription != null)
+			{
+				if(accountSubscription.IsTrial)
+				{
+					if (matchGame.NumberOfBoards > _hrvsterSettings.TrialMatchBoards)
+					{
+						matchGame.NumberOfBoards = _hrvsterSettings.TrialMatchBoards;
+						matchGame.NumberOfWinnableBoards = matchGame.NumberOfBoards;
+					}
+				}
+			}
 
 			await _repository.UpdateAsync(matchGame, timeZone, isDaylight, cancellationToken);
 		}

@@ -6,13 +6,27 @@
 @{
     var linkUrl = @linkBuilder.BuildTwitterLink(Model.Rule.ExternalId, Guid.Empty, Model.ScreenName).Result;
 }
-
-<div class="form-container mx-auto p-4">
-    <div>You have been entered into the sweepstake <strong>@Model.Sweep.Name</strong></div>
-    <div>
-        The sweepstake will run from <strong>@Model.Sweep.StartDateUtc.ToString("MMM d, yyyy hh:MM") GMT</strong>
-        to <strong>@Model.Sweep.EndDateUtc.ToString("MMM d, yyyy hh:MM") GMT</strong> with the draw on 
-        <strong>@Model.Sweep.DrawDateUtc.ToString("MMM d, yyyy hh:MM") GMT</strong>
+<link rel="stylesheet" href="~/css/site.css">
+<div class="section-game">
+    <div class="container">
+        <div class="content-wrapper d-flex justify-content-center align-items-center flex-column vh-100">
+            <div style="text-align: center">
+                <h4 class="win-message text-center">
+                    You have been entered into the sweepstake <strong>@Model.Sweep.Name</strong>
+                </h4>
+                <hr/>
+                <h4 class="win-message text-center">
+                    The sweepstake will run from <strong>@Model.Sweep.StartDateUtc.ToString("MMM d, yyyy hh:MM") GMT</strong> to <strong>@Model.Sweep.EndDateUtc.ToString("MMM d, yyyy hh:MM") GMT</strong>.
+                </h4>
+                <hr/>
+                <h4 class="win-message text-center">
+                    With a prize draw on <strong>@Model.Sweep.DrawDateUtc.ToString("MMM d, yyyy hh:MM") GMT</strong>
+                </h4>
+                <hr/>
+                <h4 class="win-message text-center">
+                    Winners will be automatically notified.
+                </h4>
+            </div>
+        </div>
     </div>
-    <div>The winners will be posted on the tweet you came from belong to <a target="_blank" href="@linkUrl">@linkUrl</a> </div>
 </div>

@@ -18,5 +18,9 @@ namespace hrvster.Models.Subscriptions
 		public decimal PricePerYear { get; set; }
 		public FlutterwavePlan FlutterwavePlan { get; set; }
 		public StripePlan StripePlan { get; set; }
+		public bool IsOnTrial { get; set; }
+		public int MatchGamesPerMonth { get; set; }
+		public int MatchHashtagsPerMonth { get; set; }
+		public int MatchPlaysPerMonth { get; set; }
 	}
 }

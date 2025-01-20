@@ -1,8 +1,11 @@
-﻿using hrvster.ApplicationServices.Harvesters.Facebook;
+﻿using hrvster.ApplicationServices.Accounts;
+using hrvster.ApplicationServices.Harvesters.Facebook;
+using hrvster.ApplicationServices.Subscription;
 using hrvster.Core.Clients.Common;
 using hrvster.Core.Clients.Publishers;
 using hrvster.Core.Requests.Rules.Notifications;
 using hrvster.Models;
+using hrvster.Models.Options;
 using hrvster.Models.Profiles;
 using MediatR;
 using Microsoft.AspNetCore.Http;
@@ -10,6 +13,9 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using hrvster.Models.Extensions;
+using System.Linq;
+using FirebaseAdmin.Messaging;
 
 namespace hrvster.ApplicationServices.Publishing
 {
@@ -25,17 +31,26 @@ namespace hrvster.ApplicationServices.Publishing
 		private readonly Func<ExternalClientType, IExternalClient> _publisherResolver;
 		private readonly IMediator _mediator;
 		private readonly IFacebookPageSerivce _facebookPageService;
+		private readonly HarvesterSettingsOptions _hrvsterSettings;
+		private readonly IAccountSubscriptionService _accountSubscriptionService;
+		private readonly IAccountsService _accountService;
 
 		public PublishService(
 			ILoggerFactory loggerFactory,
 			Func<ExternalClientType, IExternalClient> publisherResolver,
 			IMediator mediator,
-			IFacebookPageSerivce facebookPageSerivce)
+			IFacebookPageSerivce facebookPageSerivce,
+			HarvesterSettingsOptions hrvsterSettings,
+			IAccountSubscriptionService accountSubscriptionService,
+			IAccountsService accountsService)
 		{
 			_logger = loggerFactory.CreateLogger<PublishService>();
 			_publisherResolver = publisherResolver;
 			_mediator = mediator;
 			_facebookPageService = facebookPageSerivce;
+			_hrvsterSettings = hrvsterSettings;
+			_accountSubscriptionService = accountSubscriptionService;
+			_accountService = accountsService;
 		}
 
 		public async Task<bool> PublishAsync(Guid ruleUid, string urlLink, Profile profile, int gameId, Guid gameUid, GameTypesEnum gameType, IList<IFormFile> media, IList<string> mediaLocation, string token, Guid userUid, string watchValue, int watchTypeId, string tweetText, ExternalClientType externalClientType, bool following, string pageId = "")
@@ -46,6 +61,14 @@ namespace hrvster.ApplicationServices.Publishing
 				userUid,
 				profile.ScreenName,
 				externalClientType.ToString());
+
+			var ruleCount = await GetGameRuleCountsForAsync(profile.Account.AccountUid);
+			if (ruleCount >= _hrvsterSettings.MaxRulesPerAccount)
+			{
+				_logger.LogError("The user with Uid {userUid} has reached the maximum number of rules allowed", userUid);
+
+				return false;
+			}
 
 			var publisher = _publisherResolver(externalClientType);
 
@@ -76,10 +99,10 @@ namespace hrvster.ApplicationServices.Publishing
 			return true;
 		}
 
-		private static Message BuildMessage(
+		private static Core.Clients.Common.Message BuildMessage(
 			Guid gameUid, Profile profile, IList<string> mediaLocation, string watchValue, int watchTypeId, string tweetText)
 		{
-			return new Message
+			return new Core.Clients.Common.Message
 			{
 				GameUid = gameUid,
 				Hashtag = watchValue,
@@ -117,6 +140,15 @@ namespace hrvster.ApplicationServices.Publishing
 			//Todo: Finish the sending of the scheduled posts
 
 			return true;
+		}
+
+		private async Task<int> GetGameRuleCountsForAsync(Guid userUid)
+		{
+			var rules = await _accountService.GetAllRulesAsync(userUid);
+
+			if (rules == null) return 0;
+
+			return rules.GetActiveRules().Count();
 		}
 	}
 }

@@ -25,6 +25,7 @@ namespace hrvster.Web.Controllers
 		private readonly ISessionManager _sessionManager;
 		private readonly IAccountsService _accountsService;
 		private readonly PaymentProviderOptions _paymentProviderOption;
+		private readonly HarvesterSettingsOptions _hrvsterSettings;
 
 		private HrvsterUser _hrvsterUser;
 
@@ -35,7 +36,8 @@ namespace hrvster.Web.Controllers
 			IToastNotification notificationService,
 			ISessionManager sessionManager,
 			IAccountsService accountsService,
-			PaymentProviderOptions paymentProviderOptions)
+			PaymentProviderOptions paymentProviderOptions,
+			HarvesterSettingsOptions hrvsterSettings)
 		{
 			_logger = loggerFactory.CreateLogger<SubscriptionsController>();
 			_mediator = mediator;
@@ -44,6 +46,7 @@ namespace hrvster.Web.Controllers
 			_sessionManager = sessionManager;
 			_accountsService = accountsService;
 			_paymentProviderOption = paymentProviderOptions;
+			_hrvsterSettings = hrvsterSettings;
 		}
 
 		public async Task<IActionResult> Index(string subscriptionStatus)
@@ -73,9 +76,42 @@ namespace hrvster.Web.Controllers
 		[Route("/Subscriptions/EndOfSubscription")]
 		public async Task<IActionResult> EndOfSubscription()
 		{
-			_notificationService.AddInfoToastMessage("You have reached the end of your subscription. You will need to subscribe again to continue.");
+			_notificationService.AddInfoToastMessage("You are either in trial mode or you have reached the end of your subscription. You will need to subscribe again to continue.");
 
 			return RedirectToAction("UnSubscribed");
+		}
+
+		[HttpPost]
+		[Route("/SelectPlan/Trial/{planUid:Guid}")]
+		public async Task<IActionResult> SelectTrialForUser(Guid planUid)
+		{
+			_hrvsterUser = _sessionManager.GetUserInformation();
+
+			var plan = await _mediator.Send(new GetPlanByUidRequest(planUid));
+
+			if(_hrvsterUser.UserUid == Guid.Empty)
+			{
+				return RedirectToAction("Dashboard");
+			}
+
+			if (plan == null) return RedirectToAction("Dashboard");
+
+			var operation = await _subscriptionService.SubscribeUserToAsync(plan, _hrvsterUser.UserUid, true);
+
+			if (operation.HasError)
+			{
+				_logger.LogWarning("Error trying to subscribe the user with Uid {userUid} to the plan {planName}. Message received. ",
+					_hrvsterUser.UserUid,
+					plan.PlanName);
+
+				_notificationService.AddErrorToastMessage(operation.Message);
+
+				return RedirectToAction("Index", "Dashboard");
+			}
+
+			_notificationService.AddSuccessToastMessage($"You have been subscribed to the trial. You will be able to use the plan for {_hrvsterSettings.TrialDays} days.");
+
+			return RedirectToAction("Index", "Dashboard");
 		}
 
 		[HttpPost]

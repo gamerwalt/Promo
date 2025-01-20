@@ -1,10 +1,13 @@
 ﻿using hrvster.ApplicationServices.Common;
 using hrvster.ApplicationServices.MatchGames;
+using hrvster.ApplicationServices.Subscription;
 using hrvster.Core.Requests.MatchGames;
+using hrvster.Exceptions;
+using hrvster.Models.Extensions;
+using hrvster.Models.Options;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using NToastNotify;
-using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -17,22 +20,70 @@ namespace hrvster.Core.Handlers.MatchGame
 		private readonly IMatchGamesService _service;
 		private readonly ICampaignService _campaignService;
 		private readonly IToastNotification _notificationService;
+		private readonly IAccountSubscriptionService _accountSubscriptionService;
+		private readonly HarvesterSettingsOptions _hrvsterSettings;
 
 		public CreateMatchGame(
 			ILoggerFactory loggerFactory,
 			IMatchGamesService service,
 			ICampaignService campaignService,
-			IToastNotification notificationService)
+			IToastNotification notificationService,
+			IAccountSubscriptionService accountSubscriptionService,
+			HarvesterSettingsOptions harvesterSettings)
 		{
 			_logger = loggerFactory.CreateLogger<CreateMatchGame>();
 			_service = service;
 			_campaignService = campaignService;
 			_notificationService = notificationService;
+			_accountSubscriptionService = accountSubscriptionService;
+			_hrvsterSettings = harvesterSettings;
 		}
 
 		public async Task<bool> Handle(CreateMatchGameRequest request, CancellationToken cancellationToken)
 		{
-			if (! await ValidateCreateMatchGameRequestName(request, cancellationToken))
+			var accountSubscription = await _accountSubscriptionService.GetAccountSubscriptionAsync(request.AccountUid);
+			if (accountSubscription == null)
+			{
+				_logger.LogWarning("Account with uid {accountUid} is not subscribed.", request.AccountUid);
+
+				throw new AccountIsNotSubscribedException($"Account with uid {request.AccountUid} is not subscribed.");
+			}
+
+			var matchGames = await _service.GetAccountMatchGamesAsync(request.AccountUid, cancellationToken);
+			var activeMatchGames = matchGames.Where(s => s.IsActive() || s.WillBeInProgress()).ToList();
+
+			var isTrial = accountSubscription.IsTrial;
+
+			if (isTrial)
+			{
+				if (activeMatchGames.Count >= _hrvsterSettings.TrialMatchGames)
+				{
+					_notificationService.AddErrorToastMessage("You have reached the maximum number of match games allowed for the trial.");
+
+					return false;
+				}
+
+				if(request.NumberOfBoards > _hrvsterSettings.TrialMatchBoards)
+				{
+					_notificationService.AddErrorToastMessage($"You cannot create more than {_hrvsterSettings.TrialMatchBoards} boards.");
+
+					return false;
+				}
+			}
+
+			if (!isTrial)
+			{
+				if (accountSubscription.Plan.MatchGamesPerMonth != 0)
+				{
+					if (activeMatchGames.Count >= accountSubscription.Plan.MatchGamesPerMonth)
+					{
+						_notificationService.AddErrorToastMessage("You have reached the maximum number of match games allowed for your subscription plan.");
+						return false;
+					}
+				}
+			}
+
+			if (!await ValidateCreateMatchGameRequestName(request, cancellationToken))
 			{
 				_notificationService.AddErrorToastMessage("The match game name you supplied already exists.");
 

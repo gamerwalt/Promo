@@ -23,7 +23,7 @@ namespace hrvster.ApplicationServices.Subscription
 		SubscriptionStatus IsAccountSubscribed(Guid accountUid);
 		Task ProcessFlutterwaveTransactionAsync(Guid flutterwaveEventUid, FlutterwaveCardTransaction cardTransaction);
 		Task SaveFlutterwaveEventAsync(string flutterwaveEventString);
-		Task<ServiceOperation<AccountSubscription>> SubscribeUserToAsync(Plan plan, Guid accountUid);
+		Task<ServiceOperation<AccountSubscription>> SubscribeUserToAsync(Plan plan, Guid accountUid, bool isTrial = false);
 		Task UnsubscribeAsync(Guid accountUid, PaymentClient paymentClient, CancellationToken cancellationToken);
 	}
 
@@ -112,9 +112,12 @@ namespace hrvster.ApplicationServices.Subscription
 			}
 		}
 
-		public async Task<ServiceOperation<AccountSubscription>> SubscribeUserToAsync(Plan plan, Guid accountUid)
+		public async Task<ServiceOperation<AccountSubscription>> SubscribeUserToAsync(
+			Plan plan, 
+			Guid accountUid, 
+			bool isTrial = false)
 		{
-			var result = await _mediator.Send(new SubscribeUserToPlanRequest(accountUid, plan));
+			var result = await _mediator.Send(new SubscribeUserToPlanRequest(accountUid, plan, isTrial));
 
 			await _mediator.Publish(new UserSubscribed(accountUid, plan));
 

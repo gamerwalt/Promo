@@ -3,6 +3,7 @@ using hrvster.Core.Requests.Notifications;
 using hrvster.Infrastructure;
 using hrvster.Models;
 using hrvster.Models.Extensions;
+using hrvster.Models.Options;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using NToastNotify;
@@ -20,19 +21,22 @@ namespace hrvster.Core.Handlers.Sweepstakes.Creation
 		private readonly ISweepsRepository _repository;
 		private readonly IAccountSubscriptionService _accountSubscriptionService;
 		private readonly IToastNotification _notificationService;
+		private readonly HarvesterSettingsOptions _hrvsterSettings;
 
 		public CreateSweepRequestHandler(
 			ILoggerFactory loggerFactory, 
 			IMediator mediator, 
 			ISweepsRepository repository,
 			IAccountSubscriptionService accountSubscriptionService,
-			IToastNotification notificationService)
+			IToastNotification notificationService,
+			HarvesterSettingsOptions hrvsterSettings)
 		{
 			_logger = loggerFactory.CreateLogger<CreateSweepRequestHandler>();
 			_mediator = mediator;
 			_repository = repository;
 			_accountSubscriptionService = accountSubscriptionService;
 			_notificationService = notificationService;
+			_hrvsterSettings = hrvsterSettings;
 		}
 
 		public async Task<Sweep> Handle(Requests.CreateSweep request, CancellationToken cancellationToken)
@@ -55,18 +59,34 @@ namespace hrvster.Core.Handlers.Sweepstakes.Creation
 			var sweeps = await _repository.GetAllForAccountAsync(request.Sweep.AccountUid);
 			var activeSweeps = sweeps.Where(s => s.IsActive() || s.WillBeInProgress()).ToList();
 
-			if (accountSubscription.Plan.SweepstakesPerMonth != 0)
+			if (!accountSubscription.IsTrial)
 			{
-				if (activeSweeps.Count >= accountSubscription.Plan.SweepstakesPerMonth)
+				if (accountSubscription.Plan.SweepstakesPerMonth != 0)
+				{
+					if (activeSweeps.Count >= accountSubscription.Plan.SweepstakesPerMonth)
+					{
+						_logger.LogWarning("Account with uid {accountUid} has a total of {activeSweepsCount} active sweepstakes and their current max is {maxPromotions}",
+							request.Sweep.AccountUid,
+							activeSweeps.Count,
+							accountSubscription.Plan.SweepstakesPerMonth);
+
+						_notificationService.AddErrorToastMessage($"You cannot create more sweepstakes.");
+						_notificationService.AddInfoToastMessage($"You can only have {accountSubscription.Plan.PromotionsPerMonth} active sweepstakes per month.");
+
+						return default;
+					}
+				}
+			}
+			else if (accountSubscription.IsTrial)
+			{
+				if (activeSweeps.Count >= _hrvsterSettings.TrialSweepGames)
 				{
 					_logger.LogWarning("Account with uid {accountUid} has a total of {activeSweepsCount} active sweepstakes and their current max is {maxPromotions}",
 						request.Sweep.AccountUid,
 						activeSweeps.Count,
-						accountSubscription.Plan.SweepstakesPerMonth);
-
+						_hrvsterSettings.TrialSweepGames);
 					_notificationService.AddErrorToastMessage($"You cannot create more sweepstakes.");
-					_notificationService.AddInfoToastMessage($"You can only have {accountSubscription.Plan.PromotionsPerMonth} active sweepstakes per month.");
-
+					_notificationService.AddInfoToastMessage($"You can only have {_hrvsterSettings.TrialSweepGames} active sweepstakes while on Trial mode.");
 					return default;
 				}
 			}

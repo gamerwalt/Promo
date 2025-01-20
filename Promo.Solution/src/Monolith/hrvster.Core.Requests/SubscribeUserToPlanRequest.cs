@@ -9,14 +9,17 @@ namespace hrvster.Core.Requests
 	{
 		private Guid _userUid;
 		private Plan _plan;
+		private bool _isTrial;
 
-		public SubscribeUserToPlanRequest(Guid userUid, Plan plan)
+		public SubscribeUserToPlanRequest(Guid userUid, Plan plan, bool isTrial = false)
 		{
 			_userUid = userUid;
 			_plan = plan;
+			_isTrial = isTrial;
 		}
 
 		public Guid UserUId { get { return _userUid; } }
 		public Plan Plan { get { return _plan; } }
+		public bool IsTrial { get { return _isTrial; } }
 	}
 }

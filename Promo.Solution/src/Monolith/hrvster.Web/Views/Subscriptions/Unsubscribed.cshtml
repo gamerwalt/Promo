@@ -27,6 +27,7 @@
 							</button>
 						</div>
 						<div class="row g-10">
+							<div style="text-align: center" class="text-succes fw-bold fs-lg-1">You will not be charged for 1 month if you select Trial Mode</div>
 							@foreach (var plan in Model)
 							{
 								<div class="col-xl-4">
@@ -128,6 +129,10 @@
 											</div>
 											<form asp-action="SelectPlanForUser" asp-route-planUid="@plan.PlanUid">
 												<button class="btn btn-sm btn-primary fw-bold fs-5" type="submit">Select</button>
+											</form>
+											<hr />
+											<form asp-action="SelectTrialForUser" asp-route-planUid="@plan.PlanUid">
+												<button class="btn btn-sm btn-info fw-bold fs-5" type="submit">Trial Mode</button>
 											</form>
 										</div>
 									</div>

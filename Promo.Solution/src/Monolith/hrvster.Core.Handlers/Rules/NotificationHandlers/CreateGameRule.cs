@@ -7,6 +7,7 @@ using hrvster.Infrastructure.Core;
 using hrvster.Infrastructure.MatchGames;
 using hrvster.Models;
 using hrvster.Models.Extensions;
+using hrvster.Models.Options;
 using hrvster.Models.Sweepstakes;
 using MediatR;
 using Microsoft.Extensions.Logging;
@@ -28,6 +29,7 @@ namespace hrvster.Core.Handlers.Rules.NotificationHandlers
 		private readonly IAccountSubscriptionService _accountSubscriptionService;
 		private readonly ISweepRulesPageRepository _sweepRulesPageRepository;
 		private readonly IMatchRulePageRepository _matchRulePageRepository;
+		private readonly HarvesterSettingsOptions _hrvsterSettings;
 
 		public CreateGameRule(
 			ILoggerFactory loggerFactory,
@@ -38,7 +40,8 @@ namespace hrvster.Core.Handlers.Rules.NotificationHandlers
 			IAccountsService accountsService,
 			IAccountSubscriptionService accountSubscriptionService,
 			ISweepRulesPageRepository sweepRulesPageRepository,
-			IMatchRulePageRepository matchRulePageRepository)
+			IMatchRulePageRepository matchRulePageRepository,
+			HarvesterSettingsOptions hrvsterSettings)
 		{
 			_logger = loggerFactory.CreateLogger<CreateGameRule>();
 			_watchTypesRepository = watchTypesRepository;
@@ -49,6 +52,7 @@ namespace hrvster.Core.Handlers.Rules.NotificationHandlers
 			_accountSubscriptionService = accountSubscriptionService;
 			_sweepRulesPageRepository = sweepRulesPageRepository;
 			_matchRulePageRepository = matchRulePageRepository;
+			_hrvsterSettings = hrvsterSettings;
 		}
 
 		public async Task Handle(RulePublished notification, CancellationToken cancellationToken)
@@ -65,13 +69,40 @@ namespace hrvster.Core.Handlers.Rules.NotificationHandlers
 
 			var ruleCount = await GetGameRuleCountsForAsync(notification.Profile.Account.AccountUid);
 
-			if (ruleCount >= accountSubscription.Plan.GetHashtagCount())
+			if (!accountSubscription.IsTrial)
 			{
-				_logger.LogWarning("Account with uid {accountUid} has a total of {activeRulesCount} active hashtags and their current max is {maxHashtags}", notification.Profile.Account.AccountUid,
-				ruleCount,
-						accountSubscription.Plan.HashtagsPerMonth);
+				if (ruleCount >= accountSubscription.Plan.GetHashtagCount())
+				{
+					_logger.LogWarning("Account with uid {accountUid} has a total of {activeRulesCount} active hashtags and their current max is {maxHashtags}", notification.Profile.Account.AccountUid,
+					ruleCount,
+							accountSubscription.Plan.HashtagsPerMonth);
 
-				return;
+					return;
+				}
+			}
+			else if (accountSubscription.IsTrial)
+			{
+				switch (notification.GameType)
+				{
+					case GameTypesEnum.Sweeps:
+						if(ruleCount >= _hrvsterSettings.TrialSweepRules)
+						{
+							_logger.LogWarning("Account with uid {accountUid} has a total of {activeRulesCount} active hashtags and their current max is {maxHashtags}", notification.Profile.Account.AccountUid,
+							ruleCount,
+									_hrvsterSettings.TrialSweepRules);
+							return;
+						}
+						break;
+					case GameTypesEnum.MatchGames:
+						if (ruleCount >= _hrvsterSettings.TrialMatchRules)
+						{
+							_logger.LogWarning("Account with uid {accountUid} has a total of {activeRulesCount} active hashtags and their current max is {maxHashtags}", notification.Profile.Account.AccountUid,
+							ruleCount,
+									_hrvsterSettings.TrialMatchRules);
+							return;
+						}
+						break;
+				}
 			}
 
 			var watchTypes = await _watchTypesRepository.GetWatchTypesAsync();

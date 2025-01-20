@@ -173,18 +173,44 @@ namespace hrvster.Infrastructure.MatchGames
 
 		public async Task<Guid> GetRandomBoardAsync(Guid gameUid, CancellationToken cancellationToken)
 		{
-			var query = $"SELECT board_uid FROM match_boards as mb LEFT JOIN match_game_plays as mp ON mp.game_board_id = mb.board_id INNER JOIN match_games as mg ON mg.match_game_id = mb.match_game_id WHERE mg.match_game_uid = '{gameUid}' AND mp.game_board_id IS NULL AND mb.is_reserved = 0 ORDER BY RAND() LIMIT 1";
+			// Step 1: Query to get the total number of rows
+			const string countQuery = @"
+				SELECT COUNT(1) 
+				FROM match_boards AS mb FORCE INDEX (idx_match_game_reserved)
+				INNER JOIN match_games AS mg ON mg.match_game_id = mb.match_game_id
+				WHERE mg.match_game_uid = @matchGameUid AND mb.is_reserved = 0";
+
 			using var conn = new MySqlConnection(_database.GetConnectionString());
-			var command = new MySqlCommand(query, conn);
-			await conn.OpenAsync();
-			var randomBoardUid = (string)await command.ExecuteScalarAsync(cancellationToken);
+			await conn.OpenAsync(cancellationToken);
 
-			if (string.IsNullOrWhiteSpace(randomBoardUid))
-			{
+			using var countCmd = new MySqlCommand(countQuery, conn);
+			countCmd.Parameters.AddWithValue("@matchGameUid", gameUid);
+
+			var totalRows = Convert.ToInt32(await countCmd.ExecuteScalarAsync(cancellationToken));
+			if (totalRows == 0)
 				return Guid.Empty;
-			}
 
-			return Guid.Parse(randomBoardUid);
+			// Step 2: Generate a random offset
+			var random = new Random();
+			var offset = random.Next(0, totalRows);
+
+			// Step 3: Fetch a single random board using OFFSET
+			const string randomBoardQuery = @"
+				SELECT mb.board_uid 
+				FROM match_boards AS mb FORCE INDEX (idx_match_game_reserved)
+				INNER JOIN match_games AS mg ON mg.match_game_id = mb.match_game_id
+				WHERE mg.match_game_uid = @matchGameUid AND mb.is_reserved = 0
+				LIMIT 1 OFFSET @offset";
+
+			using var randomBoardCmd = new MySqlCommand(randomBoardQuery, conn);
+			randomBoardCmd.Parameters.AddWithValue("@matchGameUid", gameUid);
+			randomBoardCmd.Parameters.AddWithValue("@offset", offset);
+
+			var result = await randomBoardCmd.ExecuteScalarAsync(cancellationToken);
+
+			return result == null || result == DBNull.Value
+				? Guid.Empty
+				: Guid.Parse(result.ToString());
 		}
 
 		public async Task<Guid> GetGameUidAsync(int gameId, CancellationToken token)

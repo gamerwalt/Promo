@@ -282,7 +282,9 @@ namespace hrvster.Web.Controllers
 				await _matchGamesService.UpdateMatchGameAsync(
 					matchGame, 
 					_hrvsterUser.WindowsTimeZone, 
-					_hrvsterUser.IsDaylight, cancellationToken);
+					_hrvsterUser.IsDaylight, 
+					_hrvsterUser.UserUid,
+					cancellationToken);
 
 				return RedirectToAction("View", new { Uid = Uid });
 			}

@@ -1,3 +1,5 @@
+using Hangfire;
+using Hangfire.MemoryStorage;
 using hrvster.ApplicationServices.Harvesters.Facebook;
 using hrvster.Core.Handlers.ServiceHandlers;
 using hrvster.Core.Requests.ServiceRequests;
@@ -99,6 +101,16 @@ namespace hrvster.Services
 
 					services.AddTransient<IFacebookPageSerivce, FacebookPageSerivce>();
 					services.AddTransient<IFacebookPageRepository, FacebookPageRepository>();
+
+                    services.AddHangfire(config =>
+                    {
+                        config.SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
+                            .UseSimpleAssemblyNameTypeSerializer()
+                            .UseDefaultTypeSerializer()
+                            .UseMemoryStorage();
+                    });
+
+					services.AddHangfireServer();
 
 					LoadServices(services);
 					AddMediator(services);

@@ -1,7 +1,9 @@
 ﻿using hrvster.Core.Authentication;
 using hrvster.Core.Requests;
 using hrvster.Infrastructure.Subscriptions;
+using hrvster.Models;
 using hrvster.Models.Core;
+using hrvster.Models.Options;
 using hrvster.Models.Subscriptions;
 using MediatR;
 using Microsoft.Extensions.Logging;
@@ -16,15 +18,25 @@ namespace hrvster.Core.Handlers
 		private readonly ILogger<SubscribeUserToPlan> _logger;
 		private readonly IAccountSubscriptionsRepository _repository;
 		private readonly ISessionManager _sessionManager;
+		private readonly HarvesterSettingsOptions _harvsterSettings;
+		private readonly PaymentProviderOptions _paymentProviderOption;
+
+		private readonly PaymentClient _paymentClient;
 
 		public SubscribeUserToPlan(
 			ILoggerFactory loggerFactory,
 			IAccountSubscriptionsRepository repository,
-			ISessionManager sessionManager)
+			ISessionManager sessionManager,
+			HarvesterSettingsOptions harvesterSettings,
+			PaymentProviderOptions paymentProviderOption)
 		{
 			_logger = loggerFactory.CreateLogger<SubscribeUserToPlan>();
 			_repository = repository;
 			_sessionManager = sessionManager;
+			_harvsterSettings = harvesterSettings;
+
+			_paymentProviderOption = paymentProviderOption;
+			_paymentClient = Enum.Parse<PaymentClient>(_paymentProviderOption.PaymentProvider);
 		}
 
 		public async Task<ServiceOperation<AccountSubscription>> Handle(
@@ -32,7 +44,9 @@ namespace hrvster.Core.Handlers
 		{
 			var hrvsterUser = _sessionManager.GetUserInformation();
 			var startDate = DateTime.Now;
-			var endDate = startDate.AddDays(30);
+			var endDate = request.IsTrial 
+				? startDate.AddDays(_harvsterSettings.TrialDays) 
+				: startDate.AddDays(30);
 
 			var startDateUtc = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(startDate, TimeZoneInfo.Local.Id,
 				hrvsterUser.WindowsTimeZone);
@@ -57,6 +71,10 @@ namespace hrvster.Core.Handlers
 
 			if(accountSubscription != null)
 			{
+				if(accountSubscription.IsTrial && request.IsTrial)
+				{
+					return ServiceOperation<AccountSubscription>.CreateFailedOperation(null, "Account was not able to be subscribed. User is trying to re-trial.", nameof(SubscribeUserToPlan));
+				}
 				//add to history
 				await _repository.CreateHistoryAsync(accountSubscription);
 				//update current
@@ -77,7 +95,8 @@ namespace hrvster.Core.Handlers
 				IsDiscounted = false,
 				SubscriptionStatus = Models.SubscriptionStatus.PendingPayment,
 				SubscriptionUid = subscriptionUid,
-				PaymentClient = Models.PaymentClient.Flutterwave
+				PaymentClient = Models.PaymentClient.Flutterwave,
+				IsTrial = request.IsTrial
 			});
 						
 

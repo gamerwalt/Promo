@@ -111,7 +111,8 @@ namespace hrvster.Template1.Web
 
 			Log.Information("Added Cookies auth scheme.");
 
-			builder.Services.AddControllersWithViews().AddRazorRuntimeCompilation();
+			builder.Services.AddControllersWithViews()
+				.AddRazorRuntimeCompilation();
 
 			builder.Services.AddMvc(o =>
 			{
@@ -180,6 +181,7 @@ namespace hrvster.Template1.Web
 			builder.Services.AddPostSchedulers();
 			builder.Services.AddWatchTypeRepositories();
 			builder.Services.AddTransient<CryptoHelper>();
+			builder.Services.AddNotificationConfigurationOptions(builder.Configuration);
 
 			builder.Services.AddTransient<TwitterClient>()
 				.AddTransient<InstagramClient>()
@@ -205,7 +207,7 @@ namespace hrvster.Template1.Web
 			builder.Services.AddScoped<ILayoutService, LayoutService>();
 			builder.Services.AddTransient<IGameService, GameService>();
 			builder.Services.AddTransient<ISweepstakesService, SweepstakesService>();
-			builder.Services.AddTransient<IMatchGamesService, MatchGamesService>();
+			builder.Services.AddScoped<IMatchGamesService, MatchGamesService>();
 			builder.Services.AddTransient<IMatchRulesService, MatchRulesService>();
 			builder.Services.AddTransient<IPublishService, PublishService>();
 			builder.Services.AddTransient<IAccountsService, AccountsService>();

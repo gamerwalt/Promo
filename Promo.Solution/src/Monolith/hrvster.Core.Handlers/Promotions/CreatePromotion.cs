@@ -4,6 +4,7 @@ using hrvster.Core.Requests.WebRequests.Promotions;
 using hrvster.Infrastructure;
 using hrvster.Models;
 using hrvster.Models.Extensions;
+using hrvster.Models.Options;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using NToastNotify;
@@ -20,19 +21,22 @@ namespace hrvster.Core.Handlers.Promotions
 		private readonly IAccountSubscriptionService _accountSubscriptionService;
 		private readonly IMediator _mediator;
 		private readonly IToastNotification _notificationService;
+		private readonly HarvesterSettingsOptions _hrvsterSettings;
 
 		public CreatePromotion(
 			ILoggerFactory loggerFactory,
 			ICampaignRepository repository,
 			IAccountSubscriptionService accountSubscriptionService,
 			IMediator mediator,
-			IToastNotification notificationService)
+			IToastNotification notificationService,
+			HarvesterSettingsOptions harvesterSettings)
 		{
 			_logger = loggerFactory.CreateLogger<CreatePromotion>();
 			_repository = repository;
 			_accountSubscriptionService = accountSubscriptionService;
 			_mediator = mediator;
 			_notificationService = notificationService;
+			_hrvsterSettings = harvesterSettings;
 		}
 
 		protected override async Task Handle(CreatePromotionRequest request, CancellationToken cancellationToken)
@@ -49,18 +53,34 @@ namespace hrvster.Core.Handlers.Promotions
 			var campaigns = await _repository.GetAccountCampaignsAsync(request.AccountUid);
 			var activeCampaigns = campaigns.Where(c => c.ActiveInd && c.IsActive() || c.WillBeInProgress()).ToList();
 
-			if (accountSubscription.Plan.PromotionsPerMonth != 0)
+			if (!accountSubscription.IsTrial)
 			{
-				if (activeCampaigns.Count >= accountSubscription.Plan.PromotionsPerMonth)
+				if (accountSubscription.Plan.PromotionsPerMonth != 0)
+				{
+					if (activeCampaigns.Count >= accountSubscription.Plan.PromotionsPerMonth)
+					{
+						_logger.LogWarning("Account with uid {accountUid} has a total of {activeCampaignCount} active campaigns and their current max is {maxPromotions}",
+							request.AccountUid,
+							activeCampaigns.Count,
+							accountSubscription.Plan.PromotionsPerMonth);
+
+						_notificationService.AddErrorToastMessage($"You cannot create more promotions.");
+						_notificationService.AddInfoToastMessage("You can only have {accountSubscription.Plan.PromotionsPerMonth} active promotions per month.");
+
+						return;
+					}
+				}
+			}
+			else if (accountSubscription.IsTrial)
+			{
+				if (activeCampaigns.Count >= _hrvsterSettings.TrialPromotions)
 				{
 					_logger.LogWarning("Account with uid {accountUid} has a total of {activeCampaignCount} active campaigns and their current max is {maxPromotions}",
 						request.AccountUid,
 						activeCampaigns.Count,
-						accountSubscription.Plan.PromotionsPerMonth);
-
+						_hrvsterSettings.TrialPromotions);
 					_notificationService.AddErrorToastMessage($"You cannot create more promotions.");
-					_notificationService.AddInfoToastMessage("You can only have {accountSubscription.Plan.PromotionsPerMonth} active promotions per month.");
-
+					_notificationService.AddInfoToastMessage($"You can only have {_hrvsterSettings.TrialPromotions} active promotions while on Trial mode.");
 					return;
 				}
 			}

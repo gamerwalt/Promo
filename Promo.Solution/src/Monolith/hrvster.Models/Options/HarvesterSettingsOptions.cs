@@ -24,5 +24,17 @@
 		public string EncryptionIV { get; set; }
 		public string StorageAccountName { get; set; }
 		public string StorageAccountKey { get; set; }
+		public int TrialDays { get; set; } = 15;
+		public int TrialMatchGames { get; set; } = 1;
+		public int TrialMatchRules { get; set; } = 1;
+		public int TrialMatchLinkRules { get; set; } = 1;
+		public int TrialMatchPlays { get; set; } = 100;
+		public  int TrialMatchBoards { get; set; } = 100;
+		public int TrialPromotions { get; set; } = 1;
+		public int TrialSweepGames { get; set; } = 1;
+		public int TrialSweepRules { get; set; } = 1;
+		public int TrialSweepLinkRules { get; set; } = 1;
+		public int TrialSweepEntries { get; set; } = 100;
+		public int MaxRulesPerAccount { get; set; } = 2;
 	}
 }

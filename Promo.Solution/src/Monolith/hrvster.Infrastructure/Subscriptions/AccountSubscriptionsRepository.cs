@@ -48,7 +48,8 @@ namespace hrvster.Infrastructure.Subscriptions
 				.AddParameter("endDateUtc", model.EndDateUtc)
 				.AddParameter("isDiscounted", model.IsDiscounted)
 				.AddParameter("discountedBy", model.DiscountedBy)
-				.AddParameter("paymentClient", model.PaymentClient);
+				.AddParameter("paymentClient", model.PaymentClient)
+				.AddParameter("isTrial", model.IsTrial);
 
 			await conn.OpenAsync();
 			await command.ExecuteNonQueryAsync();
@@ -71,7 +72,8 @@ namespace hrvster.Infrastructure.Subscriptions
 				.AddParameter("endDateUtc", model.EndDateUtc)
 				.AddParameter("isDiscounted", model.IsDiscounted)
 				.AddParameter("discountedBy", model.DiscountedBy)
-				.AddParameter("paymentClient", model.PaymentClient);
+				.AddParameter("paymentClient", model.PaymentClient)
+				.AddParameter("isTrial", model.IsTrial);
 
 			await conn.OpenAsync();
 			await command.ExecuteNonQueryAsync();
@@ -184,7 +186,8 @@ namespace hrvster.Infrastructure.Subscriptions
 				StartDateUtc = reader.GetDateTime("start_date_utc"),
 				EndDate = reader.GetDateTime("end_date"),
 				EndDateUtc = reader.GetDateTime("end_date_utc"),
-				SubscriptionStatus = Enum.Parse<SubscriptionStatus>(reader.GetString("subscription_status"))
+				SubscriptionStatus = Enum.Parse<SubscriptionStatus>(reader.GetString("subscription_status")),
+				IsTrial = reader.GetBoolean("is_trial")
 			};
 		}
 
@@ -295,7 +298,8 @@ namespace hrvster.Infrastructure.Subscriptions
 				StartDateUtc = reader.GetDateTime("start_date_utc"),
 				EndDate = reader.GetDateTime("end_date"),
 				EndDateUtc = reader.GetDateTime("end_date_utc"),
-				SubscriptionStatus = Enum.Parse<SubscriptionStatus>(reader.GetString("subscription_status"))
+				SubscriptionStatus = Enum.Parse<SubscriptionStatus>(reader.GetString("subscription_status")),
+				IsTrial = reader.GetBoolean("is_trial")
 			};
 		}
 	}

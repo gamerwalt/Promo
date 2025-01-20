@@ -4,6 +4,7 @@ using hrvster.Core.Requests.WebRequests.Promotions;
 using hrvster.Infrastructure;
 using hrvster.Models;
 using hrvster.Models.Extensions;
+using hrvster.Models.Options;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using NToastNotify;
@@ -20,6 +21,7 @@ namespace hrvster.Core.Handlers.Promotions
 		private readonly IAccountSubscriptionService _accountSubscriptionService;
 		private readonly ISessionManager _sessionManager;
 		private readonly IToastNotification _notificationService;
+		private readonly HarvesterSettingsOptions _hrvsterSettings;
 
 		private HrvsterUser _hrvsterUser;
 
@@ -28,13 +30,15 @@ namespace hrvster.Core.Handlers.Promotions
 			ICampaignRepository repository,
 			IAccountSubscriptionService accountSubscriptionService,
 			ISessionManager sessionManager,
-			IToastNotification notificationService)
+			IToastNotification notificationService,
+			HarvesterSettingsOptions hrvsterSettings)
 		{
 			_logger = loggerFactory.CreateLogger<UpdatePromotion>();
 			_repository = repository;
 			_accountSubscriptionService = accountSubscriptionService;
 			_sessionManager = sessionManager;
 			_notificationService = notificationService;
+			_hrvsterSettings = hrvsterSettings;
 		}
 
 		protected override async Task Handle(UpdatePromotionRequest request, CancellationToken cancellationToken)
@@ -59,24 +63,41 @@ namespace hrvster.Core.Handlers.Promotions
 			var activeCampaigns = campaigns
 				.Where(c => c.ActiveInd && c.IsActive() || c.WillBeInProgress())
 				.ToList();
-			if(!activeCampaigns.Any(c => c.CampaignUid == campaign.CampaignUid))
+			if (!activeCampaigns.Any(c => c.CampaignUid == campaign.CampaignUid))
 			{
-				if (accountSubscription.Plan.PromotionsPerMonth != 0)
+				if (accountSubscription.IsTrial)
 				{
-					if (activeCampaigns.Count >= accountSubscription.Plan.PromotionsPerMonth)
+					if (accountSubscription.Plan.PromotionsPerMonth != 0)
+					{
+						if (activeCampaigns.Count >= accountSubscription.Plan.PromotionsPerMonth)
+						{
+							_logger.LogWarning("Account with uid {accountUid} has a total of {activeCampaignCount} active campaigns and their current max is {maxPromotions}",
+								_hrvsterUser.UserUid,
+								activeCampaigns.Count,
+								accountSubscription.Plan.PromotionsPerMonth);
+
+							_notificationService.AddErrorToastMessage($"You cannot update this promotion to be active.");
+							_notificationService.AddInfoToastMessage($"You can only have {accountSubscription.Plan.PromotionsPerMonth} active promotions per month.");
+
+							return;
+						}
+					}
+				}
+				else if (accountSubscription.IsTrial)
+				{
+					if (activeCampaigns.Count >= _hrvsterSettings.TrialPromotions)
 					{
 						_logger.LogWarning("Account with uid {accountUid} has a total of {activeCampaignCount} active campaigns and their current max is {maxPromotions}",
 							_hrvsterUser.UserUid,
 							activeCampaigns.Count,
-							accountSubscription.Plan.PromotionsPerMonth);
-
+							_hrvsterSettings.TrialPromotions);
 						_notificationService.AddErrorToastMessage($"You cannot update this promotion to be active.");
-						_notificationService.AddInfoToastMessage($"You can only have {accountSubscription.Plan.PromotionsPerMonth} active promotions per month.");
-
+						_notificationService.AddInfoToastMessage($"You can only have {_hrvsterSettings.TrialPromotions} active promotions while on Trial mode.");
 						return;
 					}
+
 				}
-			}			
+			}
 
 			await _repository.UpdateCampaignAsync(request.CampaignUid, request.CampaignName,
 				request.Description, request.CampaignTypeUid, request.StartDate, request.EndDate, request.TimeZone, request.IsDaylight);
